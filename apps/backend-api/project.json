@@ -1,0 +1,13 @@
+{
+  "name": "backend-api",
+  "projectType": "application",
+  "sourceRoot": "apps/backend-api/src",
+  "targets": {
+    "serve:api": "pnpm --filter @safezone/backend-api dev",
+    "serve:worker": "pnpm --filter @safezone/backend-api dev:worker",
+    "serve:realtime": "pnpm --filter @safezone/backend-api dev:realtime",
+    "build": "pnpm --filter @safezone/backend-api build",
+    "test": "pnpm --filter @safezone/backend-api test"
+  }
+}
+

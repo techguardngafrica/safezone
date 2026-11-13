@@ -30,6 +30,11 @@ android/
 .env.*
 !.env.example
 
+# Testing & Coverage
+.nyc_output/
+playwright-report/
+test-results/
+
 # logs and OS
 *.log
 npm-debug.log*
@@ -42,3 +47,10 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# OS & IDE
+*.swp
+*.swo
+
+# Prisma
+apps/backend-api/prisma/migrations/*.sql.bak

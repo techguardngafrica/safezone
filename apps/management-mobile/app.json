@@ -1,15 +1,29 @@
 {
   "expo": {
-    "name": "Safezone Estate",
+    "name": "Safezone Management",
     "slug": "safezone-management",
-    "scheme": "safezone-estate",
+    "scheme": "safezone-management",
     "version": "0.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "ios": { "bundleIdentifier": "ng.safezone.management", "supportsTablet": true },
-    "android": { "package": "ng.safezone.management", "permissions": ["POST_NOTIFICATIONS"] },
-    "plugins": ["expo-router", "expo-secure-store", "expo-notifications"],
-    "experiments": { "typedRoutes": true },
+    "ios": {
+      "bundleIdentifier": "ng.gsssecurity.safezone.management",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "ng.gsssecurity.safezone.management",
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
     "extra": {
       "apiBaseUrl": "http://localhost:4000",
       "realtimeUrl": "ws://localhost:4001"
