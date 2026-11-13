@@ -11,11 +11,13 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infrastructure/docker/docker-compose.yml up -d",
     "infra:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
     "prepare": "husky"
