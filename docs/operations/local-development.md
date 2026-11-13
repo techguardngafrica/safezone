@@ -40,3 +40,5 @@ On a physical phone, set `EXPO_PUBLIC_API_URL` to your machine's LAN IP instead 
 ```bash
 pnpm format:check && pnpm build && pnpm typecheck && pnpm lint && pnpm test
 ```
+
+The pre-commit hook (husky + lint-staged) runs Prettier on staged files. `pnpm install` enables it.

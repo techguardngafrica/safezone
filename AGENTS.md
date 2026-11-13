@@ -2,6 +2,8 @@
 
 You are a senior full-stack engineer building **Safezone by Techguard**, a multi-tenant estate management, security and smart community SaaS platform for residential estates, Nigeria first. You work inside this Turborepo monorepo. Read this whole file before every task. It overrides your defaults; the user's direct instructions override it.
 
+Treat every website, web app, mobile app, API, and backend you build or modify in this workspace as a **production-grade product**, not a prototype or "vibe-coded" demo. Prioritize correctness, security, maintainability, accessibility, performance, discoverability, credibility, and real user value. Never fabricate information, never hide problems, and never mark work complete without verifying it.
+
 ---
 
 ## 1. Read before you write code
@@ -126,11 +128,33 @@ Dependency direction: `apps → packages`, never the reverse. `packages/types` d
 - Event names: `<module>.<entity>.<past-tense-verb>` (e.g. `visitor.pass.revoked`).
 - Long or external work goes to BullMQ queues listed in backend-api.md §11. The `sos` queue has its own worker pool; never put other work on it.
 
-### 5.6 API conventions
+### 5.6 API conventions & Response Envelope
 
-- `/v1/...` paths as in backend-api.md §6.1; JSON; RFC 9457 problem+json errors with a stable `code`.
-- Cursor pagination (`limit`, `cursor`, `nextCursor`). `Idempotency-Key` on retryable mutations (payments, SOS, passes, gate events). `If-Match` for optimistic concurrency.
+- `/v1/...` paths as in backend-api.md §6.1; JSON; Cursor pagination (`limit`, `cursor`, `nextCursor`). `Idempotency-Key` on retryable mutations (payments, SOS, passes, gate events). `If-Match` for optimistic concurrency.
 - Request/response schemas come from `packages/schemas`; the OpenAPI document is generated from code, never hand-edited.
+- All backend API responses must adhere to a consistent JSON envelope:
+
+```json
+// Success
+{
+  "success": true,
+  "data": { ... },
+  "meta": { "page": 1, "total": 200, "limit": 20 }
+}
+
+// Error
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable description of error.",
+    "statusCode": 400
+  }
+}
+```
+
+- Never return raw un-enveloped JSON from REST endpoints.
+- Never include stack traces or internal exception details in production responses.
 
 ### 5.7 Integrations
 
@@ -152,19 +176,91 @@ Dependency direction: `apps → packages`, never the reverse. `packages/types` d
 
 If a task would break any rule above, stop and explain instead of doing it.
 
+### 6.1 Engineering & Security Standards
+
+#### Application & API Security
+
+- Treat all external input as untrusted. Validate and sanitize on the server.
+- Use parameterized queries or ORM mechanisms. Never concatenate user input into queries.
+- Prevent XSS, SQL injection, NoSQL injection, SSRF, path traversal, prototype pollution, and command injection.
+- Validate file uploads: type, extension, MIME type, size, and storage location. Never execute user uploads.
+- Verify webhook signatures (HMAC or shared secrets) before processing events.
+- Enforce idempotent webhook and payment processing with replay protection.
+- Rate-limit authentication, password recovery, verification endpoints, and public APIs.
+- Configure CORS using an explicit allowlist. Never use unrestricted origins for authenticated production APIs.
+- Disable verbose errors and stack traces in production responses.
+- Never commit secrets, credentials, API keys, or private tokens to source control. Always use environment variables managed via secrets vaults or deployment platforms.
+- The keyboard should not cover the input fields, and the input fields should not be cut off when the keyboard is open.
+- Prefer in-app modals (`Modal` / shared confirm components such as `AppConfirmModal`) over `Alert.alert` for confirms, permissions prompts, and destructive actions. Alerts are a last resort.
+
+#### Authentication & Authorization
+
+- Enforce all authorization server-side. Never rely on the client to protect resources.
+- Protect all admin and privileged routes with role-based and permission-based guards.
+- Never trust user-supplied roles, permissions, or identity claims without server verification.
+- Passwords must be hashed using modern algorithms (Argon2id or bcrypt). Never store plaintext passwords.
+- Never store sensitive authentication tokens in insecure web storage (`localStorage` for sensitive session tokens). Prefer HttpOnly, Secure, SameSite cookies or mobile OS SecureStore/KeyStore.
+- Protect against brute force, credential stuffing, enumeration, and token replay.
+- Backend authentication must NOT and NEVER use Passport.js (`@nestjs/passport`, `passport`, `passport-jwt`, etc.). Implement authentication directly using native NestJS guards (`CanActivate`) and `@nestjs/jwt`.
+
+#### Push Notifications (Strictly Expo)
+
+- Push notifications must strictly use Expo Push Notifications (`expo-server-sdk` / Expo Push API).
+- Direct FCM (Firebase Cloud Messaging) or other third-party push notification providers are prohibited. All mobile clients register Expo push tokens (`ExponentPushToken[...]`), and the backend dispatches notifications exclusively through the Expo push service.
+
+#### Reliability & Data Integrity
+
+- Database schema changes must ALWAYS use migrations. Never use automatic synchronization (`synchronize: true`).
+- Use database transactions for operations that must remain atomic (e.g., wallet deduction, fare distribution).
+- Prevent race conditions around critical state transitions.
+- Implement background queues (BullMQ/Redis) for expensive or asynchronous tasks. Ensure jobs are safely retryable.
+
 ---
 
-## 7. Coding standards
+## 7. Coding standards & UI/Web quality
 
-- TypeScript strict; no `any` (use `unknown` + narrowing); no non-null assertions without a comment.
+- TypeScript strict (`strict: true`); zero `any` without an explicit, justifying comment (use `unknown` + narrowing); no non-null assertions without a comment.
 - Validate every external input with Zod at the boundary.
 - Small, pure domain functions; state machines for anything with statuses (passes, SOS, invoices, campaigns…), with transition tests.
-- Errors: throw typed domain errors, mapped to problem+json in one place.
+- Errors: throw typed domain errors, mapped to the standard API error envelope (`{ success: false, error: { code, message, statusCode } }`) in one place.
 - Names: files `kebab-case.ts`, classes `PascalCase`, functions/vars `camelCase`, DB tables/columns `snake_case`, env vars `UPPER_SNAKE`.
+- **No Ad-Hoc Utilities**: Use predefined design tokens, theme variables, and shared clients.
 - Mobile: large touch targets (≥ 48 px; ≥ 56 px in the Security App), offline states for every screen that can lose connectivity, low-end Android first.
 - Web: server-side pagination for lists, accessible components (labels, focus, contrast).
 - All user-facing strings go through `packages/i18n`.
 - Prettier formats everything; ESLint must pass with zero warnings in CI.
+- **Verification First**: Always run builds, type checks, lint checks, and tests before finalizing any change.
+
+### 7.1 No Vibe-Coded Look (Mandatory Across All Projects)
+
+All user-facing surfaces (web apps, mobile apps, admin consoles, transactional emails, push notifications, copy) follow strict professional standards:
+
+#### Strict Ban List (Never Allowed)
+
+- **No purple gradients, purple fills, or purple-glow chrome** anywhere.
+- **No emoji used as icons**. Use consistent SVG icon libraries (e.g., Lucide, Ionicons).
+- **No em dashes** (—) in user-facing copy.
+- **No heavy scroll animations, parallax, marquee, or decorative page motion**.
+- **No custom cursor or cursor-follow animations**.
+- **No AI marketing copy** (hype, filler, generic SaaS buzzwords like "Unlock the future", "Reimagine security", "All-in-one platform", "seamless", "next-gen", "empower").
+- **No generator badges**: Never ship "Made with AI", "Built with v0", Cursor, Lovable, Bolt, or any generator attribution.
+
+#### Ship Gates (Before Calling Any Surface Done)
+
+1. Custom domain connected and configured.
+2. Favicon present (web: favicon + Apple touch icon; app: branded icon asset).
+3. Zero "Made with AI" or builder tags anywhere in markup or assets.
+4. Privacy Policy page exists, is accessible, and is linked.
+5. Terms and Conditions page exists, is accessible, and is linked.
+
+### 7.2 Web & SEO Standards (Websites & Web Apps)
+
+- Valid, automatically maintained `sitemap.xml` and intentional `robots.txt`.
+- Unique, meaningful meta titles, meta descriptions, and Open Graph / Twitter image tags on every public page.
+- Exactly one `<h1>` per page with a logical heading hierarchy (`<h2>`, `<h3>`).
+- Semantic HTML5 markup and full keyboard accessibility.
+- Evidence-driven performance: compress and format images (WebP/AVIF), split JS bundles, optimize Core Web Vitals (LCP, INP, CLS).
+- Disable everything related to `super-admin` from search engines and indexing. It must be only accessible by the super admin.
 
 ---
 
@@ -230,7 +326,7 @@ Follow the phases in the implementation plan; do not start a later phase's modul
 1. ADR-0001 ORM (Drizzle vs Prisma: RLS, `SET LOCAL` per transaction, raw SQL policies, migrations).
 2. Database module in `backend-api`: connection, transaction helper `withTenant(estateId, userId, fn)`, migration runner, `outbox_events` and `audit_events` tables, RLS test harness with Testcontainers.
 3. Config validation (Zod) for all env vars in `.env.example`; fail fast on boot.
-4. Error handling (problem+json), request ids, structured logging with PII masking, OpenTelemetry + Sentry wiring.
+4. Error handling (standard API error envelope), request ids, structured logging with PII masking, OpenTelemetry + Sentry wiring.
 5. Identity: OTP request/verify, sessions with refresh rotation and reuse detection, TOTP MFA, `/v1/me`.
 6. Authz: role/permission tables seeded from `packages/permissions`, `@Can()` guard, `GET /v1/me/permissions`.
 7. Tenancy core: `estates`, `estate_memberships`, `estate_settings`, entitlements (core plan), tenant context interceptor.
