@@ -1,7 +1,7 @@
 # Safezone Architecture
 
 > Safezone by Techguard · Documentation set v0.1 (13 Nov 2026)
-> Companion to the Safezone Product Brief v0.2 and PRD v0.2 (in `docs/product/`) and the Full Implementation Plan.
+> Companion to the Safezone Product Brief v0.2 and PRD v0.2 (in `docs/product/`) and the [Full Implementation Plan](../product/implementation-plan.md).
 
 Safezone is a multi-tenant estate management, security and smart community platform, Nigeria first. This folder holds one document per **app**, one per **backend module**, and the architecture decision records:
 

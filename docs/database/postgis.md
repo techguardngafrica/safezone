@@ -9,4 +9,3 @@ Prisma does not natively type all PostGIS `geometry` / `geography` columns. When
 1. Declare them as `Unsupported("geography(Point, 4326)")?` in `schema.prisma`.
 2. Create `GIST` spatial indexes via custom SQL in Prisma migrations (`prisma migrate dev --create-only`).
 3. Query spatial operations using parameterized `prisma.$queryRaw`.
-

@@ -5,6 +5,8 @@
     "scheme": "safezone-security",
     "version": "0.0.0",
     "orientation": "portrait",
+    "primaryColor": "#254D42",
+    "backgroundColor": "#FAF7F2",
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "ng.gsssecurity.safezone.security",
@@ -15,10 +17,7 @@
     },
     "android": {
       "package": "ng.gsssecurity.safezone.security",
-      "permissions": [
-        "CAMERA",
-        "POST_NOTIFICATIONS"
-      ]
+      "permissions": ["CAMERA", "POST_NOTIFICATIONS"]
     },
     "plugins": [
       "expo-router",

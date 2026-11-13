@@ -1,6 +1,11 @@
-# Testing Strategy
+# Testing
 
-- **Shared packages** (`types`, `schemas`, `permissions`, `auth`, `api-client`, `i18n`): **Vitest** (`vitest run`).
-- **Backend API** (`apps/backend-api`): **Jest** unit tests (`pnpm --filter @safezone/backend-api test`) and e2e tests (`test:e2e`).
-- **Root command**: `pnpm test` runs `turbo test` across all workspaces.
+| Where                  | Tool                                          | Command                              |
+| ---------------------- | --------------------------------------------- | ------------------------------------ |
+| Packages, backend      | Vitest                                        | `pnpm test` (or `--filter <pkg>`)    |
+| Backend integration    | Vitest + Testcontainers (real Postgres/Redis) | Phase 0 task 2                       |
+| Tenant isolation suite | Vitest, `apps/backend-api/test/isolation`     | Phase 0 task 14                      |
+| Web apps               | Playwright                                    | To add with the first web feature    |
+| Mobile apps            | Maestro                                       | To add with the first mobile feature |
 
+Minimum tests per change type are in [AGENTS.md §8](../../AGENTS.md).

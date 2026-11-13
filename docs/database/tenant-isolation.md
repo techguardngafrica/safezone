@@ -8,4 +8,3 @@ Safezone enforces defense-in-depth multi-tenancy:
    - PostgreSQL RLS policies will check `estate_id = NULLIF(current_setting('app.current_estate_id', true), '')::uuid`.
    - Each tenant-scoped Prisma transaction will set `SET LOCAL app.current_estate_id = '<estate_id>'`.
    - Platform-level tables (e.g. onboarding applications, ad campaigns) remain outside estate RLS scope and require `PlatformRole` authorization.
-

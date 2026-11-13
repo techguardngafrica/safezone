@@ -15,9 +15,9 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const buttonStyles: Record<ButtonVariant, CSSProperties> = {
   primary: { background: colors.brand.primary, color: colors.brand.onPrimary, border: 'none' },
   secondary: {
-    background: colors.neutral[0],
-    color: colors.neutral[900],
-    border: `1px solid ${colors.neutral[300]}`,
+    background: colors.brand.secondary,
+    color: colors.brand.onSecondary,
+    border: 'none',
   },
   danger: { background: colors.status.danger, color: colors.neutral[0], border: 'none' },
 };
@@ -46,14 +46,21 @@ export function Card({ title, children }: { title?: string; children: ReactNode 
   return (
     <section
       style={{
-        background: colors.neutral[0],
-        border: `1px solid ${colors.neutral[100]}`,
+        background: colors.semantic.surface,
+        border: `1px solid ${colors.semantic.borderSubtle}`,
         borderRadius: radii.lg,
         padding: spacing[5],
       }}
     >
       {title ? (
-        <h2 style={{ margin: 0, marginBottom: spacing[3], fontSize: typography.size.lg }}>
+        <h2
+          style={{
+            margin: 0,
+            marginBottom: spacing[3],
+            fontSize: typography.size.lg,
+            color: colors.brand.primary,
+          }}
+        >
           {title}
         </h2>
       ) : null}
@@ -85,13 +92,15 @@ export function PageShell({ title, children }: { title: string; children: ReactN
     <main
       style={{
         fontFamily: typography.fontFamily.sans,
-        color: colors.neutral[900],
-        background: colors.neutral[50],
+        color: colors.semantic.text,
+        background: colors.semantic.background,
         minHeight: '100vh',
         padding: spacing[6],
       }}
     >
-      <h1 style={{ marginTop: 0, fontSize: typography.size.xxl }}>{title}</h1>
+      <h1 style={{ marginTop: 0, fontSize: typography.size.xxl, color: colors.brand.primary }}>
+        {title}
+      </h1>
       {children}
     </main>
   );

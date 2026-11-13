@@ -18,4 +18,3 @@ All unhandled and HTTP exceptions pass through `AllExceptionsFilter` in `apps/ba
 ```
 
 `@safezone/api-client` normalizes these responses into `SafezoneApiError`.
-

@@ -1,26 +1,20 @@
-# Environment Variables
+# Environment variables
 
-## Security Rules
+## Rules
 
-- Never commit `.env` or `.env.local` files.
-- Never prefix server-only secrets (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`) with `NEXT_PUBLIC_` or `EXPO_PUBLIC_`.
+- Never commit `.env` or `.env.local`; only `.env.example` files are tracked.
+- Never put server secrets behind `NEXT_PUBLIC_` or `EXPO_PUBLIC_` — those are bundled into clients.
+- Every backend variable is validated in `apps/backend-api/src/config/env.ts`; the process fails fast on boot.
 
-## Server-Only (`apps/backend-api/.env`)
+## Backend (`apps/backend-api/.env`, copied from the root `.env.example`)
 
-- `NODE_ENV` (`development | test | staging | production`)
-- `PORT` (default `4000`), `WORKER_PORT` (`4001`), `REALTIME_PORT` (`4002`)
-- `DATABASE_URL` (required)
-- `REDIS_URL` (required)
-- `JWT_SECRET` (required, minimum 16 characters)
-- `CORS_ORIGINS` (comma-separated allowed origins)
+The root [`.env.example`](../../.env.example) is the single list. Core ones: `NODE_ENV`, `APP_PROCESS`, `API_PORT` (4000), `REALTIME_PORT` (4001), `DATABASE_URL`, `REDIS_URL`, `CORS_ORIGINS`, `APP_MIN_VERSION`, `APP_RECOMMENDED_VERSION`. Provider keys (SMTP, Expo, Paystack, Flutterwave, SMS…) are sandbox-only in development.
 
-## Public Web (`NEXT_PUBLIC_*`)
+## Web apps (`NEXT_PUBLIC_*`)
 
 - `NEXT_PUBLIC_API_URL`
-- `NEXT_PUBLIC_APP_NAME` / `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_SITE_URL` (public-web), `NEXT_PUBLIC_APP_NAME`
 
-## Public Mobile (`EXPO_PUBLIC_*`)
+## Mobile apps (`EXPO_PUBLIC_*`)
 
-- `EXPO_PUBLIC_API_URL`
-- `EXPO_PUBLIC_APP_SURFACE`
-
+- `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_REALTIME_URL` — override `app.json` `extra` defaults (read in `src/lib/config.ts`).

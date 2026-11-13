@@ -1,4 +1,7 @@
-import baseConfig from '@safezone/config/eslint/base';
+// Root config only lints files at the repo root. Each app and package has its own eslint.config.mjs.
+import baseConfig from './packages/config/eslint/base.mjs';
 
-export default [...baseConfig];
-
+export default [
+  { ignores: ['apps/**', 'packages/**', 'infrastructure/**', 'docs/**'] },
+  ...baseConfig,
+];

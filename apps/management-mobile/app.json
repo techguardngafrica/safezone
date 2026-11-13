@@ -5,22 +5,18 @@
     "scheme": "safezone-management",
     "version": "0.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "primaryColor": "#254D42",
+    "backgroundColor": "#FAF7F2",
+    "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "ng.gsssecurity.safezone.management",
       "supportsTablet": true
     },
     "android": {
       "package": "ng.gsssecurity.safezone.management",
-      "permissions": [
-        "POST_NOTIFICATIONS"
-      ]
+      "permissions": ["POST_NOTIFICATIONS"]
     },
-    "plugins": [
-      "expo-router",
-      "expo-secure-store",
-      "expo-notifications"
-    ],
+    "plugins": ["expo-router", "expo-secure-store", "expo-notifications"],
     "experiments": {
       "typedRoutes": true
     },

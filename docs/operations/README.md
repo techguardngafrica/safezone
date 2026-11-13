@@ -2,11 +2,11 @@
 
 ## Environments
 
-| Env           | Purpose                                            | Data                                                      |
-| ------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| local/dev     | `pnpm infra:up` + `pnpm dev`; Shared integration   | Fake providers, seed data;  Sandbox provider keys         |
-| staging       | Release candidate, pilot rehearsal                 | Sandbox keys, anonymised data                             |
-| production    | Live estates                                       | Real                                                      |
+| Env        | Purpose                                          | Data                                             |
+| ---------- | ------------------------------------------------ | ------------------------------------------------ |
+| local/dev  | `pnpm infra:up` + `pnpm dev`; Shared integration | Fake providers, seed data; Sandbox provider keys |
+| staging    | Release candidate, pilot rehearsal               | Sandbox keys, anonymised data                    |
+| production | Live estates                                     | Real                                             |
 
 ## Runbooks to write before pilot go-live
 

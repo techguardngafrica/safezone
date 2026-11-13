@@ -77,11 +77,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primary: { backgroundColor: colors.brand.primary },
-  secondary: {
-    backgroundColor: colors.neutral[0],
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-  },
+  secondary: { backgroundColor: colors.brand.secondary },
   danger: { backgroundColor: colors.status.danger },
   pressed: { opacity: 0.85 },
   label: {
@@ -89,12 +85,17 @@ const styles = StyleSheet.create({
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },
-  labelSecondary: { color: colors.neutral[900] },
-  screen: { flex: 1, backgroundColor: colors.neutral[50], padding: spacing[5], gap: spacing[4] },
+  labelSecondary: { color: colors.brand.onSecondary },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.semantic.background,
+    padding: spacing[5],
+    gap: spacing[4],
+  },
   title: {
     fontSize: typography.size.xxl,
     fontWeight: typography.weight.bold,
-    color: colors.neutral[900],
+    color: colors.brand.primary,
   },
   badge: {
     alignSelf: 'flex-start',

@@ -1,12 +1,12 @@
 # Safezone docs
 
-| Folder                                  | What lives here                                                 |
-| --------------------------------------- | --------------------------------------------------------------- |
-| [product/](product/)                    | Product brief and PRD (v0.2). The source of business rules.     |
-| [architecture/](architecture/README.md) | App docs, module docs and ADRs. **The engineering spec.**       |
-| [api/](api/README.md)                   | API conventions, OpenAPI notes, webhooks and provider callbacks |
-| [database/](database/README.md)         | Schema conventions, RLS, migrations, retention                  |
-| [operations/](operations/README.md)     | Runbooks, on-call, incident response, environments              |
+| Folder                                  | What lives here                                                    |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| [product/](product/)                    | Product brief, PRD (v0.2) and implementation plan. Business rules. |
+| [architecture/](architecture/README.md) | App docs, module docs and ADRs. **The engineering spec.**          |
+| [api/](api/README.md)                   | API conventions, OpenAPI notes, webhooks and provider callbacks    |
+| [database/](database/README.md)         | Schema conventions, RLS, migrations, retention                     |
+| [operations/](operations/README.md)     | Runbooks, on-call, incident response, environments                 |
 
 Start with [AGENTS.md](../AGENTS.md) for how to work in this repo, then [architecture/README.md](architecture/README.md).
 
