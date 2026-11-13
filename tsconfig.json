@@ -1,0 +1,9 @@
+{
+  "extends": "@safezone/config/typescript/base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [],
+  "exclude": ["node_modules", "dist", ".next", ".expo"]
+}
+

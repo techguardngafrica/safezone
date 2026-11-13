@@ -1,0 +1,57 @@
+name: Main Branch CI
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: main-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-validate:
+    name: Full Repository Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.24.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @safezone/backend-api prisma:generate
+
+      - name: Lint all workspaces
+        run: pnpm lint
+
+      - name: Typecheck all workspaces
+        run: pnpm typecheck
+
+      - name: Test all workspaces
+        run: pnpm test
+
+      - name: Build all workspaces
+        run: pnpm build
+
+  deploy-placeholder:
+    name: Deployment Integration Point (Placeholder)
+    needs: build-and-validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment placeholder
+        run: |
+          echo "Deployment targets (API, Worker, Realtime, Web, Mobile EAS) are not yet wired."
+          echo "See docs/operations/deployment.md for future integration steps."
+
