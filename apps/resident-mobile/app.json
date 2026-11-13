@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Safezone",
+    "slug": "safezone-resident",
+    "scheme": "safezone",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "ng.safezone.resident",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Safezone shares your location with estate security only while an SOS alert is active."
+      }
+    },
+    "android": {
+      "package": "ng.safezone.resident",
+      "permissions": ["ACCESS_FINE_LOCATION", "POST_NOTIFICATIONS"]
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-notifications"],
+    "experiments": { "typedRoutes": true },
+    "extra": {
+      "apiBaseUrl": "http://localhost:4000",
+      "realtimeUrl": "ws://localhost:4001"
+    }
+  }
+}

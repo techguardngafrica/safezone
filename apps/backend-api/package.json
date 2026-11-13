@@ -1,0 +1,46 @@
+{
+  "name": "@safezone/backend-api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Safezone backend — NestJS modular monolith with API, worker and realtime entry points",
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "dev:worker": "nest start --watch --entryFile worker",
+    "dev:realtime": "nest start --watch --entryFile realtime",
+    "start": "node dist/main.js",
+    "start:worker": "node dist/worker.js",
+    "start:realtime": "node dist/realtime.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.5.0",
+    "@nestjs/core": "^12.5.0",
+    "@nestjs/platform-express": "^12.5.0",
+    "@nestjs/platform-socket.io": "^12.5.0",
+    "@nestjs/websockets": "^12.5.0",
+    "@safezone/permissions": "workspace:*",
+    "@safezone/schemas": "workspace:*",
+    "@safezone/types": "workspace:*",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "socket.io": "^4.8.4",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.13",
+    "@nestjs/testing": "^12.5.0",
+    "@safezone/config": "workspace:*",
+    "@swc/core": "^1.16.22",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "@types/supertest": "^7.2.1",
+    "eslint": "^10.14.0",
+    "supertest": "^7.3.2",
+    "unplugin-swc": "^2.0.0",
+    "vitest": "^5.1.0"
+  }
+}

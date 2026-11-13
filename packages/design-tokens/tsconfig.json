@@ -1,0 +1,3 @@
+{
+  "extends": "@safezone/config/tsconfig/library.json"
+}

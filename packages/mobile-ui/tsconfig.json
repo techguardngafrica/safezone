@@ -1,0 +1,3 @@
+{
+  "extends": "@safezone/config/tsconfig/react-native-library.json"
+}

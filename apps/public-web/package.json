@@ -1,0 +1,34 @@
+{
+  "name": "@safezone/public-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Public site, visitor pass pages, estate self-registration, ad enquiries and (Phase 4) Vendor Portal",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf .next .turbo"
+  },
+  "dependencies": {
+    "@safezone/api-client": "workspace:*",
+    "@safezone/design-tokens": "workspace:*",
+    "@safezone/i18n": "workspace:*",
+    "@safezone/schemas": "workspace:*",
+    "@safezone/types": "workspace:*",
+    "@safezone/web-ui": "workspace:*",
+    "next": "^16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@safezone/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^10.14.0",
+    "vitest": "^5.1.0"
+  }
+}

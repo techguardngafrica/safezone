@@ -1,0 +1,57 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Safezone API",
+    "version": "0.0.0",
+    "description": "Placeholder. Generated from apps/backend-api (pnpm --filter @safezone/backend-api openapi). Do not edit by hand."
+  },
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "healthLive",
+        "responses": {
+          "200": {
+            "description": "Process is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": { "status": { "type": "string", "enum": ["ok"] } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/app-config": {
+      "get": {
+        "operationId": "getAppConfig",
+        "parameters": [
+          { "name": "app", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "platform", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "version", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Update requirements for the calling app",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["minVersion", "recommendedVersion", "update"],
+                  "properties": {
+                    "minVersion": { "type": "string" },
+                    "recommendedVersion": { "type": "string" },
+                    "update": { "type": "string", "enum": ["none", "soft", "hard"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

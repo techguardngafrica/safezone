@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Safezone Security",
+    "slug": "safezone-security",
+    "scheme": "safezone-security",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "ng.safezone.security",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "The camera scans visitor pass QR codes and takes visitor or vehicle photos when your estate requires it."
+      }
+    },
+    "android": {
+      "package": "ng.safezone.security",
+      "permissions": ["CAMERA", "POST_NOTIFICATIONS"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications",
+      "expo-camera",
+      "expo-sqlite"
+    ],
+    "experiments": { "typedRoutes": true },
+    "extra": {
+      "apiBaseUrl": "http://localhost:4000",
+      "realtimeUrl": "ws://localhost:4001"
+    }
+  }
+}
