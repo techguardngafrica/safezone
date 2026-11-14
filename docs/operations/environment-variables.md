@@ -8,7 +8,7 @@
 
 ## Backend (`apps/backend-api/.env`, copied from the root `.env.example`)
 
-The root [`.env.example`](../../.env.example) is the single list. Core ones: `NODE_ENV`, `APP_PROCESS`, `API_PORT` (4000), `REALTIME_PORT` (4001), `DATABASE_URL`, `REDIS_URL`, `CORS_ORIGINS`, `APP_MIN_VERSION`, `APP_RECOMMENDED_VERSION`. Provider keys (SMTP, Expo, Paystack, Flutterwave, SMS…) are sandbox-only in development.
+The root [`.env.example`](../../.env.example) is the single list. Core ones: `NODE_ENV`, `APP_PROCESS`, `API_PORT` (4000), `REALTIME_PORT` (4001), `DATABASE_URL` (runtime role `safezone_app`), `DATABASE_MIGRATION_URL` (schema owner, migrations only), `DATABASE_POOL_MAX`, `REDIS_URL`, `CORS_ORIGINS`, `APP_MIN_VERSION`, `APP_RECOMMENDED_VERSION`. Provider keys (SMTP, Expo, Paystack, Flutterwave, SMS…) are sandbox-only in development.
 
 ## Web apps (`NEXT_PUBLIC_*`)
 

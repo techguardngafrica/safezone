@@ -37,3 +37,5 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+      # Postgres 17 via Testcontainers (Docker is available on ubuntu-latest).
+      - run: pnpm test:integration

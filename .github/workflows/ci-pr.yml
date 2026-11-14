@@ -43,5 +43,8 @@ jobs:
       - name: Test affected workspaces
         run: pnpm turbo test --filter=...[origin/main]
 
+      - name: Integration tests for affected workspaces
+        run: pnpm turbo test:integration --filter=...[origin/main]
+
       - name: Build affected workspaces
         run: pnpm turbo build --filter=...[origin/main]

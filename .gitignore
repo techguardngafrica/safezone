@@ -52,5 +52,6 @@ Thumbs.db
 *.swp
 *.swo
 
-# Prisma
+# Prisma (generated client)
+apps/backend-api/src/generated/
 apps/backend-api/prisma/migrations/*.sql.bak

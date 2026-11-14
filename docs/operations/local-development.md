@@ -12,7 +12,11 @@ pnpm install
 cp .env.example apps/backend-api/.env
 pnpm infra:up
 pnpm build            # compiles packages/* to dist/, which the apps consume
+pnpm --filter @safezone/backend-api db:migrate    # apply migrations as the owner
+pnpm --filter @safezone/backend-api db:app-role   # let safezone_app log in (local only)
 ```
+
+The API connects as `safezone_app`, which cannot bypass row-level security. Migrations use `DATABASE_MIGRATION_URL` (the owner). See [prisma-conventions.md](../database/prisma-conventions.md) for writing migrations.
 
 Each web and mobile app has its own `.env.example`; copy it to `.env.local` (web) or `.env` (Expo) only if you need to override the defaults.
 
@@ -39,6 +43,7 @@ On a physical phone, set `EXPO_PUBLIC_API_URL` to your machine's LAN IP instead 
 
 ```bash
 pnpm format:check && pnpm build && pnpm typecheck && pnpm lint && pnpm test
+pnpm test:integration   # database tests on Postgres 17 via Testcontainers; needs Docker
 ```
 
 The pre-commit hook (husky + lint-staged) runs Prettier on staged files. `pnpm install` enables it.

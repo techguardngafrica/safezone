@@ -31,22 +31,22 @@ All three share the same modules, database and configuration; they are deployed 
 
 ## 3. Tech stack
 
-| Concern                             | Choice                                                                                                           |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Runtime                             | Node.js LTS, TypeScript (strict)                                                                                 |
-| Framework                           | NestJS                                                                                                           |
-| Database                            | PostgreSQL (managed, with read replica), row-level security                                                      |
-| ORM / query                         | Prisma or Drizzle (decide in Phase 0 ADR; must support `SET LOCAL` per transaction and raw SQL for RLS policies) |
-| Cache, rate limits, queues, pub/sub | Redis                                                                                                            |
-| Jobs                                | BullMQ                                                                                                           |
-| Realtime                            | Socket.IO with `@socket.io/redis-adapter`                                                                        |
-| Validation                          | Zod schemas shared from `packages/schemas` (via `nestjs-zod`)                                                    |
-| API spec                            | OpenAPI 3.1 generated from code, published to `packages/contracts`                                               |
-| Object storage                      | S3-compatible bucket, signed URLs                                                                                |
-| Email                               | Zoho SMTP                                                                                                        |
-| Push                                | Expo Notifications (Expo push service delivers to FCM and APNs)                                                  |
-| Observability                       | OpenTelemetry, Sentry, Grafana stack                                                                             |
-| Tests                               | Jest/Vitest, Testcontainers (real PostgreSQL and Redis), Supertest                                               |
+| Concern                             | Choice                                                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Runtime                             | Node.js LTS, TypeScript (strict)                                                                                             |
+| Framework                           | NestJS                                                                                                                       |
+| Database                            | PostgreSQL (managed, with read replica), row-level security                                                                  |
+| ORM / query                         | Prisma 7 over `@prisma/adapter-pg`; tenant access only through `withTenant` ([ADR-0001](../adr/0001-orm-and-data-access.md)) |
+| Cache, rate limits, queues, pub/sub | Redis                                                                                                                        |
+| Jobs                                | BullMQ                                                                                                                       |
+| Realtime                            | Socket.IO with `@socket.io/redis-adapter`                                                                                    |
+| Validation                          | Zod schemas shared from `packages/schemas` (via `nestjs-zod`)                                                                |
+| API spec                            | OpenAPI 3.1 generated from code, published to `packages/contracts`                                                           |
+| Object storage                      | S3-compatible bucket, signed URLs                                                                                            |
+| Email                               | Zoho SMTP                                                                                                                    |
+| Push                                | Expo Notifications (Expo push service delivers to FCM and APNs)                                                              |
+| Observability                       | OpenTelemetry, Sentry, Grafana stack                                                                                         |
+| Tests                               | Jest/Vitest, Testcontainers (real PostgreSQL and Redis), Supertest                                                           |
 
 ## 4. Module map
 
@@ -96,6 +96,7 @@ apps/backend-api/
 │   │   ├── errors/             # problem+json error mapping
 │   │   ├── pagination/         # cursor pagination helpers
 │   │   ├── idempotency/        # Idempotency-Key interceptor
+│   │   ├── database/           # DatabaseService, withTenant, withOutboxRelay
 │   │   ├── outbox/             # outbox writer + relay
 │   │   ├── storage/            # signed upload/download URLs
 │   │   └── observability/      # OTel, logging, request ids
@@ -106,8 +107,10 @@ apps/backend-api/
 │       ├── tenancy/
 │       ├── ... (one folder per module)
 │       └── analytics/
-├── prisma/ or drizzle/         # schema, migrations, RLS policies (SQL)
+├── prisma/                     # schema.prisma, migrations (SQL incl. RLS policies and grants)
+├── prisma.config.ts            # Prisma CLI config (migrations run as the schema owner)
 ├── test/
+│   ├── integration/            # Testcontainers: RLS harness, repositories
 │   ├── e2e/
 │   ├── isolation/              # cross-tenant test suite
 │   └── fixtures/
@@ -203,7 +206,8 @@ RFC 9457 `application/problem+json`:
 ## 8. Tenant isolation
 
 - Every tenant table has `estate_id uuid not null` and an RLS policy:
-  `USING (estate_id = current_setting('app.estate_id')::uuid)`.
+  `USING (estate_id = nullif(current_setting('app.estate_id', true), '')::uuid)`, with `FORCE ROW LEVEL SECURITY`.
+- Tenant data is reached only through `DatabaseService.withTenant({ estateId, userId }, fn)`, which sets `app.estate_id` and `app.user_id` with `set_config(..., true)` (transaction-scoped, like `SET LOCAL`).
 - The application database role does **not** bypass RLS. Platform operations use a separate role and service path, only reachable from `/v1/platform/*`, and every such call writes an audit event with a reason.
 - Background jobs set the tenant context from the job payload before touching tenant data.
 - The `test/isolation` suite runs every endpoint as a user from Estate B against Estate A resources and expects `403/404`. It must pass in CI on every merge.
@@ -274,7 +278,8 @@ Environment variables (12-factor), validated at boot with Zod. Secrets from the 
 
 ```text
 NODE_ENV, APP_PROCESS=api|worker|realtime
-DATABASE_URL, DATABASE_REPLICA_URL
+DATABASE_URL (safezone_app), DATABASE_REPLICA_URL, DATABASE_POOL_MAX
+DATABASE_MIGRATION_URL (schema owner; migration job only)
 REDIS_URL
 JWT_ACCESS_SECRET / JWT_KEYS (rotation), REFRESH_TOKEN_TTL_DAYS
 STORAGE_BUCKET, STORAGE_REGION, STORAGE_ENDPOINT
@@ -322,6 +327,6 @@ FEATURE_FLAGS_SOURCE
 
 ## 18. Open questions
 
-1. Prisma vs Drizzle (RLS and `SET LOCAL` ergonomics decide it).
+1. ~~Prisma vs Drizzle~~ Decided: Prisma ([ADR-0001](../adr/0001-orm-and-data-access.md)).
 2. Hosting region (latency from Lagos vs NDPA transfer rules).
 3. SMS provider choice after sender-ID and DND-route testing.

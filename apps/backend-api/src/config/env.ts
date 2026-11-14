@@ -9,7 +9,11 @@ const envSchema = z.object({
   APP_PROCESS: z.enum(['api', 'worker', 'realtime']).default('api'),
   API_PORT: z.coerce.number().int().positive().default(4000),
   REALTIME_PORT: z.coerce.number().int().positive().default(4001),
-  DATABASE_URL: z.string().default('postgres://safezone:safezone@localhost:5432/safezone'),
+  /** Application role (safezone_app, cannot bypass RLS). Used by API, worker and realtime. */
+  DATABASE_URL: z
+    .url({ protocol: /^postgres(ql)?$/ })
+    .default('postgres://safezone_app:safezone_app@localhost:5432/safezone'),
+  DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   REDIS_URL: z.string().default('redis://localhost:6379'),
   CORS_ORIGINS: z
     .string()

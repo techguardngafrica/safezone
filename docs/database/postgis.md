@@ -1,11 +1,10 @@
-# PostGIS Strategy
+# PostGIS
 
-Local Docker uses `postgis/postgis:16-3.4-alpine`, with `CREATE EXTENSION IF NOT EXISTS postgis;` initialized in `infrastructure/docker/postgres/init/01-extensions.sql`.
+Not installed yet. The local image is `postgres:17-alpine`, which has no PostGIS. Nothing needs it until geospatial columns arrive (estate boundaries, SOS location in Phase 1).
 
-## Prisma Compatibility
+When it is needed:
 
-Prisma does not natively type all PostGIS `geometry` / `geography` columns. When geospatial columns (e.g., estate boundaries, SOS coordinates) are added:
-
-1. Declare them as `Unsupported("geography(Point, 4326)")?` in `schema.prisma`.
-2. Create `GIST` spatial indexes via custom SQL in Prisma migrations (`prisma migrate dev --create-only`).
-3. Query spatial operations using parameterized `prisma.$queryRaw`.
+1. Switch the local and test image to a PostGIS build of Postgres 17 and confirm the managed database supports the extension.
+2. Enable it in a migration: `CREATE EXTENSION IF NOT EXISTS postgis;`.
+3. Declare columns as `Unsupported("geography(Point, 4326)")?` in `schema.prisma`, add `GIST` indexes in the migration SQL, and query them with parameterised `$queryRaw` inside `withTenant`.
+4. Record the change in an ADR.

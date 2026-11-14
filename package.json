@@ -1,7 +1,7 @@
 {
   "name": "safezone",
   "private": true,
-  "description": "Safezone by Techguard — multi-tenant estate management, security and smart community platform",
+  "description": "Safezone by Techguard \u2014 multi-tenant estate management, security and smart community platform",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.0.0",
@@ -20,12 +20,15 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infrastructure/docker/docker-compose.yml up -d",
     "infra:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:integration": "turbo run test:integration"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/engines",
       "@swc/core",
-      "esbuild"
+      "esbuild",
+      "prisma"
     ]
   },
   "devDependencies": {

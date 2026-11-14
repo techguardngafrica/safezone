@@ -38,6 +38,9 @@ jobs:
       - name: Test all workspaces
         run: pnpm test
 
+      - name: Integration tests (Postgres via Testcontainers)
+        run: pnpm test:integration
+
       - name: Build all workspaces
         run: pnpm build
 
