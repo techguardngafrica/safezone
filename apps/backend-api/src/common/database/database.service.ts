@@ -31,6 +31,9 @@ export class DatabaseService implements OnModuleDestroy {
         connectionString: env.DATABASE_URL,
         max: env.DATABASE_POOL_MAX,
         application_name: `safezone-${env.APP_PROCESS}`,
+        // The driver sends Date parameters as zone-less UTC timestamps; pin the session to UTC so
+        // comparisons against timestamptz columns are correct whatever the server's default zone is.
+        options: '-c TimeZone=UTC',
       }),
     });
   }

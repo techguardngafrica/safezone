@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSafezoneClient, isApiError, unwrap } from './index';
+import { createSafezoneClient, isApiError, newIdempotencyKey, unwrap, unwrapPage } from './index';
 
 describe('createSafezoneClient', () => {
   it('sends the app headers and bearer token', async () => {
@@ -81,5 +81,76 @@ describe('unwrap', () => {
     await expect(unwrap(Promise.reject(new TypeError('fetch failed')))).rejects.toMatchObject({
       code: 'NETWORK_ERROR',
     });
+  });
+});
+
+describe('unwrapPage', () => {
+  const response = (status: number) => new Response(null, { status });
+
+  it('returns rows and the next cursor', async () => {
+    const page = await unwrapPage(
+      Promise.resolve({
+        data: { success: true as const, data: [{ id: 'a' }], meta: { nextCursor: 'c2' } },
+        response: response(200),
+      }),
+    );
+    expect(page).toEqual({ items: [{ id: 'a' }], nextCursor: 'c2' });
+  });
+
+  it('returns a null cursor on the last page', async () => {
+    const page = await unwrapPage(
+      Promise.resolve({
+        data: { success: true as const, data: [], meta: { nextCursor: null } },
+        response: response(200),
+      }),
+    );
+    expect(page.nextCursor).toBeNull();
+  });
+});
+
+describe('newIdempotencyKey', () => {
+  it('returns a v4 UUID', () => {
+    expect(newIdempotencyKey()).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+  });
+
+  it('falls back when crypto.randomUUID is missing (Hermes)', () => {
+    vi.stubGlobal('crypto', undefined);
+    try {
+      const a = newIdempotencyKey();
+      expect(a).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      expect(newIdempotencyKey()).not.toBe(a);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe('React Native fetch', () => {
+  it('works when fetch returns a response that is not a global Response instance', async () => {
+    const body = JSON.stringify({ success: true, data: { status: 'ok' } });
+    // Expo/React Native fetch resolves with its own response class, not globalThis.Response.
+    const nativeLike = {
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: new Headers({
+        'content-type': 'application/json',
+        'content-length': String(body.length),
+      }),
+      json: async () => JSON.parse(body) as unknown,
+      text: async () => body,
+      clone() {
+        return this;
+      },
+    };
+    const client = createSafezoneClient({
+      baseUrl: 'https://api.example.test',
+      app: 'resident-mobile',
+      appVersion: '1.0.0',
+      fetch: (async () => nativeLike) as unknown as typeof fetch,
+    });
+    await expect(unwrap(client.GET('/health/live'))).resolves.toEqual({ status: 'ok' });
   });
 });

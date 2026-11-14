@@ -61,7 +61,11 @@ export async function startTestDatabase(): Promise<TestDatabase> {
   const clients: PrismaClient[] = [];
   const createAppClient = (options: { max?: number } = {}): PrismaClient => {
     const client = new PrismaClient({
-      adapter: new PrismaPg({ connectionString: appUrl, max: options.max ?? 5 }),
+      adapter: new PrismaPg({
+        connectionString: appUrl,
+        max: options.max ?? 5,
+        options: '-c TimeZone=UTC',
+      }),
     });
     clients.push(client);
     return client;

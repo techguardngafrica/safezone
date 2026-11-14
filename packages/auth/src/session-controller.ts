@@ -82,6 +82,7 @@ export class SessionController {
   private accessToken: string | null = null;
   private accessTokenExpiresAt: string | null = null;
   private refreshing: Promise<string | null> | null = null;
+  private restoring: Promise<void> | null = null;
 
   constructor(
     private readonly api: AuthApi,
@@ -97,8 +98,19 @@ export class SessionController {
 
   getState = (): SessionState => this.state;
 
-  /** Restores a previous session on app start. */
-  async restore(): Promise<void> {
+  /**
+   * Restores a previous session on app start. Concurrent calls share one attempt: refresh tokens rotate,
+   * so a second parallel refresh (e.g. React Strict Mode running effects twice) would look like token
+   * reuse and end the session.
+   */
+  restore(): Promise<void> {
+    this.restoring ??= this.restoreNow().finally(() => {
+      this.restoring = null;
+    });
+    return this.restoring;
+  }
+
+  private async restoreNow(): Promise<void> {
     const stored = await this.storage.get();
     if (this.keepsRefreshToken && !stored?.refreshToken)
       return this.set({ status: 'signed_out', busy: false });

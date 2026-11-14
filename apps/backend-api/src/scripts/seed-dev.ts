@@ -17,7 +17,7 @@ export const DEV_SEED = {
 export async function seedDevelopmentData(client: pg.ClientBase): Promise<string> {
   await client.query(
     `insert into platform.estates (id, name, slug, code, type, address, state, lga, status, onboarding_mode, updated_at)
-     values ($1, 'Demo Gardens Estate', 'demo-gardens', 'DEMO01', 'gated_houses', '1 Demo Close, Lekki', 'Lagos', 'Eti-Osa', 'active', 'assisted', now())
+     values ($1, 'Demo Gardens Estate', 'demo-gardens', 'DEMOGD', 'gated_houses', '1 Demo Close, Lekki', 'Lagos', 'Eti-Osa', 'active', 'assisted', now())
      on conflict (id) do nothing`,
     [DEV_SEED.estateId],
   );

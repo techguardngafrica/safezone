@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "backend-api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@safezone/backend-api", "dev"],
+      "port": 4000
+    },
+    {
       "name": "management-web",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@safezone/management-web", "dev"],

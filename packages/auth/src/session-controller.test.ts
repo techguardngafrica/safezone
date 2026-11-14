@@ -150,6 +150,14 @@ describe('SessionController', () => {
     expect(controller.getState().status).toBe('signed_out');
   });
 
+  it('restores once when restore is called twice at the same time (web, cookie refresh)', async () => {
+    const api = fakeApi();
+    const controller = new SessionController(api, createMemorySessionStorage(), false);
+    await Promise.all([controller.restore(), controller.restore()]);
+    expect(api.refresh).toHaveBeenCalledTimes(1);
+    expect(controller.getState().status).toBe('signed_in');
+  });
+
   it('refreshes an expiring access token once for concurrent callers', async () => {
     const api = fakeApi({
       verifyOtp: vi.fn().mockResolvedValue({

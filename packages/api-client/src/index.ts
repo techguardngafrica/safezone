@@ -32,17 +32,19 @@ export function createSafezoneClient(options: SafezoneClientOptions): SafezoneCl
     ...(options.credentials ? { credentials: options.credentials } : {}),
   });
 
+  // Both hooks change nothing they would have to return: openapi-fetch requires a returned value to be
+  // `instanceof Request/Response`, which fails on React Native, where fetch uses its own classes.
   const middleware: Middleware = {
     async onRequest({ request }) {
       request.headers.set('X-Safezone-App', options.app);
       request.headers.set('X-Safezone-App-Version', options.appVersion);
       const token = await options.getAccessToken?.();
       if (token) request.headers.set('Authorization', `Bearer ${token}`);
-      return request;
+      return undefined;
     },
     async onResponse({ response }) {
       if (response.status === 401) await options.onUnauthorized?.();
-      return response;
+      return undefined;
     },
   };
   client.use(middleware);
@@ -65,7 +67,16 @@ export function isApiError(value: unknown): value is ApiErrorBody {
 
 /** Creates a unique key for the Idempotency-Key header on retryable mutations. */
 export function newIdempotencyKey(): string {
-  return globalThis.crypto.randomUUID();
+  const cryptoApi = (globalThis as { crypto?: Partial<Crypto> }).crypto;
+  if (typeof cryptoApi?.randomUUID === 'function') return cryptoApi.randomUUID();
+  // React Native (Hermes) may lack crypto.randomUUID. A key only has to be unique per attempt, not secret.
+  const bytes = new Uint8Array(16);
+  if (typeof cryptoApi?.getRandomValues === 'function') cryptoApi.getRandomValues(bytes);
+  else for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40;
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 /** Thrown by unwrap() for any non-success response. `code` is the API's stable error code. */
@@ -119,4 +130,27 @@ export async function unwrap<R extends { data?: unknown; error?: unknown; respon
   );
 }
 
+/** A cursor page: the rows plus the cursor for the next page (null on the last page). */
+export interface CursorPage<T> {
+  items: T[];
+  nextCursor: string | null;
+}
+
+/** Like unwrap(), for list endpoints: keeps `meta.nextCursor` so screens can load the next page. */
+export async function unwrapPage<R extends { data?: unknown; error?: unknown; response: Response }>(
+  call: Promise<R>,
+): Promise<CursorPage<EnvelopeData<R> extends readonly (infer T)[] ? T : never>> {
+  type Row = EnvelopeData<R> extends readonly (infer T)[] ? T : never;
+  let nextCursor: string | null = null;
+  const wrapped = call.then((result) => {
+    const body = result.data as { success?: unknown; meta?: { nextCursor?: unknown } } | undefined;
+    const next = body?.meta?.nextCursor;
+    nextCursor = typeof next === 'string' && next.length > 0 ? next : null;
+    return result;
+  });
+  const items = (await unwrap(wrapped)) as unknown as Row[];
+  return { items: Array.isArray(items) ? items : [], nextCursor };
+}
+
 export { createAuthApi } from './auth-api';
+export type { ApiData, ApiRow } from './types';
