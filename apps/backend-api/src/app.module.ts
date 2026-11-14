@@ -8,6 +8,15 @@ import { ConfigModule } from './config/config.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { QueuesModule } from './common/queues/queues.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { MaintenanceModule } from './modules/maintenance/maintenance.module';
+import { MovesModule } from './modules/occupancy/moves/moves.module';
+import { ExportsModule } from './modules/platform/exports/exports.module';
+import { FacilitiesModule } from './modules/facilities/facilities.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { ExportRegistryModule } from './common/export/export-registry';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { CommunityModule } from './modules/community/community.module';
 import { EmergencyModule } from './modules/emergency/emergency.module';
 import { AuthorizationGuard } from './modules/authz/authorization.guard';
@@ -51,6 +60,15 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     VisitorModule,
     EmergencyModule,
     CommunityModule,
+    BillingModule,
+    PaymentsModule,
+    MaintenanceModule,
+    UtilitiesModule,
+    MovesModule,
+    ExportRegistryModule,
+    ExportsModule,
+    FacilitiesModule,
+    DocumentsModule,
   ],
   controllers: [HealthController],
   providers: [

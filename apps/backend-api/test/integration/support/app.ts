@@ -68,7 +68,7 @@ export async function startTestStack(
     builder = builder.overrideProvider(ObjectStorage).useValue(new MemoryObjectStorage());
   }
   const moduleRef = await builder.compile();
-  const app = moduleRef.createNestApplication();
+  const app = moduleRef.createNestApplication({ rawBody: true });
   await app.init();
   const redis = new Redis(redisContainer.getConnectionUrl());
   const ownerQuery = (sql: string, values: unknown[]) => db.owner.query(sql, values);

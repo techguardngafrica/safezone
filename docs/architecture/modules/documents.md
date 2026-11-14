@@ -93,3 +93,7 @@ Built (`src/modules/files`): the file service. Routes are split by scope: `/v1/e
 - Signed PUT bound to the declared type and exact size; `complete` checks the object, then the worker scans, sniffs magic bytes, strips JPEG/PNG metadata (EXIF, XMP, IPTC, text chunks), stores SHA-256 and marks the file `clean`, `infected` (moved to `quarantine/`) or `rejected`.
 - Downloads: 5-minute signed URLs, clean files only; uploader or purpose-specific staff permission; sensitive purposes audited.
 - The malware scanner is a stub that detects the EICAR test file only. A real engine must replace it before residents upload files in production (needs an ADR).
+
+## 9. Phase 3 implementation notes
+
+Built in `src/modules/documents` ([ADR-0015](../adr/0015-phase-3-community-facilities-documents.md)): folders, categories, visibility rules, versions, archive, expiry reminders (30/7/0 days), logged views and downloads, access history for managers. **Not built:** policy acknowledgements (governance, Phase 5), vendor associations (Phase 4).

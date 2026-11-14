@@ -97,7 +97,13 @@ export class JoinRequestsService {
           if (already > 0)
             throw new ConflictError('ALREADY_MEMBER', 'You are already in this household');
         }
-        const status = firstJoinStep(input.relationship, settings.tenant_approval, false);
+        const owners =
+          (await this.property.activeOwners(tx, input.estateId, [unit.id])).get(unit.id) ?? [];
+        const status = firstJoinStep(
+          input.relationship,
+          settings.tenant_approval,
+          owners.length > 0,
+        );
         const id = uuidv7();
         const row = await tx.joinRequest.create({
           data: {
@@ -137,6 +143,15 @@ export class JoinRequestsService {
             estateId: input.estateId,
             data: { name: input.fullName, unitCode: unit.code },
             dedupeKey: `join:${id}:waiting`,
+          });
+        }
+        if (status === 'awaiting_owner') {
+          await this.notifications.request(tx, {
+            intent: 'occupancy.join_request_waiting',
+            userIds: owners.map((owner) => owner.userId),
+            estateId: input.estateId,
+            data: { name: input.fullName, unitCode: unit.code },
+            dedupeKey: `join:${id}:owner`,
           });
         }
         return this.view(row, unit);
@@ -201,11 +216,23 @@ export class JoinRequestsService {
               select: { id: true },
             })
           ).map((household) => household.id);
-      if (!staff && headOf.length === 0) return [];
+      const owned = staff
+        ? []
+        : (await this.property.ownedUnits(tx, access.estateId, access.userId)).map(
+            (item) => item.ownership.spaceId,
+          );
+      if (!staff && headOf.length === 0 && owned.length === 0) return [];
       return tx.joinRequest.findMany({
         where: {
           estateId: access.estateId,
-          ...(staff ? {} : { householdId: { in: headOf } }),
+          ...(staff
+            ? {}
+            : {
+                OR: [
+                  { householdId: { in: headOf } },
+                  { spaceId: { in: owned }, relationship: 'tenant' },
+                ],
+              }),
           ...(query.status
             ? { status: query.status }
             : { status: { in: [...OPEN_JOIN_STATUSES] } }),
@@ -391,7 +418,11 @@ export class JoinRequestsService {
       });
       if (household) return 'household_head';
     }
-    // Owner approvals need ownership records (property, Phase 2).
+    if (row.status === 'awaiting_owner') {
+      const owners =
+        (await this.property.activeOwners(tx, row.estateId, [row.spaceId])).get(row.spaceId) ?? [];
+      if (owners.some((owner) => owner.userId === access.userId)) return 'owner';
+    }
     return null;
   }
 

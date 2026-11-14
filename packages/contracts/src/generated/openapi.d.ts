@@ -232,6 +232,822 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/billing-runs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Billing runs, newest first
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    get: operations['billing_listRuns'];
+    put?: never;
+    /**
+     * Prepare a billing run
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_createRun'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Billing run detail
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    get: operations['billing_getRun'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a run (not by the person who prepared it)
+     * @description Requires `billing.run.approve`. Needs the `billing` feature.
+     */
+    post: operations['billing_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a run that has not been issued
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}/issue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Issue the invoices of an approved run
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_issue'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}/items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A run's per-unit bills (the preview)
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    get: operations['billing_runItems'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Compute every unit’s bill
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_preview'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/billing-runs/{id}/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Submit a previewed run for approval
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/blocks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Block someone from messaging me
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_block'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/blocks/{userId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Unblock someone
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    delete: operations['channels_unblock'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Bookings (managers: all; others: their own)
+     * @description Any active member of the estate. Needs the `facilities` feature.
+     */
+    get: operations['facilities_bookings'];
+    put?: never;
+    /**
+     * Book a facility
+     * @description Requires `facility.book`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_book'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Booking detail
+     * @description Any active member of the estate. Needs the `facilities` feature.
+     */
+    get: operations['facilities_booking'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a booking
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a booking (refund follows the policy)
+     * @description Any active member of the estate. Needs the `facilities` feature.
+     */
+    post: operations['facilities_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}/check-in': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check a booker in
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_checkIn'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}/damage-reports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Report damage (optionally charge the booker)
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_damage'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}/no-show': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark a no-show
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_noShow'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/bookings/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decline a booking with a reason
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My channels (building, estate, joined), or public channels to join
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    get: operations['channels_list'];
+    put?: never;
+    /**
+     * Create a resident channel (may need approval)
+     * @description Requires `community.channel.create`. Needs the `community` feature.
+     */
+    post: operations['channels_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a resident channel
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    post: operations['channels_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/archive': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Archive a channel
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    post: operations['channels_archive'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/join': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Join (public) or ask to join (restricted)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_join'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/members': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Invite someone or accept their request (owner or moderator)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_invite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/members/{userId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Leave, or remove a member
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    delete: operations['channels_removeMember'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Message history, newest first (search with q)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    get: operations['channels_messages'];
+    put?: never;
+    /**
+     * Post a message
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/preferences': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Notifications for this channel: all, mentions or none
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    put: operations['channels_preferences'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/channels/{id}/suspend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Suspend a channel
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    post: operations['channels_suspend'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/charges': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Charge definitions
+     * @description Requires `invoice.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_charges'];
+    put?: never;
+    /**
+     * Define a charge (dues, levies, service charge)
+     * @description Requires `charge.manage`. Needs the `billing` feature.
+     */
+    post: operations['billing_createCharge'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/charges/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Charge detail
+     * @description Requires `invoice.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_charge'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change a charge for future runs (send If-Match with its version)
+     * @description Requires `charge.manage`. Needs the `billing` feature.
+     */
+    patch: operations['billing_updateCharge'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/community/guidelines': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Community guidelines and whether I accepted them
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    get: operations['channels_guidelines'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/community/guidelines/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept the guidelines (needed before posting)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_accept'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/direct-channels': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a private conversation (if the estate allows)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_direct'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/document-folders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Document folders
+     * @description Any active member of the estate. Needs the `documents` feature.
+     */
+    get: operations['documents_folders'];
+    put?: never;
+    /**
+     * Create a folder
+     * @description Requires `document.manage`. Needs the `documents` feature.
+     */
+    post: operations['documents_createFolder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/documents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Documents I may see
+     * @description Any active member of the estate. Needs the `documents` feature.
+     */
+    get: operations['documents_list'];
+    put?: never;
+    /**
+     * Publish a document with its visibility
+     * @description Requires `document.manage`. Needs the `documents` feature.
+     */
+    post: operations['documents_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/documents/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Document detail (logged)
+     * @description Any active member of the estate. Needs the `documents` feature.
+     */
+    get: operations['documents_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change title, category, folder, visibility or expiry
+     * @description Requires `document.manage`. Needs the `documents` feature.
+     */
+    patch: operations['documents_update'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/documents/{id}/access-log': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Who viewed or downloaded a document
+     * @description Requires `document.manage`. Needs the `documents` feature.
+     */
+    get: operations['documents_accessLog'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/documents/{id}/archive': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Archive a document (versions are kept)
+     * @description Requires `document.manage`. Needs the `documents` feature.
+     */
+    post: operations['documents_archive'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/documents/{id}/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * A 5-minute download link (logged)
+     * @description Any active member of the estate. Needs the `documents` feature.
+     */
+    post: operations['documents_download'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/documents/{id}/versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Upload a new version
+     * @description Requires `document.manage`. Needs the `documents` feature.
+     */
+    post: operations['documents_addVersion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/domestic-staff': {
     parameters: {
       query?: never;
@@ -290,6 +1106,138 @@ export interface paths {
      * @description Requires `broadcast.emergency`. Needs the `emergency` feature.
      */
     post: operations['emergency_broadcast'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/exports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Recent exports
+     * @description Requires `estate.configure`.
+     */
+    get: operations['exports_list'];
+    put?: never;
+    /**
+     * Request a full data export (ZIP of CSV and JSON)
+     * @description Requires `estate.configure`.
+     */
+    post: operations['exports_request'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/exports/{id}/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * A 15-minute download link for a ready export (audited)
+     * @description Requires `estate.configure`.
+     */
+    post: operations['exports_download'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/facilities': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Facilities
+     * @description Any active member of the estate. Needs the `facilities` feature.
+     */
+    get: operations['facilities_list'];
+    put?: never;
+    /**
+     * Add a facility with its hours, rules and price
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/facilities/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Facility detail
+     * @description Any active member of the estate. Needs the `facilities` feature.
+     */
+    get: operations['facilities_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change a facility, its rules or price
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    patch: operations['facilities_update'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/facilities/{id}/availability': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Opening hours and busy times on a date
+     * @description Any active member of the estate. Needs the `facilities` feature.
+     */
+    get: operations['facilities_availability'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/facilities/{id}/blackouts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Close a facility for a period (affected bookings are cancelled and refunded)
+     * @description Requires `facility.manage`. Needs the `facilities` feature.
+     */
+    post: operations['facilities_blackout'];
     delete?: never;
     options?: never;
     head?: never;
@@ -648,6 +1596,130 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/invoices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Invoices (staff: all; residents: their own and their household’s)
+     * @description Requires `invoice.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_listInvoices'];
+    put?: never;
+    /**
+     * Issue a one-off invoice to a unit’s household
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_createInvoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/invoices/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Invoice detail with lines, credits, waivers and payments
+     * @description Requires `invoice.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_invoice'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/invoices/{id}/credit-notes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Issue a credit note against an invoice
+     * @description Requires `billing.run.approve`. Needs the `billing` feature.
+     */
+    post: operations['billing_creditNote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/invoices/{id}/waivers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Request a waiver (approved at once when within the approver’s threshold)
+     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     */
+    post: operations['billing_requestWaiver'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/invoices/{id}/waivers/{waiverId}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a waiver (not by the requester)
+     * @description Requires `billing.run.approve`. Needs the `billing` feature.
+     */
+    post: operations['billing_approveWaiver'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/invoices/{id}/waivers/{waiverId}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a waiver with a reason
+     * @description Requires `billing.run.approve`. Needs the `billing` feature.
+     */
+    post: operations['billing_rejectWaiver'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/join-requests': {
     parameters: {
       query?: never;
@@ -708,6 +1780,794 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/ledger': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ledger entries (accountants)
+     * @description Requires `report.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_ledgerEntries'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ledger/balances': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Trial balance per ledger account
+     * @description Requires `report.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_balances'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Request and complaint categories
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_categories'];
+    put?: never;
+    /**
+     * Add a category
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_createCategory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-categories/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Rename, re-prioritise or retire a category
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    patch: operations['maintenance_updateCategory'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Requests (management: all; residents: their household’s)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_list'];
+    put?: never;
+    /**
+     * Report a problem or make a complaint
+     * @description Requires `maintenance.request`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Request detail with comments
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a request
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/await-materials': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Pause for materials (SLA clock pauses)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_awaitMaterials'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Withdraw a request before work starts
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/close': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Confirm the fix and close
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_close'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/comments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Comment on a request (staff may add internal notes)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_comment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/rate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Rate the fix (closes a resolved request)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_rate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a request with a reason
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/reopen': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reopen within 7 days of resolution
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_reopen'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/request-info': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask the requester for more information
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_requestInfo'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/resolve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark resolved (staff or assignee)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_resolve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/respond': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Requester answers an information request
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_respond'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/resume': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resume after materials arrive
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_resume'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/review': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start reviewing a request
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_review'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/maintenance-requests/{id}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start work (staff or assignee)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_start'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/manual-payments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Office payments
+     * @description Requires `payment.reconcile`. Needs the `payments` feature.
+     */
+    get: operations['payments_manualPayments'];
+    put?: never;
+    /**
+     * Record a payment received at the office (needs a second approver)
+     * @description Requires `payment.reconcile`. Needs the `payments` feature.
+     */
+    post: operations['payments_recordManual'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/manual-payments/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve an office payment and apply it to invoices
+     * @description Requires `billing.run.approve`. Needs the `payments` feature.
+     */
+    post: operations['payments_approveManual'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/manual-payments/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject an office payment with a reason
+     * @description Requires `billing.run.approve`. Needs the `payments` feature.
+     */
+    post: operations['payments_rejectManual'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/messages/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete my message
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    delete: operations['channels_remove'];
+    options?: never;
+    head?: never;
+    /**
+     * Edit my message (within 15 minutes)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    patch: operations['channels_edit'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/messages/{id}/reactions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * React to a message
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_react'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/messages/{id}/reactions/remove': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove my reaction
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['channels_unreact'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meter-readings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record meter readings in bulk (management)
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    post: operations['utilities_readings'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Meters (management: all; residents: their units’)
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    get: operations['utilities_meters'];
+    put?: never;
+    /**
+     * Register a meter for a unit
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    post: operations['utilities_createMeter'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meters/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a meter
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    delete: operations['utilities_removeMeter'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meters/lookup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check a meter with its provider (shows the account name to confirm)
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    post: operations['utilities_lookup'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moderation/actions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Moderation audit log
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    get: operations['moderation_actions'];
+    put?: never;
+    /**
+     * Remove, warn, mute, remove from channel, suspend, ban or dismiss
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    post: operations['moderation_act'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moderation/actions/{id}/appeal': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Appeal an action taken against me
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['moderation_appeal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moderation/actions/{id}/decide': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide an appeal (another moderator)
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    post: operations['moderation_decide'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moderation/queue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reports to review
+     * @description Requires `community.moderate`. Needs the `community` feature.
+     */
+    get: operations['moderation_queue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moves': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Moves (guards: gate notices for a day; residents: theirs)
+     * @description Any active member of the estate. Needs the `occupancy` feature.
+     */
+    get: operations['moves_list'];
+    put?: never;
+    /**
+     * Schedule a move-in or move-out (head, owner or management)
+     * @description Any active member of the estate. Needs the `occupancy` feature.
+     */
+    post: operations['moves_schedule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moves/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a scheduled move
+     * @description Any active member of the estate. Needs the `occupancy` feature.
+     */
+    post: operations['moves_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moves/{id}/checklist': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update the move-out checklist
+     * @description Requires `resident.approve`. Needs the `occupancy` feature.
+     */
+    put: operations['moves_checklist'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/moves/{id}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Complete a move now (move-out ends the occupancy)
+     * @description Requires `resident.approve`. Needs the `occupancy` feature.
+     */
+    post: operations['moves_complete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/occupancies': {
     parameters: {
       query?: never;
@@ -742,6 +2602,486 @@ export interface paths {
      * @description Requires `resident.approve`. Needs the `occupancy` feature.
      */
     post: operations['estateOccupancy_endOccupancy'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/occupancies/{id}/renew': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Renew a lease with a new end date
+     * @description Requires `resident.approve`. Needs the `occupancy` feature.
+     */
+    post: operations['estateOccupancy_renew'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/owned-units': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Owner mode: units I own and who lives there
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    get: operations['estateOccupancy_ownedUnits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ownership-transfers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ownership transfers (staff: all; owners: their units’)
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    get: operations['ownerships_transfers'];
+    put?: never;
+    /**
+     * Start an ownership transfer (owner or management)
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    post: operations['ownerships_requestTransfer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ownership-transfers/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve and complete a transfer (override needs documents)
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    post: operations['ownerships_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ownership-transfers/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a transfer you opened
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    post: operations['ownerships_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ownership-transfers/{id}/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Seller confirms a transfer
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    post: operations['ownerships_confirm'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ownership-transfers/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a transfer (management or the seller)
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    post: operations['ownerships_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ownerships/{id}/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * End an ownership record (corrections; sales use transfers)
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    post: operations['ownerships_end'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/payment-intents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start checkout for my open invoices (Idempotency-Key required)
+     * @description Requires `payment.make`. Needs the `payments` feature.
+     */
+    post: operations['payments_createIntent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/payment-intents/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Payment status (the payer, or staff who reconcile)
+     * @description Any active member of the estate. Needs the `payments` feature.
+     */
+    get: operations['payments_intent'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/payment-intents/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check a payment with the provider now (after returning from checkout)
+     * @description Any active member of the estate. Needs the `payments` feature.
+     */
+    post: operations['payments_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/payout-account': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The estate's active payout account (last 4 digits only)
+     * @description Requires `estate.configure`. Needs the `payments` feature.
+     */
+    get: operations['payments_payoutAccount'];
+    put?: never;
+    /**
+     * Link the estate's bank account (settlement goes straight to it)
+     * @description Requires `estate.configure`. Needs the `payments` feature.
+     */
+    post: operations['payments_setupPayout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/polls': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Polls for me
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    get: operations['polls_list'];
+    put?: never;
+    /**
+     * Create an official poll
+     * @description Requires `announcement.publish`. Needs the `community` feature.
+     */
+    post: operations['polls_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/polls/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Poll (results after voting or closing)
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    get: operations['polls_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/polls/{id}/voters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Who voted for what (named polls only)
+     * @description Requires `announcement.publish`. Needs the `community` feature.
+     */
+    get: operations['polls_voters'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/polls/{id}/votes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Vote
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['polls_vote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/recurring-maintenance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Planned maintenance schedules
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_recurring'];
+    put?: never;
+    /**
+     * Schedule planned maintenance
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_createRecurring'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/refunds': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Refunds
+     * @description Requires `payment.refund`. Needs the `payments` feature.
+     */
+    get: operations['payments_refunds'];
+    put?: never;
+    /**
+     * Request a refund from a payer's unallocated credit
+     * @description Requires `payment.refund`. Needs the `payments` feature.
+     */
+    post: operations['payments_requestRefund'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/refunds/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a refund (not by the requester) and send it to the provider
+     * @description Requires `billing.run.approve`. Needs the `payments` feature.
+     */
+    post: operations['payments_approveRefund'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/refunds/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a refund with a reason
+     * @description Requires `billing.run.approve`. Needs the `payments` feature.
+     */
+    post: operations['payments_rejectRefund'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/reports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Report a message, channel or person
+     * @description Any active member of the estate. Needs the `community` feature.
+     */
+    post: operations['moderation_report'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/reports/facilities': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Utilisation per facility
+     * @description Requires `report.read`. Needs the `facilities` feature.
+     */
+    get: operations['facilities_report'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/reports/maintenance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Volume, resolution time, SLA compliance and cost
+     * @description Requires `report.read`. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_report'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -890,6 +3230,30 @@ export interface paths {
      * @description Requires `estate.configure`.
      */
     post: operations['setup_activate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/sla-policies': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Response and resolution targets per priority
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_slaPolicies'];
+    /**
+     * Set targets per priority (applies to new requests)
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    put: operations['maintenance_putSlaPolicies'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1188,6 +3552,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/statements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Statement for a payer or unit (residents: their own)
+     * @description Requires `invoice.read`. Needs the `billing` feature.
+     */
+    get: operations['billing_statement'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/transactions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Verified payments (staff who reconcile: all; residents: their own)
+     * @description Any active member of the estate. Needs the `payments` feature.
+     */
+    get: operations['payments_transactions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/units': {
     parameters: {
       query?: never;
@@ -1200,6 +3604,94 @@ export interface paths {
      * @description Any active member of the estate. Needs the `property` feature.
      */
     get: operations['property_units'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/units/{id}/ownerships': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Owners of a unit, past and present (staff, or the unit’s owner)
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    get: operations['ownerships_list'];
+    put?: never;
+    /**
+     * Record an owner of a unit (person or company)
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    post: operations['ownerships_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/utility-outages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Outages (residents: those affecting them)
+     * @description Any active member of the estate. Needs the `announcements` feature.
+     */
+    get: operations['utilities_outages'];
+    put?: never;
+    /**
+     * Announce an outage to affected residents
+     * @description Requires `announcement.publish`. Needs the `announcements` feature.
+     */
+    post: operations['utilities_announce'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/utility-outages/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Resolve, cancel or update an outage
+     * @description Requires `announcement.publish`. Needs the `announcements` feature.
+     */
+    patch: operations['utilities_updateOutage'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/utility-providers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Providers meters can be registered with
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    get: operations['utilities_providers'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1264,6 +3756,46 @@ export interface paths {
      * @description Requires `gate.verify`. Needs the `occupancy` feature.
      */
     get: operations['estateOccupancy_lookupVehicle'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/virtual-accounts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Get a dedicated bank transfer account for a unit I pay for
+     * @description Requires `payment.make`. Needs the `payments` feature.
+     */
+    post: operations['payments_createVirtualAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/virtual-accounts/mine': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My transfer accounts in this estate
+     * @description Requires `payment.make`. Needs the `payments` feature.
+     */
+    get: operations['payments_myVirtualAccounts'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1372,6 +3904,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/waivers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Waivers (e.g. those waiting for approval)
+     * @description Requires `billing.run.approve`. Needs the `billing` feature.
+     */
+    get: operations['billing_waivers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/walkins': {
     parameters: {
       query?: never;
@@ -1446,6 +3998,94 @@ export interface paths {
      * @description Any active member of the estate. Needs the `visitors` feature.
      */
     post: operations['visitor_rejectWalkin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/work-orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Work orders (assignees: only theirs)
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_workOrders'];
+    put?: never;
+    /**
+     * Create a work order (from a request or planned work)
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_createWorkOrder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/work-orders/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Work order detail
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    get: operations['maintenance_workOrder'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Assign, schedule, set costs or move status
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    patch: operations['maintenance_updateWorkOrder'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/work-orders/{id}/materials': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record materials used
+     * @description Any active member of the estate. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_addMaterial'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/work-orders/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Verify completed work (and invoice a recharge)
+     * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
+     */
+    post: operations['maintenance_verify'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2032,6 +4672,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/payments/banks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Nigerian banks the provider can settle to
+     * @description Any signed-in user.
+     */
+    get: operations['paymentsPublic_banks'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/permissions/catalogue': {
     parameters: {
       query?: never;
@@ -2520,6 +5180,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/webhooks/payments/{provider}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Payment provider webhook (signature-verified, idempotent)
+     * @description Public.
+     */
+    post: operations['paymentsPublic_webhook'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2617,6 +5297,15 @@ export interface components {
     };
     /** @description Unexpected error */
     Error500: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ApiError'];
+      };
+    };
+    /** @description A provider (payments, bills) did not respond */
+    Error502: {
       headers: {
         [name: string]: unknown;
       };
@@ -3266,6 +5955,3452 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  billing_listRuns: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_createRun: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          label: string;
+          /** Format: date */
+          periodStart: string;
+          /** Format: date */
+          periodEnd: string;
+          /** Format: date */
+          dueDate: string;
+          chargeIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_getRun: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_issue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_runItems: {
+    parameters: {
+      query?: {
+        skipped?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              payerName: string | null;
+              amount: number;
+              lines: {
+                /** Format: uuid */
+                chargeId: string;
+                description: string;
+                quantity: number;
+                unitAmount: number;
+                amount: number;
+              }[];
+              /** @enum {string} */
+              payerType: 'occupant' | 'owner';
+              skipReason: ('vacant' | 'no_owner' | 'not_applicable' | 'payer_changed') | null;
+              invoiceId: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_preview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              label: string;
+              /** Format: date */
+              periodStart: string;
+              /** Format: date */
+              periodEnd: string;
+              /** Format: date */
+              dueDate: string;
+              chargeIds: string[];
+              /** @enum {string} */
+              status:
+                'draft' | 'previewed' | 'awaiting_approval' | 'approved' | 'issued' | 'cancelled';
+              totals: {
+                invoices: number;
+                amount: number;
+                skippedUnits: number;
+              } | null;
+              /** @constant */
+              currency: 'NGN';
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvalRequired: boolean | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              issuedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_block: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_unblock: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_bookings: {
+    parameters: {
+      query?: {
+        mine?: string;
+        facilityId?: string;
+        date?: string;
+        status?:
+          | 'pending_approval'
+          | 'pending_payment'
+          | 'confirmed'
+          | 'cancelled'
+          | 'completed'
+          | 'no_show'
+          | 'rejected';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_book: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          facilityId: string;
+          /** Format: date-time */
+          startsAt: string;
+          /** Format: date-time */
+          endsAt: string;
+          /** @default 0 */
+          guests?: number;
+          purpose?: string;
+          overrideReason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_checkIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_damage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          description: string;
+          /** @default [] */
+          photoFileIds?: string[];
+          chargeAmount?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              bookingId: string;
+              description: string;
+              chargeAmount: number;
+              invoiceId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_noShow: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              facilityId: string;
+              facilityName: string;
+              /** Format: uuid */
+              bookedBy: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              guests: number;
+              purpose: string | null;
+              /** @enum {string} */
+              status:
+                | 'pending_approval'
+                | 'pending_payment'
+                | 'confirmed'
+                | 'cancelled'
+                | 'completed'
+                | 'no_show'
+                | 'rejected';
+              price: number;
+              invoiceId: string | null;
+              holdExpiresAt: string | null;
+              refundAmount: number;
+              rejectionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_list: {
+    parameters: {
+      query?: {
+        mine?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          description?: string;
+          category?: string;
+          /**
+           * @default public
+           * @enum {string}
+           */
+          privacy?: 'public' | 'restricted' | 'invite_only';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_archive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_join: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_invite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_removeMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_messages: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        q?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              channelId: string;
+              /** Format: uuid */
+              authorId: string;
+              authorName: string | null;
+              body: string | null;
+              replyToId: string | null;
+              attachmentFileIds: string[];
+              mentionUserIds: string[];
+              reactions: {
+                emoji: string;
+                count: number;
+                mine: boolean;
+              }[];
+              /** @enum {string} */
+              state: 'visible' | 'deleted' | 'removed';
+              editedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+          /** Format: uuid */
+          replyToId?: string;
+          /** @default [] */
+          attachmentFileIds?: string[];
+          /** @default [] */
+          mentionUserIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              channelId: string;
+              /** Format: uuid */
+              authorId: string;
+              authorName: string | null;
+              body: string | null;
+              replyToId: string | null;
+              attachmentFileIds: string[];
+              mentionUserIds: string[];
+              reactions: {
+                emoji: string;
+                count: number;
+                mine: boolean;
+              }[];
+              /** @enum {string} */
+              state: 'visible' | 'deleted' | 'removed';
+              editedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_preferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          notify: 'all' | 'mentions' | 'none';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_suspend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_charges: {
+    parameters: {
+      query?: {
+        status?: 'active' | 'archived';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type:
+                | 'estate_dues'
+                | 'service_charge'
+                | 'maintenance_charge'
+                | 'security_levy'
+                | 'development_levy'
+                | 'utility_charge'
+                | 'special_assessment'
+                | 'custom';
+              name: string;
+              description: string | null;
+              amountRule:
+                | {
+                    /** @constant */
+                    kind: 'fixed';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_unit_type';
+                    amounts: {
+                      [key: string]: number;
+                    };
+                    otherwise?: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_bedroom';
+                    amount: number;
+                    /** @default 1 */
+                    minimumBedrooms: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_sqm';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'metered';
+                    /** @enum {string} */
+                    utility: 'electricity' | 'water' | 'gas';
+                    ratePerUnit: number;
+                    fixedAmount?: number;
+                  };
+              /** @enum {string} */
+              frequency: 'one_off' | 'monthly' | 'quarterly' | 'annual';
+              /** @enum {string} */
+              payer: 'occupant' | 'owner';
+              appliesTo: {
+                /** @default [] */
+                spaceIds: string[];
+                /** @default [] */
+                unitTypes: ('house' | 'flat' | 'shop' | 'office' | 'other')[];
+              };
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              penaltyRule:
+                | (
+                    | {
+                        /** @constant */
+                        kind: 'fixed';
+                        amount: number;
+                      }
+                    | {
+                        /** @constant */
+                        kind: 'percent';
+                        basisPoints: number;
+                        cap?: number;
+                      }
+                  )
+                | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              /** @constant */
+              currency: 'NGN';
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_createCharge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type:
+            | 'estate_dues'
+            | 'service_charge'
+            | 'maintenance_charge'
+            | 'security_levy'
+            | 'development_levy'
+            | 'utility_charge'
+            | 'special_assessment'
+            | 'custom';
+          name: string;
+          description?: string;
+          amountRule:
+            | {
+                /** @constant */
+                kind: 'fixed';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                kind: 'per_unit_type';
+                amounts: {
+                  [key: string]: number;
+                };
+                otherwise?: number;
+              }
+            | {
+                /** @constant */
+                kind: 'per_bedroom';
+                amount: number;
+                /** @default 1 */
+                minimumBedrooms?: number;
+              }
+            | {
+                /** @constant */
+                kind: 'per_sqm';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                kind: 'metered';
+                /** @enum {string} */
+                utility: 'electricity' | 'water' | 'gas';
+                ratePerUnit: number;
+                fixedAmount?: number;
+              };
+          /** @enum {string} */
+          frequency: 'one_off' | 'monthly' | 'quarterly' | 'annual';
+          /**
+           * @default occupant
+           * @enum {string}
+           */
+          payer?: 'occupant' | 'owner';
+          /**
+           * @default {
+           *       "spaceIds": [],
+           *       "unitTypes": []
+           *     }
+           */
+          appliesTo?: {
+            /** @default [] */
+            spaceIds?: string[];
+            /** @default [] */
+            unitTypes?: ('house' | 'flat' | 'shop' | 'office' | 'other')[];
+          };
+          /** Format: date */
+          startsOn: string;
+          /** Format: date */
+          endsOn?: string;
+          penaltyRule?:
+            | {
+                /** @constant */
+                kind: 'fixed';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                kind: 'percent';
+                basisPoints: number;
+                cap?: number;
+              };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type:
+                | 'estate_dues'
+                | 'service_charge'
+                | 'maintenance_charge'
+                | 'security_levy'
+                | 'development_levy'
+                | 'utility_charge'
+                | 'special_assessment'
+                | 'custom';
+              name: string;
+              description: string | null;
+              amountRule:
+                | {
+                    /** @constant */
+                    kind: 'fixed';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_unit_type';
+                    amounts: {
+                      [key: string]: number;
+                    };
+                    otherwise?: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_bedroom';
+                    amount: number;
+                    /** @default 1 */
+                    minimumBedrooms: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_sqm';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'metered';
+                    /** @enum {string} */
+                    utility: 'electricity' | 'water' | 'gas';
+                    ratePerUnit: number;
+                    fixedAmount?: number;
+                  };
+              /** @enum {string} */
+              frequency: 'one_off' | 'monthly' | 'quarterly' | 'annual';
+              /** @enum {string} */
+              payer: 'occupant' | 'owner';
+              appliesTo: {
+                /** @default [] */
+                spaceIds: string[];
+                /** @default [] */
+                unitTypes: ('house' | 'flat' | 'shop' | 'office' | 'other')[];
+              };
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              penaltyRule:
+                | (
+                    | {
+                        /** @constant */
+                        kind: 'fixed';
+                        amount: number;
+                      }
+                    | {
+                        /** @constant */
+                        kind: 'percent';
+                        basisPoints: number;
+                        cap?: number;
+                      }
+                  )
+                | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              /** @constant */
+              currency: 'NGN';
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_charge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type:
+                | 'estate_dues'
+                | 'service_charge'
+                | 'maintenance_charge'
+                | 'security_levy'
+                | 'development_levy'
+                | 'utility_charge'
+                | 'special_assessment'
+                | 'custom';
+              name: string;
+              description: string | null;
+              amountRule:
+                | {
+                    /** @constant */
+                    kind: 'fixed';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_unit_type';
+                    amounts: {
+                      [key: string]: number;
+                    };
+                    otherwise?: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_bedroom';
+                    amount: number;
+                    /** @default 1 */
+                    minimumBedrooms: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_sqm';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'metered';
+                    /** @enum {string} */
+                    utility: 'electricity' | 'water' | 'gas';
+                    ratePerUnit: number;
+                    fixedAmount?: number;
+                  };
+              /** @enum {string} */
+              frequency: 'one_off' | 'monthly' | 'quarterly' | 'annual';
+              /** @enum {string} */
+              payer: 'occupant' | 'owner';
+              appliesTo: {
+                /** @default [] */
+                spaceIds: string[];
+                /** @default [] */
+                unitTypes: ('house' | 'flat' | 'shop' | 'office' | 'other')[];
+              };
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              penaltyRule:
+                | (
+                    | {
+                        /** @constant */
+                        kind: 'fixed';
+                        amount: number;
+                      }
+                    | {
+                        /** @constant */
+                        kind: 'percent';
+                        basisPoints: number;
+                        cap?: number;
+                      }
+                  )
+                | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              /** @constant */
+              currency: 'NGN';
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_updateCharge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          description?: string | null;
+          amountRule?:
+            | {
+                /** @constant */
+                kind: 'fixed';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                kind: 'per_unit_type';
+                amounts: {
+                  [key: string]: number;
+                };
+                otherwise?: number;
+              }
+            | {
+                /** @constant */
+                kind: 'per_bedroom';
+                amount: number;
+                /** @default 1 */
+                minimumBedrooms?: number;
+              }
+            | {
+                /** @constant */
+                kind: 'per_sqm';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                kind: 'metered';
+                /** @enum {string} */
+                utility: 'electricity' | 'water' | 'gas';
+                ratePerUnit: number;
+                fixedAmount?: number;
+              };
+          appliesTo?: {
+            /** @default [] */
+            spaceIds?: string[];
+            /** @default [] */
+            unitTypes?: ('house' | 'flat' | 'shop' | 'office' | 'other')[];
+          };
+          endsOn?: string | null;
+          penaltyRule?:
+            | (
+                | {
+                    /** @constant */
+                    kind: 'fixed';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'percent';
+                    basisPoints: number;
+                    cap?: number;
+                  }
+              )
+            | null;
+          /** @enum {string} */
+          status?: 'active' | 'archived';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type:
+                | 'estate_dues'
+                | 'service_charge'
+                | 'maintenance_charge'
+                | 'security_levy'
+                | 'development_levy'
+                | 'utility_charge'
+                | 'special_assessment'
+                | 'custom';
+              name: string;
+              description: string | null;
+              amountRule:
+                | {
+                    /** @constant */
+                    kind: 'fixed';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_unit_type';
+                    amounts: {
+                      [key: string]: number;
+                    };
+                    otherwise?: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_bedroom';
+                    amount: number;
+                    /** @default 1 */
+                    minimumBedrooms: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'per_sqm';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    kind: 'metered';
+                    /** @enum {string} */
+                    utility: 'electricity' | 'water' | 'gas';
+                    ratePerUnit: number;
+                    fixedAmount?: number;
+                  };
+              /** @enum {string} */
+              frequency: 'one_off' | 'monthly' | 'quarterly' | 'annual';
+              /** @enum {string} */
+              payer: 'occupant' | 'owner';
+              appliesTo: {
+                /** @default [] */
+                spaceIds: string[];
+                /** @default [] */
+                unitTypes: ('house' | 'flat' | 'shop' | 'office' | 'other')[];
+              };
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              penaltyRule:
+                | (
+                    | {
+                        /** @constant */
+                        kind: 'fixed';
+                        amount: number;
+                      }
+                    | {
+                        /** @constant */
+                        kind: 'percent';
+                        basisPoints: number;
+                        cap?: number;
+                      }
+                  )
+                | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              /** @constant */
+              currency: 'NGN';
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      412: components['responses']['Error412'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_guidelines: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              text: string;
+              acceptedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_accept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              text: string;
+              acceptedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_direct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'building' | 'estate' | 'resident' | 'direct';
+              name: string;
+              description: string | null;
+              category: string | null;
+              /** @enum {string} */
+              privacy: 'public' | 'restricted' | 'invite_only';
+              /** @enum {string} */
+              status: 'pending_approval' | 'active' | 'suspended' | 'archived';
+              staffOnly: boolean;
+              spaceId: string | null;
+              memberCount: number | null;
+              myRole: ('owner' | 'moderator' | 'member') | null;
+              myStatus: ('active' | 'requested' | 'invited') | null;
+              notify: ('all' | 'mentions' | 'none') | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_folders: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              parentId: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_createFolder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** Format: uuid */
+          parentId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              parentId: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_list: {
+    parameters: {
+      query?: {
+        category?:
+          | 'estate_rules'
+          | 'constitution'
+          | 'agm_minutes'
+          | 'notice'
+          | 'contract'
+          | 'insurance'
+          | 'property'
+          | 'resident'
+          | 'vendor'
+          | 'other';
+        folderId?: string;
+        q?: string;
+        expiringWithinDays?: number;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              description: string | null;
+              /** @enum {string} */
+              category:
+                | 'estate_rules'
+                | 'constitution'
+                | 'agm_minutes'
+                | 'notice'
+                | 'contract'
+                | 'insurance'
+                | 'property'
+                | 'resident'
+                | 'vendor'
+                | 'other';
+              folderId: string | null;
+              visibility:
+                | {
+                    /** @constant */
+                    audience: 'managers';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'residents';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'roles';
+                    roleKeys: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'spaces';
+                    spaceIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'households';
+                    householdIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'user';
+                    /** Format: uuid */
+                    userId: string;
+                  };
+              expiresOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              currentVersion: number;
+              versions: {
+                version: number;
+                /** Format: uuid */
+                fileId: string;
+                notes: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title: string;
+          description?: string;
+          /** @enum {string} */
+          category:
+            | 'estate_rules'
+            | 'constitution'
+            | 'agm_minutes'
+            | 'notice'
+            | 'contract'
+            | 'insurance'
+            | 'property'
+            | 'resident'
+            | 'vendor'
+            | 'other';
+          /** Format: uuid */
+          folderId?: string;
+          visibility:
+            | {
+                /** @constant */
+                audience: 'managers';
+              }
+            | {
+                /** @constant */
+                audience: 'residents';
+              }
+            | {
+                /** @constant */
+                audience: 'roles';
+                roleKeys: string[];
+              }
+            | {
+                /** @constant */
+                audience: 'spaces';
+                spaceIds: string[];
+              }
+            | {
+                /** @constant */
+                audience: 'households';
+                householdIds: string[];
+              }
+            | {
+                /** @constant */
+                audience: 'user';
+                /** Format: uuid */
+                userId: string;
+              };
+          /** Format: date */
+          expiresOn?: string;
+          /** Format: uuid */
+          fileId: string;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              description: string | null;
+              /** @enum {string} */
+              category:
+                | 'estate_rules'
+                | 'constitution'
+                | 'agm_minutes'
+                | 'notice'
+                | 'contract'
+                | 'insurance'
+                | 'property'
+                | 'resident'
+                | 'vendor'
+                | 'other';
+              folderId: string | null;
+              visibility:
+                | {
+                    /** @constant */
+                    audience: 'managers';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'residents';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'roles';
+                    roleKeys: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'spaces';
+                    spaceIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'households';
+                    householdIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'user';
+                    /** Format: uuid */
+                    userId: string;
+                  };
+              expiresOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              currentVersion: number;
+              versions: {
+                version: number;
+                /** Format: uuid */
+                fileId: string;
+                notes: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              description: string | null;
+              /** @enum {string} */
+              category:
+                | 'estate_rules'
+                | 'constitution'
+                | 'agm_minutes'
+                | 'notice'
+                | 'contract'
+                | 'insurance'
+                | 'property'
+                | 'resident'
+                | 'vendor'
+                | 'other';
+              folderId: string | null;
+              visibility:
+                | {
+                    /** @constant */
+                    audience: 'managers';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'residents';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'roles';
+                    roleKeys: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'spaces';
+                    spaceIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'households';
+                    householdIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'user';
+                    /** Format: uuid */
+                    userId: string;
+                  };
+              expiresOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              currentVersion: number;
+              versions: {
+                version: number;
+                /** Format: uuid */
+                fileId: string;
+                notes: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title?: string;
+          description?: string | null;
+          /** @enum {string} */
+          category?:
+            | 'estate_rules'
+            | 'constitution'
+            | 'agm_minutes'
+            | 'notice'
+            | 'contract'
+            | 'insurance'
+            | 'property'
+            | 'resident'
+            | 'vendor'
+            | 'other';
+          folderId?: string | null;
+          visibility?:
+            | {
+                /** @constant */
+                audience: 'managers';
+              }
+            | {
+                /** @constant */
+                audience: 'residents';
+              }
+            | {
+                /** @constant */
+                audience: 'roles';
+                roleKeys: string[];
+              }
+            | {
+                /** @constant */
+                audience: 'spaces';
+                spaceIds: string[];
+              }
+            | {
+                /** @constant */
+                audience: 'households';
+                householdIds: string[];
+              }
+            | {
+                /** @constant */
+                audience: 'user';
+                /** Format: uuid */
+                userId: string;
+              };
+          expiresOn?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              description: string | null;
+              /** @enum {string} */
+              category:
+                | 'estate_rules'
+                | 'constitution'
+                | 'agm_minutes'
+                | 'notice'
+                | 'contract'
+                | 'insurance'
+                | 'property'
+                | 'resident'
+                | 'vendor'
+                | 'other';
+              folderId: string | null;
+              visibility:
+                | {
+                    /** @constant */
+                    audience: 'managers';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'residents';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'roles';
+                    roleKeys: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'spaces';
+                    spaceIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'households';
+                    householdIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'user';
+                    /** Format: uuid */
+                    userId: string;
+                  };
+              expiresOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              currentVersion: number;
+              versions: {
+                version: number;
+                /** Format: uuid */
+                fileId: string;
+                notes: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_accessLog: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              /** @enum {string} */
+              action: 'view' | 'download';
+              version: number;
+              /** Format: date-time */
+              at: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_archive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              description: string | null;
+              /** @enum {string} */
+              category:
+                | 'estate_rules'
+                | 'constitution'
+                | 'agm_minutes'
+                | 'notice'
+                | 'contract'
+                | 'insurance'
+                | 'property'
+                | 'resident'
+                | 'vendor'
+                | 'other';
+              folderId: string | null;
+              visibility:
+                | {
+                    /** @constant */
+                    audience: 'managers';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'residents';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'roles';
+                    roleKeys: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'spaces';
+                    spaceIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'households';
+                    householdIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'user';
+                    /** Format: uuid */
+                    userId: string;
+                  };
+              expiresOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              currentVersion: number;
+              versions: {
+                version: number;
+                /** Format: uuid */
+                fileId: string;
+                notes: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_download: {
+    parameters: {
+      query?: {
+        version?: number;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              url: string;
+              /** Format: date-time */
+              expiresAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  documents_addVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          fileId: string;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              description: string | null;
+              /** @enum {string} */
+              category:
+                | 'estate_rules'
+                | 'constitution'
+                | 'agm_minutes'
+                | 'notice'
+                | 'contract'
+                | 'insurance'
+                | 'property'
+                | 'resident'
+                | 'vendor'
+                | 'other';
+              folderId: string | null;
+              visibility:
+                | {
+                    /** @constant */
+                    audience: 'managers';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'residents';
+                  }
+                | {
+                    /** @constant */
+                    audience: 'roles';
+                    roleKeys: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'spaces';
+                    spaceIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'households';
+                    householdIds: string[];
+                  }
+                | {
+                    /** @constant */
+                    audience: 'user';
+                    /** Format: uuid */
+                    userId: string;
+                  };
+              expiresOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'archived';
+              currentVersion: number;
+              versions: {
+                version: number;
+                /** Format: uuid */
+                fileId: string;
+                notes: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
   estateOccupancy_staff: {
     parameters: {
       query?: {
@@ -3470,6 +9605,882 @@ export interface operations {
               recipients: number;
               /** Format: date-time */
               sentAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  exports_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status: 'queued' | 'building' | 'ready' | 'failed' | 'expired';
+              sizeBytes: number | null;
+              datasets: {
+                [key: string]: number;
+              } | null;
+              expiresAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              readyAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  exports_request: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status: 'queued' | 'building' | 'ready' | 'failed' | 'expired';
+              sizeBytes: number | null;
+              datasets: {
+                [key: string]: number;
+              } | null;
+              expiresAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              readyAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  exports_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              url: string;
+              /** Format: date-time */
+              expiresAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'event_hall' | 'pool' | 'gym' | 'court' | 'guest_house' | 'parking' | 'other';
+              spaceId: string | null;
+              capacity: number | null;
+              description: string | null;
+              rules: string | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'closed';
+              openingHours: {
+                day: number;
+                open: string;
+                close: string;
+              }[];
+              policy: {
+                /**
+                 * @default residents_and_owners
+                 * @enum {string}
+                 */
+                whoCanBook: 'residents' | 'owners' | 'residents_and_owners';
+                /** @default 30 */
+                advanceDays: number;
+                /** @default 60 */
+                minMinutes: number;
+                /** @default 240 */
+                maxMinutes: number;
+                /** @default 0 */
+                perHouseholdPerWeek: number;
+                /** @default 0 */
+                perHouseholdPerMonth: number;
+                /** @default 0 */
+                bufferMinutes: number;
+                /** @default 0 */
+                maxGuests: number;
+                /** @default false */
+                requiresApproval: boolean;
+                /**
+                 * @default {
+                 *       "freeHours": 24,
+                 *       "partialHours": 2,
+                 *       "partialPercent": 50
+                 *     }
+                 */
+                cancellation: {
+                  /** @default 24 */
+                  freeHours: number;
+                  /** @default 2 */
+                  partialHours: number;
+                  /** @default 50 */
+                  partialPercent: number;
+                };
+              };
+              pricing:
+                | {
+                    /** @constant */
+                    basis: 'free';
+                  }
+                | {
+                    /** @constant */
+                    basis: 'flat';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'hourly';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'daily';
+                    amount: number;
+                  };
+              version: number;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** @enum {string} */
+          type: 'event_hall' | 'pool' | 'gym' | 'court' | 'guest_house' | 'parking' | 'other';
+          /** Format: uuid */
+          spaceId?: string;
+          capacity?: number;
+          description?: string;
+          rules?: string;
+          /** @default [] */
+          photoFileIds?: string[];
+          /**
+           * @default [
+           *       {
+           *         "day": 0,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       },
+           *       {
+           *         "day": 1,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       },
+           *       {
+           *         "day": 2,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       },
+           *       {
+           *         "day": 3,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       },
+           *       {
+           *         "day": 4,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       },
+           *       {
+           *         "day": 5,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       },
+           *       {
+           *         "day": 6,
+           *         "open": "06:00",
+           *         "close": "22:00"
+           *       }
+           *     ]
+           */
+          openingHours?: {
+            day: number;
+            open: string;
+            close: string;
+          }[];
+          /**
+           * @default {
+           *       "whoCanBook": "residents_and_owners",
+           *       "advanceDays": 30,
+           *       "minMinutes": 60,
+           *       "maxMinutes": 240,
+           *       "perHouseholdPerWeek": 0,
+           *       "perHouseholdPerMonth": 0,
+           *       "bufferMinutes": 0,
+           *       "maxGuests": 0,
+           *       "requiresApproval": false,
+           *       "cancellation": {
+           *         "freeHours": 24,
+           *         "partialHours": 2,
+           *         "partialPercent": 50
+           *       }
+           *     }
+           */
+          policy?: {
+            /**
+             * @default residents_and_owners
+             * @enum {string}
+             */
+            whoCanBook?: 'residents' | 'owners' | 'residents_and_owners';
+            /** @default 30 */
+            advanceDays?: number;
+            /** @default 60 */
+            minMinutes?: number;
+            /** @default 240 */
+            maxMinutes?: number;
+            /** @default 0 */
+            perHouseholdPerWeek?: number;
+            /** @default 0 */
+            perHouseholdPerMonth?: number;
+            /** @default 0 */
+            bufferMinutes?: number;
+            /** @default 0 */
+            maxGuests?: number;
+            /** @default false */
+            requiresApproval?: boolean;
+            /**
+             * @default {
+             *       "freeHours": 24,
+             *       "partialHours": 2,
+             *       "partialPercent": 50
+             *     }
+             */
+            cancellation?: {
+              /** @default 24 */
+              freeHours?: number;
+              /** @default 2 */
+              partialHours?: number;
+              /** @default 50 */
+              partialPercent?: number;
+            };
+          };
+          /**
+           * @default {
+           *       "basis": "free"
+           *     }
+           */
+          pricing?:
+            | {
+                /** @constant */
+                basis: 'free';
+              }
+            | {
+                /** @constant */
+                basis: 'flat';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                basis: 'hourly';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                basis: 'daily';
+                amount: number;
+              };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'event_hall' | 'pool' | 'gym' | 'court' | 'guest_house' | 'parking' | 'other';
+              spaceId: string | null;
+              capacity: number | null;
+              description: string | null;
+              rules: string | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'closed';
+              openingHours: {
+                day: number;
+                open: string;
+                close: string;
+              }[];
+              policy: {
+                /**
+                 * @default residents_and_owners
+                 * @enum {string}
+                 */
+                whoCanBook: 'residents' | 'owners' | 'residents_and_owners';
+                /** @default 30 */
+                advanceDays: number;
+                /** @default 60 */
+                minMinutes: number;
+                /** @default 240 */
+                maxMinutes: number;
+                /** @default 0 */
+                perHouseholdPerWeek: number;
+                /** @default 0 */
+                perHouseholdPerMonth: number;
+                /** @default 0 */
+                bufferMinutes: number;
+                /** @default 0 */
+                maxGuests: number;
+                /** @default false */
+                requiresApproval: boolean;
+                /**
+                 * @default {
+                 *       "freeHours": 24,
+                 *       "partialHours": 2,
+                 *       "partialPercent": 50
+                 *     }
+                 */
+                cancellation: {
+                  /** @default 24 */
+                  freeHours: number;
+                  /** @default 2 */
+                  partialHours: number;
+                  /** @default 50 */
+                  partialPercent: number;
+                };
+              };
+              pricing:
+                | {
+                    /** @constant */
+                    basis: 'free';
+                  }
+                | {
+                    /** @constant */
+                    basis: 'flat';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'hourly';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'daily';
+                    amount: number;
+                  };
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'event_hall' | 'pool' | 'gym' | 'court' | 'guest_house' | 'parking' | 'other';
+              spaceId: string | null;
+              capacity: number | null;
+              description: string | null;
+              rules: string | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'closed';
+              openingHours: {
+                day: number;
+                open: string;
+                close: string;
+              }[];
+              policy: {
+                /**
+                 * @default residents_and_owners
+                 * @enum {string}
+                 */
+                whoCanBook: 'residents' | 'owners' | 'residents_and_owners';
+                /** @default 30 */
+                advanceDays: number;
+                /** @default 60 */
+                minMinutes: number;
+                /** @default 240 */
+                maxMinutes: number;
+                /** @default 0 */
+                perHouseholdPerWeek: number;
+                /** @default 0 */
+                perHouseholdPerMonth: number;
+                /** @default 0 */
+                bufferMinutes: number;
+                /** @default 0 */
+                maxGuests: number;
+                /** @default false */
+                requiresApproval: boolean;
+                /**
+                 * @default {
+                 *       "freeHours": 24,
+                 *       "partialHours": 2,
+                 *       "partialPercent": 50
+                 *     }
+                 */
+                cancellation: {
+                  /** @default 24 */
+                  freeHours: number;
+                  /** @default 2 */
+                  partialHours: number;
+                  /** @default 50 */
+                  partialPercent: number;
+                };
+              };
+              pricing:
+                | {
+                    /** @constant */
+                    basis: 'free';
+                  }
+                | {
+                    /** @constant */
+                    basis: 'flat';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'hourly';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'daily';
+                    amount: number;
+                  };
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          capacity?: number | null;
+          description?: string | null;
+          rules?: string | null;
+          /** @enum {string} */
+          status?: 'active' | 'closed';
+          openingHours?: {
+            day: number;
+            open: string;
+            close: string;
+          }[];
+          policy?: {
+            /**
+             * @default residents_and_owners
+             * @enum {string}
+             */
+            whoCanBook?: 'residents' | 'owners' | 'residents_and_owners';
+            /** @default 30 */
+            advanceDays?: number;
+            /** @default 60 */
+            minMinutes?: number;
+            /** @default 240 */
+            maxMinutes?: number;
+            /** @default 0 */
+            perHouseholdPerWeek?: number;
+            /** @default 0 */
+            perHouseholdPerMonth?: number;
+            /** @default 0 */
+            bufferMinutes?: number;
+            /** @default 0 */
+            maxGuests?: number;
+            /** @default false */
+            requiresApproval?: boolean;
+            /**
+             * @default {
+             *       "freeHours": 24,
+             *       "partialHours": 2,
+             *       "partialPercent": 50
+             *     }
+             */
+            cancellation?: {
+              /** @default 24 */
+              freeHours?: number;
+              /** @default 2 */
+              partialHours?: number;
+              /** @default 50 */
+              partialPercent?: number;
+            };
+          };
+          pricing?:
+            | {
+                /** @constant */
+                basis: 'free';
+              }
+            | {
+                /** @constant */
+                basis: 'flat';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                basis: 'hourly';
+                amount: number;
+              }
+            | {
+                /** @constant */
+                basis: 'daily';
+                amount: number;
+              };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'event_hall' | 'pool' | 'gym' | 'court' | 'guest_house' | 'parking' | 'other';
+              spaceId: string | null;
+              capacity: number | null;
+              description: string | null;
+              rules: string | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'closed';
+              openingHours: {
+                day: number;
+                open: string;
+                close: string;
+              }[];
+              policy: {
+                /**
+                 * @default residents_and_owners
+                 * @enum {string}
+                 */
+                whoCanBook: 'residents' | 'owners' | 'residents_and_owners';
+                /** @default 30 */
+                advanceDays: number;
+                /** @default 60 */
+                minMinutes: number;
+                /** @default 240 */
+                maxMinutes: number;
+                /** @default 0 */
+                perHouseholdPerWeek: number;
+                /** @default 0 */
+                perHouseholdPerMonth: number;
+                /** @default 0 */
+                bufferMinutes: number;
+                /** @default 0 */
+                maxGuests: number;
+                /** @default false */
+                requiresApproval: boolean;
+                /**
+                 * @default {
+                 *       "freeHours": 24,
+                 *       "partialHours": 2,
+                 *       "partialPercent": 50
+                 *     }
+                 */
+                cancellation: {
+                  /** @default 24 */
+                  freeHours: number;
+                  /** @default 2 */
+                  partialHours: number;
+                  /** @default 50 */
+                  partialPercent: number;
+                };
+              };
+              pricing:
+                | {
+                    /** @constant */
+                    basis: 'free';
+                  }
+                | {
+                    /** @constant */
+                    basis: 'flat';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'hourly';
+                    amount: number;
+                  }
+                | {
+                    /** @constant */
+                    basis: 'daily';
+                    amount: number;
+                  };
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_availability: {
+    parameters: {
+      query: {
+        date: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: date */
+              date: string;
+              open: {
+                /** Format: date-time */
+                from: string;
+                /** Format: date-time */
+                to: string;
+              }[];
+              busy: {
+                /** Format: date-time */
+                from: string;
+                /** Format: date-time */
+                to: string;
+                /** @enum {string} */
+                kind: 'booking' | 'blackout';
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_blackout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          startsAt: string;
+          /** Format: date-time */
+          endsAt: string;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              reason: string;
+              affectedBookings: number;
             };
           };
         };
@@ -4657,6 +11668,507 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  billing_listInvoices: {
+    parameters: {
+      query?: {
+        status?: 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'waived' | 'cancelled';
+        spaceId?: string;
+        payerUserId?: string;
+        billingRunId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              /** Format: uuid */
+              payerUserId: string;
+              /** @enum {string} */
+              payerType: 'occupant' | 'owner';
+              billingRunId: string | null;
+              penaltyForInvoiceId: string | null;
+              description: string;
+              /** Format: date */
+              issueDate: string;
+              /** Format: date */
+              dueDate: string;
+              /** @constant */
+              currency: 'NGN';
+              subtotal: number;
+              total: number;
+              amountPaid: number;
+              amountCredited: number;
+              amountWaived: number;
+              balance: number;
+              /** @enum {string} */
+              status: 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'waived' | 'cancelled';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_createInvoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          spaceId: string;
+          description: string;
+          /** Format: date */
+          dueDate: string;
+          lines: {
+            description: string;
+            /** @default 1 */
+            quantity?: number;
+            unitAmount: number;
+            /** Format: uuid */
+            chargeId?: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              /** Format: uuid */
+              payerUserId: string;
+              /** @enum {string} */
+              payerType: 'occupant' | 'owner';
+              billingRunId: string | null;
+              penaltyForInvoiceId: string | null;
+              description: string;
+              /** Format: date */
+              issueDate: string;
+              /** Format: date */
+              dueDate: string;
+              /** @constant */
+              currency: 'NGN';
+              subtotal: number;
+              total: number;
+              amountPaid: number;
+              amountCredited: number;
+              amountWaived: number;
+              balance: number;
+              /** @enum {string} */
+              status: 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'waived' | 'cancelled';
+              /** Format: date-time */
+              createdAt: string;
+              lines: {
+                /** Format: uuid */
+                id: string;
+                chargeId: string | null;
+                description: string;
+                quantity: number;
+                unitAmount: number;
+                amount: number;
+              }[];
+              creditNotes: {
+                /** Format: uuid */
+                id: string;
+                amount: number;
+                reason: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              waivers: {
+                /** Format: uuid */
+                id: string;
+                amount: number;
+                reason: string;
+                /** @enum {string} */
+                status: 'pending' | 'approved' | 'rejected';
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              allocations: {
+                /** Format: uuid */
+                id: string;
+                amount: number;
+                sourceType: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_invoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              /** Format: uuid */
+              payerUserId: string;
+              /** @enum {string} */
+              payerType: 'occupant' | 'owner';
+              billingRunId: string | null;
+              penaltyForInvoiceId: string | null;
+              description: string;
+              /** Format: date */
+              issueDate: string;
+              /** Format: date */
+              dueDate: string;
+              /** @constant */
+              currency: 'NGN';
+              subtotal: number;
+              total: number;
+              amountPaid: number;
+              amountCredited: number;
+              amountWaived: number;
+              balance: number;
+              /** @enum {string} */
+              status: 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'waived' | 'cancelled';
+              /** Format: date-time */
+              createdAt: string;
+              lines: {
+                /** Format: uuid */
+                id: string;
+                chargeId: string | null;
+                description: string;
+                quantity: number;
+                unitAmount: number;
+                amount: number;
+              }[];
+              creditNotes: {
+                /** Format: uuid */
+                id: string;
+                amount: number;
+                reason: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              waivers: {
+                /** Format: uuid */
+                id: string;
+                amount: number;
+                reason: string;
+                /** @enum {string} */
+                status: 'pending' | 'approved' | 'rejected';
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              allocations: {
+                /** Format: uuid */
+                id: string;
+                amount: number;
+                sourceType: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_creditNote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          amount: number;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              invoiceId: string;
+              amount: number;
+              reason: string;
+              /** Format: uuid */
+              createdBy: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_requestWaiver: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          amount: number;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              invoiceId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              decidedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_approveWaiver: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+        waiverId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              invoiceId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              decidedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_rejectWaiver: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+        waiverId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              invoiceId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              decidedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   estateOccupancy_queue: {
     parameters: {
       query?: {
@@ -4877,6 +12389,3172 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  billing_ledgerEntries: {
+    parameters: {
+      query?: {
+        account?: string;
+        from?: string;
+        to?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              journalId: string;
+              journalType: string;
+              description: string;
+              accountCode: string;
+              accountName: string;
+              /** @enum {string} */
+              accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+              debit: number;
+              credit: number;
+              /** Format: date-time */
+              occurredAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  billing_balances: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              code: string;
+              name: string;
+              /** @enum {string} */
+              type: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+              debit: number;
+              credit: number;
+              balance: number;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_categories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** @enum {string} */
+              defaultPriority: 'low' | 'normal' | 'high' | 'urgent';
+              active: boolean;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_createCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /**
+           * @default maintenance
+           * @enum {string}
+           */
+          kind?: 'maintenance' | 'complaint';
+          /**
+           * @default normal
+           * @enum {string}
+           */
+          defaultPriority?: 'low' | 'normal' | 'high' | 'urgent';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** @enum {string} */
+              defaultPriority: 'low' | 'normal' | 'high' | 'urgent';
+              active: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_updateCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          /** @enum {string} */
+          defaultPriority?: 'low' | 'normal' | 'high' | 'urgent';
+          active?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** @enum {string} */
+              defaultPriority: 'low' | 'normal' | 'high' | 'urgent';
+              active: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_list: {
+    parameters: {
+      query?: {
+        status?:
+          | 'submitted'
+          | 'under_review'
+          | 'info_requested'
+          | 'approved'
+          | 'assigned'
+          | 'in_progress'
+          | 'awaiting_materials'
+          | 'resolved'
+          | 'closed'
+          | 'rejected'
+          | 'cancelled';
+        kind?: 'maintenance' | 'complaint';
+        mine?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @default maintenance
+           * @enum {string}
+           */
+          kind?: 'maintenance' | 'complaint';
+          /** Format: uuid */
+          categoryId: string;
+          /** @enum {string} */
+          priority?: 'low' | 'normal' | 'high' | 'urgent';
+          /** Format: uuid */
+          spaceId?: string;
+          title: string;
+          description: string;
+          preferredTimes?: string;
+          /** @default false */
+          aboutNeighbour?: boolean;
+          /** @default [] */
+          attachmentFileIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_awaitMaterials: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_close: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_comment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+          /** @default false */
+          internal?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_rate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          rating: number;
+          feedback?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_reopen: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_requestInfo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_resolve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_respond: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_resume: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_review: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_start: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** @enum {string} */
+              kind: 'maintenance' | 'complaint';
+              /** Format: uuid */
+              categoryId: string;
+              categoryName: string;
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              spaceId: string | null;
+              unitCode: string | null;
+              title: string;
+              description: string;
+              preferredTimes: string | null;
+              aboutNeighbour: boolean;
+              /** Format: uuid */
+              requestedBy: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'assigned'
+                | 'in_progress'
+                | 'awaiting_materials'
+                | 'resolved'
+                | 'closed'
+                | 'rejected'
+                | 'cancelled';
+              slaDueAt: string | null;
+              slaBreached: boolean;
+              rejectionReason: string | null;
+              rating: number | null;
+              feedback: string | null;
+              attachmentFileIds: string[];
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              comments: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              workOrderIds: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_manualPayments: {
+    parameters: {
+      query?: {
+        status?: 'pending' | 'approved' | 'rejected';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              payerUserId: string;
+              spaceId: string | null;
+              amount: number;
+              /** @enum {string} */
+              method: 'cash' | 'cheque' | 'bank_deposit' | 'pos';
+              /** Format: date */
+              receivedOn: string;
+              reference: string | null;
+              evidenceFileId: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              recordedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_recordManual: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          payerUserId: string;
+          /** Format: uuid */
+          spaceId?: string;
+          amount: number;
+          /** @enum {string} */
+          method: 'cash' | 'cheque' | 'bank_deposit' | 'pos';
+          /** Format: date */
+          receivedOn: string;
+          reference?: string;
+          /** Format: uuid */
+          evidenceFileId?: string;
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              payerUserId: string;
+              spaceId: string | null;
+              amount: number;
+              /** @enum {string} */
+              method: 'cash' | 'cheque' | 'bank_deposit' | 'pos';
+              /** Format: date */
+              receivedOn: string;
+              reference: string | null;
+              evidenceFileId: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              recordedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_approveManual: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              payerUserId: string;
+              spaceId: string | null;
+              amount: number;
+              /** @enum {string} */
+              method: 'cash' | 'cheque' | 'bank_deposit' | 'pos';
+              /** Format: date */
+              receivedOn: string;
+              reference: string | null;
+              evidenceFileId: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              recordedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_rejectManual: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              payerUserId: string;
+              spaceId: string | null;
+              amount: number;
+              /** @enum {string} */
+              method: 'cash' | 'cheque' | 'bank_deposit' | 'pos';
+              /** Format: date */
+              receivedOn: string;
+              reference: string | null;
+              evidenceFileId: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              recordedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_edit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              channelId: string;
+              /** Format: uuid */
+              authorId: string;
+              authorName: string | null;
+              body: string | null;
+              replyToId: string | null;
+              attachmentFileIds: string[];
+              mentionUserIds: string[];
+              reactions: {
+                emoji: string;
+                count: number;
+                mine: boolean;
+              }[];
+              /** @enum {string} */
+              state: 'visible' | 'deleted' | 'removed';
+              editedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_react: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          emoji: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              channelId: string;
+              /** Format: uuid */
+              authorId: string;
+              authorName: string | null;
+              body: string | null;
+              replyToId: string | null;
+              attachmentFileIds: string[];
+              mentionUserIds: string[];
+              reactions: {
+                emoji: string;
+                count: number;
+                mine: boolean;
+              }[];
+              /** @enum {string} */
+              state: 'visible' | 'deleted' | 'removed';
+              editedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  channels_unreact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          emoji: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              channelId: string;
+              /** Format: uuid */
+              authorId: string;
+              authorName: string | null;
+              body: string | null;
+              replyToId: string | null;
+              attachmentFileIds: string[];
+              mentionUserIds: string[];
+              reactions: {
+                emoji: string;
+                count: number;
+                mine: boolean;
+              }[];
+              /** @enum {string} */
+              state: 'visible' | 'deleted' | 'removed';
+              editedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_readings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          readings: {
+            /** Format: uuid */
+            meterId: string;
+            reading: number;
+            /** Format: date-time */
+            readAt: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              recorded: number;
+              rejected: {
+                /** Format: uuid */
+                meterId: string;
+                reason: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_meters: {
+    parameters: {
+      query?: {
+        spaceId?: string;
+        type?: 'electricity' | 'water' | 'gas';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'electricity' | 'water' | 'gas';
+              /** @enum {string} */
+              supply: 'public' | 'estate';
+              providerCode: string;
+              meterNumber: string;
+              accountName: string | null;
+              prepaid: boolean;
+              /** @enum {string} */
+              status: 'active' | 'removed';
+              verifiedAt: string | null;
+              lastReading: number | null;
+              lastReadAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_createMeter: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          providerCode: string;
+          meterNumber: string;
+          /** Format: uuid */
+          spaceId: string;
+          /** @enum {string} */
+          type: 'electricity' | 'water' | 'gas';
+          /**
+           * @default public
+           * @enum {string}
+           */
+          supply?: 'public' | 'estate';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'electricity' | 'water' | 'gas';
+              /** @enum {string} */
+              supply: 'public' | 'estate';
+              providerCode: string;
+              meterNumber: string;
+              accountName: string | null;
+              prepaid: boolean;
+              /** @enum {string} */
+              status: 'active' | 'removed';
+              verifiedAt: string | null;
+              lastReading: number | null;
+              lastReadAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  utilities_removeMeter: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_lookup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          providerCode: string;
+          meterNumber: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              providerCode: string;
+              meterNumber: string;
+              accountName: string;
+              prepaid: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  moderation_actions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              action:
+                | 'remove_message'
+                | 'warn'
+                | 'mute'
+                | 'remove_from_channel'
+                | 'suspend_channel'
+                | 'ban'
+                | 'dismiss_report';
+              /** @enum {string} */
+              targetType: 'message' | 'channel' | 'user';
+              /** Format: uuid */
+              targetId: string;
+              reason: string;
+              endsAt: string | null;
+              /** Format: uuid */
+              moderatorId: string;
+              /** @enum {string} */
+              appealStatus: 'none' | 'pending' | 'upheld' | 'overturned';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moderation_act: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          action:
+            | 'remove_message'
+            | 'warn'
+            | 'mute'
+            | 'remove_from_channel'
+            | 'suspend_channel'
+            | 'ban'
+            | 'dismiss_report';
+          /** @enum {string} */
+          targetType: 'message' | 'channel' | 'user';
+          /** Format: uuid */
+          targetId: string;
+          /** Format: uuid */
+          channelId?: string;
+          reason: string;
+          durationHours?: number;
+          /** Format: uuid */
+          reportId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              action:
+                | 'remove_message'
+                | 'warn'
+                | 'mute'
+                | 'remove_from_channel'
+                | 'suspend_channel'
+                | 'ban'
+                | 'dismiss_report';
+              /** @enum {string} */
+              targetType: 'message' | 'channel' | 'user';
+              /** Format: uuid */
+              targetId: string;
+              reason: string;
+              endsAt: string | null;
+              /** Format: uuid */
+              moderatorId: string;
+              /** @enum {string} */
+              appealStatus: 'none' | 'pending' | 'upheld' | 'overturned';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moderation_appeal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          statement: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              action:
+                | 'remove_message'
+                | 'warn'
+                | 'mute'
+                | 'remove_from_channel'
+                | 'suspend_channel'
+                | 'ban'
+                | 'dismiss_report';
+              /** @enum {string} */
+              targetType: 'message' | 'channel' | 'user';
+              /** Format: uuid */
+              targetId: string;
+              reason: string;
+              endsAt: string | null;
+              /** Format: uuid */
+              moderatorId: string;
+              /** @enum {string} */
+              appealStatus: 'none' | 'pending' | 'upheld' | 'overturned';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moderation_decide: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          decision: 'upheld' | 'overturned';
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              action:
+                | 'remove_message'
+                | 'warn'
+                | 'mute'
+                | 'remove_from_channel'
+                | 'suspend_channel'
+                | 'ban'
+                | 'dismiss_report';
+              /** @enum {string} */
+              targetType: 'message' | 'channel' | 'user';
+              /** Format: uuid */
+              targetId: string;
+              reason: string;
+              endsAt: string | null;
+              /** Format: uuid */
+              moderatorId: string;
+              /** @enum {string} */
+              appealStatus: 'none' | 'pending' | 'upheld' | 'overturned';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moderation_queue: {
+    parameters: {
+      query?: {
+        status?: 'open' | 'actioned' | 'dismissed';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              targetType: 'message' | 'channel' | 'user';
+              /** Format: uuid */
+              targetId: string;
+              reason: string;
+              details: string | null;
+              /** @enum {string} */
+              status: 'open' | 'actioned' | 'dismissed';
+              /** Format: uuid */
+              reportedBy: string;
+              preview: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moves_list: {
+    parameters: {
+      query?: {
+        on?: string;
+        status?: 'scheduled' | 'completed' | 'cancelled';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'move_in' | 'move_out';
+              /** Format: uuid */
+              occupancyId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** Format: date */
+              scheduledOn: string;
+              gateNotice: {
+                items?: string;
+                /** @default [] */
+                vehicles: string[];
+                notes?: string;
+              };
+              checklist: {
+                item: string;
+                done: boolean;
+              }[];
+              /** @enum {string} */
+              status: 'scheduled' | 'completed' | 'cancelled';
+              outstandingBalance: number;
+              /** Format: date-time */
+              createdAt: string;
+              completedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moves_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type: 'move_in' | 'move_out';
+          /** Format: uuid */
+          occupancyId: string;
+          /** Format: date */
+          scheduledOn: string;
+          /**
+           * @default {
+           *       "vehicles": []
+           *     }
+           */
+          gateNotice?: {
+            items?: string;
+            /** @default [] */
+            vehicles?: string[];
+            notes?: string;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'move_in' | 'move_out';
+              /** Format: uuid */
+              occupancyId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** Format: date */
+              scheduledOn: string;
+              gateNotice: {
+                items?: string;
+                /** @default [] */
+                vehicles: string[];
+                notes?: string;
+              };
+              checklist: {
+                item: string;
+                done: boolean;
+              }[];
+              /** @enum {string} */
+              status: 'scheduled' | 'completed' | 'cancelled';
+              outstandingBalance: number;
+              /** Format: date-time */
+              createdAt: string;
+              completedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moves_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'move_in' | 'move_out';
+              /** Format: uuid */
+              occupancyId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** Format: date */
+              scheduledOn: string;
+              gateNotice: {
+                items?: string;
+                /** @default [] */
+                vehicles: string[];
+                notes?: string;
+              };
+              checklist: {
+                item: string;
+                done: boolean;
+              }[];
+              /** @enum {string} */
+              status: 'scheduled' | 'completed' | 'cancelled';
+              outstandingBalance: number;
+              /** Format: date-time */
+              createdAt: string;
+              completedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moves_checklist: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          items: {
+            item: string;
+            done: boolean;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'move_in' | 'move_out';
+              /** Format: uuid */
+              occupancyId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** Format: date */
+              scheduledOn: string;
+              gateNotice: {
+                items?: string;
+                /** @default [] */
+                vehicles: string[];
+                notes?: string;
+              };
+              checklist: {
+                item: string;
+                done: boolean;
+              }[];
+              /** @enum {string} */
+              status: 'scheduled' | 'completed' | 'cancelled';
+              outstandingBalance: number;
+              /** Format: date-time */
+              createdAt: string;
+              completedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moves_complete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'move_in' | 'move_out';
+              /** Format: uuid */
+              occupancyId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** Format: date */
+              scheduledOn: string;
+              gateNotice: {
+                items?: string;
+                /** @default [] */
+                vehicles: string[];
+                notes?: string;
+              };
+              checklist: {
+                item: string;
+                done: boolean;
+              }[];
+              /** @enum {string} */
+              status: 'scheduled' | 'completed' | 'cancelled';
+              outstandingBalance: number;
+              /** Format: date-time */
+              createdAt: string;
+              completedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
   estateOccupancy_createOccupancy: {
     parameters: {
       query?: never;
@@ -5009,6 +15687,1610 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateOccupancy_renew: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: date */
+          endsOn: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: date */
+              endsOn: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateOccupancy_ownedUnits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              ownershipId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              unitName: string;
+              shareBasisPoints: number;
+              unitStatus: string | null;
+              household: {
+                name: string;
+                occupancyType: string;
+              } | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_transfers: {
+    parameters: {
+      query?: {
+        status?: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'sale' | 'gift' | 'inheritance' | 'correction';
+              /** Format: date */
+              effectiveOn: string;
+              fromOwnershipIds: string[];
+              toOwners: {
+                name: string;
+                companyName: string | null;
+                shareBasisPoints: number;
+              }[];
+              /** @enum {string} */
+              status: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+              /** Format: uuid */
+              requestedBy: string;
+              sellerConfirmedBy: string | null;
+              managerOverride: boolean;
+              decidedBy: string | null;
+              reason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_requestTransfer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          spaceId: string;
+          /** @enum {string} */
+          type: 'sale' | 'gift' | 'inheritance' | 'correction';
+          /** Format: date */
+          effectiveOn: string;
+          toOwners: {
+            owner:
+              | {
+                  /** @constant */
+                  type: 'person';
+                  fullName: string;
+                  phone: string;
+                }
+              | {
+                  /** @constant */
+                  type: 'company';
+                  companyName: string;
+                  contactName: string;
+                  contactPhone: string;
+                };
+            shareBasisPoints: number;
+          }[];
+          /** @default [] */
+          documentFileIds?: string[];
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'sale' | 'gift' | 'inheritance' | 'correction';
+              /** Format: date */
+              effectiveOn: string;
+              fromOwnershipIds: string[];
+              toOwners: {
+                name: string;
+                companyName: string | null;
+                shareBasisPoints: number;
+              }[];
+              /** @enum {string} */
+              status: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+              /** Format: uuid */
+              requestedBy: string;
+              sellerConfirmedBy: string | null;
+              managerOverride: boolean;
+              decidedBy: string | null;
+              reason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          override?: {
+            reason: string;
+            documentFileIds: string[];
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'sale' | 'gift' | 'inheritance' | 'correction';
+              /** Format: date */
+              effectiveOn: string;
+              fromOwnershipIds: string[];
+              toOwners: {
+                name: string;
+                companyName: string | null;
+                shareBasisPoints: number;
+              }[];
+              /** @enum {string} */
+              status: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+              /** Format: uuid */
+              requestedBy: string;
+              sellerConfirmedBy: string | null;
+              managerOverride: boolean;
+              decidedBy: string | null;
+              reason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'sale' | 'gift' | 'inheritance' | 'correction';
+              /** Format: date */
+              effectiveOn: string;
+              fromOwnershipIds: string[];
+              toOwners: {
+                name: string;
+                companyName: string | null;
+                shareBasisPoints: number;
+              }[];
+              /** @enum {string} */
+              status: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+              /** Format: uuid */
+              requestedBy: string;
+              sellerConfirmedBy: string | null;
+              managerOverride: boolean;
+              decidedBy: string | null;
+              reason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_confirm: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'sale' | 'gift' | 'inheritance' | 'correction';
+              /** Format: date */
+              effectiveOn: string;
+              fromOwnershipIds: string[];
+              toOwners: {
+                name: string;
+                companyName: string | null;
+                shareBasisPoints: number;
+              }[];
+              /** @enum {string} */
+              status: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+              /** Format: uuid */
+              requestedBy: string;
+              sellerConfirmedBy: string | null;
+              managerOverride: boolean;
+              decidedBy: string | null;
+              reason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              type: 'sale' | 'gift' | 'inheritance' | 'correction';
+              /** Format: date */
+              effectiveOn: string;
+              fromOwnershipIds: string[];
+              toOwners: {
+                name: string;
+                companyName: string | null;
+                shareBasisPoints: number;
+              }[];
+              /** @enum {string} */
+              status: 'requested' | 'seller_confirmed' | 'completed' | 'rejected' | 'cancelled';
+              /** Format: uuid */
+              requestedBy: string;
+              sellerConfirmedBy: string | null;
+              managerOverride: boolean;
+              decidedBy: string | null;
+              reason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: date */
+          endsOn?: string;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              ownerType: 'person' | 'company';
+              /** Format: uuid */
+              ownerUserId: string;
+              ownerName: string;
+              companyName: string | null;
+              shareBasisPoints: number;
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'ended';
+              verifiedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_createIntent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          invoiceIds?: string[];
+          /** Format: uri */
+          callbackUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @constant */
+              purpose: 'invoice';
+              invoiceIds: string[];
+              amount: number;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              reference: string;
+              /** @enum {string} */
+              status: 'created' | 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  payments_intent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @constant */
+              purpose: 'invoice';
+              invoiceIds: string[];
+              amount: number;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              reference: string;
+              /** @enum {string} */
+              status: 'created' | 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @constant */
+              purpose: 'invoice';
+              invoiceIds: string[];
+              amount: number;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              reference: string;
+              /** @enum {string} */
+              status: 'created' | 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  payments_payoutAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              bankName: string;
+              accountName: string;
+              accountLast4: string;
+              /** @enum {string} */
+              status: 'active' | 'disabled';
+              /** Format: date-time */
+              verifiedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_setupPayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          bankCode: string;
+          accountNumber: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              bankName: string;
+              accountName: string;
+              accountLast4: string;
+              /** @enum {string} */
+              status: 'active' | 'disabled';
+              /** Format: date-time */
+              verifiedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  polls_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              question: string;
+              options: {
+                /** Format: uuid */
+                id: string;
+                label: string;
+                votes: number | null;
+              }[];
+              /** Format: date-time */
+              closesAt: string;
+              anonymous: boolean;
+              /** @enum {string} */
+              votePer: 'user' | 'household';
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              totalVotes: number | null;
+              myVoteOptionId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  polls_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          question: string;
+          options: string[];
+          /** Format: date-time */
+          closesAt: string;
+          /** @default false */
+          anonymous?: boolean;
+          /**
+           * @default user
+           * @enum {string}
+           */
+          votePer?: 'user' | 'household';
+          audience:
+            | {
+                /** @constant */
+                type: 'estate';
+              }
+            | {
+                /** @constant */
+                type: 'spaces';
+                spaceIds: string[];
+              };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              question: string;
+              options: {
+                /** Format: uuid */
+                id: string;
+                label: string;
+                votes: number | null;
+              }[];
+              /** Format: date-time */
+              closesAt: string;
+              anonymous: boolean;
+              /** @enum {string} */
+              votePer: 'user' | 'household';
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              totalVotes: number | null;
+              myVoteOptionId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  polls_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              question: string;
+              options: {
+                /** Format: uuid */
+                id: string;
+                label: string;
+                votes: number | null;
+              }[];
+              /** Format: date-time */
+              closesAt: string;
+              anonymous: boolean;
+              /** @enum {string} */
+              votePer: 'user' | 'household';
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              totalVotes: number | null;
+              myVoteOptionId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  polls_voters: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              /** Format: uuid */
+              optionId: string;
+              /** Format: date-time */
+              votedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  polls_vote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          optionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              question: string;
+              options: {
+                /** Format: uuid */
+                id: string;
+                label: string;
+                votes: number | null;
+              }[];
+              /** Format: date-time */
+              closesAt: string;
+              anonymous: boolean;
+              /** @enum {string} */
+              votePer: 'user' | 'household';
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              totalVotes: number | null;
+              myVoteOptionId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_recurring: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              /** @enum {string} */
+              frequency: 'weekly' | 'monthly' | 'quarterly' | 'annually';
+              /** Format: date */
+              nextRunOn: string;
+              active: boolean;
+              lastWorkOrderId: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_createRecurring: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title: string;
+          scope?: string;
+          /** Format: uuid */
+          spaceId?: string;
+          /** @enum {string} */
+          frequency: 'weekly' | 'monthly' | 'quarterly' | 'annually';
+          /** Format: date */
+          startsOn: string;
+          assignee?:
+            | {
+                /** @constant */
+                type: 'staff';
+                /** Format: uuid */
+                userId: string;
+              }
+            | {
+                /** @constant */
+                type: 'vendor';
+                name: string;
+                phone: string;
+                company?: string;
+              };
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              /** @enum {string} */
+              frequency: 'weekly' | 'monthly' | 'quarterly' | 'annually';
+              /** Format: date */
+              nextRunOn: string;
+              active: boolean;
+              lastWorkOrderId: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_refunds: {
+    parameters: {
+      query?: {
+        status?: 'pending' | 'approved' | 'processing' | 'completed' | 'failed' | 'rejected';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              transactionId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'processing' | 'completed' | 'failed' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              providerRef: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_requestRefund: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          transactionId: string;
+          amount: number;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              transactionId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'processing' | 'completed' | 'failed' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              providerRef: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_approveRefund: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              transactionId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'processing' | 'completed' | 'failed' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              providerRef: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_rejectRefund: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              transactionId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'processing' | 'completed' | 'failed' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              providerRef: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  moderation_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          targetType: 'message' | 'channel' | 'user';
+          /** Format: uuid */
+          targetId: string;
+          /** @enum {string} */
+          reason: 'spam' | 'harassment' | 'hate' | 'violence' | 'scam' | 'privacy' | 'other';
+          details?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              targetType: 'message' | 'channel' | 'user';
+              /** Format: uuid */
+              targetId: string;
+              reason: string;
+              details: string | null;
+              /** @enum {string} */
+              status: 'open' | 'actioned' | 'dismissed';
+              /** Format: uuid */
+              reportedBy: string;
+              preview: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  facilities_report: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              facilities: {
+                /** Format: uuid */
+                facilityId: string;
+                name: string;
+                bookings: number;
+                bookedHours: number;
+                cancelled: number;
+                noShows: number;
+                revenue: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_report: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: date */
+              from: string;
+              /** Format: date */
+              to: string;
+              submitted: number;
+              resolved: number;
+              open: number;
+              averageResolutionHours: number | null;
+              slaCompliancePercent: number | null;
+              averageRating: number | null;
+              byCategory: {
+                category: string;
+                count: number;
+              }[];
+              byStatus: {
+                /** @enum {string} */
+                status:
+                  | 'submitted'
+                  | 'under_review'
+                  | 'info_requested'
+                  | 'approved'
+                  | 'assigned'
+                  | 'in_progress'
+                  | 'awaiting_materials'
+                  | 'resolved'
+                  | 'closed'
+                  | 'rejected'
+                  | 'cancelled';
+                count: number;
+              }[];
+              costs: {
+                labour: number;
+                materials: number;
+                recharged: number;
+              };
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -5245,10 +17527,37 @@ export interface operations {
               'community.private_messaging': boolean;
               /** @default true */
               'community.channel_approval': boolean;
+              /** @default Be respectful. No harassment, hate, scams or sharing other residents’ personal details. Report problems to moderators. */
+              'community.guidelines': string;
+              /** @default false */
+              'community.owners_in_building_channels': boolean;
               /** @default [] */
               'ads.blocked_categories': string[];
               /** @default false */
               'guards.can_see_resident_phone': boolean;
+              /** @default true */
+              'billing.two_level_approval': boolean;
+              /** @default 0 */
+              'billing.approval_threshold_kobo': number;
+              /** @default 0 */
+              'billing.waiver_threshold_kobo': number;
+              /** @default 0 */
+              'facilities.block_with_arrears_kobo': number;
+              /** @default false */
+              'occupancy.block_move_out_with_balance': boolean;
+              /** @default false */
+              'billing.bill_owner_when_vacant': boolean;
+              /** @default 7 */
+              'billing.penalty_grace_days': number;
+              /**
+               * @default [
+               *       -3,
+               *       0,
+               *       7,
+               *       30
+               *     ]
+               */
+              'billing.reminder_offsets_days': number[];
             };
           };
         };
@@ -5286,8 +17595,18 @@ export interface operations {
           }[];
           'community.private_messaging'?: boolean;
           'community.channel_approval'?: boolean;
+          'community.guidelines'?: string;
+          'community.owners_in_building_channels'?: boolean;
           'ads.blocked_categories'?: string[];
           'guards.can_see_resident_phone'?: boolean;
+          'billing.two_level_approval'?: boolean;
+          'billing.approval_threshold_kobo'?: number;
+          'billing.waiver_threshold_kobo'?: number;
+          'facilities.block_with_arrears_kobo'?: number;
+          'occupancy.block_move_out_with_balance'?: boolean;
+          'billing.bill_owner_when_vacant'?: boolean;
+          'billing.penalty_grace_days'?: number;
+          'billing.reminder_offsets_days'?: number[];
         };
       };
     };
@@ -5342,10 +17661,37 @@ export interface operations {
               'community.private_messaging': boolean;
               /** @default true */
               'community.channel_approval': boolean;
+              /** @default Be respectful. No harassment, hate, scams or sharing other residents’ personal details. Report problems to moderators. */
+              'community.guidelines': string;
+              /** @default false */
+              'community.owners_in_building_channels': boolean;
               /** @default [] */
               'ads.blocked_categories': string[];
               /** @default false */
               'guards.can_see_resident_phone': boolean;
+              /** @default true */
+              'billing.two_level_approval': boolean;
+              /** @default 0 */
+              'billing.approval_threshold_kobo': number;
+              /** @default 0 */
+              'billing.waiver_threshold_kobo': number;
+              /** @default 0 */
+              'facilities.block_with_arrears_kobo': number;
+              /** @default false */
+              'occupancy.block_move_out_with_balance': boolean;
+              /** @default false */
+              'billing.bill_owner_when_vacant': boolean;
+              /** @default 7 */
+              'billing.penalty_grace_days': number;
+              /**
+               * @default [
+               *       -3,
+               *       0,
+               *       7,
+               *       30
+               *     ]
+               */
+              'billing.reminder_offsets_days': number[];
             };
           };
         };
@@ -5505,6 +17851,89 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_slaPolicies: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              responseMinutes: number;
+              resolutionHours: number;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_putSlaPolicies: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          policies: {
+            /** @enum {string} */
+            priority: 'low' | 'normal' | 'high' | 'urgent';
+            responseMinutes: number;
+            resolutionHours: number;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              priority: 'low' | 'normal' | 'high' | 'urgent';
+              responseMinutes: number;
+              resolutionHours: number;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -6861,6 +19290,116 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  billing_statement: {
+    parameters: {
+      query?: {
+        spaceId?: string;
+        payerUserId?: string;
+        from?: string;
+        to?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              spaceId: string | null;
+              payerUserId: string | null;
+              from: string | null;
+              to: string | null;
+              /** @constant */
+              currency: 'NGN';
+              openingBalance: number;
+              closingBalance: number;
+              unallocatedCredit: number;
+              lines: {
+                /** Format: date-time */
+                date: string;
+                /** @enum {string} */
+                type: 'invoice' | 'payment' | 'credit_note' | 'waiver' | 'adjustment';
+                description: string;
+                reference: string | null;
+                debit: number;
+                credit: number;
+                balance: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_transactions: {
+    parameters: {
+      query?: {
+        payerUserId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              intentId: string | null;
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              channel: string;
+              amount: number;
+              fees: number;
+              /** @enum {string} */
+              status: 'succeeded' | 'refunded' | 'partially_refunded';
+              /** Format: uuid */
+              payerUserId: string;
+              reference: string;
+              /** Format: date-time */
+              paidAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   property_units: {
     parameters: {
       query?: {
@@ -6914,6 +19453,339 @@ export interface operations {
               version: number;
             }[];
             meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              ownerType: 'person' | 'company';
+              /** Format: uuid */
+              ownerUserId: string;
+              ownerName: string;
+              companyName: string | null;
+              shareBasisPoints: number;
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'ended';
+              verifiedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  ownerships_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          owner:
+            | {
+                /** @constant */
+                type: 'person';
+                fullName: string;
+                phone: string;
+              }
+            | {
+                /** @constant */
+                type: 'company';
+                companyName: string;
+                contactName: string;
+                contactPhone: string;
+              };
+          /** @default 10000 */
+          shareBasisPoints?: number;
+          /** Format: date */
+          startsOn?: string;
+          /** @default [] */
+          evidenceFileIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              ownerType: 'person' | 'company';
+              /** Format: uuid */
+              ownerUserId: string;
+              ownerName: string;
+              companyName: string | null;
+              shareBasisPoints: number;
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'ended';
+              verifiedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_outages: {
+    parameters: {
+      query?: {
+        status?: 'announced' | 'resolved' | 'cancelled';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              type: string;
+              title: string;
+              details: string | null;
+              /** Format: date-time */
+              startsAt: string;
+              expectedEndAt: string | null;
+              spaceIds: string[];
+              /** @enum {string} */
+              status: 'announced' | 'resolved' | 'cancelled';
+              notified: number;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_announce: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          type: ('electricity' | 'water' | 'gas') | ('internet' | 'waste');
+          title: string;
+          details?: string;
+          /** Format: date-time */
+          startsAt: string;
+          /** Format: date-time */
+          expectedEndAt?: string;
+          /** @default [] */
+          spaceIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              type: string;
+              title: string;
+              details: string | null;
+              /** Format: date-time */
+              startsAt: string;
+              expectedEndAt: string | null;
+              spaceIds: string[];
+              /** @enum {string} */
+              status: 'announced' | 'resolved' | 'cancelled';
+              notified: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_updateOutage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status?: 'resolved' | 'cancelled';
+          /** Format: date-time */
+          expectedEndAt?: string;
+          details?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              type: string;
+              title: string;
+              details: string | null;
+              /** Format: date-time */
+              startsAt: string;
+              expectedEndAt: string | null;
+              spaceIds: string[];
+              /** @enum {string} */
+              status: 'announced' | 'resolved' | 'cancelled';
+              notified: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  utilities_providers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              code: string;
+              name: string;
+              /** @enum {string} */
+              type: 'electricity' | 'water' | 'gas';
+              /** @enum {string} */
+              supply: 'public' | 'estate';
+            }[];
           };
         };
       };
@@ -7100,6 +19972,105 @@ export interface operations {
               unitCode: string;
               householdName: string;
             } | null;
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  payments_createVirtualAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          spaceId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              accountNumber: string;
+              bankName: string;
+              accountName: string;
+              /** @enum {string} */
+              status: 'active' | 'inactive';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  payments_myVirtualAccounts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              /** @enum {string} */
+              provider: 'paystack' | 'flutterwave' | 'fake';
+              accountNumber: string;
+              bankName: string;
+              accountName: string;
+              /** @enum {string} */
+              status: 'active' | 'inactive';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
           };
         };
       };
@@ -7434,6 +20405,55 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  billing_waivers: {
+    parameters: {
+      query?: {
+        status?: 'pending' | 'approved' | 'rejected';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              invoiceId: string;
+              amount: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              decidedBy: string | null;
+              decisionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              decidedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   visitor_createWalkin: {
     parameters: {
       query?: never;
@@ -7646,6 +20666,527 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_workOrders: {
+    parameters: {
+      query?: {
+        assignee?: 'me';
+        status?:
+          | 'open'
+          | 'scheduled'
+          | 'in_progress'
+          | 'on_hold'
+          | 'completed'
+          | 'verified'
+          | 'closed'
+          | 'cancelled';
+        requestId?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              requestId: string | null;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              assigneeType: ('staff' | 'vendor') | null;
+              assigneeUserId: string | null;
+              vendorName: string | null;
+              scheduledStart: string | null;
+              scheduledEnd: string | null;
+              /** @enum {string} */
+              status:
+                | 'open'
+                | 'scheduled'
+                | 'in_progress'
+                | 'on_hold'
+                | 'completed'
+                | 'verified'
+                | 'closed'
+                | 'cancelled';
+              visitorPassId: string | null;
+              labourCost: number;
+              materialsCost: number;
+              rechargeToResident: boolean;
+              invoiceId: string | null;
+              resolutionNotes: string | null;
+              materials: {
+                /** Format: uuid */
+                id: string;
+                item: string;
+                quantity: number;
+                unitCost: number;
+                amount: number;
+              }[];
+              completedAt: string | null;
+              verifiedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_createWorkOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          requestId?: string;
+          title: string;
+          scope?: string;
+          /** Format: uuid */
+          spaceId?: string;
+          assignee?:
+            | {
+                /** @constant */
+                type: 'staff';
+                /** Format: uuid */
+                userId: string;
+              }
+            | {
+                /** @constant */
+                type: 'vendor';
+                name: string;
+                phone: string;
+                company?: string;
+              };
+          /** Format: date-time */
+          scheduledStart?: string;
+          /** Format: date-time */
+          scheduledEnd?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              requestId: string | null;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              assigneeType: ('staff' | 'vendor') | null;
+              assigneeUserId: string | null;
+              vendorName: string | null;
+              scheduledStart: string | null;
+              scheduledEnd: string | null;
+              /** @enum {string} */
+              status:
+                | 'open'
+                | 'scheduled'
+                | 'in_progress'
+                | 'on_hold'
+                | 'completed'
+                | 'verified'
+                | 'closed'
+                | 'cancelled';
+              visitorPassId: string | null;
+              labourCost: number;
+              materialsCost: number;
+              rechargeToResident: boolean;
+              invoiceId: string | null;
+              resolutionNotes: string | null;
+              materials: {
+                /** Format: uuid */
+                id: string;
+                item: string;
+                quantity: number;
+                unitCost: number;
+                amount: number;
+              }[];
+              completedAt: string | null;
+              verifiedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_workOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              requestId: string | null;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              assigneeType: ('staff' | 'vendor') | null;
+              assigneeUserId: string | null;
+              vendorName: string | null;
+              scheduledStart: string | null;
+              scheduledEnd: string | null;
+              /** @enum {string} */
+              status:
+                | 'open'
+                | 'scheduled'
+                | 'in_progress'
+                | 'on_hold'
+                | 'completed'
+                | 'verified'
+                | 'closed'
+                | 'cancelled';
+              visitorPassId: string | null;
+              labourCost: number;
+              materialsCost: number;
+              rechargeToResident: boolean;
+              invoiceId: string | null;
+              resolutionNotes: string | null;
+              materials: {
+                /** Format: uuid */
+                id: string;
+                item: string;
+                quantity: number;
+                unitCost: number;
+                amount: number;
+              }[];
+              completedAt: string | null;
+              verifiedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_updateWorkOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          assignee?:
+            | {
+                /** @constant */
+                type: 'staff';
+                /** Format: uuid */
+                userId: string;
+              }
+            | {
+                /** @constant */
+                type: 'vendor';
+                name: string;
+                phone: string;
+                company?: string;
+              };
+          /** Format: date-time */
+          scheduledStart?: string;
+          /** Format: date-time */
+          scheduledEnd?: string;
+          /** @enum {string} */
+          status?: 'scheduled' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+          labourCost?: number;
+          resolutionNotes?: string;
+          resolutionFileIds?: string[];
+          rechargeToResident?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              requestId: string | null;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              assigneeType: ('staff' | 'vendor') | null;
+              assigneeUserId: string | null;
+              vendorName: string | null;
+              scheduledStart: string | null;
+              scheduledEnd: string | null;
+              /** @enum {string} */
+              status:
+                | 'open'
+                | 'scheduled'
+                | 'in_progress'
+                | 'on_hold'
+                | 'completed'
+                | 'verified'
+                | 'closed'
+                | 'cancelled';
+              visitorPassId: string | null;
+              labourCost: number;
+              materialsCost: number;
+              rechargeToResident: boolean;
+              invoiceId: string | null;
+              resolutionNotes: string | null;
+              materials: {
+                /** Format: uuid */
+                id: string;
+                item: string;
+                quantity: number;
+                unitCost: number;
+                amount: number;
+              }[];
+              completedAt: string | null;
+              verifiedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_addMaterial: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          item: string;
+          quantity: number;
+          unitCost: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              requestId: string | null;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              assigneeType: ('staff' | 'vendor') | null;
+              assigneeUserId: string | null;
+              vendorName: string | null;
+              scheduledStart: string | null;
+              scheduledEnd: string | null;
+              /** @enum {string} */
+              status:
+                | 'open'
+                | 'scheduled'
+                | 'in_progress'
+                | 'on_hold'
+                | 'completed'
+                | 'verified'
+                | 'closed'
+                | 'cancelled';
+              visitorPassId: string | null;
+              labourCost: number;
+              materialsCost: number;
+              rechargeToResident: boolean;
+              invoiceId: string | null;
+              resolutionNotes: string | null;
+              materials: {
+                /** Format: uuid */
+                id: string;
+                item: string;
+                quantity: number;
+                unitCost: number;
+                amount: number;
+              }[];
+              completedAt: string | null;
+              verifiedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  maintenance_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              requestId: string | null;
+              title: string;
+              scope: string | null;
+              spaceId: string | null;
+              assigneeType: ('staff' | 'vendor') | null;
+              assigneeUserId: string | null;
+              vendorName: string | null;
+              scheduledStart: string | null;
+              scheduledEnd: string | null;
+              /** @enum {string} */
+              status:
+                | 'open'
+                | 'scheduled'
+                | 'in_progress'
+                | 'on_hold'
+                | 'completed'
+                | 'verified'
+                | 'closed'
+                | 'cancelled';
+              visitorPassId: string | null;
+              labourCost: number;
+              materialsCost: number;
+              rechargeToResident: boolean;
+              invoiceId: string | null;
+              resolutionNotes: string | null;
+              materials: {
+                /** Format: uuid */
+                id: string;
+                item: string;
+                quantity: number;
+                unitCost: number;
+                amount: number;
+              }[];
+              completedAt: string | null;
+              verifiedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
   };
@@ -9149,6 +22690,38 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       500: components['responses']['Error500'];
+    };
+  };
+  paymentsPublic_banks: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              code: string;
+              name: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
     };
   };
   access_catalogue: {
@@ -10677,6 +24250,39 @@ export interface operations {
       400: components['responses']['Error400'];
       404: components['responses']['Error404'];
       429: components['responses']['Error429'];
+      500: components['responses']['Error500'];
+    };
+  };
+  paymentsPublic_webhook: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: 'paystack' | 'fake';
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @constant */
+              received: true;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };

@@ -26,7 +26,6 @@ export type TenantApprovalPolicy = 'owner_then_manager_override' | 'manager_only
  * - household_member: the household head.
  * - owner: the manager (who checks the ownership record).
  * - tenant: the unit's owner when one is known and the policy involves owners, otherwise the manager.
- *   Ownership records arrive in Phase 2, so until then `knownOwner` is false and tenants go to the manager.
  */
 export function firstJoinStep(
   relationship: JoinRelationship,

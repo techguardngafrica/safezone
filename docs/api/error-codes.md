@@ -122,3 +122,137 @@ Stable `error.code` values. Add a row when you add a code.
 | `NOT_A_RESPONDER`            | 422    | Assign SOS alerts to a guard or supervisor of the estate        |
 | `LOCATION_REQUIRED`          | 422    | Send a location                                                 |
 | `PIN_SPACE_EXHAUSTED`        | 503    | Could not issue a unique PIN; retry                             |
+
+## Phase 2: money, maintenance and operations
+
+| Code                             | Status    | Meaning                                                             |
+| -------------------------------- | --------- | ------------------------------------------------------------------- |
+| `PRECONDITION_FAILED`            | 412       | `If-Match` is not a valid version                                   |
+| `IDEMPOTENCY_KEY_REQUIRED`       | 400       | Payment intents need an `Idempotency-Key` header                    |
+| `STATEMENT_PARTY_REQUIRED`       | 422       | Staff statements need a payer or a unit                             |
+| `CHARGE_NOT_FOUND`               | 404       | No such charge in this estate                                       |
+| `CHARGE_DATES_INVALID`           | 422       | End date before start date                                          |
+| `BILLING_CHARGE_INACTIVE`        | 422       | A charge in the run is archived or outside the period               |
+| `BILLING_RUN_NOT_FOUND`          | 404       | No such billing run                                                 |
+| `BILLING_RUN_INVALID_TRANSITION` | 409       | The run's status does not allow this step                           |
+| `BILLING_RUN_STALE`              | 409       | A charge changed after the preview; prepare a new run               |
+| `BILLING_RUN_EMPTY`              | 422       | Nothing to bill                                                     |
+| `BILLING_RUN_TOO_LARGE`          | 422       | More than 5,000 units; split the run                                |
+| `BILLING_RUN_SELF_APPROVAL`      | 403       | The approver prepared or submitted the run                          |
+| `INVOICE_NOT_FOUND`              | 404       | No such invoice visible to the caller                               |
+| `INVOICE_NO_PAYER`               | 422       | The unit has no active household to bill                            |
+| `INVOICE_DUE_DATE_PAST`          | 422       | Due date before today (WAT)                                         |
+| `INVOICE_AMOUNT_EXCEEDS_BALANCE` | 422       | Credit note or waiver larger than what is owed                      |
+| `INVOICE_NOT_PAYABLE`            | 422       | A chosen invoice is closed or not the caller's                      |
+| `NOTHING_TO_PAY`                 | 422       | The caller has no open invoices                                     |
+| `WAIVER_NOT_FOUND`               | 404       | No such waiver                                                      |
+| `WAIVER_NOT_PENDING`             | 409       | Already decided                                                     |
+| `WAIVER_SELF_APPROVAL`           | 403       | The requester cannot decide it                                      |
+| `PAYOUT_ACCOUNT_NOT_FOUND`       | 404       | The estate has not linked a bank account                            |
+| `PAYMENTS_NOT_SET_UP`            | 422       | Online payments are not set up for this estate                      |
+| `CALLBACK_URL_NOT_ALLOWED`       | 422       | Return link outside the public web origin or app scheme             |
+| `PAYMENT_INTENT_NOT_FOUND`       | 404       | No such payment visible to the caller                               |
+| `PAYMENT_PROVIDER_UNAVAILABLE`   | 502       | The provider did not respond; retry                                 |
+| `PAYMENT_PROVIDER_REJECTED`      | 422       | The provider refused (bad account, unknown bank)                    |
+| `PAYMENT_PROVIDER_UNKNOWN`       | 404       | Webhook for a provider that is not configured                       |
+| `WEBHOOK_SIGNATURE_INVALID`      | 401       | Missing or wrong webhook signature                                  |
+| `WEBHOOK_PAYLOAD_INVALID`        | 400       | Unrecognised webhook body                                           |
+| `VIRTUAL_ACCOUNT_NOT_PAYER`      | 403       | Only the unit's household head gets its transfer account            |
+| `MANUAL_PAYMENT_NOT_FOUND`       | 404       | No such office payment                                              |
+| `MANUAL_PAYMENT_NOT_PENDING`     | 409       | Already decided                                                     |
+| `MANUAL_PAYMENT_SELF_APPROVAL`   | 403       | The recorder cannot approve it                                      |
+| `TRANSACTION_NOT_FOUND`          | 404       | No such verified transaction                                        |
+| `REFUND_EXCEEDS_PAYMENT`         | 422       | More than is left of the payment                                    |
+| `REFUND_EXCEEDS_CREDIT`          | 422       | More than the payer's unallocated credit; issue a credit note first |
+| `REFUND_NOT_FOUND`               | 404       | No such refund                                                      |
+| `REFUND_NOT_PENDING`             | 409       | Already decided                                                     |
+| `REFUND_SELF_APPROVAL`           | 403       | The requester cannot decide it                                      |
+| `OWNERSHIP_NOT_FOUND`            | 404       | No such ownership                                                   |
+| `OWNERSHIP_NOT_ACTIVE`           | 409       | Already ended                                                       |
+| `OWNERSHIP_EXISTS`               | 409       | The person already owns part of the unit                            |
+| `OWNERSHIP_SHARES_EXCEEDED`      | 422       | Shares would exceed 100%; use a transfer                            |
+| `TRANSFER_NOT_FOUND`             | 404       | No such transfer                                                    |
+| `TRANSFER_SHARES_INVALID`        | 422       | New owners' shares must total 100%                                  |
+| `TRANSFER_ALREADY_OPEN`          | 409       | The unit already has a transfer in progress                         |
+| `TRANSFER_INVALID_TRANSITION`    | 409       | The transfer's status does not allow this                           |
+| `TRANSFER_NEEDS_SELLER`          | 422       | Seller has not confirmed; override needs documents and a reason     |
+| `TRANSFER_STALE`                 | 409       | The unit's owners changed after the transfer was opened             |
+| `CATEGORY_NOT_FOUND`             | 404       | No such maintenance category                                        |
+| `CATEGORY_EXISTS`                | 409       | Category name already used                                          |
+| `ATTACHMENT_INVALID`             | 422       | Attachments must be your uploaded maintenance files                 |
+| `MAINTENANCE_REQUEST_NOT_FOUND`  | 404       | No such request visible to the caller                               |
+| `MAINTENANCE_INVALID_TRANSITION` | 409       | The request's status does not allow this                            |
+| `MAINTENANCE_REOPEN_EXPIRED`     | 409       | Resolved more than 7 days ago                                       |
+| `MAINTENANCE_NOT_RESOLVED`       | 409       | Rate once resolved                                                  |
+| `WORK_ORDER_NOT_FOUND`           | 404       | No such work order visible to the caller                            |
+| `WORK_ORDER_CLOSED`              | 409       | Verified, closed or cancelled                                       |
+| `WORK_ORDER_INVALID_TRANSITION`  | 409       | The work order's status does not allow this                         |
+| `WORK_ORDER_SCHEDULE_INVALID`    | 422       | Visit must end after it starts                                      |
+| `ASSIGNEE_NOT_STAFF`             | 422       | Staff assignees must hold an estate role                            |
+| `RECHARGE_NEEDS_UNIT`            | 422       | Recharges need a unit                                               |
+| `UTILITY_PROVIDER_NOT_FOUND`     | 404       | Unknown provider code                                               |
+| `METER_LOOKUP_NOT_NEEDED`        | 422       | Estate sub-meters are not looked up                                 |
+| `METER_NOT_FOUND`                | 422 / 404 | The provider has no such meter / no such meter here                 |
+| `BILLS_PROVIDER_UNAVAILABLE`     | 502       | Meter validation is not available                                   |
+| `METER_PROVIDER_MISMATCH`        | 422       | Provider does not supply that utility                               |
+| `METER_EXISTS`                   | 409       | Meter already registered in the estate                              |
+| `OUTAGE_NOT_FOUND`               | 404       | No such outage                                                      |
+| `OUTAGE_CLOSED`                  | 409       | Already resolved or cancelled                                       |
+| `MOVE_NOT_FOUND`                 | 404       | No such move                                                        |
+| `MOVE_DATE_PAST`                 | 422       | Choose today or later                                               |
+| `MOVE_ALREADY_SCHEDULED`         | 409       | A move of this type is already scheduled                            |
+| `MOVE_NOT_SCHEDULED`             | 409       | Already completed or cancelled                                      |
+| `MOVE_OUT_BALANCE_OUTSTANDING`   | 422       | The estate blocks move-out with unpaid invoices                     |
+| `OCCUPANCY_DATES_INVALID`        | 422       | New end date not after the start                                    |
+| `EXPORT_IN_PROGRESS`             | 409       | An export is already being prepared                                 |
+| `EXPORT_NOT_FOUND`               | 404       | No such export                                                      |
+| `EXPORT_NOT_READY`               | 409       | Not ready, failed or expired                                        |
+
+## Phase 3: community, facilities and documents
+
+| Code                                                                                                                                                                                            | Status    | Meaning                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------ |
+| `GUIDELINES_NOT_ACCEPTED`                                                                                                                                                                       | 422       | Accept the community guidelines first            |
+| `COMMUNITY_BANNED`                                                                                                                                                                              | 403       | Banned from the estate community                 |
+| `MEMBER_MUTED`                                                                                                                                                                                  | 403       | Muted; can read but not post                     |
+| `CHANNEL_NOT_FOUND`                                                                                                                                                                             | 404       | No such channel visible to the caller            |
+| `CHANNEL_STAFF_ONLY`                                                                                                                                                                            | 403       | Only management posts here                       |
+| `CHANNEL_NOT_ACTIVE`                                                                                                                                                                            | 409       | Channel pending, suspended or archived           |
+| `CHANNEL_NOT_JOINABLE`                                                                                                                                                                          | 409       | Not an active resident channel                   |
+| `CHANNEL_INVITE_ONLY`                                                                                                                                                                           | 403       | Needs an invitation                              |
+| `CHANNEL_INVALID_TRANSITION`                                                                                                                                                                    | 409       | Channel status does not allow this               |
+| `CHANNEL_MEMBERSHIP_DERIVED`                                                                                                                                                                    | 409       | Building and estate membership follows residence |
+| `FEATURE_NOT_ENABLED`                                                                                                                                                                           | 403       | Private messaging is off in this estate          |
+| `USER_BLOCKED`                                                                                                                                                                                  | 403       | One of you blocked the other                     |
+| `DIRECT_SELF`                                                                                                                                                                                   | 422       | Cannot message yourself                          |
+| `MEMBER_NOT_FOUND`                                                                                                                                                                              | 404       | Not an active member of the estate               |
+| `MESSAGE_NOT_FOUND`                                                                                                                                                                             | 404       | No such message visible to the caller            |
+| `MESSAGE_GONE`                                                                                                                                                                                  | 409       | Deleted or removed                               |
+| `MESSAGE_EDIT_EXPIRED`                                                                                                                                                                          | 409       | Edits are allowed for 15 minutes                 |
+| `REPORT_TARGET_NOT_FOUND`                                                                                                                                                                       | 404       | Reported item not found                          |
+| `MODERATION_TARGET_INVALID`                                                                                                                                                                     | 422       | Action does not fit the target                   |
+| `MODERATION_ACTION_NOT_FOUND`                                                                                                                                                                   | 404       | No such action for the caller                    |
+| `APPEAL_EXISTS`                                                                                                                                                                                 | 409       | Already appealed                                 |
+| `APPEAL_NOT_PENDING`                                                                                                                                                                            | 409       | No pending appeal                                |
+| `APPEAL_SELF_REVIEW`                                                                                                                                                                            | 403       | Another moderator must decide                    |
+| `POLL_NOT_FOUND`                                                                                                                                                                                | 404       | No such poll for the caller                      |
+| `POLL_CLOSED`                                                                                                                                                                                   | 409       | Voting has ended                                 |
+| `POLL_ALREADY_VOTED`                                                                                                                                                                            | 409       | One vote per user or household                   |
+| `POLL_CLOSES_IN_PAST`                                                                                                                                                                           | 422       | Closing time must be in the future               |
+| `POLL_HOUSEHOLD_REQUIRED`                                                                                                                                                                       | 422       | Household polls need a household                 |
+| `POLL_OPTION_NOT_FOUND`                                                                                                                                                                         | 404       | No such option                                   |
+| `POLL_ANONYMOUS`                                                                                                                                                                                | 409       | Voters of anonymous polls are not shown          |
+| `FACILITY_NOT_FOUND`                                                                                                                                                                            | 404       | No such facility                                 |
+| `FACILITY_CLOSED`                                                                                                                                                                               | 409       | Facility is closed                               |
+| `FACILITY_UNAVAILABLE`                                                                                                                                                                          | 409       | Maintenance blackout at that time                |
+| `BOOKING_CONFLICT`                                                                                                                                                                              | 409       | Someone booked that time first                   |
+| `BOOKING_TOO_SHORT` / `BOOKING_TOO_LONG` / `BOOKING_TOO_FAR_AHEAD` / `BOOKING_IN_PAST` / `BOOKING_OUTSIDE_HOURS` / `BOOKING_TOO_MANY_GUESTS` / `BOOKING_WEEKLY_LIMIT` / `BOOKING_MONTHLY_LIMIT` | 422       | Facility rule broken                             |
+| `BOOKING_ARREARS`                                                                                                                                                                               | 422       | Outstanding dues above the estate limit          |
+| `BOOKING_NEEDS_UNIT`                                                                                                                                                                            | 422       | Paid bookings need a household unit to bill      |
+| `BOOKING_NOT_FOUND`                                                                                                                                                                             | 404       | No such booking for the caller                   |
+| `BOOKING_INVALID_TRANSITION`                                                                                                                                                                    | 409       | Booking status does not allow this               |
+| `BOOKING_NOT_STARTED`                                                                                                                                                                           | 409       | No-show only after the start                     |
+| `FOLDER_NOT_FOUND` / `FOLDER_EXISTS`                                                                                                                                                            | 404 / 409 | Folder missing or name taken                     |
+| `DOCUMENT_NOT_FOUND` / `DOCUMENT_VERSION_NOT_FOUND`                                                                                                                                             | 404       | Not found or not visible                         |
+| `DOCUMENT_FILE_INVALID`                                                                                                                                                                         | 422       | Upload the document file first                   |
+| `DOCUMENT_ARCHIVED`                                                                                                                                                                             | 409       | Archived documents take no new versions          |

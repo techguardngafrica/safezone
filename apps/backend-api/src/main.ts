@@ -13,6 +13,8 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     logger: new JsonLogger(env.LOG_LEVEL, 'api'),
     bodyParser: false,
+    // Webhook signatures are computed over the exact bytes received.
+    rawBody: true,
   });
   configureHttpApp(app, env);
 

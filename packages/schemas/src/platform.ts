@@ -73,3 +73,15 @@ export const upsertAppVersionSchema = z
   );
 
 export const myFlagsQuerySchema = z.object({ estateId: z.uuid().optional() });
+
+/** Estate data export (platform.md §6). */
+export const estateExportSchema = z.object({
+  id: z.uuid(),
+  status: z.enum(['queued', 'building', 'ready', 'failed', 'expired']),
+  sizeBytes: z.number().int().nullable(),
+  datasets: z.record(z.string(), z.number().int()).nullable(),
+  expiresAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  readyAt: z.iso.datetime().nullable(),
+});
+export const exportDownloadSchema = z.object({ url: z.string(), expiresAt: z.iso.datetime() });

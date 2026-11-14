@@ -217,6 +217,76 @@ export class FilesService {
     return rows.map(toFileStatus);
   }
 
+  /**
+   * Download link for a file another module has already authorised (e.g. a document the caller may see).
+   * Still requires a clean scan; always audited.
+   */
+  async grantedDownloadUrl(
+    estateId: string,
+    userId: string,
+    fileId: string,
+    resourceType: string,
+    resourceId: string,
+  ) {
+    const file = await this.db.withTenant({ estateId, userId }, (tx) =>
+      tx.storedFile.findFirst({ where: { id: fileId, estateId } }),
+    );
+    if (!file) throw new NotFoundError('File not found', 'FILE_NOT_FOUND');
+    if (file.scanStatus !== 'clean')
+      throw new DomainError('FILE_NOT_READY', 'The file is not available yet', 409);
+    await this.db.withTenant({ estateId, userId }, (tx) =>
+      appendOutboxEvents(tx, [
+        {
+          type: 'documents.file.downloaded',
+          estateId,
+          aggregateType: 'file',
+          aggregateId: file.id,
+          payload: { fileId: file.id, purpose: file.purpose, resourceType, resourceId },
+          audit: {
+            actorType: 'user',
+            actorId: userId,
+            action: 'documents.file.download',
+            resourceType,
+            resourceId,
+          },
+        },
+      ]),
+    );
+    const extension = file.mimeType.split('/')[1]?.split('.').pop() ?? 'bin';
+    const url = await this.storage.presignGet(
+      file.storageKey,
+      DOWNLOAD_URL_TTL_SECONDS,
+      `${file.purpose}-${file.id}.${extension}`,
+    );
+    return { url, expiresAt: new Date(Date.now() + DOWNLOAD_URL_TTL_SECONDS * 1000).toISOString() };
+  }
+
+  /**
+   * Ids among `fileIds` that are this estate's files of this purpose uploaded by the user and not
+   * infected (attachments on maintenance requests, incidents and the like).
+   */
+  async estateFilesOf(
+    estateId: string,
+    userId: string,
+    fileIds: readonly string[],
+    purpose: FilePurpose,
+  ): Promise<string[]> {
+    if (fileIds.length === 0) return [];
+    const rows = await this.db.withTenant({ estateId, userId }, (tx) =>
+      tx.storedFile.findMany({
+        where: {
+          id: { in: [...fileIds] },
+          estateId,
+          uploadedBy: userId,
+          purpose,
+          scanStatus: { not: 'infected' },
+        },
+        select: { id: true },
+      }),
+    );
+    return rows.map((row) => row.id);
+  }
+
   /** Scan status of files, for a platform reviewer (e.g. application documents). */
   async platformStatuses(fileIds: readonly string[]) {
     if (fileIds.length === 0) return [];

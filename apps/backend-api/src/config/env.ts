@@ -126,6 +126,8 @@ const envSchema = z.object({
   /** Expo push (optional access token when enhanced push security is on in the Expo project). */
   EXPO_ACCESS_TOKEN: optionalString,
 
+  /** `fake` is an in-memory provider for local work and tests; never allowed in staging/production. */
+  PAYMENTS_PROVIDER: z.enum(['fake', 'paystack']).default('fake'),
   PAYSTACK_SECRET_KEY: optionalString,
   FLUTTERWAVE_SECRET_KEY: optionalString,
   /** `fake` logs a masked delivery instead of sending; never allowed in staging/production. */
@@ -188,6 +190,10 @@ function deployedIssues(env: ParsedEnv, source: NodeJS.ProcessEnv): string[] {
     issues.push('PASS_KEY_ENCRYPTION_KEY must differ from MFA_ENCRYPTION_KEY');
   }
   if (env.SMS_PROVIDER === 'fake') issues.push('SMS_PROVIDER: fake is not allowed');
+  if (env.PAYMENTS_PROVIDER === 'fake') issues.push('PAYMENTS_PROVIDER: fake is not allowed');
+  if (env.PAYMENTS_PROVIDER === 'paystack' && !env.PAYSTACK_SECRET_KEY) {
+    issues.push('PAYSTACK_SECRET_KEY: required when PAYMENTS_PROVIDER is paystack');
+  }
   if (env.CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
     issues.push('CORS_ORIGINS: only https origins are allowed');
   }

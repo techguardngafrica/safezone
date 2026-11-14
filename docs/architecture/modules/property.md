@@ -101,3 +101,8 @@ Built in `src/modules/property` (path design in [ADR-0009](../adr/0009-spaces-ma
 - Units carry `propertyId` = `<estate code>-<unit code>`. Reads need membership; changes need `space.manage`. All routes require the `property` entitlement (core plan).
 - Registers the setup wizard's `spaces` verifier (at least one live unit).
 - **Not yet built:** `space_history` projection and `GET …/spaces/:id/history` (the audit log has the changes), imports (with the tenancy import framework), ownerships and transfers (Phase 2), archive checks for open invoices (billing, Phase 2). Occupancy will set unit `status` to `occupied`/`vacant`.
+
+## 11. Phase 2 implementation notes
+
+- Ownerships (person or company with a contact person, shares in basis points, at most 100% active per unit, never deleted), transfers with seller confirmation or documented manager override, `property_owner` role kept in step. See [ADR-0014](../adr/0014-phase-2-operations-modules.md).
+- `PropertyService.activeOwners` and `ownedUnits` serve billing, join routing and owner mode (`GET …/owned-units`, served by occupancy).

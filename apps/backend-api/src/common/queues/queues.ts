@@ -17,6 +17,12 @@ export const QUEUES = {
   ads: 'ads',
   files: 'files',
   maintenanceJobs: 'maintenance-jobs',
+  /** Poll closing and other community housekeeping. */
+  community: 'community',
+  /** Booking holds, completion, reminders and payment confirmation. */
+  facilities: 'facilities',
+  /** Daily move-outs and lease reminders. */
+  occupancy: 'occupancy',
   /** Estate onboarding: invitation sends. */
   onboarding: 'onboarding',
 } as const;

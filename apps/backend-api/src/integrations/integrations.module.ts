@@ -6,6 +6,14 @@ import { KeyVault, LocalKeyVault } from './keys/key-vault';
 import { SmtpEmailSender } from './email/smtp-email.sender';
 import { ExpoPushSender } from './push/expo-push.sender';
 import { MalwareScanner, StubMalwareScanner } from './scan/malware-scanner';
+import {
+  BillsProvider,
+  FakeBillsProvider,
+  UnconfiguredBillsProvider,
+} from './bills/bills-provider';
+import { FakePaymentGateway } from './payments/fake-payment.gateway';
+import { PaymentGateway } from './payments/payment-gateway';
+import { PaystackPaymentGateway } from './payments/paystack-payment.gateway';
 import { ObjectStorage } from './storage/object-storage';
 import { S3ObjectStorage } from './storage/s3-object-storage';
 import { PushSender } from './push/push-sender';
@@ -58,7 +66,37 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
         }),
     },
     { provide: MalwareScanner, useClass: StubMalwareScanner },
+    {
+      // No bills aggregator is chosen yet (utilities.md §9.1): the fake works locally and in tests only.
+      provide: BillsProvider,
+      inject: [ENV],
+      useFactory: (env: Env): BillsProvider =>
+        env.NODE_ENV === 'staging' || env.NODE_ENV === 'production'
+          ? new UnconfiguredBillsProvider()
+          : new FakeBillsProvider(),
+    },
+    {
+      provide: PaymentGateway,
+      inject: [ENV],
+      useFactory: (env: Env): PaymentGateway => {
+        if (env.PAYMENTS_PROVIDER === 'paystack') {
+          if (!env.PAYSTACK_SECRET_KEY)
+            throw new Error('PAYSTACK_SECRET_KEY is required for paystack');
+          return new PaystackPaymentGateway({ secretKey: env.PAYSTACK_SECRET_KEY });
+        }
+        return new FakePaymentGateway();
+      },
+    },
   ],
-  exports: [KeyVault, EmailSender, SmsSender, PushSender, ObjectStorage, MalwareScanner],
+  exports: [
+    KeyVault,
+    EmailSender,
+    SmsSender,
+    PushSender,
+    ObjectStorage,
+    MalwareScanner,
+    PaymentGateway,
+    BillsProvider,
+  ],
 })
 export class IntegrationsModule {}

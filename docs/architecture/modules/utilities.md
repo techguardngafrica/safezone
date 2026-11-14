@@ -87,3 +87,11 @@ Two supply models are supported:
 
 1. Which aggregator(s), and which DisCos are covered for pilot estates?
 2. Which sub-meter vendor systems do pilot estates use?
+
+## 10. Phase 2 implementation notes
+
+Built in `src/modules/utilities` ([ADR-0014](../adr/0014-phase-2-operations-modules.md)):
+
+- Provider catalogue (Nigerian DisCos and estate supply), meter lookup through `BillsProvider`, meter registration (residents for their units, management for sub-meters), bulk readings, outages to affected residents only.
+- Estate-run supply is billed by `metered` charges in billing runs (consumption × rate + fixed).
+- **Not built, needs a decision:** prepaid token purchases and bill payments (who receives the money; see ADR-0014 §16). No aggregator is integrated; the fake works only locally and in tests.

@@ -63,6 +63,7 @@ export const DB_CONTEXTS = [
   'platform_config',
   'outbox_relay',
   'emergency',
+  'payments',
 ] as const;
 export type DbContext = (typeof DB_CONTEXTS)[number];
 

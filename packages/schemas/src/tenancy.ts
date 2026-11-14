@@ -128,8 +128,36 @@ export const estateSettingsSchema = z.object({
     ]),
   'community.private_messaging': z.boolean().default(false),
   'community.channel_approval': z.boolean().default(true),
+  /** Shown before a member first posts (community.md §2.16). */
+  'community.guidelines': z
+    .string()
+    .max(4000)
+    .default(
+      'Be respectful. No harassment, hate, scams or sharing other residents’ personal details. Report problems to moderators.',
+    ),
+  /** Owners who do not live in the estate also join building channels of units they own (rule 1). */
+  'community.owners_in_building_channels': z.boolean().default(false),
   'ads.blocked_categories': z.array(z.string().max(60)).max(50).default([]),
   'guards.can_see_resident_phone': z.boolean().default(false),
+  /** Every billing run needs a second person to approve it (billing.md rule 3). */
+  'billing.two_level_approval': z.boolean().default(true),
+  /** With two-level approval off, runs above this total (kobo) still need approval. */
+  'billing.approval_threshold_kobo': z.number().int().min(0).max(100_000_000_000).default(0),
+  /** Waivers above this amount (kobo) need a second approver (billing.md rule 6). */
+  'billing.waiver_threshold_kobo': z.number().int().min(0).max(100_000_000_000).default(0),
+  /** Households owing more than this (kobo) cannot book paid facilities; 0 turns the check off (facilities.md rule 5). */
+  'facilities.block_with_arrears_kobo': z.number().int().min(0).max(100_000_000_000).default(0),
+  /** Refuse to complete a move-out while the unit has unpaid invoices (occupancy.md §5 step 2). */
+  'occupancy.block_move_out_with_balance': z.boolean().default(false),
+  /** Occupant charges on vacant units go to the primary owner (billing.md rule 8). */
+  'billing.bill_owner_when_vacant': z.boolean().default(false),
+  /** Late penalties apply this many days after the due date (billing.md rule 5). */
+  'billing.penalty_grace_days': z.number().int().min(0).max(180).default(7),
+  /** Reminder days relative to the due date: negative before, 0 on the day, positive after. */
+  'billing.reminder_offsets_days': z
+    .array(z.number().int().min(-60).max(120))
+    .max(8)
+    .default([-3, 0, 7, 30]),
 });
 export type EstateSettings = z.infer<typeof estateSettingsSchema>;
 export type EstateSettingKey = keyof EstateSettings;

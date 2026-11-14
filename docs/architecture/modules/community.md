@@ -112,3 +112,7 @@ Consumes: `occupancy.occupancy.started/ended` (building membership), `property.s
 ## 12. Phase 1 implementation notes
 
 Built in `src/modules/community`: official announcements only. `POST /v1/estates/:estateId/announcements` (`announcement.publish`; audience the estate or chosen spaces, resolved to units at publication; `important` also goes by SMS), `GET …/announcements` (what the reader's units cover; `all=true` for management with recipient counts), `POST …/announcements/:id/read`. Every item is labelled official. Scheduling, attachments, role audiences and email are not built.
+
+## 13. Phase 3 implementation notes
+
+Built in `src/modules/community` ([ADR-0015](../adr/0015-phase-3-community-facilities-documents.md)): guidelines acceptance; building channels with occupancy-derived membership and move-in history windows; seeded estate channels (two staff-only); resident channels with approval and privacy levels; messages with replies, attachments, mentions, reactions, 15-minute edits, own deletes and search; per-channel notification preferences; direct messages behind the estate switch, with blocking; reports, a moderation queue, remove/warn/mute/remove-from-channel/suspend/ban/dismiss, an audit log and appeals decided by another moderator; official polls (per user or household, anonymous or named). **Not built:** realtime gateway emits and typing, sponsored posts (Phase 4), message partitioning, resident privacy settings.

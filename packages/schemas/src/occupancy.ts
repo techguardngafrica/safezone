@@ -216,3 +216,43 @@ export const createEmergencyContactSchema = z.object({
 });
 
 export const estateItemParamsSchema = z.object({ estateId: z.uuid(), id: z.uuid() });
+
+// ---- Move-in and move-out (occupancy.md §5, Phase 2) --------------------------------------------
+
+export const moveTypeSchema = z.enum(['move_in', 'move_out']);
+export const gateNoticeSchema = z.object({
+  /** e.g. "1 truck, furniture" (shown to guards on the day). */
+  items: z.string().trim().max(300).optional(),
+  vehicles: z.array(z.string().trim().min(3).max(15)).max(5).default([]),
+  notes: z.string().trim().max(500).optional(),
+});
+export const createMoveSchema = z.object({
+  type: moveTypeSchema,
+  occupancyId: z.uuid(),
+  scheduledOn: z.iso.date(),
+  gateNotice: gateNoticeSchema.default({ vehicles: [] }),
+});
+export const moveChecklistSchema = z.object({
+  items: z.array(z.object({ item: z.string().trim().min(2).max(120), done: z.boolean() })).max(30),
+});
+export const moveSchema = z.object({
+  id: z.uuid(),
+  type: moveTypeSchema,
+  occupancyId: z.uuid(),
+  spaceId: z.uuid(),
+  unitCode: z.string(),
+  scheduledOn: z.iso.date(),
+  gateNotice: gateNoticeSchema,
+  checklist: z.array(z.object({ item: z.string(), done: z.boolean() })),
+  status: z.enum(['scheduled', 'completed', 'cancelled']),
+  /** Open balance on the unit when the move was scheduled (a warning; estates decide if it blocks). */
+  outstandingBalance: z.number().int(),
+  createdAt: z.iso.datetime(),
+  completedAt: z.iso.datetime().nullable(),
+});
+export const moveListQuerySchema = z.object({
+  /** Guards: moves on this day (WAT). */
+  on: z.iso.date().optional(),
+  status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
+});
+export const renewOccupancySchema = z.object({ endsOn: z.iso.date() });

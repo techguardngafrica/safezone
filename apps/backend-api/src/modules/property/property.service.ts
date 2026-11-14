@@ -479,6 +479,110 @@ export class PropertyService {
     return units.map((unit) => unit.id);
   }
 
+  /**
+   * Live units a charge applies to (billing): at or below `spaceIds` (all units when empty), optionally
+   * only some unit types. Ordered by code.
+   */
+  async billableUnits(
+    tx: Tx,
+    estateId: string,
+    filter: { spaceIds: readonly string[]; unitTypes: readonly string[] },
+  ) {
+    const unitIds =
+      filter.spaceIds.length > 0 ? await this.unitIdsWithin(tx, estateId, filter.spaceIds) : null;
+    return tx.space.findMany({
+      where: {
+        estateId,
+        type: 'unit',
+        archivedAt: null,
+        ...(unitIds ? { id: { in: unitIds } } : {}),
+        ...(filter.unitTypes.length > 0 ? { unitType: { in: [...filter.unitTypes] } } : {}),
+      },
+      select: { id: true, code: true, unitType: true, bedrooms: true, sizeSqm: true, status: true },
+      orderBy: [{ code: 'asc' }],
+    });
+  }
+
+  /** Active owners per unit, largest share first (then longest held). Billing and owner approvals. */
+  async activeOwners(tx: Tx, estateId: string, spaceIds: readonly string[]) {
+    const result = new Map<string, { userId: string; name: string; shareBp: number }[]>();
+    if (spaceIds.length === 0) return result;
+    const rows = await tx.ownership.findMany({
+      where: { estateId, status: 'active', spaceId: { in: [...spaceIds] } },
+      select: {
+        spaceId: true,
+        ownerUserId: true,
+        ownerName: true,
+        ownerCompanyName: true,
+        shareBp: true,
+      },
+      orderBy: [{ shareBp: 'desc' }, { startsOn: 'asc' }, { id: 'asc' }],
+    });
+    for (const row of rows) {
+      const list = result.get(row.spaceId) ?? [];
+      list.push({
+        userId: row.ownerUserId,
+        name: row.ownerCompanyName ?? row.ownerName,
+        shareBp: row.shareBp,
+      });
+      result.set(row.spaceId, list);
+    }
+    return result;
+  }
+
+  /** Nearest building or block above each unit (building channels, community.md §2.4). */
+  async buildingsOfUnits(tx: Tx, estateId: string, unitIds: readonly string[]) {
+    const result = new Map<string, { id: string; code: string; name: string }>();
+    if (unitIds.length === 0) return result;
+    const units = await tx.space.findMany({
+      where: { estateId, id: { in: [...unitIds] } },
+      select: { id: true, path: true },
+    });
+    const toUuid = (hex: string) =>
+      `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+    const ancestorIds = [
+      ...new Set(units.flatMap((unit) => unit.path.split('.').slice(0, -1).map(toUuid))),
+    ];
+    const buildings = await tx.space.findMany({
+      where: {
+        estateId,
+        id: { in: ancestorIds },
+        type: { in: ['building', 'block'] },
+        archivedAt: null,
+      },
+      select: { id: true, code: true, name: true, depth: true },
+    });
+    const byId = new Map(buildings.map((building) => [building.id, building]));
+    for (const unit of units) {
+      const nearest = unit.path
+        .split('.')
+        .slice(0, -1)
+        .map(toUuid)
+        .reverse()
+        .map((id) => byId.get(id))
+        .find(Boolean);
+      if (nearest) result.set(unit.id, { id: nearest.id, code: nearest.code, name: nearest.name });
+    }
+    return result;
+  }
+
+  /** Units the user owns now, with their share. */
+  async ownedUnits(tx: Tx, estateId: string, userId: string) {
+    const rows = await tx.ownership.findMany({
+      where: { estateId, ownerUserId: userId, status: 'active' },
+      orderBy: { startsOn: 'asc' },
+    });
+    const spaces = new Map(
+      (
+        await tx.space.findMany({
+          where: { estateId, id: { in: rows.map((row) => row.spaceId) } },
+          select: { id: true, code: true, name: true, status: true },
+        })
+      ).map((space) => [space.id, space]),
+    );
+    return rows.map((row) => ({ ownership: row, space: spaces.get(row.spaceId) }));
+  }
+
   /** Occupancy sets units occupied or vacant inside its own transaction. */
   async setUnitStatus(tx: Tx, estateId: string, spaceId: string, status: 'occupied' | 'vacant') {
     await tx.space.updateMany({

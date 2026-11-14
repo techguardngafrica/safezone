@@ -24,6 +24,8 @@ const productionEnv = {
   MAIL_SMTP_FROM: 'no-reply@safezone.ng',
   SMS_PROVIDER: 'termii',
   SMS_API_KEY: 'key',
+  PAYMENTS_PROVIDER: 'paystack',
+  PAYSTACK_SECRET_KEY: 'sk_live_x',
 };
 
 describe('loadEnv', () => {
@@ -46,6 +48,8 @@ describe('loadEnv', () => {
   it.each([
     ['JWT_ACCESS_SECRET', undefined, /JWT_ACCESS_SECRET: required/],
     ['SMS_PROVIDER', 'fake', /SMS_PROVIDER: fake/],
+    ['PAYMENTS_PROVIDER', 'fake', /PAYMENTS_PROVIDER: fake/],
+    ['PAYSTACK_SECRET_KEY', undefined, /PAYSTACK_SECRET_KEY: required/],
     ['CORS_ORIGINS', 'http://manage.safezone.ng', /https origins/],
     ['DATABASE_URL', 'postgres://safezone:pw@db:5432/safezone', /safezone_app/],
     ['JWT_REFRESH_SECRET', 'a'.repeat(40), /must all differ/],

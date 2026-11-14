@@ -22,6 +22,8 @@ import {
   joinRequestSchema,
   joinUnitSchema,
   joinUnitsQuerySchema,
+  ownedUnitSchema,
+  renewOccupancySchema,
   residentListQuerySchema,
   residentSchema,
   updateHouseholdMemberSchema,
@@ -282,6 +284,39 @@ export class EstateOccupancyController {
     @ValidBody() body: z.infer<typeof endOccupancySchema>,
   ) {
     return this.occupancy.endOccupancy(estate, params.id, body.reason);
+  }
+
+  @Get('owned-units')
+  @Member()
+  @RequiresFeature('property')
+  @Contract({
+    summary: 'Owner mode: units I own and who lives there',
+    tags: ['property'],
+    params: estateParamSchema,
+    response: z.array(ownedUnitSchema),
+  })
+  ownedUnits(@CurrentEstate() estate: EstateAccess) {
+    return this.occupancy.ownedUnits(estate);
+  }
+
+  @Post('occupancies/:id/renew')
+  @Can('resident.approve')
+  @RequiresFeature('occupancy')
+  @HttpCode(200)
+  @Contract({
+    summary: 'Renew a lease with a new end date',
+    tags: ['occupancy'],
+    params: estateItemParamsSchema,
+    body: renewOccupancySchema,
+    response: z.object({ id: z.uuid(), endsOn: z.iso.date() }),
+    errors: [403, 404, 422],
+  })
+  renew(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+    @ValidBody() body: z.infer<typeof renewOccupancySchema>,
+  ) {
+    return this.occupancy.renewOccupancy(estate, params.id, body.endsOn);
   }
 
   @Get('households/mine')

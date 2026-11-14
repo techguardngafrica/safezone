@@ -107,3 +107,15 @@ Billing lets an **estate bill its residents and owners**: charge definitions, bi
 - A partial payment allocates to the oldest invoice and updates balances and the ledger in one transaction.
 - No issued invoice can be edited via any endpoint.
 - Nightly verification finds zero mismatches on pilot data.
+
+## 10. Phase 2 implementation notes
+
+Built in `src/modules/billing` ([ADR-0012](../adr/0012-billing-ledger-and-invoices.md)):
+
+- Charges (`fixed`, `per_unit_type`, `per_bedroom`, `per_sqm`, `metered`), payer `occupant` or `owner` (primary owner), optional `penaltyRule` (fixed or percent with cap). Edits use `If-Match` and never touch issued invoices.
+- Billing runs: create → preview (per-unit items with skip reasons) → submit → approve (not by the creator or submitter) → issue; or cancel. Proration by days for move-ins and charges starting or ending mid-period. Issue refuses if a charge changed since the preview and re-checks payers.
+- Invoices with per-estate numbers (`INV-000001`), one-off invoices, credit notes (approvers), waivers (two-person above `billing.waiver_threshold_kobo`), statements and a trial balance from the ledger, `InvoicesService.allocate` for payments (chosen invoices, then oldest due first, remainder to payer credit, idempotent per source).
+- Database guarantees: immutable invoice terms, money checks, append-only financial tables, balanced journals checked at commit.
+- Daily job (06:00 WAT, `billing` queue): `billing.invoice.overdue` once per invoice, one late-penalty invoice per late invoice after `billing.penalty_grace_days`, reminders on `billing.reminder_offsets_days`, invoice-vs-ledger verification.
+- Routes are under `/v1/estates/:estateId/…` (residents see their own and their household's invoices there; no `/v1/me/invoices`).
+- **Not yet built:** PDF invoices and receipts, opening balances import, arrears ageing and collection reports, early-payment discounts, co-owner invoice splitting, chunked issuing for very large runs, recurring run scheduling.

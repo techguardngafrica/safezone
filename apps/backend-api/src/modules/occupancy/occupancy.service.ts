@@ -40,6 +40,14 @@ type HouseholdRow = Prisma.HouseholdGetPayload<{ include: { members: true; occup
 type StaffRow = Prisma.DomesticStaffGetPayload<object>;
 type VehicleRow = Prisma.VehicleGetPayload<object>;
 
+export interface BillingOccupant {
+  householdId: string;
+  payerUserId: string;
+  payerName: string | null;
+  /** YYYY-MM-DD, null when the household has no active occupancy record. */
+  startsOn: string | null;
+}
+
 const MAX_EMERGENCY_CONTACTS = 5;
 const residentCursorSchema = z.object({ name: z.string(), id: z.uuid() });
 
@@ -115,6 +123,58 @@ export class OccupancyService {
       where: { estateId, spaceId, status: 'active' },
       select: { id: true, name: true, headUserId: true },
     });
+  }
+
+  /**
+   * Who pays occupant charges in each unit (billing.md rule 7): the active household's head, with the
+   * date their occupancy started (for proration). Units without an active household are left out.
+   */
+  async billingOccupants(tx: Tx, estateId: string, unitIds: readonly string[]) {
+    if (unitIds.length === 0) return new Map<string, BillingOccupant>();
+    const households = await tx.household.findMany({
+      where: { estateId, status: 'active', spaceId: { in: [...unitIds] } },
+      select: {
+        id: true,
+        spaceId: true,
+        headUserId: true,
+        members: {
+          where: { relationship: 'head', status: 'active' },
+          select: { userId: true, fullName: true },
+        },
+        occupancies: {
+          where: { status: 'active' },
+          select: { startsOn: true },
+          orderBy: { startsOn: 'asc' },
+          take: 1,
+        },
+      },
+    });
+    return new Map(
+      households.map((household) => [
+        household.spaceId,
+        {
+          householdId: household.id,
+          payerUserId: household.headUserId,
+          payerName:
+            household.members.find((member) => member.userId === household.headUserId)?.fullName ??
+            null,
+          startsOn: household.occupancies[0]?.startsOn.toISOString().slice(0, 10) ?? null,
+        } satisfies BillingOccupant,
+      ]),
+    );
+  }
+
+  /** The user's active household units with the date they joined each (community history windows). */
+  async unitsSince(tx: Tx, estateId: string, userId: string) {
+    const rows = await tx.householdMember.findMany({
+      where: { estateId, userId, status: 'active', household: { status: 'active' } },
+      select: { joinedAt: true, household: { select: { id: true, spaceId: true } } },
+    });
+    return rows.map((row) => ({
+      householdId: row.household.id,
+      spaceId: row.household.spaceId,
+      joinedAt: row.joinedAt,
+    }));
   }
 
   /** Users living in these units (announcement audiences). */
@@ -279,7 +339,51 @@ export class OccupancyService {
    * resident roles revoked where the person has no other home in the estate. Visitor passes are revoked by
    * the visitor module on `occupancy.occupancy.ended`. History is kept.
    */
-  async endOccupancy(access: EstateAccess, occupancyId: string, reason: string) {
+  /** Renews a lease: a new end date (occupancy.md §5, lease expiry). */
+  async renewOccupancy(access: EstateAccess, occupancyId: string, endsOn: string) {
+    return this.db.withTenant(access, async (tx) => {
+      const occupancy = await tx.occupancy.findFirst({
+        where: { id: occupancyId, estateId: access.estateId, status: 'active' },
+      });
+      if (!occupancy) throw new NotFoundError('Occupancy not found', 'OCCUPANCY_NOT_FOUND');
+      if (endsOn <= occupancy.startsOn.toISOString().slice(0, 10))
+        throw new DomainError(
+          'OCCUPANCY_DATES_INVALID',
+          'The new end date must be after the start',
+          422,
+        );
+      await tx.occupancy.update({
+        where: { id: occupancyId },
+        data: { endsOn: new Date(`${endsOn}T00:00:00.000Z`) },
+      });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'occupancy.occupancy.renewed',
+          estateId: access.estateId,
+          aggregateType: 'occupancy',
+          aggregateId: occupancyId,
+          payload: { occupancyId, endsOn },
+          audit: {
+            actorType: 'user',
+            actorId: access.userId,
+            action: 'occupancy.occupancy.renew',
+            resourceType: 'occupancy',
+            resourceId: occupancyId,
+            before: { endsOn: occupancy.endsOn?.toISOString().slice(0, 10) ?? null },
+            after: { endsOn },
+          },
+        },
+      ]);
+      return { id: occupancyId, endsOn };
+    });
+  }
+
+  /** Ends an occupancy (manager now, or the move-out job with `userId: null`). */
+  async endOccupancy(
+    access: { estateId: string; userId: string | null },
+    occupancyId: string,
+    reason: string,
+  ) {
     return this.db.withTenant(access, async (tx) => {
       const occupancy = await tx.occupancy.findFirst({
         where: { id: occupancyId, estateId: access.estateId },
@@ -337,7 +441,7 @@ export class OccupancyService {
             spaceId: occupancy.spaceId,
           },
           audit: {
-            actorType: 'user',
+            actorType: access.userId ? 'user' : 'system',
             actorId: access.userId,
             action: 'occupancy.occupancy.end',
             resourceType: 'occupancy',
@@ -351,6 +455,43 @@ export class OccupancyService {
   }
 
   // ---- Households and members ----------------------------------------------------------------
+
+  /**
+   * Owner mode (property.md rule 8): the caller's owned units and who lives there (household name and
+   * occupancy type only, never contact details).
+   */
+  async ownedUnits(access: EstateAccess) {
+    return this.db.withTenant(access, async (tx) => {
+      const owned = await this.property.ownedUnits(tx, access.estateId, access.userId);
+      const households = await tx.household.findMany({
+        where: {
+          estateId: access.estateId,
+          status: 'active',
+          spaceId: { in: owned.map((o) => o.ownership.spaceId) },
+        },
+        select: {
+          spaceId: true,
+          name: true,
+          occupancies: { where: { status: 'active' }, select: { type: true }, take: 1 },
+        },
+      });
+      const bySpace = new Map(households.map((household) => [household.spaceId, household]));
+      return owned.map(({ ownership, space }) => {
+        const household = bySpace.get(ownership.spaceId);
+        return {
+          ownershipId: ownership.id,
+          spaceId: ownership.spaceId,
+          unitCode: space?.code ?? '',
+          unitName: space?.name ?? '',
+          shareBasisPoints: ownership.shareBp,
+          unitStatus: space?.status ?? null,
+          household: household
+            ? { name: household.name, occupancyType: household.occupancies[0]?.type ?? 'other' }
+            : null,
+        };
+      });
+    });
+  }
 
   async myHouseholds(access: EstateAccess) {
     return this.db.withTenant(access, async (tx) => {

@@ -221,6 +221,22 @@ export class TenancyService {
     });
   }
 
+  /** Usable estates with a feature enabled (daily jobs fan out over these). */
+  async estateIdsWithFeature(feature: FeatureKey): Promise<string[]> {
+    const estates = await this.db.withContext('tenancy', (tx) =>
+      tx.estate.findMany({
+        where: { status: { in: [...USABLE_STATUSES] } },
+        select: { id: true },
+        orderBy: { id: 'asc' },
+      }),
+    );
+    const result: string[] = [];
+    for (const estate of estates) {
+      if ((await this.enabledFeatures(estate.id)).includes(feature)) result.push(estate.id);
+    }
+    return result;
+  }
+
   /** Plan features adjusted by unexpired per-estate overrides. All estates are on the free core plan. */
   async enabledFeatures(estateId: string): Promise<FeatureKey[]> {
     return this.db.withContext(

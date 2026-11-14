@@ -114,3 +114,10 @@ Built in `src/modules/occupancy` ([ADR-0011](../adr/0011-occupancy-and-sos-imple
 - Households: `GET …/households/mine`, `GET …/households/:id`, `POST …/households/:id/members`, `PATCH/DELETE …/household-members/:id`; managers: `POST …/occupancies`, `POST …/occupancies/:id/end` (members leave, vehicles and staff end, unit vacant, resident roles and memberships released; visitor passes revoked by the visitor worker). `GET …/residents` (staff with `resident.read`; phones masked without `pii.view`).
 - Vehicles (`GET/POST …/vehicles`, `POST …/vehicles/:id/deactivate`, guard lookup `GET …/vehicles/lookup?plate=` returning unit, household name and vehicle only), domestic staff (`GET/POST …/domestic-staff`, `POST …/domestic-staff/:id/status`; manager approval per `staff_pass.requires_manager_approval`), emergency contacts (`/v1/me/emergency-contacts`, consent required, at most 5).
 - **Not yet built:** owner approval step (needs Phase 2 ownerships), 7-day reminders and 30-day expiry job (expiry is stored, not yet enforced by a job), resident privacy settings, move-in/out (Phase 2).
+
+## 11. Phase 2 implementation notes
+
+- Tenant join requests go to the unit's owner first when ownership is recorded.
+- Owner mode: `GET …/owned-units`.
+- Move-in/move-out (`MovesModule`, `move_events`), lease renewals, lease reminders at 60/30/7 days and expiry notices; daily job at 00:30 WAT. See [ADR-0014](../adr/0014-phase-2-operations-modules.md).
+- **Not yet built:** resident privacy settings, join request reminders and expiry job.

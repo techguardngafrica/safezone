@@ -136,8 +136,10 @@ describe('emergency: SOS', () => {
 
     await waitFor(async () => {
       await relay.relayBatch();
+      // Wait for every recipient asserted below: fan-out messages can arrive in any order.
       return (
         workerSms.lastTo('+2348031000001') !== undefined &&
+        workerSms.lastTo('+2348031000002') !== undefined &&
         workerSms.lastTo('+2348031000099') !== undefined
       );
     });

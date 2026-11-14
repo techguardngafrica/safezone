@@ -91,3 +91,8 @@ Platform owns **Techguard's control plane** for Safezone: platform staff, featur
 ## 10. Phase 0 implementation notes
 
 Built (`src/modules/platform`): `feature_flags` (default, targeting by estates, apps, minimum version, stable percentage rollout; public flags) and `app_versions`; `GET /v1/public/app-config`, `GET /v1/me/feature-flags`, `GET/PUT /v1/platform/feature-flags[/:key]`, `PUT /v1/platform/app-versions/:app/:platform` (`platform.config`, audited). Flags are cached for 30 seconds per instance.
+
+## 10. Phase 2 implementation notes
+
+- Estate data export: `POST/GET …/exports`, `POST …/exports/:id/download` (15-minute links, audited), built on the `exports` queue from datasets each module registers ([ADR-0014](../adr/0014-phase-2-operations-modules.md)).
+- **Not yet built:** uploaded files in exports, offboarding purge after the read-only period, DSR tooling, support sessions.

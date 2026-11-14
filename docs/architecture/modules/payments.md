@@ -106,3 +106,11 @@ Paystack and Flutterwave behind a `PaymentGateway` adapter: initialise transacti
 - A transfer to a virtual account is matched and allocated within 2 minutes of the provider webhook.
 - 99% of pilot payments reconcile automatically.
 - The resident sees "Payment successful" only after server verification.
+
+## 10. Phase 2 implementation notes
+
+Built in `src/modules/payments` and `src/integrations/payments` ([ADR-0013](../adr/0013-payments-flow.md)):
+
+- `PaymentGateway` with Paystack (fetch) and an in-memory fake; `PAYMENTS_PROVIDER=fake|paystack`.
+- Payout account setup (subaccount; last 4 digits only), payment intents with `Idempotency-Key` and server-computed amounts, signed and de-duplicated webhooks processed on the `payments` queue, `…/payment-intents/:id/verify`, dedicated virtual accounts per payer and unit, office (manual) payments with a second approver, refunds from unallocated credit with a second approver and ledger reversal if the provider fails.
+- **Not yet built:** Flutterwave adapter and failover, daily reconciliation and settlement import, disputes, intent expiry job, receipts.

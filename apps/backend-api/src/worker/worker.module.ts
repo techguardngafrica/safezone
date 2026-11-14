@@ -20,13 +20,49 @@ import { OnboardingConsumer } from '../modules/tenancy/onboarding/onboarding.con
 import { TenancyService } from '../modules/tenancy/tenancy.service';
 import { PassKeysService } from '../modules/visitor/pass-keys.service';
 import { VisitorConsumer } from '../modules/visitor/visitor.consumer';
+import { BillingConsumer } from '../modules/billing/billing.consumer';
+import { BillingModule } from '../modules/billing/billing.module';
+import { PaymentsConsumer } from '../modules/payments/payments.consumer';
+import { PaymentsModule } from '../modules/payments/payments.module';
+import { MaintenanceConsumer } from '../modules/maintenance/maintenance.consumer';
+import { MaintenanceModule } from '../modules/maintenance/maintenance.module';
+import { MovesConsumer } from '../modules/occupancy/moves/moves.consumer';
+import { MovesModule } from '../modules/occupancy/moves/moves.module';
+import { ExportRegistryModule } from '../common/export/export-registry';
+import { ExportsConsumer } from '../modules/platform/exports/exports.consumer';
+import { ExportsModule } from '../modules/platform/exports/exports.module';
+import { FacilitiesConsumer } from '../modules/facilities/facilities.consumer';
+import { CommunityConsumer } from '../modules/community/community.consumer';
+import { FacilitiesModule } from '../modules/facilities/facilities.module';
+import { DocumentsModule } from '../modules/documents/documents.module';
+import { AuditModule } from '../modules/audit/audit.module';
+import { CommunityModule } from '../modules/community/community.module';
+import { EmergencyModule } from '../modules/emergency/emergency.module';
 
 /**
  * Root module for the worker process: outbox relay and queue consumers.
  * SosConsumer is the `sos` queue's own worker pool; never put other work on that queue.
  */
 @Module({
-  imports: [ConfigModule, DatabaseModule, RedisModule, QueuesModule, IntegrationsModule],
+  imports: [
+    ConfigModule,
+    DatabaseModule,
+    RedisModule,
+    QueuesModule,
+    IntegrationsModule,
+    BillingModule,
+    PaymentsModule,
+    MaintenanceModule,
+    MovesModule,
+    ExportRegistryModule,
+    ExportsModule,
+    // Loaded so their export datasets are registered in the worker that builds exports.
+    AuditModule,
+    CommunityModule,
+    EmergencyModule,
+    FacilitiesModule,
+    DocumentsModule,
+  ],
   providers: [
     OutboxRelay,
     AuditService,
@@ -44,6 +80,13 @@ import { VisitorConsumer } from '../modules/visitor/visitor.consumer';
     UserDirectory,
     PropertyService,
     SosConsumer,
+    PaymentsConsumer,
+    BillingConsumer,
+    MaintenanceConsumer,
+    MovesConsumer,
+    ExportsConsumer,
+    FacilitiesConsumer,
+    CommunityConsumer,
   ],
 })
 export class WorkerModule {}

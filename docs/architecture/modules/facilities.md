@@ -78,3 +78,7 @@ Exclusion constraint on `bookings` (facility, tstzrange) for confirmed/pending b
 - Two residents trying to book the same slot at the same moment: one succeeds, one gets a clear conflict message.
 - Unpaid holds release at 30 minutes.
 - Cancellation refund amounts match the policy.
+
+## 9. Phase 3 implementation notes
+
+Built in `src/modules/facilities` ([ADR-0015](../adr/0015-phase-3-community-facilities-documents.md)): facilities with WAT opening hours, rules and pricing (free, flat, hourly, daily); availability; database-enforced no-overlap with buffers; approval; billing invoices with 30-minute holds confirmed on payment; policy refunds to payer credit; blackouts that cancel and refund; check-in and no-show; damage charges; utilisation report; reminders. **Not built:** deposits, guest passes for events, guest pricing.

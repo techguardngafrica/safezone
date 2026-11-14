@@ -22,6 +22,7 @@ const ERROR_STATUS_TEXT: Record<number, string> = {
   422: 'Business rule violation',
   429: 'Too many requests (see Retry-After)',
   500: 'Unexpected error',
+  502: 'A provider (payments, bills) did not respond',
   503: 'Temporarily unavailable',
 };
 

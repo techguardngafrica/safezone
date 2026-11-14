@@ -85,3 +85,11 @@ Work order: `open → scheduled → in_progress → on_hold → completed → ve
 - A resident can submit a request with photos in under 1 minute and track every status change.
 - Assigning a vendor to an in-unit job creates a matching contractor pass.
 - SLA breach notifications fire at the right times, excluding paused periods.
+
+## 10. Phase 2 implementation notes
+
+Built in `src/modules/maintenance` ([ADR-0014](../adr/0014-phase-2-operations-modules.md)):
+
+- Default categories seeded on first use; requests and complaints with the full status machine, comments (internal notes for staff), rating, reopen within 7 days, auto-close after 7 days.
+- SLA policies per priority with pause and two escalation levels (5-minute job); work orders for staff or vendors with schedule, materials, labour cost, verification and recharge invoices; contractor visitor passes for scheduled vendor visits to units; planned (recurring) work orders; maintenance report.
+- **Not yet built:** marketplace vendors (Phase 4), video length check (size is enforced by the files module), resident availability slots.

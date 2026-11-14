@@ -11,7 +11,7 @@
 The root [`.env.example`](../../.env.example) is the single list. Every variable is validated by `apps/backend-api/src/config/env.ts`; error messages name the variable but never print its value.
 
 - In `development` and `test`, missing values fall back to local defaults so `pnpm dev` works against docker-compose.
-- In `staging` and `production` the process refuses to start unless database, Redis, JWT/OTP secrets (32+ chars, all different, no placeholders), `MFA_ENCRYPTION_KEY` (32 bytes base64), storage credentials, Zoho SMTP credentials and `SMS_API_KEY` are set; `SMS_PROVIDER=fake`, non-https `CORS_ORIGINS` and non-https `MANAGEMENT_WEB_URL` are refused; `DATABASE_URL` must connect as `safezone_app`.
+- In `staging` and `production` the process refuses to start unless database, Redis, JWT/OTP secrets (32+ chars, all different, no placeholders), `MFA_ENCRYPTION_KEY` (32 bytes base64), storage credentials, Zoho SMTP credentials and `SMS_API_KEY` are set; `SMS_PROVIDER=fake`, `PAYMENTS_PROVIDER=fake` (and `paystack` without `PAYSTACK_SECRET_KEY`), non-https `CORS_ORIGINS` and non-https `MANAGEMENT_WEB_URL` are refused; `DATABASE_URL` must connect as `safezone_app`.
 - Secrets: `JWT_ACCESS_SECRET` (access JWTs), `JWT_REFRESH_SECRET` (refresh and recovery code hashes), `OTP_HMAC_SECRET` (OTP hashes, rate-limit keys and estate invitation link tokens, ADR-0008; rotating it invalidates open invitations), `MFA_ENCRYPTION_KEY` (TOTP secrets at rest).
 - `PUBLIC_WEB_URL`: base URL of public-web; visitor pass links open `<url>/p/<token>`.
 - `PASS_KEY_ENCRYPTION_KEY`: 32 bytes base64; wraps estate pass-signing keys and pass PINs (ADR-0010). Must differ from `MFA_ENCRYPTION_KEY`.

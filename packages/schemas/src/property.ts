@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { phoneE164Schema } from './common';
 
 /** Spaces tree (property.md). Ownership and transfers are Phase 2. */
 export const SPACE_TYPE_KEYS = [
@@ -129,3 +130,121 @@ export const bulkCreateResultSchema = z.object({
 });
 
 export const spaceParamsSchema = z.object({ estateId: z.uuid(), id: z.uuid() });
+
+// ---- Ownerships (property.md §2.5–2.7, Phase 2) -------------------------------------------------
+
+/** Shares are basis points: 10,000 = 100%. Active shares of a unit never exceed 100%. */
+export const shareBasisPointsSchema = z.number().int().min(1).max(10_000);
+
+export const ownerInputSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('person'),
+    fullName: z.string().trim().min(2).max(120),
+    phone: phoneE164Schema,
+  }),
+  z.object({
+    type: z.literal('company'),
+    companyName: z.string().trim().min(2).max(160),
+    /** The company's contact person signs in and pays owner-billed charges. */
+    contactName: z.string().trim().min(2).max(120),
+    contactPhone: phoneE164Schema,
+  }),
+]);
+
+export const createOwnershipSchema = z.object({
+  owner: ownerInputSchema,
+  shareBasisPoints: shareBasisPointsSchema.default(10_000),
+  startsOn: z.iso.date().optional(),
+  evidenceFileIds: z.array(z.uuid()).max(10).default([]),
+});
+
+export const ownershipSchema = z.object({
+  id: z.uuid(),
+  spaceId: z.uuid(),
+  unitCode: z.string(),
+  ownerType: z.enum(['person', 'company']),
+  ownerUserId: z.uuid(),
+  ownerName: z.string(),
+  companyName: z.string().nullable(),
+  shareBasisPoints: z.number().int(),
+  startsOn: z.iso.date(),
+  endsOn: z.iso.date().nullable(),
+  status: z.enum(['active', 'ended']),
+  verifiedAt: z.iso.datetime().nullable(),
+});
+
+export const endOwnershipSchema = z.object({
+  endsOn: z.iso.date().optional(),
+  reason: z.string().trim().min(3).max(500),
+});
+
+export const transferTypeSchema = z.enum(['sale', 'gift', 'inheritance', 'correction']);
+
+export const createOwnershipTransferSchema = z.object({
+  spaceId: z.uuid(),
+  type: transferTypeSchema,
+  effectiveOn: z.iso.date(),
+  /** New owners; their shares must total 100%. */
+  toOwners: z
+    .array(z.object({ owner: ownerInputSchema, shareBasisPoints: shareBasisPointsSchema }))
+    .min(1)
+    .max(10),
+  documentFileIds: z.array(z.uuid()).max(10).default([]),
+  note: z.string().trim().max(1000).optional(),
+});
+
+export const ownershipTransferStatusSchema = z.enum([
+  'requested',
+  'seller_confirmed',
+  'completed',
+  'rejected',
+  'cancelled',
+]);
+
+export const ownershipTransferSchema = z.object({
+  id: z.uuid(),
+  spaceId: z.uuid(),
+  unitCode: z.string(),
+  type: transferTypeSchema,
+  effectiveOn: z.iso.date(),
+  fromOwnershipIds: z.array(z.uuid()),
+  toOwners: z.array(
+    z.object({
+      name: z.string(),
+      companyName: z.string().nullable(),
+      shareBasisPoints: z.number().int(),
+    }),
+  ),
+  status: ownershipTransferStatusSchema,
+  requestedBy: z.uuid(),
+  sellerConfirmedBy: z.uuid().nullable(),
+  managerOverride: z.boolean(),
+  decidedBy: z.uuid().nullable(),
+  reason: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+});
+
+export const transferDecisionSchema = z.object({
+  /** Manager approving without the seller's confirmation must attach documents and say why. */
+  override: z
+    .object({
+      reason: z.string().trim().min(3).max(500),
+      documentFileIds: z.array(z.uuid()).min(1).max(10),
+    })
+    .optional(),
+});
+
+export const transferListQuerySchema = z.object({
+  status: ownershipTransferStatusSchema.optional(),
+});
+
+export const ownedUnitSchema = z.object({
+  ownershipId: z.uuid(),
+  spaceId: z.uuid(),
+  unitCode: z.string(),
+  unitName: z.string(),
+  shareBasisPoints: z.number().int(),
+  unitStatus: z.string().nullable(),
+  /** Current household (owners see who lives in their unit, not their contact details). */
+  household: z.object({ name: z.string(), occupancyType: z.string() }).nullable(),
+});

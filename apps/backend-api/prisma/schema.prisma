@@ -1156,3 +1156,1208 @@ model AnnouncementRead {
   @@map("announcement_reads")
   @@schema("tenant")
 }
+
+// ---- Billing (billing.md, Phase 2; ADR-0012) ------------------------------------------------------
+// Money columns are integer kobo (bigint). Issued invoice terms, lines, allocations, credit notes,
+// journals and ledger entries are append-only, enforced by triggers in the migration.
+
+model Charge {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  /// estate_dues | service_charge | maintenance_charge | security_levy | development_levy | utility_charge | special_assessment | custom
+  type        String
+  name        String
+  description String?
+  /// AmountRule (packages/schemas billing.ts)
+  amountRule  Json      @map("amount_rule") @db.JsonB
+  /// one_off | monthly | quarterly | annual
+  frequency   String
+  /// occupant (owner arrives with ownerships)
+  payer       String    @default("occupant")
+  /// { spaceIds: uuid[], unitTypes: string[] }
+  appliesTo   Json      @map("applies_to") @db.JsonB
+  /// PenaltyRule (packages/schemas billing.ts), null for no late penalty
+  penaltyRule Json?     @map("penalty_rule") @db.JsonB
+  startsOn    DateTime  @map("starts_on") @db.Date
+  endsOn      DateTime? @map("ends_on") @db.Date
+  /// active | archived
+  status      String    @default("active")
+  currency    String    @default("NGN")
+  version     Int       @default(1)
+  createdBy   String    @map("created_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([estateId, status])
+  @@map("charges")
+  @@schema("tenant")
+}
+
+model BillingRun {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  label            String
+  periodStart      DateTime  @map("period_start") @db.Date
+  periodEnd        DateTime  @map("period_end") @db.Date
+  dueDate          DateTime  @map("due_date") @db.Date
+  chargeIds        String[]  @map("charge_ids") @db.Uuid
+  /// Charge versions the preview was computed from: { [chargeId]: version }
+  chargeVersions   Json?     @map("charge_versions") @db.JsonB
+  /// draft | previewed | awaiting_approval | approved | issued | cancelled
+  status           String    @default("draft")
+  invoiceCount     Int?      @map("invoice_count")
+  totalAmount      BigInt?   @map("total_amount")
+  skippedUnits     Int?      @map("skipped_units")
+  approvalRequired Boolean?  @map("approval_required")
+  currency         String    @default("NGN")
+  createdBy        String    @map("created_by") @db.Uuid
+  submittedBy      String?   @map("submitted_by") @db.Uuid
+  approvedBy       String?   @map("approved_by") @db.Uuid
+  issuedBy         String?   @map("issued_by") @db.Uuid
+  cancelledBy      String?   @map("cancelled_by") @db.Uuid
+  cancelReason     String?   @map("cancel_reason")
+  previewedAt      DateTime? @map("previewed_at") @db.Timestamptz(3)
+  submittedAt      DateTime? @map("submitted_at") @db.Timestamptz(3)
+  approvedAt       DateTime? @map("approved_at") @db.Timestamptz(3)
+  issuedAt         DateTime? @map("issued_at") @db.Timestamptz(3)
+  cancelledAt      DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  version          Int       @default(1)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  items BillingRunItem[]
+
+  @@index([estateId, status, createdAt])
+  @@map("billing_runs")
+  @@schema("tenant")
+}
+
+/// One unit's computed bill in a run (the preview that is approved and then issued).
+model BillingRunItem {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  estateId     String  @map("estate_id") @db.Uuid
+  billingRunId String  @map("billing_run_id") @db.Uuid
+  spaceId      String  @map("space_id") @db.Uuid
+  unitCode     String  @map("unit_code")
+  householdId  String? @map("household_id") @db.Uuid
+  payerUserId  String? @map("payer_user_id") @db.Uuid
+  /// occupant | owner
+  payerType    String  @default("occupant") @map("payer_type")
+  payerName    String? @map("payer_name")
+  amount       BigInt  @default(0)
+  /// [{ chargeId, chargeType, description, quantity, unitAmount, amount }]
+  lines        Json    @db.JsonB
+  /// vacant | not_applicable | payer_changed
+  skipReason   String? @map("skip_reason")
+  invoiceId    String? @map("invoice_id") @db.Uuid
+
+  run BillingRun @relation(fields: [billingRunId], references: [id])
+
+  @@unique([billingRunId, spaceId])
+  @@index([estateId])
+  @@map("billing_run_items")
+  @@schema("tenant")
+}
+
+/// Per-estate invoice number sequence (row-locked on use, so numbers have no gaps per estate).
+model InvoiceCounter {
+  estateId String @id @map("estate_id") @db.Uuid
+  next     Int    @default(1)
+
+  @@map("invoice_counters")
+  @@schema("tenant")
+}
+
+model Invoice {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  estateId            String    @map("estate_id") @db.Uuid
+  number              String
+  spaceId             String    @map("space_id") @db.Uuid
+  householdId         String?   @map("household_id") @db.Uuid
+  payerUserId         String    @map("payer_user_id") @db.Uuid
+  /// occupant | owner
+  payerType           String    @map("payer_type")
+  billingRunId        String?   @map("billing_run_id") @db.Uuid
+  /// Late-payment penalty invoices: the invoice that was paid late (one penalty per invoice).
+  penaltyForInvoiceId String?   @unique @map("penalty_for_invoice_id") @db.Uuid
+  description         String
+  issueDate           DateTime  @map("issue_date") @db.Date
+  dueDate             DateTime  @map("due_date") @db.Date
+  currency            String    @default("NGN")
+  subtotal            BigInt
+  total               BigInt
+  amountPaid          BigInt    @default(0) @map("amount_paid")
+  amountCredited      BigInt    @default(0) @map("amount_credited")
+  amountWaived        BigInt    @default(0) @map("amount_waived")
+  balance             BigInt
+  /// issued | partially_paid | paid | waived | cancelled (overdue is derived from due_date on read)
+  status              String    @default("issued")
+  /// When billing.invoice.overdue was emitted (set once).
+  overdueAt           DateTime? @map("overdue_at") @db.Timestamptz(3)
+  createdBy           String?   @map("created_by") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  lines       InvoiceLine[]
+  creditNotes CreditNote[]
+  waivers     Waiver[]
+  allocations Allocation[]
+
+  @@unique([estateId, number])
+  @@unique([billingRunId, spaceId, payerType])
+  @@index([estateId, status, dueDate])
+  @@index([estateId, payerUserId, issueDate])
+  @@index([estateId, spaceId, issueDate])
+  @@map("invoices")
+  @@schema("tenant")
+}
+
+model InvoiceLine {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  estateId    String  @map("estate_id") @db.Uuid
+  invoiceId   String  @map("invoice_id") @db.Uuid
+  chargeId    String? @map("charge_id") @db.Uuid
+  /// Charge type for income posting (custom when not from a charge).
+  chargeType  String  @map("charge_type")
+  description String
+  quantity    Float
+  unitAmount  BigInt  @map("unit_amount")
+  amount      BigInt
+  position    Int
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@map("invoice_lines")
+  @@schema("tenant")
+}
+
+model CreditNote {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  invoiceId String   @map("invoice_id") @db.Uuid
+  amount    BigInt
+  reason    String
+  createdBy String   @map("created_by") @db.Uuid
+  journalId String   @map("journal_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([estateId, invoiceId])
+  @@map("credit_notes")
+  @@schema("tenant")
+}
+
+model Waiver {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  invoiceId      String    @map("invoice_id") @db.Uuid
+  amount         BigInt
+  reason         String
+  /// pending | approved | rejected
+  status         String    @default("pending")
+  requestedBy    String    @map("requested_by") @db.Uuid
+  decidedBy      String?   @map("decided_by") @db.Uuid
+  decisionReason String?   @map("decision_reason")
+  journalId      String?   @map("journal_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  decidedAt      DateTime? @map("decided_at") @db.Timestamptz(3)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([estateId, status])
+  @@index([invoiceId])
+  @@map("waivers")
+  @@schema("tenant")
+}
+
+/// Money received applied to an invoice. Source is the payments module (payment, manual payment, credit).
+model Allocation {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  invoiceId  String   @map("invoice_id") @db.Uuid
+  amount     BigInt
+  /// payment | manual_payment | credit
+  sourceType String   @map("source_type")
+  sourceId   String   @map("source_id")
+  journalId  String   @map("journal_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@unique([sourceType, sourceId, invoiceId])
+  @@index([estateId, invoiceId])
+  @@map("allocations")
+  @@schema("tenant")
+}
+
+model LedgerAccount {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  /// e.g. receivable:<payer>:<unit>, income:estate_dues, cash:paystack, waivers, credits:<payer>
+  code        String
+  name        String
+  /// asset | liability | income | expense | equity
+  type        String
+  /// Party accounts (receivables, credits): who and which unit, for statements.
+  partyUserId String?  @map("party_user_id") @db.Uuid
+  spaceId     String?  @map("space_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  entries LedgerEntry[]
+
+  @@unique([estateId, code])
+  @@index([estateId, partyUserId])
+  @@index([estateId, spaceId])
+  @@map("ledger_accounts")
+  @@schema("tenant")
+}
+
+model Journal {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  estateId          String   @map("estate_id") @db.Uuid
+  /// invoice | payment | credit_note | waiver | refund | adjustment
+  type              String
+  description       String
+  sourceType        String   @map("source_type")
+  sourceId          String   @map("source_id")
+  reference         String?
+  postedBy          String?  @map("posted_by") @db.Uuid
+  reversesJournalId String?  @map("reverses_journal_id") @db.Uuid
+  postedAt          DateTime @default(now()) @map("posted_at") @db.Timestamptz(3)
+
+  entries LedgerEntry[]
+
+  @@index([estateId, sourceType, sourceId])
+  @@index([estateId, postedAt])
+  @@map("journals")
+  @@schema("tenant")
+}
+
+model LedgerEntry {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  journalId  String   @map("journal_id") @db.Uuid
+  accountId  String   @map("account_id") @db.Uuid
+  debit      BigInt   @default(0)
+  credit     BigInt   @default(0)
+  occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  journal Journal       @relation(fields: [journalId], references: [id])
+  account LedgerAccount @relation(fields: [accountId], references: [id])
+
+  @@index([journalId])
+  @@index([estateId, accountId, occurredAt])
+  @@map("ledger_entries")
+  @@schema("tenant")
+}
+
+// ---- Payments (payments.md, Phase 2; ADR-0013) ---------------------------------------------------
+// Safezone never holds estate money: checkout and transfers settle to the estate's provider
+// subaccount. Full bank account numbers are never stored (only the last 4 digits).
+
+model PayoutAccount {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  provider       String
+  subaccountCode String    @map("subaccount_code")
+  bankCode       String    @map("bank_code")
+  bankName       String    @map("bank_name")
+  accountName    String    @map("account_name")
+  accountLast4   String    @map("account_last4")
+  /// active | disabled (one active account per estate and provider)
+  status         String    @default("active")
+  verifiedAt     DateTime  @default(now()) @map("verified_at") @db.Timestamptz(3)
+  createdBy      String    @map("created_by") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  disabledAt     DateTime? @map("disabled_at") @db.Timestamptz(3)
+
+  @@index([estateId, provider, status])
+  @@map("payout_accounts")
+  @@schema("tenant")
+}
+
+model VirtualAccount {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  estateId      String   @map("estate_id") @db.Uuid
+  spaceId       String   @map("space_id") @db.Uuid
+  payerUserId   String   @map("payer_user_id") @db.Uuid
+  provider      String
+  customerCode  String   @map("customer_code")
+  accountNumber String   @map("account_number")
+  bankName      String   @map("bank_name")
+  accountName   String   @map("account_name")
+  /// active | inactive
+  status        String   @default("active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([provider, customerCode])
+  @@index([estateId, payerUserId, status])
+  @@map("virtual_accounts")
+  @@schema("tenant")
+}
+
+model PaymentIntent {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  /// invoice (booking, utility, order, ad_invoice later)
+  purpose          String
+  purposeIds       String[]  @map("purpose_ids") @db.Uuid
+  payerUserId      String    @map("payer_user_id") @db.Uuid
+  amount           BigInt
+  currency         String    @default("NGN")
+  provider         String
+  reference        String    @unique
+  authorizationUrl String?   @map("authorization_url")
+  subaccountCode   String    @map("subaccount_code")
+  /// created | pending | succeeded | failed | cancelled | expired
+  status           String    @default("created")
+  idempotencyKey   String    @map("idempotency_key")
+  failureReason    String?   @map("failure_reason")
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(3)
+  paidAt           DateTime? @map("paid_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, payerUserId, idempotencyKey])
+  @@index([estateId, payerUserId, createdAt])
+  @@map("payment_intents")
+  @@schema("tenant")
+}
+
+/// A verified provider transaction (append-only apart from refund totals).
+model PaymentTransaction {
+  id                    String   @id @default(uuid(7)) @db.Uuid
+  estateId              String   @map("estate_id") @db.Uuid
+  intentId              String?  @map("intent_id") @db.Uuid
+  virtualAccountId      String?  @map("virtual_account_id") @db.Uuid
+  payerUserId           String   @map("payer_user_id") @db.Uuid
+  provider              String
+  providerTransactionId String   @map("provider_transaction_id")
+  reference             String
+  /// card | bank | ussd | bank_transfer | dedicated_nuban | ...
+  channel               String
+  amount                BigInt
+  fees                  BigInt   @default(0)
+  amountRefunded        BigInt   @default(0) @map("amount_refunded")
+  paidAt                DateTime @map("paid_at") @db.Timestamptz(3)
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([provider, providerTransactionId])
+  @@index([estateId, payerUserId, paidAt])
+  @@index([estateId, paidAt])
+  @@map("payment_transactions")
+  @@schema("tenant")
+}
+
+model ManualPayment {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  payerUserId    String    @map("payer_user_id") @db.Uuid
+  spaceId        String?   @map("space_id") @db.Uuid
+  amount         BigInt
+  /// cash | cheque | bank_deposit | pos
+  method         String
+  receivedOn     DateTime  @map("received_on") @db.Date
+  reference      String?
+  evidenceFileId String?   @map("evidence_file_id") @db.Uuid
+  note           String?
+  /// pending | approved | rejected
+  status         String    @default("pending")
+  recordedBy     String    @map("recorded_by") @db.Uuid
+  decidedBy      String?   @map("decided_by") @db.Uuid
+  decisionReason String?   @map("decision_reason")
+  decidedAt      DateTime? @map("decided_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, status])
+  @@map("manual_payments")
+  @@schema("tenant")
+}
+
+model Refund {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  transactionId  String    @map("transaction_id") @db.Uuid
+  amount         BigInt
+  reason         String
+  /// pending | approved | processing | completed | failed | rejected
+  status         String    @default("pending")
+  requestedBy    String    @map("requested_by") @db.Uuid
+  decidedBy      String?   @map("decided_by") @db.Uuid
+  decisionReason String?   @map("decision_reason")
+  providerRef    String?   @map("provider_ref")
+  journalId      String?   @map("journal_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  decidedAt      DateTime? @map("decided_at") @db.Timestamptz(3)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(3)
+
+  @@index([estateId, status])
+  @@index([transactionId])
+  @@map("refunds")
+  @@schema("tenant")
+}
+
+/// Maps provider references and customer codes to an estate, so webhooks (which carry no estate)
+/// can be processed inside the right tenant (payments context only).
+model PaymentRoute {
+  provider  String
+  routeKey  String   @map("route_key")
+  /// intent | virtual_account | refund
+  kind      String
+  estateId  String   @map("estate_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@id([provider, routeKey])
+  @@map("payment_routes")
+  @@schema("platform")
+}
+
+/// Received provider webhooks (minimised: no card or account data). De-duplicated on event id.
+model PaymentWebhookEvent {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  provider       String
+  eventId        String    @map("event_id")
+  type           String
+  reference      String?
+  customerCode   String?   @map("customer_code")
+  signatureValid Boolean   @map("signature_valid")
+  receivedAt     DateTime  @default(now()) @map("received_at") @db.Timestamptz(3)
+  processedAt    DateTime? @map("processed_at") @db.Timestamptz(3)
+  /// processed | ignored | failed
+  result         String?
+
+  @@unique([provider, eventId])
+  @@map("payment_webhook_events")
+  @@schema("platform")
+}
+
+// ---- Ownerships (property.md, Phase 2; ADR-0014) -------------------------------------------------
+
+model Ownership {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  spaceId          String    @map("space_id") @db.Uuid
+  /// person | company
+  ownerType        String    @map("owner_type")
+  /// The person, or the company's contact person (signs in, pays owner-billed charges).
+  ownerUserId      String    @map("owner_user_id") @db.Uuid
+  ownerName        String    @map("owner_name")
+  ownerCompanyName String?   @map("owner_company_name")
+  /// 10,000 = 100%
+  shareBp          Int       @map("share_bp")
+  startsOn         DateTime  @map("starts_on") @db.Date
+  endsOn           DateTime? @map("ends_on") @db.Date
+  /// active | ended
+  status           String    @default("active")
+  evidenceFileIds  String[]  @map("evidence_file_ids") @db.Uuid
+  transferId       String?   @map("transfer_id") @db.Uuid
+  verifiedBy       String?   @map("verified_by") @db.Uuid
+  verifiedAt       DateTime? @map("verified_at") @db.Timestamptz(3)
+  createdBy        String    @map("created_by") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  endedAt          DateTime? @map("ended_at") @db.Timestamptz(3)
+  endReason        String?   @map("end_reason")
+
+  @@index([estateId, spaceId, status])
+  @@index([estateId, ownerUserId, status])
+  @@map("ownerships")
+  @@schema("tenant")
+}
+
+model OwnershipTransfer {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  estateId          String    @map("estate_id") @db.Uuid
+  spaceId           String    @map("space_id") @db.Uuid
+  /// sale | gift | inheritance | correction
+  type              String
+  effectiveOn       DateTime  @map("effective_on") @db.Date
+  fromOwnershipIds  String[]  @map("from_ownership_ids") @db.Uuid
+  /// [{ owner: OwnerInput, shareBasisPoints }]
+  toOwners          Json      @map("to_owners") @db.JsonB
+  documentFileIds   String[]  @map("document_file_ids") @db.Uuid
+  note              String?
+  /// requested | seller_confirmed | completed | rejected | cancelled
+  status            String    @default("requested")
+  requestedBy       String    @map("requested_by") @db.Uuid
+  sellerConfirmedBy String?   @map("seller_confirmed_by") @db.Uuid
+  managerOverride   Boolean   @default(false) @map("manager_override")
+  overrideReason    String?   @map("override_reason")
+  decidedBy         String?   @map("decided_by") @db.Uuid
+  reason            String?
+  version           Int       @default(1)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  decidedAt         DateTime? @map("decided_at") @db.Timestamptz(3)
+
+  @@index([estateId, status])
+  @@index([estateId, spaceId])
+  @@map("ownership_transfers")
+  @@schema("tenant")
+}
+
+// ---- Maintenance (maintenance.md, Phase 2; ADR-0014) ---------------------------------------------
+
+model MaintenanceCategory {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  name            String
+  /// maintenance | complaint
+  kind            String   @default("maintenance")
+  defaultPriority String   @default("normal") @map("default_priority")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([estateId, name])
+  @@map("maintenance_categories")
+  @@schema("tenant")
+}
+
+model MaintenanceCounter {
+  estateId String @map("estate_id") @db.Uuid
+  /// MR | WO
+  kind     String
+  next     Int    @default(1)
+
+  @@id([estateId, kind])
+  @@map("maintenance_counters")
+  @@schema("tenant")
+}
+
+model MaintenanceRequest {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  estateId          String    @map("estate_id") @db.Uuid
+  number            String
+  kind              String
+  categoryId        String    @map("category_id") @db.Uuid
+  priority          String
+  spaceId           String?   @map("space_id") @db.Uuid
+  householdId       String?   @map("household_id") @db.Uuid
+  title             String
+  description       String
+  preferredTimes    String?   @map("preferred_times")
+  aboutNeighbour    Boolean   @default(false) @map("about_neighbour")
+  attachmentFileIds String[]  @map("attachment_file_ids") @db.Uuid
+  requestedBy       String    @map("requested_by") @db.Uuid
+  status            String    @default("submitted")
+  slaDueAt          DateTime? @map("sla_due_at") @db.Timestamptz(3)
+  slaPausedAt       DateTime? @map("sla_paused_at") @db.Timestamptz(3)
+  slaPausedMs       BigInt    @default(0) @map("sla_paused_ms")
+  /// 0 none, 1 facility manager notified, 2 estate manager notified
+  slaBreachLevel    Int       @default(0) @map("sla_breach_level")
+  resolutionHours   Int       @map("resolution_hours")
+  rejectionReason   String?   @map("rejection_reason")
+  rating            Int?
+  feedback          String?
+  version           Int       @default(1)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  respondedAt       DateTime? @map("responded_at") @db.Timestamptz(3)
+  resolvedAt        DateTime? @map("resolved_at") @db.Timestamptz(3)
+  closedAt          DateTime? @map("closed_at") @db.Timestamptz(3)
+
+  comments MaintenanceComment[]
+
+  @@unique([estateId, number])
+  @@index([estateId, status, createdAt])
+  @@index([estateId, requestedBy])
+  @@index([estateId, householdId])
+  @@map("maintenance_requests")
+  @@schema("tenant")
+}
+
+model MaintenanceComment {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  requestId String   @map("request_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  body      String
+  internal  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  request MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  @@index([requestId, createdAt])
+  @@map("maintenance_comments")
+  @@schema("tenant")
+}
+
+model WorkOrder {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  estateId           String    @map("estate_id") @db.Uuid
+  number             String
+  requestId          String?   @map("request_id") @db.Uuid
+  recurringId        String?   @map("recurring_id") @db.Uuid
+  title              String
+  scope              String?
+  spaceId            String?   @map("space_id") @db.Uuid
+  /// staff | vendor
+  assigneeType       String?   @map("assignee_type")
+  assigneeUserId     String?   @map("assignee_user_id") @db.Uuid
+  vendorName         String?   @map("vendor_name")
+  vendorPhone        String?   @map("vendor_phone")
+  vendorCompany      String?   @map("vendor_company")
+  scheduledStart     DateTime? @map("scheduled_start") @db.Timestamptz(3)
+  scheduledEnd       DateTime? @map("scheduled_end") @db.Timestamptz(3)
+  status             String    @default("open")
+  visitorPassId      String?   @map("visitor_pass_id") @db.Uuid
+  labourCost         BigInt    @default(0) @map("labour_cost")
+  materialsCost      BigInt    @default(0) @map("materials_cost")
+  rechargeToResident Boolean   @default(false) @map("recharge_to_resident")
+  invoiceId          String?   @map("invoice_id") @db.Uuid
+  resolutionNotes    String?   @map("resolution_notes")
+  resolutionFileIds  String[]  @map("resolution_file_ids") @db.Uuid
+  createdBy          String    @map("created_by") @db.Uuid
+  completedAt        DateTime? @map("completed_at") @db.Timestamptz(3)
+  verifiedBy         String?   @map("verified_by") @db.Uuid
+  verifiedAt         DateTime? @map("verified_at") @db.Timestamptz(3)
+  version            Int       @default(1)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  materials WorkOrderMaterial[]
+
+  @@unique([estateId, number])
+  @@index([estateId, status])
+  @@index([estateId, assigneeUserId, status])
+  @@index([requestId])
+  @@map("work_orders")
+  @@schema("tenant")
+}
+
+model WorkOrderMaterial {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  workOrderId String   @map("work_order_id") @db.Uuid
+  item        String
+  quantity    Float
+  unitCost    BigInt   @map("unit_cost")
+  amount      BigInt
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+  @@map("work_order_materials")
+  @@schema("tenant")
+}
+
+model RecurringMaintenance {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  title           String
+  scope           String?
+  spaceId         String?  @map("space_id") @db.Uuid
+  /// weekly | monthly | quarterly | annually
+  frequency       String
+  nextRunOn       DateTime @map("next_run_on") @db.Date
+  /// WorkOrderAssignee or null
+  assignee        Json?    @db.JsonB
+  active          Boolean  @default(true)
+  lastWorkOrderId String?  @map("last_work_order_id") @db.Uuid
+  createdBy       String   @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, active, nextRunOn])
+  @@map("recurring_maintenance")
+  @@schema("tenant")
+}
+
+model SlaPolicy {
+  estateId        String   @map("estate_id") @db.Uuid
+  priority        String
+  responseMinutes Int      @map("response_minutes")
+  resolutionHours Int      @map("resolution_hours")
+  updatedBy       String?  @map("updated_by") @db.Uuid
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@id([estateId, priority])
+  @@map("sla_policies")
+  @@schema("tenant")
+}
+
+// ---- Utilities (utilities.md, Phase 2; ADR-0014) -------------------------------------------------
+
+model Meter {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  spaceId      String    @map("space_id") @db.Uuid
+  /// electricity | water | gas
+  type         String
+  /// public (DisCo / provider) | estate (sub-meter)
+  supply       String
+  providerCode String    @map("provider_code")
+  meterNumber  String    @map("meter_number")
+  accountName  String?   @map("account_name")
+  prepaid      Boolean   @default(true)
+  /// active | removed
+  status       String    @default("active")
+  verifiedAt   DateTime? @map("verified_at") @db.Timestamptz(3)
+  createdBy    String    @map("created_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  removedAt    DateTime? @map("removed_at") @db.Timestamptz(3)
+
+  readings MeterReading[]
+
+  @@index([estateId, spaceId, status])
+  @@map("meters")
+  @@schema("tenant")
+}
+
+model MeterReading {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  meterId    String   @map("meter_id") @db.Uuid
+  reading    Float
+  readAt     DateTime @map("read_at") @db.Timestamptz(3)
+  /// manual | import | device
+  source     String   @default("manual")
+  recordedBy String?  @map("recorded_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  meter Meter @relation(fields: [meterId], references: [id])
+
+  @@index([meterId, readAt])
+  @@map("meter_readings")
+  @@schema("tenant")
+}
+
+model UtilityOutage {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  estateId      String    @map("estate_id") @db.Uuid
+  type          String
+  title         String
+  details       String?
+  startsAt      DateTime  @map("starts_at") @db.Timestamptz(3)
+  expectedEndAt DateTime? @map("expected_end_at") @db.Timestamptz(3)
+  spaceIds      String[]  @map("space_ids") @db.Uuid
+  /// announced | resolved | cancelled
+  status        String    @default("announced")
+  notified      Int       @default(0)
+  createdBy     String    @map("created_by") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  closedAt      DateTime? @map("closed_at") @db.Timestamptz(3)
+
+  @@index([estateId, status, startsAt])
+  @@map("utility_outages")
+  @@schema("tenant")
+}
+
+/// Move-in and move-out (occupancy.md §5; ADR-0014).
+model MoveEvent {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  estateId           String    @map("estate_id") @db.Uuid
+  occupancyId        String    @map("occupancy_id") @db.Uuid
+  spaceId            String    @map("space_id") @db.Uuid
+  householdId        String    @map("household_id") @db.Uuid
+  /// move_in | move_out
+  type               String
+  scheduledOn        DateTime  @map("scheduled_on") @db.Date
+  gateNotice         Json      @map("gate_notice") @db.JsonB
+  checklist          Json      @db.JsonB
+  /// scheduled | completed | cancelled
+  status             String    @default("scheduled")
+  outstandingBalance BigInt    @default(0) @map("outstanding_balance")
+  createdBy          String    @map("created_by") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  completedAt        DateTime? @map("completed_at") @db.Timestamptz(3)
+  completedBy        String?   @map("completed_by") @db.Uuid
+  cancelReason       String?   @map("cancel_reason")
+
+  @@index([estateId, scheduledOn, status])
+  @@index([occupancyId])
+  @@map("move_events")
+  @@schema("tenant")
+}
+
+/// Estate data exports (platform.md §6; ADR-0014). The ZIP lives in object storage under `object_key`.
+model EstateExport {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  requestedBy String    @map("requested_by") @db.Uuid
+  /// queued | building | ready | failed | expired
+  status      String    @default("queued")
+  objectKey   String?   @map("object_key")
+  sizeBytes   Int?      @map("size_bytes")
+  /// { [dataset]: rowCount }
+  datasets    Json?     @db.JsonB
+  error       String?
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  readyAt     DateTime? @map("ready_at") @db.Timestamptz(3)
+
+  @@index([estateId, createdAt])
+  @@map("estate_exports")
+  @@schema("tenant")
+}
+
+// ---- Facilities (facilities.md, Phase 3; ADR-0015) -----------------------------------------------
+
+model Facility {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  estateId     String   @map("estate_id") @db.Uuid
+  spaceId      String?  @map("space_id") @db.Uuid
+  name         String
+  type         String
+  capacity     Int?
+  description  String?
+  rules        String?
+  photoFileIds String[] @map("photo_file_ids") @db.Uuid
+  /// active | closed
+  status       String   @default("active")
+  /// [{ day, open, close }] in WAT
+  openingHours Json     @map("opening_hours") @db.JsonB
+  policy       Json     @db.JsonB
+  pricing      Json     @db.JsonB
+  version      Int      @default(1)
+  createdBy    String   @map("created_by") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, status])
+  @@map("facilities")
+  @@schema("tenant")
+}
+
+model FacilityBlackout {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  facilityId String   @map("facility_id") @db.Uuid
+  startsAt   DateTime @map("starts_at") @db.Timestamptz(3)
+  endsAt     DateTime @map("ends_at") @db.Timestamptz(3)
+  reason     String
+  createdBy  String   @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([facilityId, startsAt])
+  @@map("facility_blackouts")
+  @@schema("tenant")
+}
+
+model Booking {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String    @map("estate_id") @db.Uuid
+  facilityId      String    @map("facility_id") @db.Uuid
+  bookedBy        String    @map("booked_by") @db.Uuid
+  householdId     String?   @map("household_id") @db.Uuid
+  spaceId         String?   @map("space_id") @db.Uuid
+  startsAt        DateTime  @map("starts_at") @db.Timestamptz(3)
+  endsAt          DateTime  @map("ends_at") @db.Timestamptz(3)
+  /// End plus the facility's buffer: the span no other booking may overlap.
+  blockedUntil    DateTime  @map("blocked_until") @db.Timestamptz(3)
+  guests          Int       @default(0)
+  purpose         String?
+  /// pending_approval | pending_payment | confirmed | cancelled | completed | no_show | rejected
+  status          String
+  price           BigInt    @default(0)
+  invoiceId       String?   @unique @map("invoice_id") @db.Uuid
+  holdExpiresAt   DateTime? @map("hold_expires_at") @db.Timestamptz(3)
+  approvedBy      String?   @map("approved_by") @db.Uuid
+  rejectionReason String?   @map("rejection_reason")
+  overrideReason  String?   @map("override_reason")
+  cancelledAt     DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  cancelReason    String?   @map("cancel_reason")
+  refundAmount    BigInt    @default(0) @map("refund_amount")
+  checkedInAt     DateTime? @map("checked_in_at") @db.Timestamptz(3)
+  remindedAt      DateTime? @map("reminded_at") @db.Timestamptz(3)
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([facilityId, startsAt])
+  @@index([estateId, bookedBy, startsAt])
+  @@index([estateId, status])
+  @@map("bookings")
+  @@schema("tenant")
+}
+
+model DamageReport {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  estateId     String   @map("estate_id") @db.Uuid
+  facilityId   String   @map("facility_id") @db.Uuid
+  bookingId    String   @map("booking_id") @db.Uuid
+  description  String
+  photoFileIds String[] @map("photo_file_ids") @db.Uuid
+  chargeAmount BigInt   @default(0) @map("charge_amount")
+  invoiceId    String?  @map("invoice_id") @db.Uuid
+  reportedBy   String   @map("reported_by") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([bookingId])
+  @@map("damage_reports")
+  @@schema("tenant")
+}
+
+// ---- Documents (documents.md, Phase 3; ADR-0015) -------------------------------------------------
+
+model DocumentFolder {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  parentId  String?  @map("parent_id") @db.Uuid
+  name      String
+  createdBy String   @map("created_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([estateId, parentId, name])
+  @@map("document_folders")
+  @@schema("tenant")
+}
+
+model Document {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  folderId       String?   @map("folder_id") @db.Uuid
+  category       String
+  title          String
+  description    String?
+  /// DocumentVisibility (packages/schemas documents.ts)
+  visibility     Json      @db.JsonB
+  expiresOn      DateTime? @map("expires_on") @db.Date
+  /// active | archived
+  status         String    @default("active")
+  currentVersion Int       @default(1) @map("current_version")
+  createdBy      String    @map("created_by") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  archivedAt     DateTime? @map("archived_at") @db.Timestamptz(3)
+
+  versions DocumentVersion[]
+
+  @@index([estateId, status, category])
+  @@index([estateId, expiresOn])
+  @@map("documents")
+  @@schema("tenant")
+}
+
+model DocumentVersion {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  documentId String   @map("document_id") @db.Uuid
+  version    Int
+  fileId     String   @map("file_id") @db.Uuid
+  notes      String?
+  uploadedBy String   @map("uploaded_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  document Document @relation(fields: [documentId], references: [id])
+
+  @@unique([documentId, version])
+  @@map("document_versions")
+  @@schema("tenant")
+}
+
+model DocumentAccess {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  documentId String   @map("document_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  /// view | download
+  action     String
+  version    Int
+  at         DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([documentId, at])
+  @@map("document_access_log")
+  @@schema("tenant")
+}
+
+// ---- Community channels, moderation and polls (community.md, Phase 3; ADR-0015) ------------------
+
+model Channel {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  /// building | estate | resident | direct
+  type        String
+  /// Building channels: the building (or block) space. Estate channels: null.
+  spaceId     String?   @map("space_id") @db.Uuid
+  /// Seeded estate channels: general, security_updates, …; direct: sorted user ids.
+  key         String?
+  name        String
+  description String?
+  category    String?
+  /// public | restricted | invite_only
+  privacy     String    @default("public")
+  /// pending_approval | active | suspended | archived
+  status      String    @default("active")
+  staffOnly   Boolean   @default(false) @map("staff_only")
+  createdBy   String?   @map("created_by") @db.Uuid
+  approvedBy  String?   @map("approved_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  suspendedAt DateTime? @map("suspended_at") @db.Timestamptz(3)
+
+  @@unique([estateId, type, key])
+  @@index([estateId, type, status])
+  @@map("channels")
+  @@schema("tenant")
+}
+
+/// Explicit members (resident and direct channels) and per-user preferences on derived channels.
+model ChannelMember {
+  estateId   String    @map("estate_id") @db.Uuid
+  channelId  String    @map("channel_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  /// owner | moderator | member
+  role       String    @default("member")
+  /// active | requested | invited | removed
+  status     String    @default("active")
+  /// all | mentions | none
+  notify     String    @default("all")
+  mutedUntil DateTime? @map("muted_until") @db.Timestamptz(3)
+  joinedAt   DateTime  @default(now()) @map("joined_at") @db.Timestamptz(3)
+
+  @@id([channelId, userId])
+  @@index([estateId, userId, status])
+  @@map("channel_members")
+  @@schema("tenant")
+}
+
+model Message {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  estateId            String    @map("estate_id") @db.Uuid
+  channelId           String    @map("channel_id") @db.Uuid
+  authorId            String    @map("author_id") @db.Uuid
+  body                String
+  replyToId           String?   @map("reply_to_id") @db.Uuid
+  attachmentFileIds   String[]  @map("attachment_file_ids") @db.Uuid
+  mentionUserIds      String[]  @map("mention_user_ids") @db.Uuid
+  editedAt            DateTime? @map("edited_at") @db.Timestamptz(3)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(3)
+  removedByModeration Boolean   @default(false) @map("removed_by_moderation")
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([channelId, createdAt])
+  @@index([estateId, authorId])
+  @@map("messages")
+  @@schema("tenant")
+}
+
+model MessageReaction {
+  estateId  String   @map("estate_id") @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  emoji     String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@id([messageId, userId, emoji])
+  @@map("message_reactions")
+  @@schema("tenant")
+}
+
+model UserBlock {
+  estateId  String   @map("estate_id") @db.Uuid
+  blockerId String   @map("blocker_id") @db.Uuid
+  blockedId String   @map("blocked_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@id([estateId, blockerId, blockedId])
+  @@map("user_blocks")
+  @@schema("tenant")
+}
+
+model CommunityProfile {
+  estateId             String    @map("estate_id") @db.Uuid
+  userId               String    @map("user_id") @db.Uuid
+  guidelinesAcceptedAt DateTime? @map("guidelines_accepted_at") @db.Timestamptz(3)
+  /// Estate-wide mute (moderation) until this time.
+  mutedUntil           DateTime? @map("muted_until") @db.Timestamptz(3)
+  /// Estate-wide ban; null when not banned, far future for permanent.
+  bannedUntil          DateTime? @map("banned_until") @db.Timestamptz(3)
+  warnings             Int       @default(0)
+
+  @@id([estateId, userId])
+  @@map("community_profiles")
+  @@schema("tenant")
+}
+
+model CommunityReport {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  /// message | channel | user
+  targetType String    @map("target_type")
+  targetId   String    @map("target_id") @db.Uuid
+  reason     String
+  details    String?
+  reportedBy String    @map("reported_by") @db.Uuid
+  /// open | actioned | dismissed
+  status     String    @default("open")
+  handledBy  String?   @map("handled_by") @db.Uuid
+  handledAt  DateTime? @map("handled_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([targetType, targetId, reportedBy])
+  @@index([estateId, status, createdAt])
+  @@map("community_reports")
+  @@schema("tenant")
+}
+
+model ModerationAction {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String    @map("estate_id") @db.Uuid
+  action          String
+  targetType      String    @map("target_type")
+  targetId        String    @map("target_id") @db.Uuid
+  /// The user the action applies to (author of a removed message, muted or banned user).
+  subjectUserId   String?   @map("subject_user_id") @db.Uuid
+  channelId       String?   @map("channel_id") @db.Uuid
+  reason          String
+  endsAt          DateTime? @map("ends_at") @db.Timestamptz(3)
+  moderatorId     String    @map("moderator_id") @db.Uuid
+  reportId        String?   @map("report_id") @db.Uuid
+  /// none | pending | upheld | overturned
+  appealStatus    String    @default("none") @map("appeal_status")
+  appealStatement String?   @map("appeal_statement")
+  appealDecidedBy String?   @map("appeal_decided_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, createdAt])
+  @@index([estateId, subjectUserId])
+  @@map("moderation_actions")
+  @@schema("tenant")
+}
+
+model Poll {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  question        String
+  closesAt        DateTime @map("closes_at") @db.Timestamptz(3)
+  anonymous       Boolean  @default(false)
+  /// user | household
+  votePer         String   @default("user") @map("vote_per")
+  /// estate | spaces
+  audienceType    String   @map("audience_type")
+  audienceUnitIds String[] @map("audience_unit_ids") @db.Uuid
+  createdBy       String   @map("created_by") @db.Uuid
+  closedNotified  Boolean  @default(false) @map("closed_notified")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  options PollOption[]
+
+  @@index([estateId, closesAt])
+  @@map("polls")
+  @@schema("tenant")
+}
+
+model PollOption {
+  id       String @id @default(uuid(7)) @db.Uuid
+  estateId String @map("estate_id") @db.Uuid
+  pollId   String @map("poll_id") @db.Uuid
+  label    String
+  position Int
+
+  poll Poll @relation(fields: [pollId], references: [id])
+
+  @@index([pollId])
+  @@map("poll_options")
+  @@schema("tenant")
+}
+
+model PollVote {
+  id       String   @id @default(uuid(7)) @db.Uuid
+  estateId String   @map("estate_id") @db.Uuid
+  pollId   String   @map("poll_id") @db.Uuid
+  optionId String   @map("option_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  /// The voting unit: the user, or their household when the poll is one vote per household.
+  voterKey String   @map("voter_key")
+  votedAt  DateTime @default(now()) @map("voted_at") @db.Timestamptz(3)
+
+  @@unique([pollId, voterKey])
+  @@map("poll_votes")
+  @@schema("tenant")
+}
