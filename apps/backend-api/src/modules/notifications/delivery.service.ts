@@ -5,7 +5,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import type { RelayedEvent } from '../../common/outbox/outbox-relay';
 import { PushSender } from '../../integrations/push/push-sender';
 import { SmsSender } from '../../integrations/sms/sms-sender';
-import { INTENTS, isIntentKey, resolveChannels } from './domain/intents';
+import { type IntentDefinition, INTENTS, isIntentKey, resolveChannels } from './domain/intents';
 import { type NotificationRequest, notificationRequestSchema } from './notifications.service';
 
 /** Domain events that become notifications without the emitting module calling us. */
@@ -57,7 +57,7 @@ export class DeliveryService {
 
   private async deliverToUser(
     request: NotificationRequest,
-    intent: (typeof INTENTS)[keyof typeof INTENTS],
+    intent: IntentDefinition,
     userId: string,
   ): Promise<void> {
     const prepared = await this.db.withContext('notifications', async (tx) => {

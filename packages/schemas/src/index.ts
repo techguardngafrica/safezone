@@ -9,3 +9,5 @@ export * from './authz';
 export * from './notifications';
 export * from './files';
 export * from './platform';
+export * from './onboarding';
+export * from './property';

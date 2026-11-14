@@ -32,7 +32,67 @@ export const INTENTS = {
     body: 'notifications.account.security_alert.body',
     sms: 'notifications.account.security_alert.sms',
   },
+  'onboarding.application_received': {
+    category: 'account',
+    priority: 'normal',
+    mandatory: true,
+    channels: ['push', 'sms'],
+    smsOnlyWithoutPush: true,
+    title: 'notifications.onboarding.application_received.title',
+    body: 'notifications.onboarding.application_received.body',
+  },
+  'onboarding.application_info_requested': {
+    category: 'account',
+    priority: 'high',
+    mandatory: true,
+    channels: ['push', 'sms'],
+    smsOnlyWithoutPush: true,
+    title: 'notifications.onboarding.application_info_requested.title',
+    body: 'notifications.onboarding.application_info_requested.body',
+  },
+  'onboarding.application_approved': {
+    category: 'account',
+    priority: 'high',
+    mandatory: true,
+    channels: ['push', 'sms'],
+    smsOnlyWithoutPush: true,
+    title: 'notifications.onboarding.application_approved.title',
+    body: 'notifications.onboarding.application_approved.body',
+  },
+  'onboarding.application_rejected': {
+    category: 'account',
+    priority: 'high',
+    mandatory: true,
+    channels: ['push', 'sms'],
+    smsOnlyWithoutPush: true,
+    title: 'notifications.onboarding.application_rejected.title',
+    body: 'notifications.onboarding.application_rejected.body',
+  },
 } as const satisfies Record<string, IntentDefinition>;
+
+/**
+ * Messages to a phone number or email address that may not belong to a user yet (invitations).
+ * No in-app record; each channel is sent at most once per dedupe key.
+ */
+export interface ContactIntentDefinition {
+  sms: MessageKey;
+  emailSubject: MessageKey;
+  emailBody: MessageKey;
+}
+
+export const CONTACT_INTENTS = {
+  'onboarding.invitation': {
+    sms: 'notifications.onboarding.invitation.sms',
+    emailSubject: 'notifications.onboarding.invitation.email_subject',
+    emailBody: 'notifications.onboarding.invitation.email_body',
+  },
+} as const satisfies Record<string, ContactIntentDefinition>;
+
+export type ContactIntentKey = keyof typeof CONTACT_INTENTS;
+
+export function isContactIntentKey(value: string): value is ContactIntentKey {
+  return Object.hasOwn(CONTACT_INTENTS, value);
+}
 
 export type IntentKey = keyof typeof INTENTS;
 

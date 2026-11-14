@@ -17,6 +17,8 @@ export const QUEUES = {
   ads: 'ads',
   files: 'files',
   maintenanceJobs: 'maintenance-jobs',
+  /** Estate onboarding: invitation sends. */
+  onboarding: 'onboarding',
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 

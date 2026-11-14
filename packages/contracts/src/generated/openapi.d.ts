@@ -292,6 +292,194 @@ export interface paths {
     patch: operations['estate_updateSettings'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/setup-progress': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Setup wizard progress
+     * @description Requires `estate.configure`.
+     */
+    get: operations['setup_progress'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/setup-progress/{step}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark a setup step complete (verified where the facts are known)
+     * @description Requires `estate.configure`.
+     */
+    post: operations['setup_complete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/setup-progress/activate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Activate the estate when setup is complete
+     * @description Requires `estate.configure`.
+     */
+    post: operations['setup_activate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/spaces': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Browse the spaces tree (children of parentId, or top level)
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    get: operations['property_list'];
+    put?: never;
+    /**
+     * Create a space
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    post: operations['property_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/spaces/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * One space
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    get: operations['property_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update or re-parent a space (If-Match: version)
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    patch: operations['property_update'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/spaces/{id}/archive': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Archive a space with nothing inside it
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    post: operations['property_archive'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/spaces/bulk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create many spaces from a pattern (e.g. floors 1-5, flats A-D); dryRun to preview
+     * @description Requires `space.manage`. Needs the `property` feature.
+     */
+    post: operations['property_bulk'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/units': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search units (inside a space, by status, by code or name)
+     * @description Any active member of the estate. Needs the `property` feature.
+     */
+    get: operations['property_units'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/invitations/{token}/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept an estate invitation (signed in with the invited phone)
+     * @description Any signed-in user.
+     */
+    post: operations['myOnboarding_accept'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/me': {
     parameters: {
       query?: never;
@@ -314,6 +502,70 @@ export interface paths {
      * @description Any signed-in user.
      */
     patch: operations['me_updateProfile'];
+    trace?: never;
+  };
+  '/v1/me/estate-applications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My estate applications
+     * @description Any signed-in user.
+     */
+    get: operations['myOnboarding_mine'];
+    put?: never;
+    /**
+     * Apply to bring an estate onto Safezone (free)
+     * @description Any signed-in user.
+     */
+    post: operations['myOnboarding_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/estate-applications/{id}/resubmit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Answer an information request and resubmit
+     * @description Any signed-in user.
+     */
+    post: operations['myOnboarding_resubmit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/estate-applications/{id}/withdraw': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Withdraw my application
+     * @description Any signed-in user.
+     */
+    post: operations['myOnboarding_withdraw'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/me/feature-flags': {
@@ -700,6 +952,294 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/estate-applications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estate application review queue (oldest first)
+     * @description Requires `platform.estate.approve`.
+     */
+    get: operations['platformOnboarding_listApplications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estate-applications/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Application with applicant contact and duplicate check
+     * @description Requires `platform.estate.approve`.
+     */
+    get: operations['platformOnboarding_review'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estate-applications/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve: creates the estate and its administrator
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estate-applications/{id}/documents/{fileId}/download-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Signed download of an application document (audited)
+     * @description Requires `platform.estate.approve`.
+     */
+    get: operations['platformOnboarding_document'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estate-applications/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject an application with a reason
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estate-applications/{id}/request-info': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask the applicant for more information
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_requestInfo'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estate-applications/{id}/start-review': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Take an application into review
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_startReview'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Find estates by name or join code
+     * @description Requires `platform.estate.create`.
+     */
+    get: operations['platformOnboarding_listEstates'];
+    put?: never;
+    /**
+     * Create an estate for a customer (assisted onboarding)
+     * @description Requires `platform.estate.create`.
+     */
+    post: operations['platformOnboarding_createEstate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * One estate
+     * @description Requires `platform.estate.create`.
+     */
+    get: operations['platformOnboarding_getEstate'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}/deactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Deactivate an estate (starts offboarding)
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_deactivate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}/invitations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Invitations for an estate
+     * @description Requires `platform.estate.create`.
+     */
+    get: operations['platformOnboarding_invitations'];
+    put?: never;
+    /**
+     * Invite an estate representative (link by SMS and email, 7 days)
+     * @description Requires `platform.estate.create`.
+     */
+    post: operations['platformOnboarding_invite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}/invitations/{invitationId}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Revoke a pending invitation
+     * @description Requires `platform.estate.create`.
+     */
+    post: operations['platformOnboarding_revoke'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}/reactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Lift a suspension
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_reactivate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}/suspend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Suspend an estate (safety features keep working)
+     * @description Requires `platform.estate.approve`.
+     */
+    post: operations['platformOnboarding_suspend'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/feature-flags': {
     parameters: {
       query?: never;
@@ -740,6 +1280,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/onboarding-leads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Assisted onboarding requests (newest first)
+     * @description Requires `platform.estate.create`.
+     */
+    get: operations['platformOnboarding_listLeads'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/onboarding-leads/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update a lead
+     * @description Requires `platform.estate.create`.
+     */
+    patch: operations['platformOnboarding_updateLead'];
+    trace?: never;
+  };
   '/v1/public/app-config': {
     parameters: {
       query?: never;
@@ -754,6 +1334,46 @@ export interface paths {
     get: operations['platform_appConfig'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/invitations/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview an estate invitation before signing in
+     * @description Public.
+     */
+    get: operations['publicOnboarding_previewInvitation'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/onboarding-leads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask Techguard to onboard an estate (assisted onboarding)
+     * @description Public.
+     */
+    post: operations['publicOnboarding_createLead'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1690,6 +2310,672 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  setup_progress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              estateStatus: string;
+              steps: {
+                /** @enum {string} */
+                step:
+                  | 'profile'
+                  | 'spaces'
+                  | 'gates'
+                  | 'security_supervisor'
+                  | 'sos_policy'
+                  | 'residents';
+                required: boolean;
+                completedAt: string | null;
+              }[];
+              missing: (
+                'profile' | 'spaces' | 'gates' | 'security_supervisor' | 'sos_policy' | 'residents'
+              )[];
+              canActivate: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  setup_complete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        step: 'profile' | 'spaces' | 'gates' | 'security_supervisor' | 'sos_policy' | 'residents';
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              estateStatus: string;
+              steps: {
+                /** @enum {string} */
+                step:
+                  | 'profile'
+                  | 'spaces'
+                  | 'gates'
+                  | 'security_supervisor'
+                  | 'sos_policy'
+                  | 'residents';
+                required: boolean;
+                completedAt: string | null;
+              }[];
+              missing: (
+                'profile' | 'spaces' | 'gates' | 'security_supervisor' | 'sos_policy' | 'residents'
+              )[];
+              canActivate: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  setup_activate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              estateStatus: string;
+              steps: {
+                /** @enum {string} */
+                step:
+                  | 'profile'
+                  | 'spaces'
+                  | 'gates'
+                  | 'security_supervisor'
+                  | 'sos_policy'
+                  | 'residents';
+                required: boolean;
+                completedAt: string | null;
+              }[];
+              missing: (
+                'profile' | 'spaces' | 'gates' | 'security_supervisor' | 'sos_policy' | 'residents'
+              )[];
+              canActivate: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_list: {
+    parameters: {
+      query?: {
+        parentId?: string;
+        type?:
+          'phase' | 'zone' | 'street' | 'block' | 'building' | 'floor' | 'unit' | 'common_area';
+        includeArchived?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              /** @enum {string} */
+              type:
+                | 'phase'
+                | 'zone'
+                | 'street'
+                | 'block'
+                | 'building'
+                | 'floor'
+                | 'unit'
+                | 'common_area';
+              code: string;
+              name: string;
+              depth: number;
+              propertyId: string | null;
+              unitType: ('house' | 'flat' | 'shop' | 'office' | 'other') | null;
+              bedrooms: number | null;
+              sizeSqm: number | null;
+              status: ('vacant' | 'occupied' | 'under_construction' | 'reserved') | null;
+              externalRef: string | null;
+              archivedAt: string | null;
+              version: number;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default null */
+          parentId?: string | null;
+          /** @enum {string} */
+          type:
+            'phase' | 'zone' | 'street' | 'block' | 'building' | 'floor' | 'unit' | 'common_area';
+          code: string;
+          name?: string;
+          externalRef?: string;
+          /** @enum {string} */
+          unitType?: 'house' | 'flat' | 'shop' | 'office' | 'other';
+          bedrooms?: number;
+          sizeSqm?: number;
+          /** @enum {string} */
+          status?: 'vacant' | 'occupied' | 'under_construction' | 'reserved';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              /** @enum {string} */
+              type:
+                | 'phase'
+                | 'zone'
+                | 'street'
+                | 'block'
+                | 'building'
+                | 'floor'
+                | 'unit'
+                | 'common_area';
+              code: string;
+              name: string;
+              depth: number;
+              propertyId: string | null;
+              unitType: ('house' | 'flat' | 'shop' | 'office' | 'other') | null;
+              bedrooms: number | null;
+              sizeSqm: number | null;
+              status: ('vacant' | 'occupied' | 'under_construction' | 'reserved') | null;
+              externalRef: string | null;
+              archivedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              /** @enum {string} */
+              type:
+                | 'phase'
+                | 'zone'
+                | 'street'
+                | 'block'
+                | 'building'
+                | 'floor'
+                | 'unit'
+                | 'common_area';
+              code: string;
+              name: string;
+              depth: number;
+              propertyId: string | null;
+              unitType: ('house' | 'flat' | 'shop' | 'office' | 'other') | null;
+              bedrooms: number | null;
+              sizeSqm: number | null;
+              status: ('vacant' | 'occupied' | 'under_construction' | 'reserved') | null;
+              externalRef: string | null;
+              archivedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          code?: string;
+          name?: string;
+          parentId?: string | null;
+          /** @enum {string} */
+          unitType?: 'house' | 'flat' | 'shop' | 'office' | 'other';
+          bedrooms?: number;
+          sizeSqm?: number;
+          /** @enum {string} */
+          status?: 'vacant' | 'occupied' | 'under_construction' | 'reserved';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              /** @enum {string} */
+              type:
+                | 'phase'
+                | 'zone'
+                | 'street'
+                | 'block'
+                | 'building'
+                | 'floor'
+                | 'unit'
+                | 'common_area';
+              code: string;
+              name: string;
+              depth: number;
+              propertyId: string | null;
+              unitType: ('house' | 'flat' | 'shop' | 'office' | 'other') | null;
+              bedrooms: number | null;
+              sizeSqm: number | null;
+              status: ('vacant' | 'occupied' | 'under_construction' | 'reserved') | null;
+              externalRef: string | null;
+              archivedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      412: components['responses']['Error412'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_archive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              /** @enum {string} */
+              type:
+                | 'phase'
+                | 'zone'
+                | 'street'
+                | 'block'
+                | 'building'
+                | 'floor'
+                | 'unit'
+                | 'common_area';
+              code: string;
+              name: string;
+              depth: number;
+              propertyId: string | null;
+              unitType: ('house' | 'flat' | 'shop' | 'office' | 'other') | null;
+              bedrooms: number | null;
+              sizeSqm: number | null;
+              status: ('vacant' | 'occupied' | 'under_construction' | 'reserved') | null;
+              externalRef: string | null;
+              archivedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_bulk: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default null */
+          parentId?: string | null;
+          levels: {
+            /** @enum {string} */
+            type:
+              'phase' | 'zone' | 'street' | 'block' | 'building' | 'floor' | 'unit' | 'common_area';
+            labels:
+              | {
+                  from: number;
+                  to: number;
+                  pad?: number;
+                }
+              | {
+                  letters: {
+                    from: string;
+                    to: string;
+                  };
+                }
+              | {
+                  list: string[];
+                };
+            codeTemplate?: string;
+            nameTemplate?: string;
+            /** @enum {string} */
+            unitType?: 'house' | 'flat' | 'shop' | 'office' | 'other';
+          }[];
+          /** @default false */
+          dryRun?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              dryRun: boolean;
+              total: number;
+              byType: {
+                [key: string]: number;
+              };
+              sample: {
+                /** @enum {string} */
+                type:
+                  | 'phase'
+                  | 'zone'
+                  | 'street'
+                  | 'block'
+                  | 'building'
+                  | 'floor'
+                  | 'unit'
+                  | 'common_area';
+                code: string;
+                name: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  property_units: {
+    parameters: {
+      query?: {
+        withinId?: string;
+        status?: 'vacant' | 'occupied' | 'under_construction' | 'reserved';
+        q?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              /** @enum {string} */
+              type:
+                | 'phase'
+                | 'zone'
+                | 'street'
+                | 'block'
+                | 'building'
+                | 'floor'
+                | 'unit'
+                | 'common_area';
+              code: string;
+              name: string;
+              depth: number;
+              propertyId: string | null;
+              unitType: ('house' | 'flat' | 'shop' | 'office' | 'other') | null;
+              bedrooms: number | null;
+              sizeSqm: number | null;
+              status: ('vacant' | 'occupied' | 'under_construction' | 'reserved') | null;
+              externalRef: string | null;
+              archivedAt: string | null;
+              version: number;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  myOnboarding_accept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              estateId: string;
+              roleKey: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   me_profile: {
     parameters: {
       query?: never;
@@ -1771,6 +3057,330 @@ export interface operations {
       400: components['responses']['Error400'];
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  myOnboarding_mine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  myOnboarding_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          representative: {
+            fullName: string;
+            /** Format: email */
+            email: string;
+            /** @enum {string} */
+            role: 'owner' | 'developer' | 'manager' | 'residents_association_officer';
+          };
+          estate: {
+            name: string;
+            address: string;
+            state: string;
+            lga: string;
+            location?: {
+              lat: number;
+              lng: number;
+            };
+            /** @enum {string} */
+            type: 'gated_houses' | 'apartment_complex' | 'mixed';
+            unitsEstimate: number;
+            gatesEstimate: number;
+          };
+          documentFileIds: string[];
+          /** @constant */
+          acceptedTerms: true;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  myOnboarding_resubmit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default [] */
+          documentFileIds?: string[];
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  myOnboarding_withdraw: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
       500: components['responses']['Error500'];
     };
   };
@@ -2535,6 +4145,1082 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformOnboarding_listApplications: {
+    parameters: {
+      query?: {
+        status?:
+          'submitted' | 'under_review' | 'info_requested' | 'approved' | 'rejected' | 'withdrawn';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_review: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+              /** Format: uuid */
+              applicantUserId: string;
+              applicantPhone: string;
+              reviewerId: string | null;
+              duplicates: {
+                /** @enum {string} */
+                kind: 'estate' | 'application';
+                /** Format: uuid */
+                id: string;
+                name: string;
+                /** @enum {string} */
+                reason: 'same_name' | 'similar_name_nearby';
+                distanceMetres: number | null;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_document: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        fileId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              url: string;
+              /** Format: date-time */
+              expiresAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_requestInfo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_startReview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'rejected'
+                | 'withdrawn';
+              representative: {
+                fullName: string;
+                email: string;
+                role: string;
+              };
+              estate: {
+                name: string;
+                /** @enum {string} */
+                type: 'gated_houses' | 'apartment_complex' | 'mixed';
+                address: string;
+                state: string;
+                lga: string;
+                location: {
+                  lat: number;
+                  lng: number;
+                } | null;
+                unitsEstimate: number;
+                gatesEstimate: number;
+              };
+              documents: {
+                /** Format: uuid */
+                fileId: string;
+                docType: string;
+              }[];
+              decisionReason: string | null;
+              estateId: string | null;
+              /** Format: date-time */
+              submittedAt: string;
+              decidedAt: string | null;
+              version: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_listEstates: {
+    parameters: {
+      query?: {
+        q?: string;
+        status?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              slug: string;
+              code: string;
+              /** @enum {string} */
+              type: 'gated_houses' | 'apartment_complex' | 'mixed';
+              address: string | null;
+              state: string | null;
+              lga: string | null;
+              timezone: string;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              status:
+                | 'applied'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'active'
+                | 'suspended'
+                | 'deactivated'
+                | 'rejected';
+              /** @enum {string} */
+              onboardingMode: 'self_service' | 'assisted';
+              version: number;
+              approvedAt: string | null;
+              activatedAt: string | null;
+              suspendedAt: string | null;
+              suspensionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_createEstate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** @enum {string} */
+          type: 'gated_houses' | 'apartment_complex' | 'mixed';
+          address: string;
+          state: string;
+          lga: string;
+          /** Format: uuid */
+          leadId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              slug: string;
+              code: string;
+              /** @enum {string} */
+              type: 'gated_houses' | 'apartment_complex' | 'mixed';
+              address: string | null;
+              state: string | null;
+              lga: string | null;
+              timezone: string;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              status:
+                | 'applied'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'active'
+                | 'suspended'
+                | 'deactivated'
+                | 'rejected';
+              /** @enum {string} */
+              onboardingMode: 'self_service' | 'assisted';
+              version: number;
+              approvedAt: string | null;
+              activatedAt: string | null;
+              suspendedAt: string | null;
+              suspensionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_getEstate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              slug: string;
+              code: string;
+              /** @enum {string} */
+              type: 'gated_houses' | 'apartment_complex' | 'mixed';
+              address: string | null;
+              state: string | null;
+              lga: string | null;
+              timezone: string;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              status:
+                | 'applied'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'active'
+                | 'suspended'
+                | 'deactivated'
+                | 'rejected';
+              /** @enum {string} */
+              onboardingMode: 'self_service' | 'assisted';
+              version: number;
+              approvedAt: string | null;
+              activatedAt: string | null;
+              suspendedAt: string | null;
+              suspensionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_deactivate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              slug: string;
+              code: string;
+              /** @enum {string} */
+              type: 'gated_houses' | 'apartment_complex' | 'mixed';
+              address: string | null;
+              state: string | null;
+              lga: string | null;
+              timezone: string;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              status:
+                | 'applied'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'active'
+                | 'suspended'
+                | 'deactivated'
+                | 'rejected';
+              /** @enum {string} */
+              onboardingMode: 'self_service' | 'assisted';
+              version: number;
+              approvedAt: string | null;
+              activatedAt: string | null;
+              suspendedAt: string | null;
+              suspensionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_invitations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              phone: string;
+              email: string | null;
+              roleKey: string;
+              /** @enum {string} */
+              status: 'pending' | 'accepted' | 'expired' | 'revoked';
+              /** Format: date-time */
+              expiresAt: string;
+              acceptedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_invite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          phone: string;
+          /** Format: email */
+          email?: string;
+          /**
+           * @default estate_administrator
+           * @enum {string}
+           */
+          roleKey?: 'estate_administrator' | 'estate_manager';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              phone: string;
+              email: string | null;
+              roleKey: string;
+              /** @enum {string} */
+              status: 'pending' | 'accepted' | 'expired' | 'revoked';
+              /** Format: date-time */
+              expiresAt: string;
+              acceptedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_revoke: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        invitationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              phone: string;
+              email: string | null;
+              roleKey: string;
+              /** @enum {string} */
+              status: 'pending' | 'accepted' | 'expired' | 'revoked';
+              /** Format: date-time */
+              expiresAt: string;
+              acceptedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_reactivate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              slug: string;
+              code: string;
+              /** @enum {string} */
+              type: 'gated_houses' | 'apartment_complex' | 'mixed';
+              address: string | null;
+              state: string | null;
+              lga: string | null;
+              timezone: string;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              status:
+                | 'applied'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'active'
+                | 'suspended'
+                | 'deactivated'
+                | 'rejected';
+              /** @enum {string} */
+              onboardingMode: 'self_service' | 'assisted';
+              version: number;
+              approvedAt: string | null;
+              activatedAt: string | null;
+              suspendedAt: string | null;
+              suspensionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_suspend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              slug: string;
+              code: string;
+              /** @enum {string} */
+              type: 'gated_houses' | 'apartment_complex' | 'mixed';
+              address: string | null;
+              state: string | null;
+              lga: string | null;
+              timezone: string;
+              /** @constant */
+              currency: 'NGN';
+              /** @enum {string} */
+              status:
+                | 'applied'
+                | 'under_review'
+                | 'info_requested'
+                | 'approved'
+                | 'active'
+                | 'suspended'
+                | 'deactivated'
+                | 'rejected';
+              /** @enum {string} */
+              onboardingMode: 'self_service' | 'assisted';
+              version: number;
+              approvedAt: string | null;
+              activatedAt: string | null;
+              suspendedAt: string | null;
+              suspensionReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   platform_listFlags: {
     parameters: {
       query?: never;
@@ -2633,6 +5319,97 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformOnboarding_listLeads: {
+    parameters: {
+      query?: {
+        status?: 'new' | 'contacted' | 'converted' | 'closed';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              phone: string;
+              email: string | null;
+              estateName: string;
+              location: string;
+              unitsEstimate: number | null;
+              message: string | null;
+              /** @enum {string} */
+              status: 'new' | 'contacted' | 'converted' | 'closed';
+              estateId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_updateLead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status: 'new' | 'contacted' | 'converted' | 'closed';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status: 'new' | 'contacted' | 'converted' | 'closed';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   platform_appConfig: {
     parameters: {
       query: {
@@ -2675,6 +5452,87 @@ export interface operations {
         };
       };
       400: components['responses']['Error400'];
+      500: components['responses']['Error500'];
+    };
+  };
+  publicOnboarding_previewInvitation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              estateName: string;
+              roleKey: string;
+              phoneMasked: string;
+              /** Format: date-time */
+              expiresAt: string;
+              /** @enum {string} */
+              status: 'pending' | 'accepted' | 'expired' | 'revoked';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      404: components['responses']['Error404'];
+      429: components['responses']['Error429'];
+      500: components['responses']['Error500'];
+    };
+  };
+  publicOnboarding_createLead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          phone: string;
+          /** Format: email */
+          email?: string;
+          estateName: string;
+          location: string;
+          unitsEstimate?: number;
+          message?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      429: components['responses']['Error429'];
       500: components['responses']['Error500'];
     };
   };

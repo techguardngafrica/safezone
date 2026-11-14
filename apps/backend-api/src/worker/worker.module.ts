@@ -10,7 +10,9 @@ import { AuditService } from '../modules/audit/audit.service';
 import { FilesConsumer } from '../modules/files/files.consumer';
 import { FilesService } from '../modules/files/files.service';
 import { DeliveryService } from '../modules/notifications/delivery.service';
+import { ContactDeliveryService } from '../modules/notifications/contact-delivery.service';
 import { NotificationsConsumer } from '../modules/notifications/notifications.consumer';
+import { OnboardingConsumer } from '../modules/tenancy/onboarding/onboarding.consumer';
 
 /**
  * Root module for the worker process: outbox relay and queue consumers.
@@ -27,6 +29,8 @@ import { NotificationsConsumer } from '../modules/notifications/notifications.co
     NotificationsConsumer,
     FilesService,
     FilesConsumer,
+    ContactDeliveryService,
+    OnboardingConsumer,
   ],
 })
 export class WorkerModule {}

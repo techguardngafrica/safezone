@@ -11,3 +11,5 @@ Copy [0000-template.md](0000-template.md) to `NNNN-short-title.md`. One decision
 | [0005](0005-module-database-contexts.md)      | Module database contexts (`app.context`) for platform tables                            | Accepted                             |
 | [0006](0006-api-response-envelope.md)         | API response envelope instead of RFC 9457 problem details                               | Accepted                             |
 | [0007](0007-sessions-and-refresh-families.md) | Sessions, refresh-token families and MFA state                                          | Accepted                             |
+| [0008](0008-estate-onboarding.md)             | Estate onboarding: atomic approval, derived invitation tokens, suspension enforcement   | Accepted                             |
+| [0009](0009-spaces-materialised-path.md)      | Spaces tree as a text materialised path instead of `ltree`                              | Accepted                             |

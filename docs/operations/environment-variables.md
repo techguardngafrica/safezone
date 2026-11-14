@@ -11,8 +11,9 @@
 The root [`.env.example`](../../.env.example) is the single list. Every variable is validated by `apps/backend-api/src/config/env.ts`; error messages name the variable but never print its value.
 
 - In `development` and `test`, missing values fall back to local defaults so `pnpm dev` works against docker-compose.
-- In `staging` and `production` the process refuses to start unless database, Redis, JWT/OTP secrets (32+ chars, all different, no placeholders), `MFA_ENCRYPTION_KEY` (32 bytes base64), storage credentials, Zoho SMTP credentials and `SMS_API_KEY` are set; `SMS_PROVIDER=fake` and non-https `CORS_ORIGINS` are refused; `DATABASE_URL` must connect as `safezone_app`.
-- Secrets: `JWT_ACCESS_SECRET` (access JWTs), `JWT_REFRESH_SECRET` (refresh and recovery code hashes), `OTP_HMAC_SECRET` (OTP hashes and rate-limit keys), `MFA_ENCRYPTION_KEY` (TOTP secrets at rest).
+- In `staging` and `production` the process refuses to start unless database, Redis, JWT/OTP secrets (32+ chars, all different, no placeholders), `MFA_ENCRYPTION_KEY` (32 bytes base64), storage credentials, Zoho SMTP credentials and `SMS_API_KEY` are set; `SMS_PROVIDER=fake`, non-https `CORS_ORIGINS` and non-https `MANAGEMENT_WEB_URL` are refused; `DATABASE_URL` must connect as `safezone_app`.
+- Secrets: `JWT_ACCESS_SECRET` (access JWTs), `JWT_REFRESH_SECRET` (refresh and recovery code hashes), `OTP_HMAC_SECRET` (OTP hashes, rate-limit keys and estate invitation link tokens, ADR-0008; rotating it invalidates open invitations), `MFA_ENCRYPTION_KEY` (TOTP secrets at rest).
+- `MANAGEMENT_WEB_URL`: base URL of management-web; invitation links open `<url>/invite/<token>`.
 - `OUTBOX_RELAY_DISABLED=true` stops the worker's relay loop (tests and maintenance only).
 
 ## Web apps (`NEXT_PUBLIC_*`)

@@ -525,3 +525,178 @@ model AppVersion {
   @@map("app_versions")
   @@schema("platform")
 }
+
+// ---------------------------------------------------------------------------------------------------
+// Tenancy: estate onboarding (Phase 1, tenancy.md §4–5). Applications, leads and invitations exist
+// before (or outside) an estate, so they live in the platform schema behind the tenancy context.
+// ---------------------------------------------------------------------------------------------------
+
+/// Self-service application. Lifecycle in modules/tenancy/domain/application-status.ts.
+model EstateApplication {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  applicantUserId     String    @map("applicant_user_id") @db.Uuid
+  representativeName  String    @map("representative_name")
+  representativeEmail String    @map("representative_email")
+  /// owner | developer | manager | residents_association_officer
+  representativeRole  String    @map("representative_role")
+  estateName          String    @map("estate_name")
+  /// gated_houses | apartment_complex | mixed
+  estateType          String    @map("estate_type")
+  address             String
+  state               String
+  lga                 String
+  /// WGS84; plain columns until PostGIS lands (docs/database/postgis.md).
+  latitude            Float?
+  longitude           Float?
+  unitsEstimate       Int       @map("units_estimate")
+  gatesEstimate       Int       @map("gates_estimate")
+  /// submitted | under_review | info_requested | approved | rejected | withdrawn
+  status              String    @default("submitted")
+  reviewerId          String?   @map("reviewer_id") @db.Uuid
+  /// What Techguard asked for (info_requested) or why it was rejected.
+  decisionReason      String?   @map("decision_reason")
+  estateId            String?   @unique @map("estate_id") @db.Uuid
+  submittedAt         DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(3)
+  decidedAt           DateTime? @map("decided_at") @db.Timestamptz(3)
+  version             Int       @default(1)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  documents EstateApplicationDocument[]
+
+  @@index([applicantUserId])
+  @@index([status, submittedAt])
+  @@map("estate_applications")
+  @@schema("platform")
+}
+
+model EstateApplicationDocument {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  applicationId String   @map("application_id") @db.Uuid
+  fileId        String   @map("file_id") @db.Uuid
+  /// proof_of_authority (more types later)
+  docType       String   @default("proof_of_authority") @map("doc_type")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  application EstateApplication @relation(fields: [applicationId], references: [id])
+
+  @@unique([applicationId, fileId])
+  @@map("estate_application_documents")
+  @@schema("platform")
+}
+
+/// Techguard-assisted onboarding request from public-web.
+model OnboardingLead {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  name          String
+  phone         String
+  email         String?
+  estateName    String   @map("estate_name")
+  location      String
+  unitsEstimate Int?     @map("units_estimate")
+  message       String?
+  /// new | contacted | converted | closed
+  status        String   @default("new")
+  ownerUserId   String?  @map("owner_user_id") @db.Uuid
+  estateId      String?  @map("estate_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@map("onboarding_leads")
+  @@schema("platform")
+}
+
+/// Invitation to administer an estate. Only a SHA-256 of the token is stored.
+model EstateInvitation {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  phone      String
+  email      String?
+  roleKey    String    @map("role_key")
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  acceptedAt DateTime? @map("accepted_at") @db.Timestamptz(3)
+  acceptedBy String?   @map("accepted_by") @db.Uuid
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(3)
+  invitedBy  String    @map("invited_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId])
+  @@map("estate_invitations")
+  @@schema("platform")
+}
+
+/// Setup wizard progress (tenancy.md §7.4).
+model EstateSetupStep {
+  estateId    String   @map("estate_id") @db.Uuid
+  /// profile | spaces | gates | security_supervisor | sos_policy | residents
+  step        String
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz(3)
+  completedBy String?  @map("completed_by") @db.Uuid
+
+  @@id([estateId, step])
+  @@map("estate_setup_progress")
+  @@schema("tenant")
+}
+
+/// Messages to a phone or email that is not (yet) a user, e.g. invitations. One row per channel send.
+model ContactDelivery {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  dedupeKey   String    @map("dedupe_key")
+  intentKey   String    @map("intent_key")
+  /// sms | email
+  channel     String
+  /// Masked address only.
+  toAddress   String    @map("to_address")
+  /// claimed | sent | failed
+  status      String    @default("claimed")
+  providerRef String?   @map("provider_ref")
+  error       String?
+  sentAt      DateTime? @map("sent_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([dedupeKey, channel])
+  @@map("contact_deliveries")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Property: the spaces tree (Phase 1, property.md). Ownership and transfers arrive in Phase 2.
+// ---------------------------------------------------------------------------------------------------
+
+/// One node of the estate's physical tree: phase, zone, street, block, building, floor, unit or common area.
+/// `path` is a materialised path of compact ids ("<id>.<id>…"), indexed for prefix search (ADR-0009).
+model Space {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  /// Null for top-level spaces (their parent is the estate).
+  parentId    String?   @map("parent_id") @db.Uuid
+  /// phase | zone | street | block | building | floor | unit | common_area
+  type        String
+  code        String
+  name        String
+  path        String
+  depth       Int
+  /// Units only: house | flat | shop | office | other
+  unitType    String?   @map("unit_type")
+  bedrooms    Int?
+  sizeSqm     Float?    @map("size_sqm")
+  /// Units only: vacant | occupied | under_construction | reserved
+  status      String?
+  /// Import key, unique per estate (re-import updates).
+  externalRef String?   @map("external_ref")
+  archivedAt  DateTime? @map("archived_at") @db.Timestamptz(3)
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  parent   Space?  @relation("SpaceTree", fields: [parentId], references: [id], onDelete: Restrict, map: "spaces_parent_fkey")
+  children Space[] @relation("SpaceTree")
+
+  @@unique([estateId, path])
+  @@index([estateId, parentId])
+  @@index([estateId, type, status])
+  @@map("spaces")
+  @@schema("tenant")
+}

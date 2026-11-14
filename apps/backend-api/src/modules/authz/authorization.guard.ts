@@ -12,6 +12,7 @@ import {
 import { PUBLIC_KEY } from '../../common/auth/public.decorator';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../common/errors/domain-error';
 import { requestContext } from '../../common/http/request-context';
+import { blockedBySuspension } from '../tenancy/domain/estate-lifecycle';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { AuthzService } from './authz.service';
 
@@ -23,7 +24,8 @@ const estateIdSchema = z.uuid();
  * 2. MFA for staff and platform roles (identity.md §6.4);
  * 3. estate membership for routes with :estateId (non-members get 404, so other estates stay invisible);
  * 4. the permission, in the estate or at platform level;
- * 5. the estate's entitlement for @RequiresFeature routes.
+ * 5. the estate's entitlement for @RequiresFeature routes;
+ * 6. suspension: only reads and safety actions in a suspended estate (tenancy.md §7.5).
  */
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -50,7 +52,7 @@ export class AuthorizationGuard implements CanActivate {
 
     const request = context
       .switchToHttp()
-      .getRequest<AuthenticatedRequest & { params?: Record<string, string> }>();
+      .getRequest<AuthenticatedRequest & { params?: Record<string, string>; method?: string }>();
     const auth = request.auth;
     if (!auth) throw new UnauthorizedError();
 
@@ -86,6 +88,19 @@ export class AuthorizationGuard implements CanActivate {
     const grant = this.authz.grantIn(assignments, rawEstateId);
     if (rule.kind === 'permission' && !grant.permissions.has(rule.permission))
       throw new ForbiddenError();
+
+    if (
+      blockedBySuspension(
+        membership.estateStatus,
+        request.method ?? 'GET',
+        rule.kind === 'permission' ? rule.permission : null,
+      )
+    ) {
+      throw new ForbiddenError(
+        'This estate is suspended. Only safety features are available.',
+        'ESTATE_SUSPENDED',
+      );
+    }
 
     const feature = this.reflector.getAllAndOverride<string | undefined>(FEATURE_KEY, targets);
     if (feature) {

@@ -6,6 +6,7 @@ const productionEnv = {
   DATABASE_URL: 'postgres://safezone_app:pw@db.internal:5432/safezone',
   REDIS_URL: 'rediss://cache.internal:6379',
   CORS_ORIGINS: 'https://manage.safezone.ng,https://admin.safezone.ng',
+  MANAGEMENT_WEB_URL: 'https://manage.safezone.ng',
   JWT_ACCESS_SECRET: 'a'.repeat(40),
   JWT_REFRESH_SECRET: 'b'.repeat(40),
   OTP_HMAC_SECRET: 'c'.repeat(40),

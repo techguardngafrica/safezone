@@ -85,8 +85,8 @@ export async function startTestStack(
     async createEstate(name = 'Test Estate') {
       const id = uuidv7();
       await ownerQuery(
-        `insert into platform.estates (id, name, slug, code, type, status, onboarding_mode, updated_at)
-         values ($1, $2, $3, $4, 'gated_houses', 'active', 'assisted', now())`,
+        `insert into platform.estates (id, name, slug, code, type, status, onboarding_mode, activated_at, updated_at)
+         values ($1, $2, $3, $4, 'gated_houses', 'active', 'assisted', now(), now())`,
         [id, name, `estate-${id}`, id.slice(-6).toUpperCase()],
       );
       return id;

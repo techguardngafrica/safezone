@@ -4,6 +4,7 @@
 | ------------------------------------------------------ | ------------------------------------------------------------------ |
 | [product/](product/)                                   | Product brief, PRD (v0.2) and implementation plan. Business rules. |
 | [product/phase-0-status.md](product/phase-0-status.md) | What Phase 0 delivered and what is still open                      |
+| [product/phase-1-status.md](product/phase-1-status.md) | Phase 1 progress: what is built, verified and next                 |
 | [architecture/](architecture/README.md)                | App docs, module docs and ADRs. **The engineering spec.**          |
 | [api/](api/README.md)                                  | API conventions, OpenAPI notes, webhooks and provider callbacks    |
 | [database/](database/README.md)                        | Schema conventions, RLS, migrations, retention                     |

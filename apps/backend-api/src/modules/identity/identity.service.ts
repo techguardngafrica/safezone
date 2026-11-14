@@ -136,6 +136,20 @@ export class IdentityService {
     };
   }
 
+  /** Phone and name of users, for other modules' server-side checks and staff views (never to advertisers). */
+  async contactsOf(
+    userIds: readonly string[],
+  ): Promise<Map<string, { phone: string; fullName: string | null }>> {
+    if (userIds.length === 0) return new Map();
+    const rows = await this.db.withContext('identity', (tx) =>
+      tx.user.findMany({
+        where: { id: { in: [...userIds] } },
+        select: { id: true, phoneE164: true, fullName: true },
+      }),
+    );
+    return new Map(rows.map((row) => [row.id, { phone: row.phoneE164, fullName: row.fullName }]));
+  }
+
   async getProfile(userId: string): Promise<UserProfile> {
     const user = await this.db.withUser(userId, (tx) =>
       tx.user.findUnique({ where: { id: userId } }),

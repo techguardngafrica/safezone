@@ -148,3 +148,14 @@ Applicant: submitted, info requested, approved (with setup link), rejected. Invi
 Built (`src/modules/tenancy`): `estates` (platform schema), `estate_memberships`, `estate_settings`, `entitlements` (tenant schema, RLS), `plans` with the free `core` plan; `GET/PATCH /v1/estates/:estateId` (If-Match on `version`), `GET/PATCH /v1/estates/:estateId/settings` typed by `estateSettingsSchema` (defaults from §6), entitlement checks for `@RequiresFeature`. Changes are audited through the outbox.
 
 Onboarding workflows, invitations, setup progress and imports are Phase 1. Local estates come from `pnpm db:seed:dev`.
+
+## 15. Phase 1 implementation notes (onboarding)
+
+Built in `src/modules/tenancy/onboarding` (decisions in [ADR-0008](../adr/0008-estate-onboarding.md)):
+
+- **Tables:** `estate_applications` (+ append-only `estate_application_documents`), `onboarding_leads`, `estate_invitations` (token hash only), `estate_setup_progress`. Status machines in `domain/application-status.ts` and `domain/estate-lifecycle.ts`, unit-tested per transition.
+- **Self-service:** `POST /v1/me/estate-applications` (signed in; documents are the applicant's own `estate_application` uploads), `GET /v1/me/estate-applications`, `…/:id/resubmit`, `…/:id/withdraw`. Review: `GET /v1/platform/estate-applications[/:id]` (applicant phone + duplicate check), `…/start-review`, `…/request-info`, `…/approve`, `…/reject`, `…/documents/:fileId/download-url` (audited). Approval needs one clean document and creates estate + membership + Estate Administrator in one transaction.
+- **Assisted:** `POST /v1/public/onboarding-leads` (rate-limited), `GET/PATCH /v1/platform/onboarding-leads`, `POST/GET /v1/platform/estates[/:id]`, `POST/GET /v1/platform/estates/:id/invitations`, `…/:invitationId/revoke`, `GET /v1/public/invitations/:token`, `POST /v1/invitations/:token/accept` (invited phone only). Links are sent by the worker on the `onboarding` queue.
+- **Lifecycle:** `POST /v1/platform/estates/:id/suspend|reactivate|deactivate` (reason required, audited). Suspension is enforced in the authorization guard (`ESTATE_SUSPENDED` except reads and safety actions).
+- **Setup:** `GET /v1/estates/:estateId/setup-progress`, `POST …/:step/complete`, `POST …/activate`. Required: spaces, gates, security supervisor, SOS policy. The supervisor step is verified through authz; spaces and gates are confirmed by the administrator until property and security register their verifiers.
+- **Not yet built:** applicant/ops email notifications (applicant notices go by push or SMS), "stale application" alerts to Techguard ops, `invitations.expire` job (expiry is computed on read), `GET /v1/estates/search` for join requests (arrives with occupancy), imports framework, offboarding purge.

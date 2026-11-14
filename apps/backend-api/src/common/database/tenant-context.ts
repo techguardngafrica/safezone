@@ -124,3 +124,25 @@ export function withOutboxRelay<T>(
 ): Promise<T> {
   return withContext(client, 'outbox_relay', fn, options ?? {});
 }
+
+/**
+ * Lets another module do its part inside the caller's transaction (ADR-0005, amended in ADR-0008):
+ * `app.context` is switched for `fn` and restored afterwards, so the work commits or rolls back with the
+ * caller's. Only exported services of the owning module call this, never controllers.
+ */
+export async function asModule<T>(
+  tx: Tx,
+  context: DbContext,
+  fn: (tx: Tx) => Promise<T>,
+): Promise<T> {
+  if (!DB_CONTEXTS.includes(context)) throw new TypeError('Unknown database context');
+  const rows = await tx.$queryRaw<{ previous: string | null }[]>`
+    select current_setting('app.context', true) as previous`;
+  const previous = rows[0]?.previous ?? '';
+  await tx.$queryRaw`select set_config('app.context', ${context}, true)`;
+  try {
+    return await fn(tx);
+  } finally {
+    await tx.$queryRaw`select set_config('app.context', ${previous}, true)`;
+  }
+}

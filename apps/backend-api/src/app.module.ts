@@ -15,6 +15,8 @@ import { IdentityModule } from './modules/identity/identity.module';
 import { FilesModule } from './modules/files/files.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PlatformModule } from './modules/platform/platform.module';
+import { PropertyModule } from './modules/property/property.module';
+import { OnboardingModule } from './modules/tenancy/onboarding/onboarding.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 
 /**
@@ -37,6 +39,8 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     NotificationsModule,
     FilesModule,
     PlatformModule,
+    OnboardingModule,
+    PropertyModule,
   ],
   controllers: [HealthController],
   providers: [

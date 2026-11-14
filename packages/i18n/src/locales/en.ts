@@ -60,6 +60,25 @@ export const en = {
   'notifications.account.security_alert.sms':
     'Safezone: we signed out a device on your account after unusual activity. If this was not you, contact support.',
 
+  'notifications.onboarding.application_received.title': 'Application received',
+  'notifications.onboarding.application_received.body':
+    'We received your application for {estateName}. Techguard will review it within 2 working days.',
+  'notifications.onboarding.application_info_requested.title': 'More information needed',
+  'notifications.onboarding.application_info_requested.body':
+    'Techguard needs more information about {estateName}: {reason}',
+  'notifications.onboarding.application_approved.title': 'Your estate is approved',
+  'notifications.onboarding.application_approved.body':
+    '{estateName} is approved. Sign in to the Safezone management app to finish setting it up.',
+  'notifications.onboarding.application_rejected.title': 'Application not approved',
+  'notifications.onboarding.application_rejected.body':
+    'We could not approve {estateName}: {reason}',
+  'notifications.onboarding.invitation.sms':
+    'Safezone: you are invited to manage {estateName}. Accept within 7 days: {link}',
+  'notifications.onboarding.invitation.email_subject':
+    'You are invited to manage {estateName} on Safezone',
+  'notifications.onboarding.invitation.email_body':
+    'Hello,\n\nTechguard has set up {estateName} on Safezone and invited you to manage it as {role}.\n\nOpen this link within 7 days and sign in with {phone} to accept:\n{link}\n\nIf you did not expect this invitation, you can ignore this email.\n\nSafezone by Techguard',
+
   'common.continue': 'Continue',
   'common.cancel': 'Cancel',
   'common.retry': 'Try again',

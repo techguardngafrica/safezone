@@ -71,6 +71,9 @@ const envSchema = z.object({
     )
     .pipe(z.array(z.url()).min(1)),
 
+  /** Base URL of management-web; invitation links point here (tenancy.md §4.2). */
+  MANAGEMENT_WEB_URL: z.url().default('http://localhost:3001'),
+
   /** Fallback when no app_versions row exists (platform module). */
   APP_MIN_VERSION: z
     .string()
@@ -175,6 +178,9 @@ function deployedIssues(env: ParsedEnv, source: NodeJS.ProcessEnv): string[] {
   if (env.SMS_PROVIDER === 'fake') issues.push('SMS_PROVIDER: fake is not allowed');
   if (env.CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
     issues.push('CORS_ORIGINS: only https origins are allowed');
+  }
+  if (!env.MANAGEMENT_WEB_URL.startsWith('https://')) {
+    issues.push('MANAGEMENT_WEB_URL: must be https');
   }
   if (new URL(env.DATABASE_URL).username !== 'safezone_app') {
     issues.push('DATABASE_URL: must connect as safezone_app (RLS cannot be bypassed)');

@@ -48,6 +48,7 @@ export function routeEvent(event: Pick<RelayedEvent, 'type' | 'audit'>): QueueNa
     queues.push(QUEUES.notifications);
   }
   if (event.type === 'documents.file.uploaded') queues.push(QUEUES.files);
+  if (event.type === 'tenancy.invitation.sent') queues.push(QUEUES.onboarding);
   return queues;
 }
 

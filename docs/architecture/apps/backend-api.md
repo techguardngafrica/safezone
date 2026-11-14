@@ -245,6 +245,7 @@ Event naming: `<module>.<entity>.<past-tense-verb>`, e.g. `visitor.pass.created`
 | `exports`          | Low                      | Estate data exports, reports                            | Low              |
 | `ads`              | Low                      | Impression/click rollups, campaign schedule transitions | Medium           |
 | `maintenance-jobs` | Low                      | Retention purges, partition creation                    | 1                |
+| `onboarding`       | Normal                   | Estate invitation sends (link derived in the worker)    | 4                |
 
 All jobs: retries with exponential backoff, dead-letter queue, alert when DLQ is non-empty.
 

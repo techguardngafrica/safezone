@@ -206,6 +206,68 @@ export class FilesService {
     return { url, expiresAt: new Date(Date.now() + DOWNLOAD_URL_TTL_SECONDS * 1000).toISOString() };
   }
 
+  /** The signed-in user's own personal files with these ids and this purpose (other ids are left out). */
+  async ownFiles(userId: string, fileIds: readonly string[], purpose: FilePurpose) {
+    if (fileIds.length === 0) return [];
+    const rows = await this.db.withUser(userId, (tx) =>
+      tx.storedFile.findMany({
+        where: { id: { in: [...fileIds] }, estateId: null, uploadedBy: userId, purpose },
+      }),
+    );
+    return rows.map(toFileStatus);
+  }
+
+  /** Scan status of files, for a platform reviewer (e.g. application documents). */
+  async platformStatuses(fileIds: readonly string[]) {
+    if (fileIds.length === 0) return [];
+    const rows = await this.db.withContext('files', (tx) =>
+      tx.storedFile.findMany({ where: { id: { in: [...fileIds] } } }),
+    );
+    return rows.map(toFileStatus);
+  }
+
+  /**
+   * Signed download for Techguard staff reviewing a file another module has linked (the caller checks
+   * that link and the permission). Always audited.
+   */
+  async platformDownloadUrl(staffUserId: string, fileId: string, reason: string) {
+    const file = await this.db.withContext('files', (tx) =>
+      tx.storedFile.findUnique({ where: { id: fileId } }),
+    );
+    if (!file) throw new NotFoundError('File not found', 'FILE_NOT_FOUND');
+    if (file.scanStatus !== 'clean')
+      throw new DomainError('FILE_NOT_READY', 'The file is not available yet', 409);
+    await this.db.withContext(
+      'files',
+      (tx) =>
+        appendOutboxEvents(tx, [
+          {
+            type: 'documents.file.downloaded',
+            estateId: file.estateId,
+            aggregateType: 'file',
+            aggregateId: file.id,
+            payload: { fileId: file.id, purpose: file.purpose },
+            audit: {
+              actorType: 'platform_staff',
+              actorId: staffUserId,
+              action: 'documents.file.download',
+              resourceType: 'file',
+              resourceId: file.id,
+              reason,
+            },
+          },
+        ]),
+      { estateId: file.estateId },
+    );
+    const extension = file.mimeType.split('/')[1]?.split('.').pop() ?? 'bin';
+    const url = await this.storage.presignGet(
+      file.storageKey,
+      DOWNLOAD_URL_TTL_SECONDS,
+      `${file.purpose}-${file.id}.${extension}`,
+    );
+    return { url, expiresAt: new Date(Date.now() + DOWNLOAD_URL_TTL_SECONDS * 1000).toISOString() };
+  }
+
   /**
    * Worker: scan, verify type, strip image metadata, hash. Idempotent: only pending files are processed.
    * Infected files are moved to quarantine/ and never served.
