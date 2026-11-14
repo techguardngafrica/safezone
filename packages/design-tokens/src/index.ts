@@ -66,6 +66,8 @@ export const colors = {
     textMuted: palette.charcoal[500],
     border: palette.charcoal[300],
     borderSubtle: '#F1ECE4',
+    /** Input and control boundaries. 3:1 or better on white, Sand 50, Sand 100 and neutral 100. */
+    borderStrong: '#7E8380',
     focusRing: palette.forest[500],
     link: palette.forest[500],
   },
@@ -76,6 +78,20 @@ export const colors = {
     danger: '#C81E1E',
     info: '#2B6CB0',
   },
+  /** Subtle status fills for badges and banners; text colours are AA against their fill. */
+  statusSubtle: {
+    success: { background: '#E6F4EE', text: '#0B5C42' },
+    warning: { background: '#FDF1E3', text: '#8A3F06' },
+    danger: { background: '#FCE9E9', text: '#9B1717' },
+    info: { background: '#E8F0F9', text: '#1F4F82' },
+  },
+  /** Home module tile tones (UI_GUIDELINES.md 4.2). Icon chip holds a white icon. */
+  tile: {
+    forest: { background: palette.forest[100], chip: palette.forest[500] },
+    sand: { background: palette.sand[300], chip: palette.charcoal[700] },
+  },
+  /** Scrim behind dialogs and sheets: Charcoal 900 at 40 percent. */
+  overlay: { scrim: 'rgba(46, 51, 49, 0.4)' },
   /** Security App gate decisions — always paired with an icon and a word, never colour alone. */
   gate: { allow: '#12805C', check: '#B45309', deny: '#C81E1E' },
   sponsored: { badgeBackground: palette.sand[300], badgeText: palette.charcoal[900] },
@@ -83,7 +99,13 @@ export const colors = {
 
 export const spacing = { 0: 0, 1: 4, 2: 8, 3: 12, 4: 16, 5: 24, 6: 32, 7: 48, 8: 64 } as const;
 
-export const radii = { none: 0, sm: 4, md: 8, lg: 12, pill: 999 } as const;
+export const radii = { none: 0, sm: 4, md: 8, lg: 12, xl: 24, pill: 999 } as const;
+
+/** Motion durations in ms (UI_GUIDELINES.md section 12). Respect reduced motion. */
+export const motion = { duration: { fast: 120, base: 200, slow: 300 } } as const;
+
+/** Web breakpoints in px (min-width). */
+export const breakpoints = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;
 
 export const typography = {
   fontFamily: {
@@ -98,7 +120,16 @@ export const typography = {
 /** Minimum touch targets (AGENTS.md §7). */
 export const touchTarget = { default: 48, security: 56 } as const;
 
-export const tokens = { palette, colors, spacing, radii, typography, touchTarget } as const;
+export const tokens = {
+  palette,
+  colors,
+  spacing,
+  radii,
+  typography,
+  touchTarget,
+  motion,
+  breakpoints,
+} as const;
 export type Tokens = typeof tokens;
 
 function channel(value: number): number {

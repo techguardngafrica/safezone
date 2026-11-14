@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { colors, contrastRatio, relativeLuminance } from './index';
+import { breakpoints, colors, contrastRatio, motion, radii, relativeLuminance } from './index';
 
 const AA_TEXT = 4.5;
 
@@ -25,6 +25,41 @@ describe('brand colours', () => {
     ['white on warning', colors.neutral[0], colors.status.warning],
   ])('%s meets WCAG AA for text', (_name, fg, bg) => {
     expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+});
+
+describe('added UI guideline tokens', () => {
+  const surfaces = [
+    colors.semantic.surface,
+    colors.semantic.background,
+    colors.semantic.surfaceMuted,
+    colors.neutral[100],
+  ];
+
+  it.each(surfaces)('borderStrong meets 3:1 non-text contrast on %s', (surface) => {
+    expect(contrastRatio(colors.semantic.borderStrong, surface)).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each(Object.entries(colors.statusSubtle))(
+    '%s subtle text meets AA on its fill',
+    (_n, pair) => {
+      expect(contrastRatio(pair.text, pair.background)).toBeGreaterThanOrEqual(AA_TEXT);
+    },
+  );
+
+  it.each([
+    ['forest tile text', colors.semantic.text, colors.tile.forest.background],
+    ['sand tile text', colors.semantic.text, colors.tile.sand.background],
+    ['forest chip icon', colors.neutral[0], colors.tile.forest.chip],
+    ['sand chip icon', colors.neutral[0], colors.tile.sand.chip],
+  ])('%s meets AA', (_name, fg, bg) => {
+    expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  it('exposes the sheet radius, motion and breakpoints', () => {
+    expect(radii.xl).toBe(24);
+    expect(motion.duration).toEqual({ fast: 120, base: 200, slow: 300 });
+    expect(breakpoints.xl).toBe(1280);
   });
 });
 
