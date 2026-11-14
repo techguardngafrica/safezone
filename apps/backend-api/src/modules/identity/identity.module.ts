@@ -1,3 +1,4 @@
+import { UserDirectory } from './user-directory.service';
 import { Module } from '@nestjs/common';
 import { RateLimiter, RedisRateLimiter } from '../../common/rate-limit/rate-limiter';
 import { AuthzModule } from '../authz/authz.module';
@@ -14,6 +15,7 @@ import { TokenService } from './token.service';
   imports: [AuthzModule],
   controllers: [AuthController, MeController],
   providers: [
+    UserDirectory,
     IdentityService,
     OtpService,
     SessionService,
@@ -22,6 +24,6 @@ import { TokenService } from './token.service';
     AuthenticationGuard,
     { provide: RateLimiter, useClass: RedisRateLimiter },
   ],
-  exports: [IdentityService, TokenService, SessionService, AuthenticationGuard],
+  exports: [UserDirectory, IdentityService, TokenService, SessionService, AuthenticationGuard],
 })
 export class IdentityModule {}

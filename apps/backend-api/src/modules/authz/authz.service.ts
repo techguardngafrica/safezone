@@ -106,6 +106,61 @@ export class AuthzService {
     });
   }
 
+  /** Revokes a built-in estate role inside the caller's transaction. No-op when not held. */
+  async revokeBuiltInRole(
+    tx: Tx,
+    input: { userId: string; roleKey: string; estateId: string; revokedBy: string | null },
+  ): Promise<void> {
+    await asModule(tx, 'authz', async () => {
+      await tx.roleAssignment.updateMany({
+        where: {
+          userId: input.userId,
+          estateId: input.estateId,
+          revokedAt: null,
+          role: { key: input.roleKey, estateId: null, isBuiltin: true },
+        },
+        data: { revokedAt: new Date(), revokedBy: input.revokedBy },
+      });
+    });
+  }
+
+  /** Unrevoked, current role assignments of a user in an estate, inside the caller's transaction. */
+  async countEstateRoles(tx: Tx, userId: string, estateId: string): Promise<number> {
+    const now = new Date();
+    return asModule(tx, 'authz', () =>
+      tx.roleAssignment.count({
+        where: {
+          userId,
+          estateId,
+          revokedAt: null,
+          validFrom: { lte: now },
+          OR: [{ validTo: null }, { validTo: { gt: now } }],
+        },
+      }),
+    );
+  }
+
+  /** Users holding any of these built-in roles in an estate now (e.g. SOS responders). */
+  async holdersOf(
+    estateId: string,
+    roleKeys: readonly string[],
+    now: Date = new Date(),
+  ): Promise<string[]> {
+    const rows = await this.db.withContext('authz', (tx) =>
+      tx.roleAssignment.findMany({
+        where: {
+          estateId,
+          revokedAt: null,
+          validFrom: { lte: now },
+          OR: [{ validTo: null }, { validTo: { gt: now } }],
+          role: { key: { in: [...roleKeys] }, estateId: null, isBuiltin: true },
+        },
+        select: { userId: true },
+      }),
+    );
+    return [...new Set(rows.map((row) => row.userId))];
+  }
+
   /** How many users currently hold a built-in role in an estate (setup checks). */
   async countHolders(estateId: string, roleKey: string, now: Date = new Date()): Promise<number> {
     return this.db.withContext('authz', (tx) =>

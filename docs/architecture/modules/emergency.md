@@ -126,3 +126,12 @@ SOS count by category, drill vs real, median and p90 acknowledgement and resolut
 - If nobody acknowledges, escalation steps fire at configured times and are visible in the timeline.
 - A drill never contacts external emergency contacts.
 - An SOS sent by SMS from a registered resident creates an alert linked to their unit.
+
+## 14. Phase 1 implementation notes
+
+Built in `src/modules/emergency` ([ADR-0011](../adr/0011-occupancy-and-sos-implementation.md)):
+
+- Tables `sos_alerts` (one active real alert per household), append-only `sos_locations` and `sos_events` (timeline), `emergency_broadcasts`. State machine in `domain/sos.ts`, unit-tested per transition.
+- `POST …/sos` (`Idempotency-Key` UUID; repeats attach to the active alert), `GET …/sos`, `GET …/sos/:id` (timeline; emergency contacts for responders while active), `POST …/sos/:id/location` (triggerer, active only), `…/cancel` (triggerer, before acknowledgement), `…/acknowledge`, `…/assign`, `…/responding`, `…/notes`, `…/resolve` (false alarm flag), `…/close` (supervisors and managers), `POST …/emergency-broadcasts` (explicit `confirm`). Drills: `isDrill` on trigger (supervisors and managers).
+- `SosConsumer` is the `sos` queue's own worker: push and SMS to every guard and supervisor, SMS to emergency contacts for real resident alerts (never drills), escalation jobs at the `sos.escalation` steps that fire only while unacknowledged.
+- **Not yet built:** realtime emits, voice calls (SMS sent instead and recorded), SMS-triggered SOS webhook, on-shift targeting (all guards are notified), synthetic monitoring, reports.

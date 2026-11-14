@@ -104,3 +104,13 @@ Consumers: visitor (revoke passes on end), community (channel membership), billi
 - A tenant join request routes to the owner first, then the manager, per estate setting.
 - Ending an occupancy revokes all recurring passes for that household within 1 minute.
 - A household member without `visitor.invite` cannot create passes.
+
+## 11. Phase 1 implementation notes
+
+Built in `src/modules/occupancy` ([ADR-0011](../adr/0011-occupancy-and-sos-implementation.md)):
+
+- Tables `households`, `household_members` (permissions JSON: `inviteVisitors`, `triggerSos`, `payBills`, `viewBills`, `receiveGateAlerts`), `occupancies`, `join_requests`, `vehicles`, `domestic_staff` (tenant RLS) and `platform.emergency_contacts` (own rows; read by the `emergency` context). One active household per unit, one open request per user and unit, active plates unique per estate: all enforced by partial unique indexes.
+- Join: `GET /v1/join/estates/:code`, `GET …/:code/units?q=`, `POST/GET /v1/me/join-requests`, `POST /v1/me/join-requests/:id/cancel`; decisions at `GET /v1/estates/:estateId/join-requests` and `…/:id/approve|reject`. Approval creates the household, occupancy, membership and role in one transaction and marks the unit occupied.
+- Households: `GET …/households/mine`, `GET …/households/:id`, `POST …/households/:id/members`, `PATCH/DELETE …/household-members/:id`; managers: `POST …/occupancies`, `POST …/occupancies/:id/end` (members leave, vehicles and staff end, unit vacant, resident roles and memberships released; visitor passes revoked by the visitor worker). `GET …/residents` (staff with `resident.read`; phones masked without `pii.view`).
+- Vehicles (`GET/POST …/vehicles`, `POST …/vehicles/:id/deactivate`, guard lookup `GET …/vehicles/lookup?plate=` returning unit, household name and vehicle only), domestic staff (`GET/POST …/domestic-staff`, `POST …/domestic-staff/:id/status`; manager approval per `staff_pass.requires_manager_approval`), emergency contacts (`/v1/me/emergency-contacts`, consent required, at most 5).
+- **Not yet built:** owner approval step (needs Phase 2 ownerships), 7-day reminders and 30-day expiry job (expiry is stored, not yet enforced by a job), resident privacy settings, move-in/out (Phase 2).

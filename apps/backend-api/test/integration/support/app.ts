@@ -6,6 +6,7 @@ import pg from 'pg';
 import request from 'supertest';
 import { AppModule } from '../../../src/app.module';
 import { uuidv7 } from '../../../src/common/ids/uuidv7';
+import { generateEstateCode } from '../../../src/modules/tenancy/domain/codes';
 import { EmailSender, FakeEmailSender } from '../../../src/integrations/email/email-sender';
 import { FakeSmsSender } from '../../../src/integrations/sms/fake-sms.sender';
 import { SmsSender } from '../../../src/integrations/sms/sms-sender';
@@ -87,7 +88,7 @@ export async function startTestStack(
       await ownerQuery(
         `insert into platform.estates (id, name, slug, code, type, status, onboarding_mode, activated_at, updated_at)
          values ($1, $2, $3, $4, 'gated_houses', 'active', 'assisted', now(), now())`,
-        [id, name, `estate-${id}`, id.slice(-6).toUpperCase()],
+        [id, name, `estate-${id}`, generateEstateCode()],
       );
       return id;
     },

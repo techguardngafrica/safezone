@@ -271,6 +271,13 @@ describe('estate onboarding', () => {
       .set(as(token))
       .send({ type: 'unit', code: 'H1', unitType: 'house' })
       .expect(201);
+    const noGate = await stack.http.post(`${base}/gates/complete`).set(as(token)).expect(422);
+    expect(noGate.body.error.code).toBe('SETUP_STEP_INCOMPLETE');
+    await stack.http
+      .post(`/v1/estates/${estateId}/gates`)
+      .set(as(token))
+      .send({ name: 'Main Gate', type: 'both' })
+      .expect(201);
     for (const step of ['spaces', 'gates', 'security_supervisor', 'sos_policy']) {
       await stack.http.post(`${base}/${step}/complete`).set(as(token)).expect(200);
     }

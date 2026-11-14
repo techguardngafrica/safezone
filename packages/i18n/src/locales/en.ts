@@ -79,6 +79,48 @@ export const en = {
   'notifications.onboarding.invitation.email_body':
     'Hello,\n\nTechguard has set up {estateName} on Safezone and invited you to manage it as {role}.\n\nOpen this link within 7 days and sign in with {phone} to accept:\n{link}\n\nIf you did not expect this invitation, you can ignore this email.\n\nSafezone by Techguard',
 
+  'notifications.occupancy.join_request_approved.title': 'Welcome to {estateName}',
+  'notifications.occupancy.join_request_approved.body':
+    'Your request to join {unitCode} was approved. You can now invite visitors and use SOS.',
+  'notifications.occupancy.join_request_rejected.title': 'Join request not approved',
+  'notifications.occupancy.join_request_rejected.body':
+    'Your request to join {unitCode} in {estateName} was not approved: {reason}',
+  'notifications.occupancy.join_request_waiting.title': 'Someone wants to join your household',
+  'notifications.occupancy.join_request_waiting.body':
+    '{name} asked to join your household at {unitCode}. Open Safezone to approve or decline.',
+  'notifications.occupancy.added_to_household.title': 'You were added to a household',
+  'notifications.occupancy.added_to_household.body':
+    'You were added to the household at {unitCode} in {estateName}. Sign in to Safezone with this number.',
+
+  'notifications.visitor.walkin_request.title': 'Visitor at the gate',
+  'notifications.visitor.walkin_request.body':
+    '{name} is at {gate} asking to visit {unitCode}. Open Safezone to let them in or decline.',
+  'notifications.visitor.arrived.title': 'Your visitor has arrived',
+  'notifications.visitor.arrived.body': '{name} entered through {gate}.',
+  'notifications.visitor.pass.sms':
+    'Safezone: {host} invited you to {estateName}. Your gate PIN is {pin}. Pass: {link}',
+  'notifications.visitor.pass.email_subject': 'Your visitor pass for {estateName}',
+  'notifications.visitor.pass.email_body':
+    'You are invited to {estateName}. Show this pass at the gate or give the PIN {pin}.\n\n{link}\n\nSafezone by Techguard',
+
+  'notifications.emergency.sos.title': '{label}SOS: {category}',
+  'notifications.emergency.sos.body': '{label}Emergency at {place}. Open Safezone to respond.',
+  'notifications.emergency.sos.sms':
+    'Safezone {label}SOS: {category} at {place}. Respond in the Security app.',
+  'notifications.emergency.sos_escalated.title': '{label}SOS not answered',
+  'notifications.emergency.sos_escalated.body':
+    '{label}No one has acknowledged the SOS at {place} after {seconds} seconds. Respond now.',
+  'notifications.emergency.contact.sms':
+    'Safezone: {name} raised an emergency alert at {estateName}. Estate security has been notified.',
+  'notifications.emergency.contact.email_subject': 'Emergency alert from {name}',
+  'notifications.emergency.contact.email_body':
+    '{name} raised an emergency alert at {estateName}. Estate security has been notified.',
+  'notifications.emergency.broadcast.title': '{title}',
+  'notifications.emergency.broadcast.body': '{body}',
+
+  'notifications.community.announcement.title': 'Official: {title}',
+  'notifications.community.announcement.body': '{body}',
+
   'common.continue': 'Continue',
   'common.cancel': 'Cancel',
   'common.retry': 'Try again',

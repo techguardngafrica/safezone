@@ -441,6 +441,73 @@ export class PropertyService {
     });
   }
 
+  /** A live unit, or null. For other modules' checks. */
+  async unit(tx: Tx, estateId: string, spaceId: string) {
+    const row = await tx.space.findFirst({
+      where: { id: spaceId, estateId, type: 'unit', archivedAt: null },
+      select: { id: true, code: true, name: true, status: true, path: true },
+    });
+    return row;
+  }
+
+  /** Code and name of spaces by id (other modules' views). */
+  async spacesByIds(tx: Tx, estateId: string, ids: readonly string[]) {
+    if (ids.length === 0) return [];
+    return tx.space.findMany({
+      where: { estateId, id: { in: [...new Set(ids)] } },
+      select: { id: true, code: true, name: true },
+    });
+  }
+
+  /** Live units at or below any of these spaces (announcement audiences). */
+  async unitIdsWithin(tx: Tx, estateId: string, spaceIds: readonly string[]): Promise<string[]> {
+    const roots = await tx.space.findMany({
+      where: { estateId, id: { in: [...spaceIds] }, archivedAt: null },
+      select: { id: true, path: true, type: true },
+    });
+    if (roots.length !== new Set(spaceIds).size)
+      throw new NotFoundError('Space not found', 'SPACE_NOT_FOUND');
+    const units = await tx.space.findMany({
+      where: {
+        estateId,
+        type: 'unit',
+        archivedAt: null,
+        OR: roots.flatMap((root) => [{ id: root.id }, { path: { startsWith: `${root.path}.` } }]),
+      },
+      select: { id: true },
+    });
+    return units.map((unit) => unit.id);
+  }
+
+  /** Occupancy sets units occupied or vacant inside its own transaction. */
+  async setUnitStatus(tx: Tx, estateId: string, spaceId: string, status: 'occupied' | 'vacant') {
+    await tx.space.updateMany({
+      where: { id: spaceId, estateId, type: 'unit' },
+      data: { status, version: { increment: 1 } },
+    });
+  }
+
+  /** Minimal unit list for someone asking to join (code and name only, at most 20). */
+  async joinableUnits(estateId: string, userId: string, q: string) {
+    return this.db.withTenant({ estateId, userId }, (tx) =>
+      tx.space.findMany({
+        where: {
+          estateId,
+          type: 'unit',
+          archivedAt: null,
+          status: { not: 'under_construction' },
+          OR: [
+            { code: { contains: q, mode: 'insensitive' } },
+            { name: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        select: { id: true, code: true, name: true },
+        orderBy: [{ code: 'asc' }],
+        take: 20,
+      }),
+    );
+  }
+
   /** Live units in an estate (setup wizard check). */
   async liveUnitCount(estateId: string): Promise<number> {
     return this.db.withTenant({ estateId, userId: null }, (tx) =>

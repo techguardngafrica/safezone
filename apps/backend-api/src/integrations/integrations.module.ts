@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
 import { EmailSender } from './email/email-sender';
+import { KeyVault, LocalKeyVault } from './keys/key-vault';
 import { SmtpEmailSender } from './email/smtp-email.sender';
 import { ExpoPushSender } from './push/expo-push.sender';
 import { MalwareScanner, StubMalwareScanner } from './scan/malware-scanner';
@@ -20,6 +21,11 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
 @Module({
   providers: [
     { provide: EmailSender, inject: [ENV], useFactory: (env: Env) => new SmtpEmailSender(env) },
+    {
+      provide: KeyVault,
+      inject: [ENV],
+      useFactory: (env: Env): KeyVault => new LocalKeyVault(env.PASS_KEY_ENCRYPTION_KEY),
+    },
     {
       provide: SmsSender,
       inject: [ENV, EmailSender],
@@ -53,6 +59,6 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
     },
     { provide: MalwareScanner, useClass: StubMalwareScanner },
   ],
-  exports: [EmailSender, SmsSender, PushSender, ObjectStorage, MalwareScanner],
+  exports: [KeyVault, EmailSender, SmsSender, PushSender, ObjectStorage, MalwareScanner],
 })
 export class IntegrationsModule {}

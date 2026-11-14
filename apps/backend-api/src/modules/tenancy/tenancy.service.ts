@@ -9,7 +9,7 @@ import {
 } from '@safezone/schemas';
 import type { Prisma } from '../../generated/prisma/client';
 import { DatabaseService } from '../../common/database/database.service';
-import type { TenantContext } from '../../common/database/tenant-context';
+import type { TenantContext, Tx } from '../../common/database/tenant-context';
 import { ConflictError, NotFoundError } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 
@@ -67,6 +67,47 @@ export class TenancyService {
       },
       { userId },
     );
+  }
+
+  /** Makes the user an active member, inside the caller's estate-scoped transaction. */
+  async ensureActiveMembership(tx: Tx, estateId: string, userId: string): Promise<void> {
+    await tx.estateMembership.upsert({
+      where: { estateId_userId: { estateId, userId } },
+      create: { estateId, userId, status: 'active' },
+      update: { status: 'active', leftAt: null },
+    });
+  }
+
+  /** Marks the membership as left (the user no longer lives or works in the estate). */
+  async endMembership(tx: Tx, estateId: string, userId: string): Promise<void> {
+    await tx.estateMembership.updateMany({
+      where: { estateId, userId, status: 'active' },
+      data: { status: 'left', leftAt: new Date() },
+    });
+  }
+
+  /** Active members of an estate (emergency broadcasts, estate-wide announcements). */
+  async activeMemberIds(estateId: string): Promise<string[]> {
+    const rows = await this.db.withTenant({ estateId, userId: null }, (tx) =>
+      tx.estateMembership.findMany({
+        where: { estateId, status: 'active' },
+        select: { userId: true },
+      }),
+    );
+    return rows.map((row) => row.userId);
+  }
+
+  /** Estate by its join code, for residents asking to join. Only estates that accept residents. */
+  async findByJoinCode(code: string): Promise<{ id: string; name: string } | null> {
+    return this.db.withContext('tenancy', async (tx) => {
+      const estate = await tx.estate.findUnique({
+        where: { code: code.trim().toUpperCase() },
+        select: { id: true, name: true, status: true },
+      });
+      return estate && (estate.status === 'approved' || estate.status === 'active')
+        ? { id: estate.id, name: estate.name }
+        : null;
+    });
   }
 
   async getProfile(context: TenantContext): Promise<EstateProfile> {

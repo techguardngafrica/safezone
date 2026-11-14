@@ -4,30 +4,30 @@
 
 ## Progress
 
-| Area                                                        | Backend | Apps | Notes                                                                                                                    |
-| ----------------------------------------------------------- | ------- | ---- | ------------------------------------------------------------------------------------------------------------------------ |
-| Self-service onboarding (apply, review, approve, reject)    | Done    | —    | [tenancy.md §15](../architecture/modules/tenancy.md), [ADR-0008](../architecture/adr/0008-estate-onboarding.md)          |
-| Techguard-assisted onboarding (lead, create, invite)        | Done    | —    | Invitation links derived in the worker, never stored                                                                     |
-| Estate lifecycle (suspend, reactivate, deactivate)          | Done    | —    | Suspension enforced in the authorization guard; safety actions keep working                                              |
-| Setup wizard progress and activation                        | Done    | —    | `spaces` and `security_supervisor` verified; `gates` confirmed manually until the security module                        |
-| Spaces tree (create, bulk pattern, re-parent, archive)      | Done    | —    | [property.md §10](../architecture/modules/property.md), [ADR-0009](../architecture/adr/0009-spaces-materialised-path.md) |
-| Occupancy: residents, households, join requests             | —       | —    | Next                                                                                                                     |
-| Visitor passes (one-time, recurring, multi, offline QR/PIN) | —       | —    |                                                                                                                          |
-| Security: gates, guards, shifts, gate events, incidents     | —       | —    | Needs the partitioning ADR before gate events ship                                                                       |
-| Emergency / SOS with escalation                             | —       | —    | Own `sos` worker pool; voice adapter                                                                                     |
-| Announcements                                               | —       | —    |                                                                                                                          |
-| Bulk imports (units, residents, vehicles)                   | —       | —    | Tenancy import framework                                                                                                 |
-| Support access with audit trail                             | —       | —    |                                                                                                                          |
-| Public visitor pass page, marketing and legal pages         | —       | —    |                                                                                                                          |
-| WhatsApp and voice adapters                                 | —       | —    | SMS, push and email exist from Phase 0                                                                                   |
+Phase 1 is **not complete**. Backend status by area (no Phase 1 screens are built yet):
 
-"Apps" covers super-admin review screens, the public-web `/register` and `/invite/:token` pages and the management-web setup wizard; none are built yet.
+| Area                                                                                                                                                | Backend     | Notes                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| Self-service and assisted onboarding, lifecycle, setup                                                                                              | Done        | [ADR-0008](../architecture/adr/0008-estate-onboarding.md); all four setup checks are now verified                     |
+| Spaces tree                                                                                                                                         | Done        | [ADR-0009](../architecture/adr/0009-spaces-materialised-path.md)                                                      |
+| Occupancy: join requests, households, vehicles, staff, contacts                                                                                     | Done        | [ADR-0011](../architecture/adr/0011-occupancy-and-sos-implementation.md); owner approval waits for Phase 2 ownerships |
+| Visitor passes, gate verify/events, offline sync, walk-ins                                                                                          | Done        | [ADR-0010](../architecture/adr/0010-visitor-pass-credentials.md)                                                      |
+| Gates                                                                                                                                               | Done        | Part of security                                                                                                      |
+| SOS with escalation, drills, broadcasts                                                                                                             | Done (core) | Voice calls, realtime emits and SMS-triggered SOS not built                                                           |
+| Official announcements                                                                                                                              | Done (core) | No scheduling or attachments                                                                                          |
+| Security personnel, shifts, kiosk PIN sign-in, incidents                                                                                            | Not started | Needed for on-shift SOS targeting and the Security App                                                                |
+| Bulk imports (units, residents, vehicles)                                                                                                           | Not started |                                                                                                                       |
+| Support access with audit trail                                                                                                                     | Not started |                                                                                                                       |
+| WhatsApp and voice adapters, realtime gateway emits                                                                                                 | Not started |                                                                                                                       |
+| Apps: super-admin review, public-web register/invite/pass pages and legal pages, management-web setup and consoles, resident and security app flows | Not started | Only the Phase 0 sign-in shells exist                                                                                 |
+| Playwright and Maestro flows                                                                                                                        | Not started |                                                                                                                       |
 
 ## Verification (14 Nov 2026)
 
-- `pnpm build`, `typecheck`, `lint`, `test` and `format:check` pass across the repo.
-- Backend: unit tests for every application and estate status transition, suspension rules, the duplicate check, join codes, placement rules and bulk planning; integration tests on real PostgreSQL 17 and Redis for both onboarding workflows, setup and activation, suspension, and the spaces tree. The isolation suite covers every new route.
-- OpenAPI regenerated (76 operations) and stable.
+- `pnpm build`, `typecheck`, `lint` (zero warnings), `test` and `format:check` pass across the repo.
+- Backend: 147 unit tests (every status machine transition and rejection, join routing, pass token signing and tampering, validity windows in WAT, SOS escalation rules) and 76 integration tests on real PostgreSQL 17 and Redis across 14 files, including the isolation suite for every route and the migration drift check.
+- OpenAPI regenerated: 141 operations, stable.
+- Not verified: performance targets (verify p95 < 300 ms, SOS trigger to first guard < 5 s at p95 on 4G, 10 verifications per second per gate), real SMS/push providers, and any device or browser flow.
 
 ## Open items
 

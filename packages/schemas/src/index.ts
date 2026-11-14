@@ -11,3 +11,7 @@ export * from './files';
 export * from './platform';
 export * from './onboarding';
 export * from './property';
+export * from './occupancy';
+export * from './visitor';
+export * from './emergency';
+export * from './announcements';

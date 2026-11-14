@@ -8,6 +8,8 @@ import { ConfigModule } from './config/config.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { QueuesModule } from './common/queues/queues.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { CommunityModule } from './modules/community/community.module';
+import { EmergencyModule } from './modules/emergency/emergency.module';
 import { AuthorizationGuard } from './modules/authz/authorization.guard';
 import { AuthzModule } from './modules/authz/authz.module';
 import { AuthenticationGuard } from './modules/identity/authentication.guard';
@@ -15,7 +17,10 @@ import { IdentityModule } from './modules/identity/identity.module';
 import { FilesModule } from './modules/files/files.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PlatformModule } from './modules/platform/platform.module';
+import { OccupancyModule } from './modules/occupancy/occupancy.module';
 import { PropertyModule } from './modules/property/property.module';
+import { SecurityModule } from './modules/security/security.module';
+import { VisitorModule } from './modules/visitor/visitor.module';
 import { OnboardingModule } from './modules/tenancy/onboarding/onboarding.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 
@@ -41,6 +46,11 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     PlatformModule,
     OnboardingModule,
     PropertyModule,
+    OccupancyModule,
+    SecurityModule,
+    VisitorModule,
+    EmergencyModule,
+    CommunityModule,
   ],
   controllers: [HealthController],
   providers: [

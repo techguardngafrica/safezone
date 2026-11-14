@@ -4,7 +4,7 @@ import { unwrap } from '@safezone/api-client';
 import { t } from '@safezone/i18n';
 import { AccountBar, Card, PageShell, SessionGate } from '@safezone/web-ui';
 import { useQuery } from '@tanstack/react-query';
-import { api, session } from './lib/session';
+import { api, session } from '../lib/session';
 
 function Memberships() {
   const memberships = useQuery({

@@ -49,6 +49,11 @@ export function routeEvent(event: Pick<RelayedEvent, 'type' | 'audit'>): QueueNa
   }
   if (event.type === 'documents.file.uploaded') queues.push(QUEUES.files);
   if (event.type === 'tenancy.invitation.sent') queues.push(QUEUES.onboarding);
+  // SOS has its own queue and worker pool; nothing else goes there.
+  if (event.type === 'emergency.alert.triggered') queues.push(QUEUES.sos);
+  if (event.type === 'visitor.pass.shared' || event.type === 'occupancy.occupancy.ended') {
+    queues.push(QUEUES.gate);
+  }
   return queues;
 }
 

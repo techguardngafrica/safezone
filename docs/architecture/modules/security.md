@@ -91,3 +91,9 @@ Gate throughput by hour, average verification time, overrides, denies, walk-in r
 - A guard not assigned to Gate B cannot record events there.
 - An incident evidence export includes file hashes matching the stored originals.
 - A device silent for 30 minutes in operating hours raises an alert to the supervisor.
+
+## 9. Phase 1 implementation notes (so far)
+
+Built in `src/modules/security`: `tenant.gates` and `GET/POST/PATCH /v1/estates/:estateId/gates` (`security.staff.manage` to change). Registers the setup wizard's `gates` verifier.
+
+**Not yet built:** security personnel, gate assignments, shift templates, rosters and sessions (PIN sign-in, kiosk), attendance, handovers, incidents and evidence, security alerts, gate-device registration.

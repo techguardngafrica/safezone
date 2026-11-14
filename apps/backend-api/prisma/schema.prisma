@@ -700,3 +700,459 @@ model Space {
   @@map("spaces")
   @@schema("tenant")
 }
+
+// ---------------------------------------------------------------------------------------------------
+// Occupancy (Phase 1, occupancy.md): who lives in or uses a unit. Move-in/out workflows are Phase 2.
+// ---------------------------------------------------------------------------------------------------
+
+model Household {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  spaceId    String    @map("space_id") @db.Uuid
+  headUserId String    @map("head_user_id") @db.Uuid
+  name       String
+  /// active | ended
+  status     String    @default("active")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  endedAt    DateTime? @map("ended_at") @db.Timestamptz(3)
+
+  members     HouseholdMember[]
+  occupancies Occupancy[]
+
+  @@index([estateId, spaceId, status])
+  @@map("households")
+  @@schema("tenant")
+}
+
+model HouseholdMember {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  householdId  String    @map("household_id") @db.Uuid
+  /// Null for minors without an app account.
+  userId       String?   @map("user_id") @db.Uuid
+  fullName     String    @map("full_name")
+  /// head | spouse | child | relative | tenant_co_occupant | other
+  relationship String
+  isMinor      Boolean   @default(false) @map("is_minor")
+  /// { inviteVisitors, triggerSos, payBills, viewBills, receiveGateAlerts }
+  permissions  Json      @db.JsonB
+  /// active | removed
+  status       String    @default("active")
+  joinedAt     DateTime  @default(now()) @map("joined_at") @db.Timestamptz(3)
+  leftAt       DateTime? @map("left_at") @db.Timestamptz(3)
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  @@index([estateId, userId, status])
+  @@index([householdId])
+  @@map("household_members")
+  @@schema("tenant")
+}
+
+model Occupancy {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  spaceId     String    @map("space_id") @db.Uuid
+  householdId String    @map("household_id") @db.Uuid
+  /// owner_occupier | tenant | other
+  type        String
+  startsOn    DateTime  @map("starts_on") @db.Date
+  endsOn      DateTime? @map("ends_on") @db.Date
+  /// active | ended
+  status      String    @default("active")
+  createdBy   String?   @map("created_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  endedAt     DateTime? @map("ended_at") @db.Timestamptz(3)
+  endedBy     String?   @map("ended_by") @db.Uuid
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  @@index([estateId, spaceId, status])
+  @@map("occupancies")
+  @@schema("tenant")
+}
+
+model JoinRequest {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String    @map("estate_id") @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  spaceId         String    @map("space_id") @db.Uuid
+  /// owner | tenant | household_member
+  relationship    String
+  /// Target household (household_member requests).
+  householdId     String?   @map("household_id") @db.Uuid
+  fullName        String    @map("full_name")
+  message         String?
+  evidenceFileIds String[]  @map("evidence_file_ids") @db.Uuid
+  /// awaiting_household_head | awaiting_owner | awaiting_manager | approved | rejected | cancelled | expired
+  status          String
+  decidedBy       String?   @map("decided_by") @db.Uuid
+  reason          String?
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  decidedAt       DateTime? @map("decided_at") @db.Timestamptz(3)
+  expiresAt       DateTime  @map("expires_at") @db.Timestamptz(3)
+
+  @@index([estateId, status, createdAt])
+  @@index([userId])
+  @@map("join_requests")
+  @@schema("tenant")
+}
+
+model Vehicle {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  householdId     String   @map("household_id") @db.Uuid
+  /// Uppercase, no spaces or dashes.
+  plateNormalised String   @map("plate_normalised")
+  plateDisplay    String   @map("plate_display")
+  make            String?
+  model           String?
+  colour          String?
+  tagNumber       String?  @map("tag_number")
+  /// active | inactive
+  status          String   @default("active")
+  createdBy       String   @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([estateId, householdId])
+  @@map("vehicles")
+  @@schema("tenant")
+}
+
+model DomesticStaff {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  householdId String   @map("household_id") @db.Uuid
+  name        String
+  phone       String?
+  /// cleaner | driver | nanny | security | cook | gardener | other
+  role        String
+  /// { days: [0-6], from: "HH:MM", to: "HH:MM" }
+  schedule    Json     @db.JsonB
+  /// pending | active | suspended | ended
+  status      String
+  approvedBy  String?  @map("approved_by") @db.Uuid
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([estateId, householdId])
+  @@index([estateId, status])
+  @@map("domestic_staff")
+  @@schema("tenant")
+}
+
+/// A user's emergency contacts (all estates). Read by the emergency module only during an active SOS.
+model EmergencyContact {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  name               String
+  phone              String
+  relationship       String
+  consentConfirmedAt DateTime @map("consent_confirmed_at") @db.Timestamptz(3)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId])
+  @@map("emergency_contacts")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Security (Phase 1, security.md): gates. Personnel, shifts and incidents follow.
+// ---------------------------------------------------------------------------------------------------
+
+model Gate {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  name      String
+  /// pedestrian | vehicle | both
+  type      String
+  /// active | inactive
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([estateId, status])
+  @@map("gates")
+  @@schema("tenant")
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Visitor (Phase 1, visitor.md). Pass token design: ADR-0010.
+// ---------------------------------------------------------------------------------------------------
+
+/// Per-estate Ed25519 key pair. The private key is wrapped by the KeyVault adapter.
+model EstateSigningKey {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  estateId          String    @map("estate_id") @db.Uuid
+  /// Small integer carried in each QR token.
+  keyIndex          Int       @map("key_index")
+  publicKey         String    @map("public_key")
+  privateKeyWrapped String    @map("private_key_wrapped")
+  activeFrom        DateTime  @default(now()) @map("active_from") @db.Timestamptz(3)
+  /// Tokens signed with a retired key stay valid until this time.
+  activeTo          DateTime? @map("active_to") @db.Timestamptz(3)
+
+  @@unique([estateId, keyIndex])
+  @@map("estate_signing_keys")
+  @@schema("tenant")
+}
+
+model VisitorInvitation {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  hostUserId      String   @map("host_user_id") @db.Uuid
+  /// Null for passes created by management (e.g. a contractor for the estate).
+  hostHouseholdId String?  @map("host_household_id") @db.Uuid
+  spaceId         String?  @map("space_id") @db.Uuid
+  /// one_time | multi_entry | recurring | domestic_staff | delivery
+  type            String
+  purpose         String?
+  createdBy       String   @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  passes VisitorPass[]
+
+  @@index([estateId, hostHouseholdId])
+  @@map("visitor_invitations")
+  @@schema("tenant")
+}
+
+model VisitorPass {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  invitationId     String    @map("invitation_id") @db.Uuid
+  visitorName      String    @map("visitor_name")
+  visitorPhone     String?   @map("visitor_phone")
+  vehiclePlate     String?   @map("vehicle_plate")
+  /// HMAC of estate + PIN; unique among live passes (partial index in the migration).
+  pinLookup        String    @map("pin_lookup")
+  /// PIN wrapped by the KeyVault, so the host and the pass page can show it again.
+  pinWrapped       String    @map("pin_wrapped")
+  /// SHA-256 of the public pass-page token (the token is derived, never stored).
+  publicTokenHash  String    @unique @map("public_token_hash")
+  validFrom        DateTime  @map("valid_from") @db.Timestamptz(3)
+  validTo          DateTime  @map("valid_to") @db.Timestamptz(3)
+  recurrence       Json?     @db.JsonB
+  gateIds          String[]  @map("gate_ids") @db.Uuid
+  /// Null = unlimited within the window.
+  maxUses          Int?      @map("max_uses")
+  usesCount        Int       @default(0) @map("uses_count")
+  domesticStaffId  String?   @map("domestic_staff_id") @db.Uuid
+  keyIndex         Int       @map("key_index")
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(3)
+  revokedBy        String?   @map("revoked_by") @db.Uuid
+  revocationReason String?   @map("revocation_reason")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  invitation VisitorInvitation @relation(fields: [invitationId], references: [id])
+
+  @@index([estateId, validFrom, validTo])
+  @@index([estateId, revokedAt])
+  @@index([invitationId])
+  @@map("visitor_passes")
+  @@schema("tenant")
+}
+
+/// Append-only. Not partitioned yet (ADR-0010); `client_uuid` makes offline sync idempotent.
+model GateEvent {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  estateId       String   @map("estate_id") @db.Uuid
+  gateId         String   @map("gate_id") @db.Uuid
+  passId         String?  @map("pass_id") @db.Uuid
+  walkinId       String?  @map("walkin_id") @db.Uuid
+  /// in | out
+  direction      String
+  visitorName    String?  @map("visitor_name")
+  vehiclePlate   String?  @map("vehicle_plate")
+  /// allow | check | deny | override
+  decision       String
+  decisionReason String?  @map("decision_reason")
+  guardUserId    String   @map("guard_user_id") @db.Uuid
+  deviceId       String?  @map("device_id")
+  clientUuid     String   @map("client_uuid") @db.Uuid
+  /// Device time.
+  occurredAt     DateTime @map("occurred_at") @db.Timestamptz(3)
+  receivedAt     DateTime @default(now()) @map("received_at") @db.Timestamptz(3)
+  /// Device clock differed from the server by more than 5 minutes.
+  clockSkewed    Boolean  @default(false) @map("clock_skewed")
+  offline        Boolean  @default(false)
+
+  @@unique([estateId, clientUuid])
+  @@index([estateId, occurredAt])
+  @@index([estateId, passId])
+  @@map("gate_events")
+  @@schema("tenant")
+}
+
+model WalkinRequest {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  gateId       String    @map("gate_id") @db.Uuid
+  spaceId      String    @map("space_id") @db.Uuid
+  householdId  String    @map("household_id") @db.Uuid
+  visitorName  String    @map("visitor_name")
+  visitorPhone String?   @map("visitor_phone")
+  purpose      String?
+  vehiclePlate String?   @map("vehicle_plate")
+  /// pending | approved | rejected | timed_out | cancelled
+  status       String    @default("pending")
+  respondedBy  String?   @map("responded_by") @db.Uuid
+  respondedAt  DateTime? @map("responded_at") @db.Timestamptz(3)
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+  guardUserId  String    @map("guard_user_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, status, expiresAt])
+  @@index([estateId, householdId])
+  @@map("walkin_requests")
+  @@schema("tenant")
+}
+
+model RestrictedVisitor {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String    @map("estate_id") @db.Uuid
+  name            String?
+  phone           String?
+  plateNormalised String?   @map("plate_normalised")
+  reason          String
+  addedBy         String    @map("added_by") @db.Uuid
+  expiresAt       DateTime? @map("expires_at") @db.Timestamptz(3)
+  removedAt       DateTime? @map("removed_at") @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId])
+  @@map("restricted_visitors")
+  @@schema("tenant")
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Emergency (Phase 1, emergency.md). Escalation steps come from the estate setting `sos.escalation`.
+// ---------------------------------------------------------------------------------------------------
+
+model SosAlert {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  triggeredBy    String    @map("triggered_by") @db.Uuid
+  /// resident | guard | staff
+  triggerRole    String    @map("trigger_role")
+  householdId    String?   @map("household_id") @db.Uuid
+  spaceId        String?   @map("space_id") @db.Uuid
+  /// security_threat | medical | fire | accident | suspicious_activity | general
+  category       String
+  isDrill        Boolean   @default(false) @map("is_drill")
+  /// app | sms | device
+  source         String    @default("app")
+  /// triggered | acknowledged | assigned | responding | resolved | closed | cancelled
+  status         String    @default("triggered")
+  triggeredAt    DateTime  @default(now()) @map("triggered_at") @db.Timestamptz(3)
+  acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz(3)
+  acknowledgedBy String?   @map("acknowledged_by") @db.Uuid
+  assignedTo     String?   @map("assigned_to") @db.Uuid
+  respondingAt   DateTime? @map("responding_at") @db.Timestamptz(3)
+  resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
+  resolvedBy     String?   @map("resolved_by") @db.Uuid
+  resolution     String?
+  falseAlarm     Boolean   @default(false) @map("false_alarm")
+  closedAt       DateTime? @map("closed_at") @db.Timestamptz(3)
+  closedBy       String?   @map("closed_by") @db.Uuid
+  cancelledAt    DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  clientUuid     String    @map("client_uuid") @db.Uuid
+  version        Int       @default(1)
+
+  @@unique([estateId, clientUuid])
+  @@index([estateId, status, triggeredAt])
+  @@map("sos_alerts")
+  @@schema("tenant")
+}
+
+/// Collected only between trigger and resolution (AGENTS.md §6.6).
+model SosLocation {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  alertId    String   @map("alert_id") @db.Uuid
+  lat        Float
+  lng        Float
+  accuracyM  Float?   @map("accuracy_m")
+  capturedAt DateTime @map("captured_at") @db.Timestamptz(3)
+  receivedAt DateTime @default(now()) @map("received_at") @db.Timestamptz(3)
+
+  @@index([alertId, capturedAt])
+  @@map("sos_locations")
+  @@schema("tenant")
+}
+
+/// Append-only timeline: every state change and notification (emergency.md §8.6).
+model SosEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  alertId    String   @map("alert_id") @db.Uuid
+  /// triggered | retriggered | notified | escalated | acknowledged | assigned | responding | note | resolved | closed | cancelled
+  type       String
+  actorId    String?  @map("actor_id") @db.Uuid
+  /// push | sms | voice | in_app (notified events)
+  channel    String?
+  payload    Json     @default("{}") @db.JsonB
+  occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  @@index([alertId, occurredAt])
+  @@map("sos_events")
+  @@schema("tenant")
+}
+
+model EmergencyBroadcast {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  title      String
+  body       String
+  sentBy     String   @map("sent_by") @db.Uuid
+  sentAt     DateTime @default(now()) @map("sent_at") @db.Timestamptz(3)
+  recipients Int      @default(0)
+
+  @@index([estateId, sentAt])
+  @@map("emergency_broadcasts")
+  @@schema("tenant")
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Community, Phase 1 part: official announcements (community.md). Channels and messaging are Phase 3.
+// ---------------------------------------------------------------------------------------------------
+
+model Announcement {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  estateId         String   @map("estate_id") @db.Uuid
+  title            String
+  body             String
+  /// general | security | maintenance | event | billing
+  category         String   @default("general")
+  /// normal | important (important also goes by SMS)
+  priority         String   @default("normal")
+  /// estate | spaces
+  audienceType     String   @map("audience_type")
+  /// The spaces chosen (buildings, blocks, units).
+  audienceSpaceIds String[] @map("audience_space_ids") @db.Uuid
+  /// Units covered, resolved at publication, for filtering what a resident sees.
+  audienceUnitIds  String[] @map("audience_unit_ids") @db.Uuid
+  authorId         String   @map("author_id") @db.Uuid
+  publishedAt      DateTime @default(now()) @map("published_at") @db.Timestamptz(3)
+  recipients       Int      @default(0)
+
+  @@index([audienceUnitIds], type: Gin, map: "announcements_audience_units")
+  @@index([estateId, publishedAt])
+  @@map("announcements")
+  @@schema("tenant")
+}
+
+model AnnouncementRead {
+  estateId       String   @map("estate_id") @db.Uuid
+  announcementId String   @map("announcement_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  readAt         DateTime @default(now()) @map("read_at") @db.Timestamptz(3)
+
+  @@id([announcementId, userId])
+  @@map("announcement_reads")
+  @@schema("tenant")
+}

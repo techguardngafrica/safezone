@@ -66,3 +66,59 @@ Stable `error.code` values. Add a row when you add a code.
 | `INTERNAL_ERROR`                | 500    | Retry later; report the `requestId` if it persists                 |
 | `OTP_DELIVERY_FAILED`           | 503    | SMS provider failed; retry shortly                                 |
 | `SERVICE_UNAVAILABLE`           | 503    | A dependency is down (readiness probe)                             |
+
+## Occupancy, visitors, gates, SOS and announcements (Phase 1)
+
+| Code                         | Status | Meaning / what the client should do                             |
+| ---------------------------- | ------ | --------------------------------------------------------------- |
+| `IDEMPOTENCY_KEY_REQUIRED`   | 400    | Send an `Idempotency-Key` header (a UUID per SOS press)         |
+| `NOT_HOUSEHOLD_HEAD`         | 403    | Only the household head (or a manager) can do this              |
+| `VISITOR_INVITE_NOT_ALLOWED` | 403    | The household has not given this member visitor invitations     |
+| `SOS_NOT_ALLOWED`            | 403    | The household has not given this member SOS                     |
+| `DRILL_NOT_ALLOWED`          | 403    | Only supervisors and managers start drills                      |
+| `ESTATE_CODE_NOT_FOUND`      | 404    | No estate accepts residents with that join code                 |
+| `HOUSEHOLD_NOT_FOUND`        | 404    | No such household for this caller                               |
+| `MEMBER_NOT_FOUND`           | 404    | No such active household member                                 |
+| `OCCUPANCY_NOT_FOUND`        | 404    | No such occupancy                                               |
+| `JOIN_REQUEST_NOT_FOUND`     | 404    | No such request waiting for this caller                         |
+| `VEHICLE_NOT_FOUND`          | 404    | No such vehicle                                                 |
+| `STAFF_NOT_FOUND`            | 404    | No such domestic staff record                                   |
+| `CONTACT_NOT_FOUND`          | 404    | No such emergency contact                                       |
+| `GATE_NOT_FOUND`             | 404    | No active gate with that id in this estate                      |
+| `PASS_NOT_FOUND`             | 404    | No such pass for this caller                                    |
+| `WALKIN_NOT_FOUND`           | 404    | No such walk-in request for this caller                         |
+| `RESTRICTED_NOT_FOUND`       | 404    | No such restricted-list entry                                   |
+| `SOS_NOT_FOUND`              | 404    | No such alert for this caller                                   |
+| `ANNOUNCEMENT_NOT_FOUND`     | 404    | No such announcement for this reader                            |
+| `UNIT_OCCUPIED`              | 409    | The unit already has a household; join it as a household member |
+| `ALREADY_MEMBER`             | 409    | Already in the household                                        |
+| `JOIN_REQUEST_OPEN`          | 409    | A request for this unit is already waiting                      |
+| `JOIN_REQUEST_CLOSED`        | 409    | The request was already decided or cancelled                    |
+| `JOIN_REQUEST_INVALID_STATE` | 409    | The request is not waiting for this approver                    |
+| `JOIN_REQUEST_STATE_CHANGED` | 409    | Someone else decided it; reload                                 |
+| `HOUSEHOLD_ENDED`            | 409    | The target household no longer lives there                      |
+| `OCCUPANCY_NOT_ACTIVE`       | 409    | The occupancy has already ended                                 |
+| `PLATE_REGISTERED`           | 409    | That plate is already active in the estate                      |
+| `STAFF_ENDED`                | 409    | The staff pass has ended                                        |
+| `GATE_NAME_TAKEN`            | 409    | A live gate already has that name                               |
+| `PASS_REVOKED`               | 409    | The pass is already revoked                                     |
+| `PASS_NOT_USABLE`            | 409    | Only scheduled or active passes can be shared                   |
+| `WALKIN_CLOSED`              | 409    | Already answered or timed out                                   |
+| `SOS_INVALID_STATE`          | 409    | The alert's status does not allow this action                   |
+| `SOS_STATE_CHANGED`          | 409    | Someone else updated the alert; reload                          |
+| `SOS_NOT_ACTIVE`             | 409    | The alert has ended; location is no longer collected            |
+| `NO_HOUSEHOLD`               | 422    | Nobody lives in that unit                                       |
+| `HEAD_PERMISSIONS_FIXED`     | 422    | The household head always has every permission                  |
+| `CANNOT_REMOVE_HEAD`         | 422    | End the occupancy instead                                       |
+| `PLATE_INVALID`              | 422    | Enter a valid plate                                             |
+| `TOO_MANY_CONTACTS`          | 422    | At most 5 emergency contacts                                    |
+| `PASS_TOO_LONG`              | 422    | Longer than `visitor.max_pass_days` (staff passes: 366 days)    |
+| `PASS_IN_PAST`               | 422    | The pass would already have ended                               |
+| `HOUSEHOLD_REQUIRED`         | 422    | Residents must choose the household the visitor is coming to    |
+| `STAFF_NOT_ACTIVE`           | 422    | Staff passes need an approved staff member of that household    |
+| `NO_VISITOR_PHONE`           | 422    | Add the visitor phone before sharing                            |
+| `GATE_REASON_REQUIRED`       | 422    | Denials and overrides need a reason                             |
+| `WALKIN_NOT_APPROVED`        | 422    | The household has not approved this walk-in                     |
+| `NOT_A_RESPONDER`            | 422    | Assign SOS alerts to a guard or supervisor of the estate        |
+| `LOCATION_REQUIRED`          | 422    | Send a location                                                 |
+| `PIN_SPACE_EXHAUSTED`        | 503    | Could not issue a unique PIN; retry                             |

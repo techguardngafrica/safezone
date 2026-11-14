@@ -130,3 +130,13 @@ Host: visitor arrived/left, walk-in request (high priority), pass shared confirm
 - Offline entries recorded during a 2-hour outage sync without duplicates.
 - A walk-in request reaches the host within 3 seconds and times out at the configured interval.
 - Every gate decision has a guard, device, time and reason recorded.
+
+## 14. Phase 1 implementation notes
+
+Built in `src/modules/visitor` (credentials in [ADR-0010](../adr/0010-visitor-pass-credentials.md)):
+
+- Pass types: `one_time`, `multi_entry`, `recurring` (days and hours in WAT), `domestic_staff` (schedule from the approved staff record, up to 366 days), `delivery`. Event and contractor passes and event guest lists are not built.
+- Hosts: `POST …/visitor-invitations` (one pass per visitor, returns QR, PIN and pass link), `GET …/visitor-passes`, `GET …/visitor-passes/:id`, `POST …/:id/revoke`, `POST …/:id/share` (SMS from the worker). Visitor page: `GET /v1/public/passes/:token` (rate-limited; credentials hidden once revoked, used or expired). Editing a pass window is not built (revoke and re-issue).
+- Gate (`gate.verify`): `POST …/gate/verify`, `POST …/gate/events` (idempotent on `clientUuid`; denials and overrides need a reason; overrides audited), `POST …/gate/sync` (offline batches, clock skew flagged), `GET …/gate/expected`, `GET …/gate/revocations`, `GET …/gate/keys`, `GET …/gate/inside`, walk-ins (`POST …/walkins`; host `POST …/walkins/:id/approve|reject`; `GET …/walkins/:id`). Management: `GET …/gate/events`, restricted list (`GET/POST/DELETE …/restricted-visitors`).
+- Worker (`gate` queue): pass shares and revocation of a household's passes when its occupancy ends.
+- **Not yet built:** realtime pushes to gate devices, overstay detection, photo capture and purge, supervisor alerts for overrides, gate-device identity (guards sign in as users today).

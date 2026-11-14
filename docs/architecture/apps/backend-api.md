@@ -233,12 +233,12 @@ Event naming: `<module>.<entity>.<past-tense-verb>`, e.g. `visitor.pass.created`
 
 | Queue              | Priority                 | Examples                                                | Concurrency      |
 | ------------------ | ------------------------ | ------------------------------------------------------- | ---------------- |
-| `sos`              | Highest, own worker pool | SOS fan-out, escalation timers                          | High, isolated   |
+| `sos`              | Highest, own worker pool | SOS fan-out, escalation timers (`SosConsumer` only)     | 20, isolated     |
 | `notifications`    | High                     | Push, SMS, WhatsApp, email sends                        | High             |
 | `outbox`           | High                     | Event relay (in-process poller today, see below)        | 1–2 per instance |
 | `audit`            | High                     | Hash-chained audit records from audited events          | 1 per instance   |
 | `files`            | Normal                   | Scan, type check, metadata strip, hash                  | 4                |
-| `gate`             | High                     | Offline sync ingestion, revocation list builds          | Medium           |
+| `gate`             | High                     | Pass shares, revoking passes when an occupancy ends     | 8                |
 | `billing`          | Normal                   | Bulk invoice runs, penalties, reminders                 | Low              |
 | `payments`         | Normal                   | Reconciliation, webhook processing, settlement checks   | Medium           |
 | `imports`          | Low                      | Excel/CSV imports                                       | Low              |

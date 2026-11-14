@@ -108,3 +108,7 @@ Consumes: `occupancy.occupancy.started/ended` (building membership), `property.s
 - A new tenant appears in their building channel automatically on approval and disappears on move-out.
 - With private messaging disabled, the DM endpoints return `FEATURE_NOT_ENABLED`.
 - A reported message can be removed from the moderation queue in two taps, and the action appears in the moderation audit log.
+
+## 12. Phase 1 implementation notes
+
+Built in `src/modules/community`: official announcements only. `POST /v1/estates/:estateId/announcements` (`announcement.publish`; audience the estate or chosen spaces, resolved to units at publication; `important` also goes by SMS), `GET …/announcements` (what the reader's units cover; `all=true` for management with recipient counts), `POST …/announcements/:id/read`. Every item is labelled official. Scheduling, attachments, role audiences and email are not built.

@@ -69,6 +69,10 @@ export class IdentityService {
       const now = new Date();
       const user =
         existing ?? (await tx.user.create({ data: { phoneE164: phone, phoneVerifiedAt: now } }));
+      // Users added by a manager or household head verify their phone on first sign-in.
+      if (existing && !existing.phoneVerifiedAt) {
+        await tx.user.update({ where: { id: existing.id }, data: { phoneVerifiedAt: now } });
+      }
       const tokens = await this.sessions.create(tx, user.id, device, client);
       await appendOutboxEvents(tx, [
         ...(existing
@@ -134,6 +138,42 @@ export class IdentityService {
       mfaRequired: !mfaVerified && requiresMfa(assignments.map((assignment) => assignment.roleKey)),
       mfaEnrolled: user?.mfaEnabled ?? false,
     };
+  }
+
+  /**
+   * The user with this phone, created (unverified, no session) when they have no account yet. Used when a
+   * manager or household head adds someone; they verify the phone the first time they sign in.
+   */
+  async findOrCreateByPhone(
+    phone: string,
+    fullName: string | null,
+    actorId: string,
+  ): Promise<string> {
+    return this.db.withContext('identity', async (tx) => {
+      const existing = await tx.user.findUnique({
+        where: { phoneE164: phone },
+        select: { id: true },
+      });
+      if (existing) return existing.id;
+      const user = await tx.user.create({ data: { phoneE164: phone, fullName } });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'identity.user.created',
+          estateId: null,
+          aggregateType: 'user',
+          aggregateId: user.id,
+          payload: { userId: user.id, addedBy: actorId },
+          audit: {
+            actorType: 'user',
+            actorId,
+            action: 'identity.user.create',
+            resourceType: 'user',
+            resourceId: user.id,
+          },
+        },
+      ]);
+      return user.id;
+    });
   }
 
   /** Phone and name of users, for other modules' server-side checks and staff views (never to advertisers). */

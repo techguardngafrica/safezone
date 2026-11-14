@@ -50,6 +50,7 @@ const LOCAL = {
   jwtRefresh: 'local-only-refresh-secret-change-me-000000000',
   otp: 'local-only-otp-secret-change-me-00000000000000',
   mfaKey: Buffer.alloc(32, 7).toString('base64'),
+  passKey: Buffer.alloc(32, 9).toString('base64'),
 } as const;
 
 const envSchema = z.object({
@@ -73,6 +74,8 @@ const envSchema = z.object({
 
   /** Base URL of management-web; invitation links point here (tenancy.md §4.2). */
   MANAGEMENT_WEB_URL: z.url().default('http://localhost:3001'),
+  /** Base URL of public-web; visitor pass links open `<url>/p/<token>`. */
+  PUBLIC_WEB_URL: z.url().default('http://localhost:3000'),
 
   /** Fallback when no app_versions row exists (platform module). */
   APP_MIN_VERSION: z
@@ -101,6 +104,8 @@ const envSchema = z.object({
   OTP_HMAC_SECRET: z.string().min(32).default(LOCAL.otp),
   /** AES-256-GCM key for TOTP secrets at rest. */
   MFA_ENCRYPTION_KEY: key32.default(LOCAL.mfaKey),
+  /** Encrypts each estate's Ed25519 visitor-pass signing key and stored pass PINs (ADR-0010). */
+  PASS_KEY_ENCRYPTION_KEY: key32.default(LOCAL.passKey),
 
   STORAGE_BUCKET: z.string().min(3).default('safezone-local'),
   STORAGE_REGION: z.string().min(1).default('us-east-1'),
@@ -154,6 +159,7 @@ function deployedIssues(env: ParsedEnv, source: NodeJS.ProcessEnv): string[] {
     'JWT_REFRESH_SECRET',
     'OTP_HMAC_SECRET',
     'MFA_ENCRYPTION_KEY',
+    'PASS_KEY_ENCRYPTION_KEY',
     'STORAGE_BUCKET',
     'STORAGE_ACCESS_KEY_ID',
     'STORAGE_SECRET_ACCESS_KEY',
@@ -175,10 +181,17 @@ function deployedIssues(env: ParsedEnv, source: NodeJS.ProcessEnv): string[] {
     issues.push('JWT_ACCESS_SECRET, JWT_REFRESH_SECRET and OTP_HMAC_SECRET must all differ');
   }
   if (env.MFA_ENCRYPTION_KEY === LOCAL.mfaKey) issues.push('MFA_ENCRYPTION_KEY: placeholder value');
+  if (env.PASS_KEY_ENCRYPTION_KEY === LOCAL.passKey) {
+    issues.push('PASS_KEY_ENCRYPTION_KEY: placeholder value');
+  }
+  if (env.PASS_KEY_ENCRYPTION_KEY === env.MFA_ENCRYPTION_KEY) {
+    issues.push('PASS_KEY_ENCRYPTION_KEY must differ from MFA_ENCRYPTION_KEY');
+  }
   if (env.SMS_PROVIDER === 'fake') issues.push('SMS_PROVIDER: fake is not allowed');
   if (env.CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
     issues.push('CORS_ORIGINS: only https origins are allowed');
   }
+  if (!env.PUBLIC_WEB_URL.startsWith('https://')) issues.push('PUBLIC_WEB_URL: must be https');
   if (!env.MANAGEMENT_WEB_URL.startsWith('https://')) {
     issues.push('MANAGEMENT_WEB_URL: must be https');
   }
