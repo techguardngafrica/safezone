@@ -1,0 +1,221 @@
+import { Injectable } from '@nestjs/common';
+import {
+  type EstateProfile,
+  type EstateSettings,
+  estateProfileSchema,
+  estateSettingsSchema,
+  FEATURE_KEYS,
+  type FeatureKey,
+} from '@safezone/schemas';
+import type { Prisma } from '../../generated/prisma/client';
+import { DatabaseService } from '../../common/database/database.service';
+import type { TenantContext } from '../../common/database/tenant-context';
+import { ConflictError, NotFoundError } from '../../common/errors/domain-error';
+import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
+
+/** Estates that can be used at all. Suspended estates keep safety features (tenancy.md §7.5). */
+const USABLE_STATUSES = new Set(['approved', 'active', 'suspended']);
+
+export interface MembershipCheck {
+  estateId: string;
+  estateStatus: string;
+}
+
+/**
+ * Tenancy core (Phase 0 task 7): estates as tenants, memberships, settings and entitlements.
+ * Public interface for other modules; nothing else reads these tables.
+ */
+@Injectable()
+export class TenancyService {
+  constructor(private readonly db: DatabaseService) {}
+
+  /** Active membership in a usable estate, or null. Used by the authorization guard on every estate route. */
+  async activeMembership(userId: string, estateId: string): Promise<MembershipCheck | null> {
+    return this.db.withContext('tenancy', async (tx) => {
+      const membership = await tx.estateMembership.findUnique({
+        where: { estateId_userId: { estateId, userId } },
+        select: { status: true },
+      });
+      if (membership?.status !== 'active') return null;
+      const estate = await tx.estate.findUnique({
+        where: { id: estateId },
+        select: { status: true },
+      });
+      if (!estate || !USABLE_STATUSES.has(estate.status)) return null;
+      return { estateId, estateStatus: estate.status };
+    });
+  }
+
+  /** The signed-in user's memberships across estates (own rows only, via RLS). */
+  async membershipsOf(userId: string) {
+    return this.db.withContext(
+      'tenancy',
+      async (tx) => {
+        const memberships = await tx.estateMembership.findMany({
+          where: { userId, status: { in: ['active', 'pending', 'suspended'] } },
+          orderBy: { joinedAt: 'asc' },
+        });
+        const estates = await tx.estate.findMany({
+          where: { id: { in: memberships.map((m) => m.estateId) } },
+          select: { id: true, name: true, status: true },
+        });
+        const byId = new Map(estates.map((estate) => [estate.id, estate]));
+        return memberships.flatMap((membership) => {
+          const estate = byId.get(membership.estateId);
+          return estate ? [{ membership, estate }] : [];
+        });
+      },
+      { userId },
+    );
+  }
+
+  async getProfile(context: TenantContext): Promise<EstateProfile> {
+    return this.db.withTenant(context, async (tx) => {
+      const estate = await tx.estate.findUnique({ where: { id: context.estateId } });
+      if (!estate) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+      return estateProfileSchema.parse(estate);
+    });
+  }
+
+  /** Optimistic concurrency: `expectedVersion` comes from If-Match. */
+  async updateProfile(
+    context: TenantContext,
+    changes: { name?: string; address?: string; state?: string; lga?: string },
+    expectedVersion?: number,
+  ): Promise<EstateProfile> {
+    return this.db.withTenant(context, async (tx) => {
+      const before = await tx.estate.findUnique({ where: { id: context.estateId } });
+      if (!before) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+      const updated = await tx.estate.updateMany({
+        where: {
+          id: context.estateId,
+          ...(expectedVersion !== undefined ? { version: expectedVersion } : {}),
+        },
+        data: { ...changes, version: { increment: 1 } },
+      });
+      if (updated.count === 0) {
+        throw new ConflictError(
+          'VERSION_MISMATCH',
+          'This estate was changed by someone else. Reload and try again.',
+        );
+      }
+      const after = await tx.estate.findUniqueOrThrow({ where: { id: context.estateId } });
+      const changed = Object.fromEntries(
+        Object.keys(changes).map((key) => [key, (before as Record<string, unknown>)[key] ?? null]),
+      ) as Prisma.InputJsonValue;
+      await appendOutboxEvents(tx, [
+        {
+          type: 'tenancy.estate.updated',
+          estateId: context.estateId,
+          aggregateType: 'estate',
+          aggregateId: context.estateId,
+          payload: { fields: Object.keys(changes) },
+          audit: {
+            actorType: 'user',
+            actorId: context.userId,
+            action: 'tenancy.estate.update',
+            resourceType: 'estate',
+            resourceId: context.estateId,
+            before: changed,
+            after: changes as Prisma.InputJsonValue,
+          },
+        },
+      ]);
+      return estateProfileSchema.parse(after);
+    });
+  }
+
+  async getSettings(context: TenantContext): Promise<EstateSettings> {
+    return this.db.withTenant(context, async (tx) => {
+      const rows = await tx.estateSetting.findMany({ where: { estateId: context.estateId } });
+      return this.mergeSettings(rows);
+    });
+  }
+
+  async updateSettings(
+    context: TenantContext,
+    changes: Partial<EstateSettings>,
+  ): Promise<EstateSettings> {
+    return this.db.withTenant(context, async (tx) => {
+      const existing = await tx.estateSetting.findMany({ where: { estateId: context.estateId } });
+      const before = this.mergeSettings(existing);
+      for (const [key, value] of Object.entries(changes)) {
+        await tx.estateSetting.upsert({
+          where: { estateId_key: { estateId: context.estateId, key } },
+          create: {
+            estateId: context.estateId,
+            key,
+            value: value as Prisma.InputJsonValue,
+            updatedBy: context.userId,
+          },
+          update: {
+            value: value as Prisma.InputJsonValue,
+            updatedBy: context.userId,
+            updatedAt: new Date(),
+          },
+        });
+      }
+      const keys = Object.keys(changes);
+      await appendOutboxEvents(tx, [
+        {
+          type: 'tenancy.settings.updated',
+          estateId: context.estateId,
+          aggregateType: 'estate',
+          aggregateId: context.estateId,
+          payload: { keys },
+          audit: {
+            actorType: 'user',
+            actorId: context.userId,
+            action: 'tenancy.settings.update',
+            resourceType: 'estate_settings',
+            resourceId: context.estateId,
+            before: Object.fromEntries(
+              keys.map((key) => [key, before[key as keyof EstateSettings]]),
+            ) as Prisma.InputJsonValue,
+            after: changes as Prisma.InputJsonValue,
+          },
+        },
+      ]);
+      return { ...before, ...changes };
+    });
+  }
+
+  /** Plan features adjusted by unexpired per-estate overrides. All estates are on the free core plan. */
+  async enabledFeatures(estateId: string): Promise<FeatureKey[]> {
+    return this.db.withContext(
+      'tenancy',
+      async (tx) => {
+        const estate = await tx.estate.findUnique({
+          where: { id: estateId },
+          select: { planKey: true },
+        });
+        if (!estate) return [];
+        const plan = await tx.plan.findUnique({ where: { key: estate.planKey } });
+        const enabled = new Set<string>(plan?.features ?? []);
+        const overrides = await tx.entitlement.findMany({ where: { estateId } });
+        const now = new Date();
+        for (const override of overrides) {
+          if (override.validTo && override.validTo <= now) continue;
+          if (override.enabled) enabled.add(override.featureKey);
+          else enabled.delete(override.featureKey);
+        }
+        return FEATURE_KEYS.filter((key) => enabled.has(key));
+      },
+      { estateId },
+    );
+  }
+
+  private mergeSettings(rows: readonly { key: string; value: unknown }[]): EstateSettings {
+    const stored: Record<string, unknown> = {};
+    for (const row of rows) stored[row.key] = row.value;
+    // Unknown or invalid stored keys fall back to defaults instead of breaking the estate.
+    const result = estateSettingsSchema.safeParse(stored);
+    if (result.success) return result.data;
+    const defaults = estateSettingsSchema.parse({});
+    for (const [key, value] of Object.entries(stored)) {
+      const single = estateSettingsSchema.shape[key as keyof EstateSettings];
+      if (single?.safeParse(value).success) (defaults as Record<string, unknown>)[key] = value;
+    }
+    return defaults;
+  }
+}

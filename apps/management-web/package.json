@@ -2,7 +2,7 @@
   "name": "@safezone/management-web",
   "version": "0.0.0",
   "private": true,
-  "description": "Estate Management App — web (Next.js)",
+  "description": "Estate Management App \u2014 web (Next.js)",
   "scripts": {
     "dev": "next dev --port 3001",
     "build": "next build",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@safezone/api-client": "workspace:*",
     "@safezone/auth": "workspace:*",
+    "@safezone/contracts": "workspace:*",
     "@safezone/design-tokens": "workspace:*",
     "@safezone/i18n": "workspace:*",
     "@safezone/permissions": "workspace:*",

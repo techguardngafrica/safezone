@@ -38,6 +38,9 @@ jobs:
       - name: Test all workspaces
         run: pnpm test
 
+      - name: API contract is up to date
+        run: pnpm --filter @safezone/backend-api openapi && git diff --exit-code packages/contracts
+
       - name: Integration tests (Postgres via Testcontainers)
         run: pnpm test:integration
 

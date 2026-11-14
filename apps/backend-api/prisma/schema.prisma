@@ -20,7 +20,8 @@ datasource db {
 }
 
 /// Transactional outbox (backend-api.md §10). Written in the same transaction as the state change;
-/// relayed to BullMQ by the worker. Infrastructure table: not exposed through any endpoint, no RLS.
+/// relayed to BullMQ by the worker. Not exposed through any endpoint. RLS: a transaction may insert
+/// events for its own estate (or platform events); only the relay context reads and updates them.
 model OutboxEvent {
   id            String    @id @default(uuid(7)) @db.Uuid
   /// <module>.<entity>.<past-tense-verb>, e.g. visitor.pass.revoked
@@ -31,6 +32,8 @@ model OutboxEvent {
   aggregateType String    @map("aggregate_type")
   aggregateId   String    @map("aggregate_id")
   payload       Json      @db.JsonB
+  /// Audit record for this event, if the action must be audited (written by the audit consumer).
+  audit         Json?     @db.JsonB
   occurredAt    DateTime  @default(now()) @map("occurred_at") @db.Timestamptz(3)
   dispatchedAt  DateTime? @map("dispatched_at") @db.Timestamptz(3)
   attempts      Int       @default(0)
@@ -42,10 +45,12 @@ model OutboxEvent {
 }
 
 /// Append-only audit trail (modules/audit.md §3). safezone_app has INSERT and SELECT only.
-/// Estate rows are protected by RLS; platform-level rows (estate_id null) are reachable only
-/// through the platform role added in Phase 0 task 7.
+/// Estate rows are readable in that estate's context; the audit consumer writes every stream
+/// (including platform-level rows with estate_id null) in the 'audit' context.
 model AuditEvent {
   id               String   @id @default(uuid(7)) @db.Uuid
+  /// Insertion order; the hash chain of each stream follows it.
+  seq              BigInt   @default(autoincrement())
   occurredAt       DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
   estateId         String?  @map("estate_id") @db.Uuid
   /// user | guard_device | system | provider_webhook | platform_staff
@@ -72,7 +77,451 @@ model AuditEvent {
   prevHash         String?  @map("prev_hash")
 
   @@index([estateId, occurredAt])
+  @@index([estateId, seq])
   @@index([resourceType, resourceId])
   @@map("audit_events")
   @@schema("audit")
+}
+
+// ---------------------------------------------------------------------------
+// identity (modules/identity.md). Platform-level: no estate_id.
+// RLS: rows are visible to the owning user (app.user_id) or inside withContext('identity').
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  phoneE164       String    @unique @map("phone_e164")
+  phoneVerifiedAt DateTime? @map("phone_verified_at") @db.Timestamptz(3)
+  email           String?
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(3)
+  fullName        String?   @map("full_name")
+  locale          String    @default("en")
+  /// active | locked | deleted
+  status          String    @default("active")
+  mfaEnabled      Boolean   @default(false) @map("mfa_enabled")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  sessions      Session[]
+  devices       UserDevice[]
+  mfaFactors    MfaFactor[]
+  recoveryCodes RecoveryCode[]
+
+  @@map("users")
+  @@schema("platform")
+}
+
+model OtpChallenge {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  phoneE164  String    @map("phone_e164")
+  /// signin | phone_change | sensitive_action
+  purpose    String
+  /// HMAC-SHA256(OTP_HMAC_SECRET, id:code). The code itself is never stored or logged.
+  codeHash   String    @map("code_hash")
+  /// sms | whatsapp
+  channel    String
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(3)
+  ip         String?   @db.Inet
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([phoneE164, purpose, createdAt])
+  @@map("otp_challenges")
+  @@schema("platform")
+}
+
+/// One session per device sign-in. A session is the refresh-token family (ADR-0005).
+model Session {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  deviceId      String?   @map("device_id") @db.Uuid
+  app           String
+  ip            String?   @db.Inet
+  userAgent     String?   @map("user_agent")
+  /// Set once MFA is satisfied for this session (or not needed when it was created).
+  mfaVerifiedAt DateTime? @map("mfa_verified_at") @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt    DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt     DateTime? @map("revoked_at") @db.Timestamptz(3)
+  /// signout | user_revoked | refresh_reuse | expired | support | phone_changed
+  revokedReason String?   @map("revoked_reason")
+
+  user          User           @relation(fields: [userId], references: [id])
+  device        UserDevice?    @relation(fields: [deviceId], references: [id])
+  refreshTokens RefreshToken[]
+
+  @@index([userId, revokedAt])
+  @@map("sessions")
+  @@schema("platform")
+}
+
+/// Every refresh token ever issued for a session. Presenting a used one revokes the session (reuse detection).
+model RefreshToken {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  sessionId String    @map("session_id") @db.Uuid
+  /// HMAC-SHA256(JWT_REFRESH_SECRET, token)
+  tokenHash String    @unique @map("token_hash")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@map("refresh_tokens")
+  @@schema("platform")
+}
+
+model UserDevice {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  /// android | ios | web
+  platform   String
+  model      String?
+  app        String
+  appVersion String   @map("app_version")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+
+  user       User        @relation(fields: [userId], references: [id])
+  sessions   Session[]
+  pushTokens PushToken[]
+
+  @@index([userId])
+  @@map("user_devices")
+  @@schema("platform")
+}
+
+model MfaFactor {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  /// totp
+  type            String    @default("totp")
+  /// AES-256-GCM(MFA_ENCRYPTION_KEY, base32 secret): iv.tag.ciphertext, base64url
+  secretEncrypted String    @map("secret_encrypted")
+  confirmedAt     DateTime? @map("confirmed_at") @db.Timestamptz(3)
+  /// Last accepted 30-second step; codes for this step or earlier are rejected (replay protection).
+  lastUsedStep    BigInt?   @map("last_used_step")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("mfa_factors")
+  @@schema("platform")
+}
+
+model RecoveryCode {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @unique @map("code_hash")
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("recovery_codes")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// authz (modules/authz.md). Built-in role definitions live in @safezone/permissions;
+// the roles table mirrors them (seeded) so assignments can reference them.
+// ---------------------------------------------------------------------------
+
+model Role {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  /// platform | estate | vendor | advertiser
+  level     String
+  key       String
+  name      String
+  isBuiltin Boolean  @default(false) @map("is_builtin")
+  /// Null for built-in roles; set for custom estate roles.
+  estateId  String?  @map("estate_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  permissions RolePermission[]
+  assignments RoleAssignment[]
+
+  @@unique([estateId, key])
+  @@map("roles")
+  @@schema("platform")
+}
+
+/// Permissions of custom roles. Built-in role permissions come from @safezone/permissions at runtime.
+model RolePermission {
+  roleId     String @map("role_id") @db.Uuid
+  permission String
+
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([roleId, permission])
+  @@map("role_permissions")
+  @@schema("platform")
+}
+
+model RoleAssignment {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  roleId    String    @map("role_id") @db.Uuid
+  /// Null for platform roles.
+  estateId  String?   @map("estate_id") @db.Uuid
+  /// building | gate | department | facility (Phase 1+)
+  scopeType String?   @map("scope_type")
+  scopeId   String?   @map("scope_id") @db.Uuid
+  validFrom DateTime  @default(now()) @map("valid_from") @db.Timestamptz(3)
+  validTo   DateTime? @map("valid_to") @db.Timestamptz(3)
+  grantedBy String?   @map("granted_by") @db.Uuid
+  grantedAt DateTime  @default(now()) @map("granted_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  revokedBy String?   @map("revoked_by") @db.Uuid
+  reason    String?
+
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@index([userId, revokedAt])
+  @@index([estateId])
+  @@map("role_assignments")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// tenancy core (modules/tenancy.md). estates is the tenant registry (platform schema);
+// memberships, settings and entitlements are tenant data (RLS on estate_id).
+// ---------------------------------------------------------------------------
+
+model Estate {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  name             String
+  slug             String    @unique
+  /// Short join code shown to residents.
+  code             String    @unique
+  /// gated_houses | apartment_complex | mixed
+  type             String
+  address          String?
+  state            String?
+  lga              String?
+  timezone         String    @default("Africa/Lagos")
+  currency         String    @default("NGN")
+  /// applied | under_review | info_requested | approved | active | suspended | deactivated | rejected
+  status           String    @default("approved")
+  /// self_service | assisted
+  onboardingMode   String    @map("onboarding_mode")
+  planKey          String    @default("core") @map("plan_key")
+  approvedBy       String?   @map("approved_by") @db.Uuid
+  approvedAt       DateTime? @map("approved_at") @db.Timestamptz(3)
+  activatedAt      DateTime? @map("activated_at") @db.Timestamptz(3)
+  suspendedAt      DateTime? @map("suspended_at") @db.Timestamptz(3)
+  suspensionReason String?   @map("suspension_reason")
+  version          Int       @default(1)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("estates")
+  @@schema("platform")
+}
+
+model EstateMembership {
+  id       String    @id @default(uuid(7)) @db.Uuid
+  estateId String    @map("estate_id") @db.Uuid
+  userId   String    @map("user_id") @db.Uuid
+  /// pending | active | suspended | left
+  status   String    @default("active")
+  joinedAt DateTime  @default(now()) @map("joined_at") @db.Timestamptz(3)
+  leftAt   DateTime? @map("left_at") @db.Timestamptz(3)
+
+  @@unique([estateId, userId])
+  @@index([userId])
+  @@map("estate_memberships")
+  @@schema("tenant")
+}
+
+model EstateSetting {
+  estateId  String   @map("estate_id") @db.Uuid
+  key       String
+  value     Json     @db.JsonB
+  updatedBy String?  @map("updated_by") @db.Uuid
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@id([estateId, key])
+  @@map("estate_settings")
+  @@schema("tenant")
+}
+
+/// Per-estate overrides of the plan's features. Absent row = the plan decides.
+model Entitlement {
+  estateId   String    @map("estate_id") @db.Uuid
+  featureKey String    @map("feature_key")
+  enabled    Boolean
+  /// core_plan | premium | override
+  source     String    @default("override")
+  validTo    DateTime? @map("valid_to") @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@id([estateId, featureKey])
+  @@map("entitlements")
+  @@schema("tenant")
+}
+
+/// Plans framework only. Every estate is on `core` (free) at launch; no pricing.
+model Plan {
+  key       String   @id
+  name      String
+  features  String[]
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("plans")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// notifications core (modules/notifications.md). Platform schema: a notification may have no estate.
+// RLS: the recipient reads their own rows; the notifications module (worker) writes in its context.
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  /// Null for platform-level notifications (e.g. account security).
+  estateId  String?   @map("estate_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  intentKey String    @map("intent_key")
+  /// critical | high | normal | bulk
+  priority  String
+  title     String
+  body      String
+  /// Deep-link data for the app; never personal data of other people beyond what the intent needs.
+  data      Json      @default("{}") @db.JsonB
+  /// Source event or caller dedupe key: one notification per user per key.
+  dedupeKey String    @map("dedupe_key")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  readAt    DateTime? @map("read_at") @db.Timestamptz(3)
+
+  deliveries NotificationDelivery[]
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt])
+  @@map("notifications")
+  @@schema("platform")
+}
+
+model NotificationDelivery {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  notificationId String    @map("notification_id") @db.Uuid
+  /// push | sms | email | whatsapp | voice
+  channel        String
+  provider       String
+  /// Masked address (phone/email) or push token id. Never a raw token.
+  toAddress      String    @map("to_address")
+  /// queued | sent | delivered | failed
+  status         String
+  providerRef    String?   @map("provider_ref")
+  error          String?
+  costKobo       Int?      @map("cost_kobo")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  sentAt         DateTime? @map("sent_at") @db.Timestamptz(3)
+  deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz(3)
+
+  notification Notification @relation(fields: [notificationId], references: [id])
+
+  @@index([notificationId])
+  @@index([channel, status, sentAt])
+  @@map("notification_deliveries")
+  @@schema("platform")
+}
+
+model PushToken {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  deviceId   String?   @map("device_id") @db.Uuid
+  app        String
+  /// ExponentPushToken[...]
+  expoToken  String    @unique @map("expo_token")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  invalidAt  DateTime? @map("invalid_at") @db.Timestamptz(3)
+
+  device UserDevice? @relation(fields: [deviceId], references: [id])
+
+  @@index([userId])
+  @@map("push_tokens")
+  @@schema("platform")
+}
+
+model NotificationPreference {
+  userId   String  @map("user_id") @db.Uuid
+  /// Category from the intent catalogue (e.g. community, billing, maintenance).
+  category String
+  /// push | sms | email | whatsapp
+  channel  String
+  enabled  Boolean
+
+  @@id([userId, category, channel])
+  @@map("notification_preferences")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// file service (modules/documents.md, Phase 0 part). Estate files are tenant-visible; personal files
+// (estate_id null) only to their uploader. The worker scans in the 'files' context.
+// ---------------------------------------------------------------------------
+
+model StoredFile {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String?   @map("estate_id") @db.Uuid
+  /// avatar | estate_application | pass_photo | maintenance | incident_evidence | document | import
+  purpose    String
+  storageKey String    @unique @map("storage_key")
+  mimeType   String    @map("mime_type")
+  sizeBytes  Int       @map("size_bytes")
+  /// SHA-256 of the stored (metadata-stripped) content, for evidence integrity.
+  sha256     String?
+  /// awaiting_upload | pending_scan | clean | infected | rejected | error
+  scanStatus String    @default("awaiting_upload") @map("scan_status")
+  uploadedBy String    @map("uploaded_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  uploadedAt DateTime? @map("uploaded_at") @db.Timestamptz(3)
+  scannedAt  DateTime? @map("scanned_at") @db.Timestamptz(3)
+  purgeAfter DateTime? @map("purge_after") @db.Timestamptz(3)
+
+  @@index([estateId, purpose])
+  @@index([uploadedBy])
+  @@map("files")
+  @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// platform config (modules/platform.md): feature flags and app versions. Not personal data:
+// readable everywhere, written only in the 'platform_config' context.
+// ---------------------------------------------------------------------------
+
+model FeatureFlag {
+  key            String   @id
+  description    String
+  defaultEnabled Boolean  @default(false) @map("default_enabled")
+  /// { estateIds?, apps?, minAppVersion?, percent? }: see modules/platform/flag-rules.ts
+  rules          Json     @default("{}") @db.JsonB
+  /// Public flags are returned by GET /v1/public/app-config (before sign-in).
+  isPublic       Boolean  @default(false) @map("is_public")
+  updatedBy      String?  @map("updated_by") @db.Uuid
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@map("feature_flags")
+  @@schema("platform")
+}
+
+model AppVersion {
+  app                String
+  /// android | ios | web
+  platform           String
+  minVersion         String   @map("min_version")
+  recommendedVersion String   @map("recommended_version")
+  message            String?
+  updatedBy          String?  @map("updated_by") @db.Uuid
+  updatedAt          DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@id([app, platform])
+  @@map("app_versions")
+  @@schema("platform")
 }

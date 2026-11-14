@@ -68,3 +68,7 @@ User creation; role assignments and revocations; permission and custom role chan
 - Every action in section 2 produces exactly one audit record with actor, action, resource and time.
 - Attempting an `UPDATE` on `audit_events` with the app role fails.
 - A support agent's actions in an estate appear in that estate's audit log, tagged with the support session.
+
+## 10. Phase 0 implementation notes
+
+Built (`src/modules/audit`): events carry an `audit` block in the outbox; the worker's `audit` consumer writes one record per event (idempotent on `source_event_id`), chained per stream (estate or platform) in `seq` order under an advisory lock. `AuditService.verifyStream` recomputes a chain. `GET /v1/estates/:estateId/audit-events` (`audit.read`, cursor paging). A trigger rejects UPDATE and DELETE for every role. Monthly partitioning, daily anchors and the platform audit log endpoints are later work.

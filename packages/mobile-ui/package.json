@@ -22,8 +22,10 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@safezone/auth": "workspace:*",
     "@safezone/design-tokens": "workspace:*",
-    "@safezone/i18n": "workspace:*"
+    "@safezone/i18n": "workspace:*",
+    "@safezone/schemas": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0",

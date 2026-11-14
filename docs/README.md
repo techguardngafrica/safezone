@@ -1,13 +1,14 @@
 # Safezone docs
 
-| Folder                                  | What lives here                                                    |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| [product/](product/)                    | Product brief, PRD (v0.2) and implementation plan. Business rules. |
-| [architecture/](architecture/README.md) | App docs, module docs and ADRs. **The engineering spec.**          |
-| [api/](api/README.md)                   | API conventions, OpenAPI notes, webhooks and provider callbacks    |
-| [database/](database/README.md)         | Schema conventions, RLS, migrations, retention                     |
-| [operations/](operations/README.md)     | Runbooks, on-call, incident response, environments                 |
-| [UI_GUIDELINES.md](UI_GUIDELINES.md)    | Design guidelines, UI/UX specs, tokens, components, accessibility  |
+| Folder                                                 | What lives here                                                    |
+| ------------------------------------------------------ | ------------------------------------------------------------------ |
+| [product/](product/)                                   | Product brief, PRD (v0.2) and implementation plan. Business rules. |
+| [product/phase-0-status.md](product/phase-0-status.md) | What Phase 0 delivered and what is still open                      |
+| [architecture/](architecture/README.md)                | App docs, module docs and ADRs. **The engineering spec.**          |
+| [api/](api/README.md)                                  | API conventions, OpenAPI notes, webhooks and provider callbacks    |
+| [database/](database/README.md)                        | Schema conventions, RLS, migrations, retention                     |
+| [operations/](operations/README.md)                    | Runbooks, on-call, incident response, environments                 |
+| [UI_GUIDELINES.md](UI_GUIDELINES.md)                   | Design guidelines, UI/UX specs, tokens, components, accessibility  |
 
 Start with [AGENTS.md](../AGENTS.md) for how to work in this repo, then [architecture/README.md](architecture/README.md).
 

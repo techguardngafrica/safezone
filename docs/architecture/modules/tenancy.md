@@ -142,3 +142,9 @@ Applicant: submitted, info requested, approved (with setup link), rejected. Invi
 - A Techguard-assisted estate can be created, pre-filled and handed over by invitation without the representative re-entering data.
 - A suspended estate still verifies visitor passes and delivers SOS.
 - An estate with no entitlement for a module gets `FEATURE_NOT_ENABLED` from that module's endpoints.
+
+## 14. Phase 0 implementation notes
+
+Built (`src/modules/tenancy`): `estates` (platform schema), `estate_memberships`, `estate_settings`, `entitlements` (tenant schema, RLS), `plans` with the free `core` plan; `GET/PATCH /v1/estates/:estateId` (If-Match on `version`), `GET/PATCH /v1/estates/:estateId/settings` typed by `estateSettingsSchema` (defaults from §6), entitlement checks for `@RequiresFeature`. Changes are audited through the outbox.
+
+Onboarding workflows, invitations, setup progress and imports are Phase 1. Local estates come from `pnpm db:seed:dev`.

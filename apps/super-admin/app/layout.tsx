@@ -1,9 +1,10 @@
 import { colors, typography } from '@safezone/design-tokens';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Safezone — Super Admin',
+  title: 'Super Admin | Safezone',
   robots: { index: false, follow: false },
 };
 
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           fontFamily: typography.fontFamily.sans,
         }}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

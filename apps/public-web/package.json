@@ -14,11 +14,14 @@
   },
   "dependencies": {
     "@safezone/api-client": "workspace:*",
+    "@safezone/auth": "workspace:*",
+    "@safezone/contracts": "workspace:*",
     "@safezone/design-tokens": "workspace:*",
     "@safezone/i18n": "workspace:*",
     "@safezone/schemas": "workspace:*",
     "@safezone/types": "workspace:*",
     "@safezone/web-ui": "workspace:*",
+    "@tanstack/react-query": "^5.107.1",
     "next": "^16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"

@@ -14,7 +14,12 @@ pnpm infra:up
 pnpm build            # compiles packages/* to dist/, which the apps consume
 pnpm --filter @safezone/backend-api db:migrate    # apply migrations as the owner
 pnpm --filter @safezone/backend-api db:app-role   # let safezone_app log in (local only)
+pnpm --filter @safezone/backend-api build && pnpm --filter @safezone/backend-api db:seed:dev   # roles + demo estate
 ```
+
+The dev seed creates **Demo Gardens Estate** and three accounts: `+2348000000001` (estate administrator, MFA), `+2348000000002` (tenant) and `+2348000000003` (super admin, MFA). With `SMS_PROVIDER=fake`, OTP codes arrive in Mailpit (http://localhost:8025), never in logs. Run the worker too (`dev:worker`): it relays the outbox, writes audit records, sends notifications and scans files.
+
+> MinIO community images (`minio/minio`) can no longer be pulled from Docker Hub or Quay, so `pnpm infra:up` cannot start the `minio` service. Start the others with `docker compose -f infrastructure/docker/docker-compose.yml up -d postgres redis mailpit` until the storage image is replaced.
 
 The API connects as `safezone_app`, which cannot bypass row-level security. Migrations use `DATABASE_MIGRATION_URL` (the owner). See [prisma-conventions.md](../database/prisma-conventions.md) for writing migrations.
 

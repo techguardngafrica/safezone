@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSafezoneClient, isProblemDetails } from './index';
+import { createSafezoneClient, isApiError, unwrap } from './index';
 
 describe('createSafezoneClient', () => {
   it('sends the app headers and bearer token', async () => {
@@ -39,9 +39,47 @@ describe('createSafezoneClient', () => {
   });
 });
 
-describe('isProblemDetails', () => {
-  it('recognises problem+json bodies', () => {
-    expect(isProblemDetails({ type: 'x', title: 'Bad', status: 422, code: 'X' })).toBe(true);
-    expect(isProblemDetails({ message: 'nope' })).toBe(false);
+describe('isApiError', () => {
+  it('recognises the error envelope', () => {
+    expect(
+      isApiError({ success: false, error: { code: 'X', message: 'Bad', statusCode: 422 } }),
+    ).toBe(true);
+    expect(isApiError({ success: true, data: {} })).toBe(false);
+    expect(isApiError({ message: 'nope' })).toBe(false);
+  });
+});
+
+describe('unwrap', () => {
+  const response = (status: number) => new Response(null, { status });
+
+  it('returns data from the success envelope', async () => {
+    await expect(
+      unwrap(
+        Promise.resolve({
+          data: { success: true as const, data: { id: 1 } },
+          response: response(200),
+        }),
+      ),
+    ).resolves.toEqual({ id: 1 });
+  });
+
+  it('throws ApiClientError with the API code', async () => {
+    const error = {
+      success: false,
+      error: { code: 'OTP_INVALID', message: 'Wrong code', statusCode: 400 },
+    };
+    await expect(unwrap(Promise.resolve({ error, response: response(400) }))).rejects.toMatchObject(
+      {
+        name: 'ApiClientError',
+        code: 'OTP_INVALID',
+        statusCode: 400,
+      },
+    );
+  });
+
+  it('maps network failures to NETWORK_ERROR', async () => {
+    await expect(unwrap(Promise.reject(new TypeError('fetch failed')))).rejects.toMatchObject({
+      code: 'NETWORK_ERROR',
+    });
   });
 });

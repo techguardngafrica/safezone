@@ -132,3 +132,13 @@ SMS and WhatsApp (OTP delivery, via [notifications](notifications.md) with a ded
 
 1. Is WhatsApp OTP enabled by default or only as fallback?
 2. Which KYC provider, and is NIN verification mandatory for any role at launch?
+
+## 13. Phase 0 implementation notes
+
+Built (`apps/backend-api/src/modules/identity`): OTP request/verify with sign-up on first use, sessions per device, refresh rotation with reuse detection, sign-out and session revocation, TOTP MFA with recovery codes, `GET/PATCH /v1/me`, `GET/DELETE /v1/me/sessions`. Design decisions: [ADR-0007](../adr/0007-sessions-and-refresh-families.md).
+
+- Table refinement: refresh tokens live in `refresh_tokens` (one row per issued token); the session is the family.
+- OTP: 6 digits, 5 minutes, HMAC with `OTP_HMAC_SECRET`, 5 attempts per code; 5 requests per phone and 10 per IP per hour, 30-second resend cooldown; 15 verifies per phone per hour. Sent directly through the SMS adapter.
+- MFA: required for staff and platform roles (`requiresMfa` in `@safezone/permissions`); state on the session; TOTP secrets AES-256-GCM encrypted with `MFA_ENCRYPTION_KEY`; replay of a used 30-second step is rejected; 10 one-time recovery codes.
+- Web refresh tokens: `sz_rt` httpOnly cookie, `SameSite=Strict`, path `/v1/auth`.
+- Not built yet: password sign-in, gate device credentials and guard PINs (Phase 1, with the Security App), phone change, recovery, NIN verification, platform support actions.

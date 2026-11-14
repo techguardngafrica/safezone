@@ -50,16 +50,77 @@ export async function withTenant<T>(
 }
 
 /**
- * Runs `fn` in a transaction allowed to read and mark outbox events (worker relay only).
- * No estate is set, so tenant tables stay invisible inside it.
+ * Module contexts for platform-level work (ADR-0005). RLS policies on platform tables admit a context
+ * by name, so a tenant code path (withTenant) cannot touch them by mistake.
  */
-export async function withOutboxRelay<T>(
+export const DB_CONTEXTS = [
+  'identity',
+  'authz',
+  'tenancy',
+  'audit',
+  'notifications',
+  'files',
+  'platform_config',
+  'outbox_relay',
+] as const;
+export type DbContext = (typeof DB_CONTEXTS)[number];
+
+const contextOptionsSchema = z.object({
+  userId: z.uuid().nullable().optional(),
+  estateId: z.uuid().nullable().optional(),
+});
+
+export interface ContextOptions extends TransactionOptions {
+  /** Sets app.user_id too (e.g. identity work for a signed-in user). */
+  userId?: string | null;
+  /** Sets app.estate_id too (e.g. tenancy creating an estate's first rows). */
+  estateId?: string | null;
+}
+
+/** Runs `fn` in a transaction with `app.context` set to a module context (and optionally user/estate). */
+export async function withContext<T>(
+  client: PrismaClient,
+  context: DbContext,
+  fn: (tx: Tx) => Promise<T>,
+  options: ContextOptions = {},
+): Promise<T> {
+  if (!DB_CONTEXTS.includes(context)) throw new TypeError('Unknown database context');
+  const parsed = contextOptionsSchema.safeParse({
+    userId: options.userId,
+    estateId: options.estateId,
+  });
+  if (!parsed.success) throw new TypeError('withContext requires UUID userId/estateId');
+  const { userId, estateId } = parsed.data;
+  const { userId: _u, estateId: _e, ...transactionOptions } = options;
+
+  return client.$transaction(async (tx) => {
+    await tx.$queryRaw`
+      select set_config('app.context', ${context}, true),
+             set_config('app.user_id', ${userId ?? ''}, true),
+             set_config('app.estate_id', ${estateId ?? ''}, true)`;
+    return fn(tx);
+  }, transactionOptions);
+}
+
+/** Runs `fn` as the signed-in user only: they see their own rows in user-owned platform tables. */
+export async function withUser<T>(
+  client: PrismaClient,
+  userId: string,
+  fn: (tx: Tx) => Promise<T>,
+  options?: TransactionOptions,
+): Promise<T> {
+  if (!z.uuid().safeParse(userId).success) throw new TypeError('withUser requires a UUID userId');
+  return client.$transaction(async (tx) => {
+    await tx.$queryRaw`select set_config('app.user_id', ${userId}, true)`;
+    return fn(tx);
+  }, options);
+}
+
+/** Runs `fn` in a transaction allowed to read and mark outbox events (worker relay only). */
+export function withOutboxRelay<T>(
   client: PrismaClient,
   fn: (tx: Tx) => Promise<T>,
   options?: TransactionOptions,
 ): Promise<T> {
-  return client.$transaction(async (tx) => {
-    await tx.$queryRaw`select set_config('app.context', 'outbox_relay', true)`;
-    return fn(tx);
-  }, options);
+  return withContext(client, 'outbox_relay', fn, options ?? {});
 }

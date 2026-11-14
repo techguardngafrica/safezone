@@ -3,9 +3,9 @@
  * Types come from @safezone/contracts (generated from the backend's OpenAPI document),
  * so calls are checked against the real API at compile time.
  */
-import createClient, { type Middleware } from 'openapi-fetch';
+import createClient, { type Client, type Middleware } from 'openapi-fetch';
 import type { paths } from '@safezone/contracts';
-import type { AppName, ProblemDetails } from '@safezone/types';
+import type { ApiErrorBody, AppName } from '@safezone/types';
 
 export interface SafezoneClientOptions {
   /** e.g. https://api.safezone.ng or http://localhost:4000 */
@@ -18,12 +18,18 @@ export interface SafezoneClientOptions {
   /** Called on 401 so the app can refresh tokens or sign the user out. */
   onUnauthorized?: () => void | Promise<void>;
   fetch?: typeof fetch;
+  /** Web apps pass 'include' so the httpOnly refresh cookie is sent to /v1/auth/refresh. */
+  credentials?: RequestCredentials;
 }
 
-export function createSafezoneClient(options: SafezoneClientOptions) {
+/** Typed client for the Safezone API (paths from @safezone/contracts). */
+export type SafezoneClient = Client<paths>;
+
+export function createSafezoneClient(options: SafezoneClientOptions): SafezoneClient {
   const client = createClient<paths>({
     baseUrl: options.baseUrl,
     ...(options.fetch ? { fetch: options.fetch } : {}),
+    ...(options.credentials ? { credentials: options.credentials } : {}),
   });
 
   const middleware: Middleware = {
@@ -44,16 +50,16 @@ export function createSafezoneClient(options: SafezoneClientOptions) {
   return client;
 }
 
-export type SafezoneClient = ReturnType<typeof createSafezoneClient>;
-
-/** Narrow an unknown error body to RFC 9457 problem details. */
-export function isProblemDetails(value: unknown): value is ProblemDetails {
+/** Narrow an unknown response body to the API error envelope. */
+export function isApiError(value: unknown): value is ApiErrorBody {
+  if (typeof value !== 'object' || value === null) return false;
+  const body = value as { success?: unknown; error?: unknown };
+  if (body.success !== false || typeof body.error !== 'object' || body.error === null) return false;
+  const error = body.error as { code?: unknown; message?: unknown; statusCode?: unknown };
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    'code' in value &&
-    'status' in value &&
-    'title' in value
+    typeof error.code === 'string' &&
+    typeof error.message === 'string' &&
+    typeof error.statusCode === 'number'
   );
 }
 
@@ -61,3 +67,56 @@ export function isProblemDetails(value: unknown): value is ProblemDetails {
 export function newIdempotencyKey(): string {
   return globalThis.crypto.randomUUID();
 }
+
+/** Thrown by unwrap() for any non-success response. `code` is the API's stable error code. */
+export class ApiClientError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+    readonly statusCode: number,
+    readonly details: ReadonlyArray<{ path: string; message: string }> = [],
+  ) {
+    super(message);
+    this.name = 'ApiClientError';
+  }
+}
+
+/**
+ * Unwraps an openapi-fetch result: returns `data` from the success envelope or throws ApiClientError.
+ * Network failures surface as code NETWORK_ERROR so screens can show their offline state.
+ *
+ *   const me = await unwrap(client.GET('/v1/me'));
+ */
+/** The `data` inside a success envelope of an openapi-fetch result. */
+export type EnvelopeData<R> = R extends { data?: infer B }
+  ? [NonNullable<B>] extends [never]
+    ? never
+    : NonNullable<B> extends { data: infer D }
+      ? D
+      : never
+  : never;
+
+export async function unwrap<R extends { data?: unknown; error?: unknown; response: Response }>(
+  call: Promise<R>,
+): Promise<EnvelopeData<R>> {
+  let result: R;
+  try {
+    result = await call;
+  } catch {
+    throw new ApiClientError('NETWORK_ERROR', 'No connection', 0);
+  }
+  const body = result.data as { success?: unknown; data?: unknown } | undefined;
+  if (body && body.success === true) return body.data as EnvelopeData<R>;
+  if (isApiError(result.error)) {
+    const { code, message, statusCode, details } = result.error.error;
+    throw new ApiClientError(code, message, statusCode, details ?? []);
+  }
+  if (result.response.status === 204) return undefined as EnvelopeData<R>;
+  throw new ApiClientError(
+    'UNEXPECTED_RESPONSE',
+    'Unexpected response from the server',
+    result.response.status,
+  );
+}
+
+export { createAuthApi } from './auth-api';

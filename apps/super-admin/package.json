@@ -2,7 +2,7 @@
   "name": "@safezone/super-admin",
   "version": "0.0.0",
   "private": true,
-  "description": "Safezone Super Admin Portal — Techguard internal (Next.js)",
+  "description": "Safezone Super Admin Portal \u2014 Techguard internal (Next.js)",
   "scripts": {
     "dev": "next dev --port 3002",
     "build": "next build",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@safezone/api-client": "workspace:*",
     "@safezone/auth": "workspace:*",
+    "@safezone/contracts": "workspace:*",
     "@safezone/design-tokens": "workspace:*",
     "@safezone/i18n": "workspace:*",
     "@safezone/permissions": "workspace:*",

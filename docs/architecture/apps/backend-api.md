@@ -93,7 +93,9 @@ apps/backend-api/
 │   │   ├── auth/               # guards, current-user decorator, session strategy
 │   │   ├── tenancy/            # TenantContext, RLS interceptor, estate resolver
 │   │   ├── authz/              # @Can() decorator, policy guard
-│   │   ├── errors/             # problem+json error mapping
+│   │   ├── errors/             # DomainError + ApiExceptionFilter (error envelope)
+│   │   ├── contract/           # @Contract, validation, route catalogue, OpenAPI builder
+│   │   ├── http/               # request ids, success envelope, HTTP core module
 │   │   ├── pagination/         # cursor pagination helpers
 │   │   ├── idempotency/        # Idempotency-Key interceptor
 │   │   ├── database/           # DatabaseService, withTenant, withOutboxRelay
@@ -159,20 +161,16 @@ modules/visitor/
 - Filtering by query params; sorting by `?sort=-createdAt`.
 - Optimistic concurrency on editable records via `If-Match: <version>`; mismatch returns `412`.
 
-### 6.3 Errors
+### 6.3 Responses and errors
 
-RFC 9457 `application/problem+json`:
+Every response uses the envelope from AGENTS.md §5.6 ([ADR-0006](../adr/0006-api-response-envelope.md)):
 
 ```json
-{
-  "type": "https://docs.safezone.ng/errors/pass-expired",
-  "title": "Visitor pass has expired",
-  "status": 422,
-  "code": "VISITOR_PASS_EXPIRED",
-  "detail": "Pass ended at 2026-11-13T18:00:00Z",
-  "requestId": "01J..."
-}
+{ "success": true, "data": {}, "meta": { "nextCursor": null } }
+{ "success": false, "error": { "code": "VISITOR_PASS_EXPIRED", "message": "Visitor pass has expired", "statusCode": 422, "requestId": "0193…" } }
 ```
+
+Validation failures add `details: [{ path, message }]`. Codes are catalogued in [docs/api/error-codes.md](../../api/error-codes.md).
 
 | Status | Use                                                                                      |
 | ------ | ---------------------------------------------------------------------------------------- |
@@ -237,7 +235,9 @@ Event naming: `<module>.<entity>.<past-tense-verb>`, e.g. `visitor.pass.created`
 | ------------------ | ------------------------ | ------------------------------------------------------- | ---------------- |
 | `sos`              | Highest, own worker pool | SOS fan-out, escalation timers                          | High, isolated   |
 | `notifications`    | High                     | Push, SMS, WhatsApp, email sends                        | High             |
-| `outbox`           | High                     | Event relay                                             | 1–2 per instance |
+| `outbox`           | High                     | Event relay (in-process poller today, see below)        | 1–2 per instance |
+| `audit`            | High                     | Hash-chained audit records from audited events          | 1 per instance   |
+| `files`            | Normal                   | Scan, type check, metadata strip, hash                  | 4                |
 | `gate`             | High                     | Offline sync ingestion, revocation list builds          | Medium           |
 | `billing`          | Normal                   | Bulk invoice runs, penalties, reminders                 | Low              |
 | `payments`         | Normal                   | Reconciliation, webhook processing, settlement checks   | Medium           |

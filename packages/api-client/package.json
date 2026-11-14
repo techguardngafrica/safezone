@@ -22,7 +22,9 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@safezone/auth": "workspace:*",
     "@safezone/contracts": "workspace:*",
+    "@safezone/schemas": "workspace:*",
     "@safezone/types": "workspace:*",
     "openapi-fetch": "^0.17.0"
   },

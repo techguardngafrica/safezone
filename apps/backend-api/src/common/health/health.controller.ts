@@ -1,16 +1,42 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { z } from 'zod';
+import { Public } from '../auth/public.decorator';
+import { Contract } from '../contract/contract';
+import { DatabaseService } from '../database/database.service';
+import { RedisService } from '../redis/redis.module';
+
+const liveSchema = z.object({ status: z.literal('ok') });
+const readySchema = z.object({
+  status: z.enum(['ok', 'fail']),
+  checks: z.record(z.string(), z.enum(['ok', 'fail'])),
+});
 
 @Controller('health')
 export class HealthController {
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly redis: RedisService,
+  ) {}
+
   /** Liveness: the process is up. */
+  @Public()
   @Get('live')
-  live(): { status: 'ok' } {
-    return { status: 'ok' };
+  @Contract({ summary: 'Liveness probe', tags: ['health'], response: liveSchema })
+  live() {
+    return { status: 'ok' as const };
   }
 
-  /** Readiness: dependencies reachable. Phase 0 adds Postgres and Redis checks here. */
+  /** Readiness: dependencies reachable. 503 when any check fails. */
+  @Public()
   @Get('ready')
-  ready(): { status: 'ok'; checks: Record<string, 'ok' | 'fail'> } {
-    return { status: 'ok', checks: {} };
+  @Contract({ summary: 'Readiness probe', tags: ['health'], response: readySchema, errors: [503] })
+  async ready() {
+    const checks = {
+      database: (await this.database.isReady()) ? ('ok' as const) : ('fail' as const),
+    };
+    if (Object.values(checks).includes('fail')) {
+      throw new ServiceUnavailableException('A dependency is unavailable');
+    }
+    return { status: 'ok' as const, checks };
   }
 }

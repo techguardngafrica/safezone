@@ -5,3 +5,7 @@
 export * from './common';
 export * from './auth';
 export * from './tenancy';
+export * from './authz';
+export * from './notifications';
+export * from './files';
+export * from './platform';

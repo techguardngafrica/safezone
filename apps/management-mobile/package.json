@@ -2,7 +2,7 @@
   "name": "@safezone/management-mobile",
   "version": "0.0.0",
   "private": true,
-  "description": "Estate Management App — mobile (Expo). Same backend, rules and permissions as management-web.",
+  "description": "Estate Management App \u2014 mobile (Expo). Same backend, rules and permissions as management-web.",
   "main": "expo-router/entry",
   "scripts": {
     "dev": "expo start",
@@ -31,6 +31,7 @@
   "dependencies": {
     "@safezone/api-client": "workspace:*",
     "@safezone/auth": "workspace:*",
+    "@safezone/contracts": "workspace:*",
     "@safezone/design-tokens": "workspace:*",
     "@safezone/i18n": "workspace:*",
     "@safezone/mobile-ui": "workspace:*",

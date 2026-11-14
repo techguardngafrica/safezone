@@ -8,7 +8,12 @@
 
 ## Backend (`apps/backend-api/.env`, copied from the root `.env.example`)
 
-The root [`.env.example`](../../.env.example) is the single list. Core ones: `NODE_ENV`, `APP_PROCESS`, `API_PORT` (4000), `REALTIME_PORT` (4001), `DATABASE_URL` (runtime role `safezone_app`), `DATABASE_MIGRATION_URL` (schema owner, migrations only), `DATABASE_POOL_MAX`, `REDIS_URL`, `CORS_ORIGINS`, `APP_MIN_VERSION`, `APP_RECOMMENDED_VERSION`. Provider keys (SMTP, Expo, Paystack, Flutterwave, SMS…) are sandbox-only in development.
+The root [`.env.example`](../../.env.example) is the single list. Every variable is validated by `apps/backend-api/src/config/env.ts`; error messages name the variable but never print its value.
+
+- In `development` and `test`, missing values fall back to local defaults so `pnpm dev` works against docker-compose.
+- In `staging` and `production` the process refuses to start unless database, Redis, JWT/OTP secrets (32+ chars, all different, no placeholders), `MFA_ENCRYPTION_KEY` (32 bytes base64), storage credentials, Zoho SMTP credentials and `SMS_API_KEY` are set; `SMS_PROVIDER=fake` and non-https `CORS_ORIGINS` are refused; `DATABASE_URL` must connect as `safezone_app`.
+- Secrets: `JWT_ACCESS_SECRET` (access JWTs), `JWT_REFRESH_SECRET` (refresh and recovery code hashes), `OTP_HMAC_SECRET` (OTP hashes and rate-limit keys), `MFA_ENCRYPTION_KEY` (TOTP secrets at rest).
+- `OUTBOX_RELAY_DISABLED=true` stops the worker's relay loop (tests and maintenance only).
 
 ## Web apps (`NEXT_PUBLIC_*`)
 

@@ -101,3 +101,9 @@ Delivery rate and latency per channel and provider; provider error rates; SMS sp
 - A user who turns off maintenance push still gets SOS and emergency broadcasts.
 - An Expo push that returns `DeviceNotRegistered` removes the token and falls back to SMS for critical intents.
 - Monthly usage per estate shows SMS count and cost correctly.
+
+## 12. Phase 0 implementation notes
+
+Built (`src/modules/notifications`, worker consumer): intent catalogue in code, in-app centre (`notifications`), deliveries, Expo push tokens, preferences with mandatory categories, Expo push with per-minute receipt checks (dead tokens removed), SMS fallback for critical intents without push, idempotency per (user, dedupe key). First intent: `account.security_alert` on refresh-token reuse.
+
+Modules request notifications with `NotificationsService.request(tx, …)` inside their transaction (outbox). Templates come from `@safezone/i18n` for now; estate template overrides, WhatsApp, voice, quiet hours, cost tracking and the email channel for verified addresses are Phase 1.

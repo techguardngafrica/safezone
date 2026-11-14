@@ -1,7 +1,7 @@
 {
   "name": "safezone",
   "private": true,
-  "description": "Safezone by Techguard \u2014 multi-tenant estate management, security and smart community platform",
+  "description": "Safezone by Techguard — multi-tenant estate management, security and smart community platform",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.0.0",

@@ -37,5 +37,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+      # The committed API contract must match the code.
+      - run: pnpm --filter @safezone/backend-api openapi && git diff --exit-code packages/contracts
       # Postgres 17 via Testcontainers (Docker is available on ubuntu-latest).
       - run: pnpm test:integration

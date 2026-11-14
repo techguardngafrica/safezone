@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_PERMISSIONS, BUILT_IN_ROLES, hasPermission, permissionsForRoles } from './index';
+import {
+  ALL_PERMISSIONS,
+  BUILT_IN_ROLES,
+  hasPermission,
+  permissionsForRoles,
+  requiresMfa,
+} from './index';
 
 describe('permission catalogue', () => {
   it('only uses permissions that exist in the catalogue', () => {
@@ -38,5 +44,23 @@ describe('role checks', () => {
     const granted = permissionsForRoles(['estate_manager', 'tenant']);
     expect(granted.has('announcement.publish')).toBe(true);
     expect(granted.has('payment.make')).toBe(true);
+  });
+});
+
+describe('requiresMfa', () => {
+  it('is required for staff and platform roles', () => {
+    expect(requiresMfa(['estate_manager'])).toBe(true);
+    expect(requiresMfa(['security_officer'])).toBe(true);
+    expect(requiresMfa(['super_admin'])).toBe(true);
+    expect(requiresMfa(['tenant', 'estate_accountant'])).toBe(true);
+  });
+
+  it('is not required for residents and owners only', () => {
+    expect(requiresMfa([])).toBe(false);
+    expect(requiresMfa(['tenant', 'homeowner', 'property_owner'])).toBe(false);
+  });
+
+  it('treats unknown roles as staff (fail safe)', () => {
+    expect(requiresMfa(['custom_role_key'])).toBe(true);
   });
 });

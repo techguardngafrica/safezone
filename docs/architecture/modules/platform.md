@@ -87,3 +87,7 @@ Platform owns **Techguard's control plane** for Safezone: platform staff, featur
 - A support session expires automatically and further requests in that estate are denied.
 - Changing a feature flag for one estate takes effect within 1 minute without deploy.
 - An estate export includes every listed dataset and opens with standard tools.
+
+## 10. Phase 0 implementation notes
+
+Built (`src/modules/platform`): `feature_flags` (default, targeting by estates, apps, minimum version, stable percentage rollout; public flags) and `app_versions`; `GET /v1/public/app-config`, `GET /v1/me/feature-flags`, `GET/PUT /v1/platform/feature-flags[/:key]`, `PUT /v1/platform/app-versions/:app/:platform` (`platform.config`, audited). Flags are cached for 30 seconds per instance.

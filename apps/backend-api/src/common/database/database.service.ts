@@ -4,11 +4,15 @@ import { PrismaClient } from '../../generated/prisma/client';
 import { ENV } from '../../config/config.module';
 import type { Env } from '../../config/env';
 import {
+  type ContextOptions,
+  type DbContext,
   type TenantContext,
   type TransactionOptions,
   type Tx,
+  withContext,
   withOutboxRelay,
   withTenant,
+  withUser,
 } from './tenant-context';
 
 /**
@@ -41,6 +45,24 @@ export class DatabaseService implements OnModuleDestroy {
 
   withOutboxRelay<T>(fn: (tx: Tx) => Promise<T>, options?: TransactionOptions): Promise<T> {
     return withOutboxRelay(this.client, fn, options);
+  }
+
+  /** Platform-level work by one module (ADR-0005). */
+  withContext<T>(
+    context: DbContext,
+    fn: (tx: Tx) => Promise<T>,
+    options?: ContextOptions,
+  ): Promise<T> {
+    return withContext(this.client, context, fn, options);
+  }
+
+  /** The signed-in user's own rows in user-owned platform tables. */
+  withUser<T>(
+    userId: string,
+    fn: (tx: Tx) => Promise<T>,
+    options?: TransactionOptions,
+  ): Promise<T> {
+    return withUser(this.client, userId, fn, options);
   }
 
   /** Readiness probe: true when the database answers. */

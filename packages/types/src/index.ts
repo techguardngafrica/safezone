@@ -56,18 +56,43 @@ export const APPS = [
 ] as const;
 export type AppName = (typeof APPS)[number];
 
-/** RFC 9457 problem details, as returned by every API error. */
-export interface ProblemDetails {
-  readonly type: string;
-  readonly title: string;
-  readonly status: number;
-  readonly code: string;
-  readonly detail?: string;
-  readonly requestId?: string;
-  readonly errors?: ReadonlyArray<{ readonly path: string; readonly message: string }>;
+/** One invalid field in a 400 response. */
+export interface ApiFieldError {
+  readonly path: string;
+  readonly message: string;
 }
 
-/** Cursor-paginated list envelope. */
+/**
+ * Error envelope returned by every API error (AGENTS.md §5.6).
+ * `code` is stable and documented in docs/api/error-codes.md; `message` is safe to show.
+ */
+export interface ApiErrorBody {
+  readonly success: false;
+  readonly error: {
+    readonly code: string;
+    readonly message: string;
+    readonly statusCode: number;
+    readonly requestId?: string;
+    readonly details?: readonly ApiFieldError[];
+  };
+}
+
+/** Pagination and other response metadata. Lists use cursors (backend-api.md §6.2). */
+export interface ApiMeta {
+  readonly nextCursor?: string | null;
+  readonly limit?: number;
+  readonly total?: number;
+  readonly [key: string]: unknown;
+}
+
+/** Success envelope returned by every API response. */
+export interface ApiSuccessBody<T> {
+  readonly success: true;
+  readonly data: T;
+  readonly meta?: ApiMeta;
+}
+
+/** Cursor-paginated list as returned by services; the API sends it as `data` + `meta.nextCursor`. */
 export interface Page<T> {
   readonly items: readonly T[];
   readonly nextCursor: string | null;

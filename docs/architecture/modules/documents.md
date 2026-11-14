@@ -85,3 +85,11 @@ Jobs: `files.scan`, `files.thumbnails`, `documents.expiry.remind` (daily: 30, 7,
 - An uploaded image has no GPS EXIF data when downloaded.
 - A resident cannot obtain a download URL for a managers-only document.
 - Expiry reminders are sent at 30, 7 and 1 days before `expires_on`.
+
+## 9. Phase 0 implementation notes
+
+Built (`src/modules/files`): the file service. Routes are split by scope: `/v1/estates/:estateId/files/...` for estate purposes and `/v1/me/files/...` for personal ones (avatar, estate application documents), instead of one `/v1/files` route with an `estateId` field, so estate access goes through the same guard as every tenant route.
+
+- Signed PUT bound to the declared type and exact size; `complete` checks the object, then the worker scans, sniffs magic bytes, strips JPEG/PNG metadata (EXIF, XMP, IPTC, text chunks), stores SHA-256 and marks the file `clean`, `infected` (moved to `quarantine/`) or `rejected`.
+- Downloads: 5-minute signed URLs, clean files only; uploader or purpose-specific staff permission; sensitive purposes audited.
+- The malware scanner is a stub that detects the EICAR test file only. A real engine must replace it before residents upload files in production (needs an ADR).

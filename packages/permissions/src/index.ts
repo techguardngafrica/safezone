@@ -326,3 +326,25 @@ export function permissionsForRoles(roleKeys: readonly string[]): Set<Permission
 export function hasPermission(roleKeys: readonly string[], permission: Permission): boolean {
   return permissionsForRoles(roleKeys).has(permission);
 }
+
+/**
+ * Estate roles held by residents and owners. Every other estate role is a staff role.
+ * Staff and platform roles must use TOTP MFA (identity.md §6.4).
+ */
+export const RESIDENT_ROLE_KEYS: readonly string[] = [
+  'resident',
+  'homeowner',
+  'tenant',
+  'household_member',
+  'property_owner',
+];
+
+/** True when any of the roles is a platform role or an estate staff role. Unknown keys count as staff. */
+export function requiresMfa(roleKeys: readonly string[]): boolean {
+  return roleKeys.some((key) => {
+    const role = getRole(key);
+    if (!role) return true;
+    if (role.level === 'platform') return true;
+    return role.level === 'estate' && !RESIDENT_ROLE_KEYS.includes(key);
+  });
+}

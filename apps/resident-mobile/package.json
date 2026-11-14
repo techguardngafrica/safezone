@@ -2,7 +2,7 @@
   "name": "@safezone/resident-mobile",
   "version": "0.0.0",
   "private": true,
-  "description": "Safezone Resident App (Expo) — residents, owners, plus Vendor and Advertiser modes",
+  "description": "Safezone Resident App (Expo) \u2014 residents, owners, plus Vendor and Advertiser modes",
   "main": "expo-router/entry",
   "scripts": {
     "dev": "expo start",
@@ -31,6 +31,7 @@
   "dependencies": {
     "@safezone/api-client": "workspace:*",
     "@safezone/auth": "workspace:*",
+    "@safezone/contracts": "workspace:*",
     "@safezone/design-tokens": "workspace:*",
     "@safezone/i18n": "workspace:*",
     "@safezone/mobile-ui": "workspace:*",

@@ -135,3 +135,11 @@ Client usage: `GET /v1/me/permissions?estateId=` returns a compact permission sn
 - A user who is Estate Manager in Estate A and Tenant in Estate B sees management features only in Estate A.
 - Revoking a role takes effect on the next request (no stale cache beyond 1 second).
 - A household member without `visitor.invite` cannot create a pass via API, even if the UI is bypassed.
+
+## 12. Phase 0 implementation notes
+
+Built (`src/modules/authz`): `roles`, `role_permissions`, `role_assignments`; built-in roles seeded from `@safezone/permissions` (`pnpm db:seed`) with deterministic ids; `AuthorizationGuard` enforcing, per request, access declaration, MFA, estate membership (non-members get 404), the permission and `@RequiresFeature` entitlements; `GET /v1/me/permissions`, `GET /v1/me/memberships`, `GET /v1/permissions/catalogue`.
+
+- Built-in role permissions are read from the package at runtime (code is the source of truth); custom roles use `role_permissions`.
+- Assignments are read per request (no cache yet), so a revocation applies on the next request.
+- Not built yet: custom role and assignment endpoints, scope rules (gate, building), household permissions.

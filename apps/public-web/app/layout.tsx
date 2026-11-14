@@ -1,9 +1,10 @@
 import { colors, typography } from '@safezone/design-tokens';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: { default: 'Safezone — Safer, smarter estates', template: '%s · Safezone' },
+  title: { default: 'Safezone: estate security and management', template: '%s | Safezone' },
   description:
     'Safezone by Techguard: visitor management, SOS, estate payments, maintenance and community for residential estates in Nigeria.',
 };
@@ -21,7 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           fontFamily: typography.fontFamily.sans,
         }}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

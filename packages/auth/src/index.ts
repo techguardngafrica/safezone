@@ -69,3 +69,5 @@ export function maskPhone(phone: string): string {
   if (phone.length < 8) return '****';
   return `${phone.slice(0, 7)}****${phone.slice(-3)}`;
 }
+
+export * from './session-controller';

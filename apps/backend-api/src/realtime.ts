@@ -1,8 +1,11 @@
+import './instrument';
 import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import { JsonLogger } from './common/observability/json-logger';
 import { loadEnv } from './config/env';
+import { configureHttpApp } from './common/http/configure-http-app';
 import { RealtimeModule } from './realtime/realtime.module';
 
 /**
@@ -11,13 +14,15 @@ import { RealtimeModule } from './realtime/realtime.module';
  */
 async function bootstrap(): Promise<void> {
   const env = loadEnv();
-  const app = await NestFactory.create(RealtimeModule, { bufferLogs: true });
+  const app = await NestFactory.create(RealtimeModule, {
+    logger: new JsonLogger(env.LOG_LEVEL, 'realtime'),
+    bodyParser: false,
+  });
+  configureHttpApp(app, env);
   app.useWebSocketAdapter(new IoAdapter(app));
-  app.enableCors({ origin: env.CORS_ORIGINS, credentials: true });
-  app.enableShutdownHooks();
 
   await app.listen(env.REALTIME_PORT);
-  Logger.log(`Realtime gateway listening on ws://localhost:${env.REALTIME_PORT}`, 'Bootstrap');
+  Logger.log(`Realtime gateway listening on port ${env.REALTIME_PORT}`, 'Bootstrap');
 }
 
 void bootstrap();
