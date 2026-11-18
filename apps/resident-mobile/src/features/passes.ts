@@ -91,3 +91,47 @@ export function availableWindows(dayOffset: number, now = Date.now()): ArrivalWi
     return new Date(validTo).getTime() - now > 30 * 60_000;
   });
 }
+
+export type VisitorInput = 'name' | 'phone' | 'plate';
+
+/** API field paths for the first visitor, mapped to the invite form's inputs. */
+export const VISITOR_FIELD_PATHS: Record<string, VisitorInput> = {
+  'visitors.0.name': 'name',
+  'visitors.0.phone': 'phone',
+  'visitors.0.vehiclePlate': 'plate',
+};
+
+export interface VisitorDraft {
+  name: string;
+  phone: string;
+  plate: string;
+}
+
+/**
+ * Checks the visitor fields before anything is sent, and normalises them to what the API accepts:
+ * a phone typed as 0803 123 4567 becomes +2348031234567, plates are upper case without spaces.
+ * Returns translated messages per input, or the cleaned values.
+ */
+export function checkVisitor(
+  draft: VisitorDraft,
+  normalisePhone: (input: string) => string | null,
+):
+  | { ok: true; visitor: { name: string; phone?: string; vehiclePlate?: string } }
+  | { ok: false; errors: Partial<Record<VisitorInput, string>> } {
+  const errors: Partial<Record<VisitorInput, string>> = {};
+  const name = draft.name.trim();
+  if (name.length < 2) errors.name = t('res.newPass.nameRequired');
+
+  const phoneInput = draft.phone.trim();
+  const phone = phoneInput ? normalisePhone(phoneInput) : null;
+  if (phoneInput && !phone) errors.phone = t('res.newPass.phoneInvalid');
+
+  const plate = draft.plate.replace(/\s+/g, '').toUpperCase();
+  if (plate && !/^[A-Z0-9-]{3,15}$/.test(plate)) errors.plate = t('res.newPass.plateInvalid');
+
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  return {
+    ok: true,
+    visitor: { name, ...(phone ? { phone } : {}), ...(plate ? { vehiclePlate: plate } : {}) },
+  };
+}

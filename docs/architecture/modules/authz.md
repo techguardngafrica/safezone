@@ -93,6 +93,8 @@ Backend usage:
 create(@Body() dto, @CurrentUser() user) { ... }
 ```
 
+Extra arguments are alternatives: `@Can('billing.run.create', 'billing.run.approve')` admits a user with either, so approvers can read what they approve ([ADR-0016](../adr/0016-approvers-read-what-they-approve.md)).
+
 Client usage: `GET /v1/me/permissions?estateId=` returns a compact permission snapshot used to show/hide UI.
 
 ## 7. Business rules

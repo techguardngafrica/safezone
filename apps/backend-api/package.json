@@ -25,7 +25,11 @@
     "db:seed": "node dist/scripts/seed.js",
     "db:seed:dev": "node dist/scripts/seed.js --dev",
     "openapi": "pnpm build && node dist/scripts/generate-openapi.js && pnpm --filter @safezone/contracts generate",
-    "test:isolation": "prisma generate && vitest run --config vitest.integration.config.ts test/isolation"
+    "test:isolation": "prisma generate && vitest run --config vitest.integration.config.ts test/isolation",
+    "dev:otp": "node scripts/dev-otp.mjs",
+    "dev:otp:reset": "node scripts/dev-otp-reset.mjs",
+    "dev:demo-data": "node dist/scripts/dev-demo-data.js",
+    "dev:demo-billing": "node dist/scripts/dev-demo-data.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1169.0",

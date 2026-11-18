@@ -5,7 +5,9 @@
   "description": "Estate Management App \u2014 mobile (Expo). Same backend, rules and permissions as management-web.",
   "main": "expo-router/entry",
   "scripts": {
-    "dev": "expo start",
+    "dev": "node ../../scripts/phone-env.mjs && EXPO_NO_REDIRECT_PAGE=1 expo start --go",
+    "run:android": "expo run:android --device",
+    "run:ios": "expo run:ios --device",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "build:dev:android": "eas build --profile development --platform android",

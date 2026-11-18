@@ -19,3 +19,4 @@ Copy [0000-template.md](0000-template.md) to `NNNN-short-title.md`. One decision
 | [0013](0013-payments-flow.md)                          | Payments: gateway adapter, split settlement, webhooks, verification, refunds            | Accepted                             |
 | [0014](0014-phase-2-operations-modules.md)             | Ownerships, maintenance, utilities, moves and estate exports                            | Accepted                             |
 | [0015](0015-phase-3-community-facilities-documents.md) | Community channels, facility bookings and documents                                     | Accepted                             |
+| [0016](0016-approvers-read-what-they-approve.md)       | Approvers can read the billing runs and office payments they approve                    | Accepted                             |

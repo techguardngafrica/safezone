@@ -51,6 +51,22 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
+          name="pay"
+          options={{
+            title: t('res.tab.pay'),
+            tabBarIcon: tabIcon('wallet-outline', 'wallet'),
+            href: hasFeature('billing') && can('invoice.read') ? undefined : null,
+          }}
+        />
+        <Tabs.Screen
+          name="community"
+          options={{
+            title: t('res.tab.community'),
+            tabBarIcon: tabIcon('chatbubbles-outline', 'chatbubbles'),
+            href: hasFeature('community') ? undefined : null,
+          }}
+        />
+        <Tabs.Screen
           name="more"
           options={{ title: t('res.tab.more'), tabBarIcon: tabIcon('menu-outline', 'menu') }}
         />

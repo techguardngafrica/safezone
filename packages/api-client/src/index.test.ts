@@ -1,5 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSafezoneClient, isApiError, newIdempotencyKey, unwrap, unwrapPage } from './index';
+import {
+  ApiClientError,
+  createSafezoneClient,
+  fieldErrors,
+  isApiError,
+  newIdempotencyKey,
+  unwrap,
+  unwrapPage,
+} from './index';
 
 describe('createSafezoneClient', () => {
   it('sends the app headers and bearer token', async () => {
@@ -152,5 +160,21 @@ describe('React Native fetch', () => {
       fetch: (async () => nativeLike) as unknown as typeof fetch,
     });
     await expect(unwrap(client.GET('/health/live'))).resolves.toEqual({ status: 'ok' });
+  });
+});
+
+describe('fieldErrors', () => {
+  it('maps validation details to field paths without the request part', () => {
+    const error = new ApiClientError('VALIDATION_FAILED', 'Some fields are invalid', 400, [
+      { path: 'body.visitors.0.phone', message: 'Bad phone' },
+      { path: 'body.visitors.0.phone', message: 'Second message' },
+      { path: 'query.limit', message: 'Too big' },
+    ]);
+    expect(fieldErrors(error)).toEqual({ 'visitors.0.phone': 'Bad phone', limit: 'Too big' });
+  });
+
+  it('is empty for other errors', () => {
+    expect(fieldErrors(new ApiClientError('FORBIDDEN', 'No', 403))).toEqual({});
+    expect(fieldErrors(new Error('x'))).toEqual({});
   });
 });

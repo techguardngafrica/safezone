@@ -194,6 +194,11 @@ export function SignInFlow({ controller, title, intro }: SignInFlowProps) {
     state.phone,
   );
   const apiError = authErrorText(state.errorCode);
+  // Each step has its own code: never carry the SMS code into the authenticator step.
+  useEffect(() => {
+    setCode('');
+    setUseRecovery(false);
+  }, [state.status]);
 
   if (state.status === 'signed_in') return null;
 

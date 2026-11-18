@@ -1,7 +1,7 @@
 {
   "name": "safezone",
   "private": true,
-  "description": "Safezone by Techguard — multi-tenant estate management, security and smart community platform",
+  "description": "Safezone by Techguard \u2014 multi-tenant estate management, security and smart community platform",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.0.0",
@@ -9,6 +9,13 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "dev:local": "turbo run dev dev:worker --filter=@safezone/backend-api --filter=@safezone/management-web",
+    "dev:api": "turbo run dev dev:worker --filter=@safezone/backend-api",
+    "dev:otp": "pnpm --filter @safezone/backend-api dev:otp",
+    "dev:otp:reset": "pnpm --filter @safezone/backend-api dev:otp:reset",
+    "dev:demo-data": "pnpm --filter @safezone/backend-api dev:demo-data",
+    "dev:demo-billing": "pnpm --filter @safezone/backend-api dev:demo-data",
+    "phone:env": "node scripts/phone-env.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
@@ -19,6 +26,7 @@
     "format:check": "prettier --check .",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infrastructure/docker/docker-compose.yml up -d",
+    "infra:up:services": "docker compose -f infrastructure/docker/docker-compose.yml up -d mailpit storage",
     "infra:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
     "prepare": "husky",
     "test:integration": "turbo run test:integration"

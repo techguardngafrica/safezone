@@ -23,13 +23,13 @@ Turborepo + pnpm workspaces.
 
 ## Getting started
 
-Requirements: Node 22+, pnpm 10+, Docker (for local Postgres and Redis).
+Requirements: Node 22+, pnpm 10+, and either Docker (`pnpm infra:up`) or native Postgres 17 and Redis. Docker is optional: with `MAIL_TRANSPORT=file` and `STORAGE_DRIVER=local` the backend runs without any containers. See [local development](docs/operations/local-development.md) for both setups.
 
 ```bash
 pnpm install
 cp .env.example apps/backend-api/.env
-pnpm infra:up
-pnpm dev
+pnpm infra:up        # skip when Postgres and Redis run natively
+pnpm dev:local       # API + worker + management web; `pnpm dev` runs every app
 ```
 
 | App                   | URL                               |
@@ -39,7 +39,7 @@ pnpm dev
 | super-admin           | http://localhost:3002             |
 | backend API           | http://localhost:4000/health/live |
 | realtime gateway      | ws://localhost:4001               |
-| Mailpit (local email) | http://localhost:8025             |
+| Mailpit (Docker only) | http://localhost:8025             |
 
 Mobile apps: `pnpm --filter @safezone/resident-mobile dev` (likewise `management-mobile`, `security-mobile`), then open in Expo Go or a development build.
 

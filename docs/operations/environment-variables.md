@@ -17,6 +17,9 @@ The root [`.env.example`](../../.env.example) is the single list. Every variable
 - `PASS_KEY_ENCRYPTION_KEY`: 32 bytes base64; wraps estate pass-signing keys and pass PINs (ADR-0010). Must differ from `MFA_ENCRYPTION_KEY`.
 - `MANAGEMENT_WEB_URL`: base URL of management-web; invitation links open `<url>/invite/<token>`.
 - `OUTBOX_RELAY_DISABLED=true` stops the worker's relay loop (tests and maintenance only).
+- `MAIL_TRANSPORT`: `smtp` (default; Zoho in staging/production, Mailpit locally) or `file` (development only). With `file`, every email and fake SMS, including OTP codes, is written to `DEV_OUTBOX_DIR` (default `.dev-outbox`, relative to `apps/backend-api`). Read a code with `pnpm dev:otp <phone>`. Refused in staging and production.
+- `STORAGE_DRIVER`: `s3` (default; S3 in staging/production, RustFS locally) or `local` (development only). With `local`, uploads are kept in `DEV_STORAGE_DIR` (default `.dev-storage`) and the API serves its own short-lived signed URLs at `/dev-storage/<token>`, bound to the declared content type and size like S3 presigned URLs. Refused in staging and production.
+- `API_PUBLIC_URL`: base URL clients use to reach the API, used for `STORAGE_DRIVER=local` links. Defaults to `http://localhost:<API_PORT>`; set your LAN IP when testing uploads from a phone.
 
 ## Web apps (`NEXT_PUBLIC_*`)
 

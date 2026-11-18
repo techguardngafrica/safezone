@@ -18,6 +18,7 @@ import { AnnouncementCard } from '../../src/features/announcement-card';
 import { PassCard } from '../../src/features/pass-card';
 import { isUpcoming } from '../../src/features/passes';
 import { errorText } from '../../src/lib/errors';
+import { useUnreadNotifications } from '../../src/lib/notifications';
 import { useResident } from '../../src/lib/resident';
 import { api, session } from '../../src/lib/session';
 import { usePullRefresh } from '../../src/lib/use-pull-refresh';
@@ -81,14 +82,34 @@ export default function HomeScreen() {
     enabled: hasFeature('announcements'),
   });
   const upcoming = (passes.data?.items ?? []).filter(isUpcoming).slice(0, 3);
+  const unread = useUnreadNotifications();
 
   const pull = usePullRefresh(() => Promise.all([passes.refetch(), notices.refetch()]));
   return (
     <ScrollScreen bottomInset={SOS_CLEARANCE} {...pull}>
       <View style={{ gap: spacing[1] }}>
-        <Text style={styles.greeting}>
-          {firstName ? t('res.home.hello', { name: firstName }) : t('res.home.helloNoName')}
-        </Text>
+        <View style={styles.headerRow}>
+          <Text style={[styles.greeting, { flex: 1 }]}>
+            {firstName ? t('res.home.hello', { name: firstName }) : t('res.home.helloNoName')}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              unread > 0
+                ? t('res.notifications.bellUnread', { count: unread })
+                : t('res.notifications.title')
+            }
+            onPress={() => router.push('/notifications')}
+            style={styles.bell}
+          >
+            <Icon name="notifications-outline" color={colors.semantic.text} />
+            {unread > 0 ? (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>{unread > 9 ? '9+' : unread}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
         <Text accessibilityRole="header" style={styles.title}>
           {t('res.home.welcome')}
         </Text>
@@ -107,6 +128,22 @@ export default function HomeScreen() {
             icon="person-add-outline"
             tone="forest"
             onPress={() => router.push('/pass/new')}
+          />
+        ) : null}
+        {hasFeature('maintenance') && can('maintenance.request') ? (
+          <Tile
+            label={t('res.home.reportIssue')}
+            icon="construct-outline"
+            tone="sand"
+            onPress={() => router.push('/issues/new')}
+          />
+        ) : null}
+        {hasFeature('facilities') && can('facility.book') ? (
+          <Tile
+            label={t('res.home.bookFacility')}
+            icon="calendar-outline"
+            tone="forest"
+            onPress={() => router.push('/facilities')}
           />
         ) : null}
         {hasFeature('announcements') ? (
@@ -189,8 +226,38 @@ const styles = StyleSheet.create({
   },
   place: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   placeText: { fontSize: typography.size.sm, color: colors.semantic.text },
-  tiles: { flexDirection: 'row', gap: spacing[3] },
-  tile: { flex: 1, borderRadius: radii.lg, padding: spacing[4], gap: spacing[3], minHeight: 112 },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
+  headerRow: { flexDirection: 'row', alignItems: 'center' },
+  bell: {
+    width: 48,
+    height: 48,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.semantic.borderSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: colors.brand.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellBadgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: typography.weight.bold },
+  tile: {
+    flexGrow: 1,
+    flexBasis: '45%',
+    borderRadius: radii.lg,
+    padding: spacing[4],
+    gap: spacing[3],
+    minHeight: 112,
+  },
   tileChip: {
     width: 44,
     height: 44,

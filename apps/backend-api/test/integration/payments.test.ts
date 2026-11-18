@@ -254,6 +254,13 @@ describe('payments', () => {
       .set(as(accountant))
       .send({ payerUserId: residentId, amount: 50_000, method: 'cash', receivedOn: '2026-11-14' })
       .expect(201);
+    // The approver (billing.run.approve, no payment.reconcile) can see the queue; residents cannot.
+    const queue = await stack.http
+      .get(url('/manual-payments?status=pending'))
+      .set(as(manager))
+      .expect(200);
+    expect(queue.body.data.map((row: { id: string }) => row.id)).toContain(recorded.body.data.id);
+    await stack.http.get(url('/manual-payments')).set(as(resident)).expect(403);
     await stack.http
       .post(url(`/manual-payments/${recorded.body.data.id}/reject`))
       .set(as(resident))

@@ -27,8 +27,28 @@ export class FakePaymentGateway extends PaymentGateway {
   readonly refunds: { transactionReference: string; amountKobo: number }[] = [];
   private sequence = 0;
 
-  constructor(readonly webhookSecret = 'fake-webhook-secret') {
+  /**
+   * @param checkoutBaseUrl Development only: when set, checkout links open the API's test checkout page
+   * (`/dev-checkout/<reference>`, see dev-checkout-routes.ts) so a payer can finish a fake payment.
+   */
+  constructor(
+    readonly webhookSecret = 'fake-webhook-secret',
+    readonly checkoutBaseUrl?: string,
+  ) {
     super();
+  }
+
+  /** The pending checkout for a reference, for the test checkout page. */
+  checkout(
+    reference: string,
+  ): { amountKobo: number; callbackUrl: string; status: VerifiedCharge['status'] } | null {
+    const charge = this.charges.get(reference);
+    if (!charge || charge.channel !== 'card') return null;
+    return {
+      amountKobo: charge.input.amountKobo,
+      callbackUrl: charge.input.callbackUrl,
+      status: charge.status,
+    };
   }
 
   async initialize(input: InitializeInput) {
@@ -42,7 +62,9 @@ export class FakePaymentGateway extends PaymentGateway {
       customerCode: null,
     });
     return {
-      authorizationUrl: `https://checkout.fake.local/${input.reference}`,
+      authorizationUrl: this.checkoutBaseUrl
+        ? `${this.checkoutBaseUrl.replace(/\/$/, '')}/dev-checkout/${encodeURIComponent(input.reference)}`
+        : `https://checkout.fake.local/${input.reference}`,
       reference: input.reference,
     };
   }

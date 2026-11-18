@@ -42,7 +42,7 @@ function Row({
 export default function MoreScreen() {
   const router = useRouter();
   const user = useSession(session).user;
-  const { memberships, estateId, switchEstate, household } = useResident();
+  const { memberships, estateId, switchEstate, household, hasFeature } = useResident();
   const [signingOut, setSigningOut] = useState(false);
   return (
     <ScrollScreen bottomInset={SOS_CLEARANCE}>
@@ -64,10 +64,43 @@ export default function MoreScreen() {
           onPress={() => router.push('/household')}
         />
         <Row
+          title={t('res.more.vehicles')}
+          subtitle={t('res.more.vehiclesHint')}
+          icon="car-outline"
+          onPress={() => router.push('/vehicles')}
+        />
+        <Row
+          title={t('res.more.staff')}
+          subtitle={t('res.more.staffHint')}
+          icon="people-circle-outline"
+          onPress={() => router.push('/staff')}
+        />
+        <Row
           title={t('res.more.emergencyContacts')}
           subtitle={t('res.more.emergencyContactsHint')}
           icon="call-outline"
           onPress={() => router.push('/emergency-contacts')}
+        />
+        {hasFeature('maintenance') ? (
+          <Row
+            title={t('res.more.issues')}
+            subtitle={t('res.more.issuesHint')}
+            icon="construct-outline"
+            onPress={() => router.push('/issues')}
+          />
+        ) : null}
+        {hasFeature('facilities') ? (
+          <Row
+            title={t('res.more.bookings')}
+            subtitle={t('res.more.bookingsHint')}
+            icon="calendar-outline"
+            onPress={() => router.push('/bookings')}
+          />
+        ) : null}
+        <Row
+          title={t('res.notifications.title')}
+          icon="notifications-outline"
+          onPress={() => router.push('/notifications')}
         />
       </Card>
       {memberships.length > 1 ? (

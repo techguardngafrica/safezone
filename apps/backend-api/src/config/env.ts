@@ -114,6 +114,15 @@ const envSchema = z.object({
   STORAGE_SECRET_ACCESS_KEY: optionalString,
   /** MinIO needs path-style URLs. */
   STORAGE_FORCE_PATH_STYLE: bool(true),
+  /**
+   * `s3` (S3, MinIO, RustFS) everywhere by default. `local` keeps files on disk and serves signed URLs
+   * from the API itself, so development needs no storage container. Development only.
+   */
+  STORAGE_DRIVER: z.enum(['s3', 'local']).default('s3'),
+  /** Folder for STORAGE_DRIVER=local, relative to the API's working directory. */
+  DEV_STORAGE_DIR: z.string().min(1).default('.dev-storage'),
+  /** Base URL clients use to reach this API, for local-storage signed URLs (phones need a LAN IP). */
+  API_PUBLIC_URL: optionalUrl,
 
   /** Email: Zoho SMTP in staging/production, Mailpit locally. */
   MAIL_SMTP_HOST: z.string().min(1).default('localhost'),
@@ -122,6 +131,13 @@ const envSchema = z.object({
   MAIL_SMTP_USER: optionalString,
   MAIL_SMTP_PASSWORD: optionalString,
   MAIL_SMTP_FROM: z.email().default('no-reply@safezone.local'),
+  /**
+   * `smtp` (Zoho; Mailpit locally) by default. `file` writes each message, including fake SMS such as
+   * OTP codes, to DEV_OUTBOX_DIR so development needs no Mailpit container. Development only.
+   */
+  MAIL_TRANSPORT: z.enum(['smtp', 'file']).default('smtp'),
+  /** Folder for MAIL_TRANSPORT=file, relative to the API's working directory. */
+  DEV_OUTBOX_DIR: z.string().min(1).default('.dev-outbox'),
 
   /** Expo push (optional access token when enhanced push security is on in the Expo project). */
   EXPO_ACCESS_TOKEN: optionalString,
@@ -190,6 +206,8 @@ function deployedIssues(env: ParsedEnv, source: NodeJS.ProcessEnv): string[] {
     issues.push('PASS_KEY_ENCRYPTION_KEY must differ from MFA_ENCRYPTION_KEY');
   }
   if (env.SMS_PROVIDER === 'fake') issues.push('SMS_PROVIDER: fake is not allowed');
+  if (env.MAIL_TRANSPORT === 'file') issues.push('MAIL_TRANSPORT: file is not allowed');
+  if (env.STORAGE_DRIVER === 'local') issues.push('STORAGE_DRIVER: local is not allowed');
   if (env.PAYMENTS_PROVIDER === 'fake') issues.push('PAYMENTS_PROVIDER: fake is not allowed');
   if (env.PAYMENTS_PROVIDER === 'paystack' && !env.PAYSTACK_SECRET_KEY) {
     issues.push('PAYSTACK_SECRET_KEY: required when PAYMENTS_PROVIDER is paystack');

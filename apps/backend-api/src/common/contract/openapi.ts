@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { RouteInfo } from './route-catalogue';
+import { rulePermissions } from '../auth/auth.decorators';
 
 type JsonSchema = Record<string, unknown>;
 
@@ -101,7 +102,9 @@ export function buildOpenApiDocument(routes: readonly RouteInfo[], version: stri
           ? 'Any signed-in user.'
           : access.kind === 'member'
             ? 'Any active member of the estate.'
-            : `Requires \`${access.permission}\`.`;
+            : `Requires ${rulePermissions(access)
+                .map((permission) => `\`${permission}\``)
+                .join(' or ')}.`;
 
     (paths[route.path] ??= {})[route.method] = {
       operationId: operationId(route),

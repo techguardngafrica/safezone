@@ -56,3 +56,7 @@ local/
 # Prisma (generated client)
 apps/backend-api/src/generated/
 apps/backend-api/prisma/migrations/*.sql.bak
+
+# local development without Docker (MAIL_TRANSPORT=file, STORAGE_DRIVER=local)
+.dev-outbox/
+.dev-storage/

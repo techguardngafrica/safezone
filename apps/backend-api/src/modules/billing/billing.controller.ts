@@ -128,7 +128,8 @@ export class BillingController {
   // ---- Billing runs --------------------------------------------------------------------------
 
   @Get('billing-runs')
-  @Can('billing.run.create')
+  // Approvers read runs too, so they can see what they are approving.
+  @Can('billing.run.create', 'billing.run.approve')
   @RequiresFeature('billing')
   @Contract({
     summary: 'Billing runs, newest first',
@@ -160,7 +161,8 @@ export class BillingController {
   }
 
   @Get('billing-runs/:id')
-  @Can('billing.run.create')
+  // Approvers read runs too, so they can see what they are approving.
+  @Can('billing.run.create', 'billing.run.approve')
   @RequiresFeature('billing')
   @Contract({
     summary: 'Billing run detail',
@@ -174,7 +176,8 @@ export class BillingController {
   }
 
   @Get('billing-runs/:id/items')
-  @Can('billing.run.create')
+  // Approvers read runs too, so they can see what they are approving.
+  @Can('billing.run.create', 'billing.run.approve')
   @RequiresFeature('billing')
   @Contract({
     summary: "A run's per-unit bills (the preview)",

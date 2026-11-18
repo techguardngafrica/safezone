@@ -181,6 +181,22 @@ describe('billing core', () => {
       .set(as(accountant))
       .expect(200);
     expect(submitted.body.data.status).toBe('awaiting_approval');
+    // The approver (billing.run.approve, no billing.run.create) reads what they approve.
+    const queue = await stack.http.get(url('/billing-runs')).set(as(manager)).expect(200);
+    expect(queue.body.data.map((run: { id: string }) => run.id)).toContain(runId);
+    await stack.http
+      .get(url(`/billing-runs/${runId}`))
+      .set(as(manager))
+      .expect(200);
+    await stack.http
+      .get(url(`/billing-runs/${runId}/items`))
+      .set(as(manager))
+      .expect(200);
+    await stack.http.get(url('/billing-runs')).set(as(flatResident)).expect(403);
+    await stack.http
+      .post(url(`/billing-runs/${runId}/preview`))
+      .set(as(manager))
+      .expect(403);
     await stack.http
       .post(url(`/billing-runs/${runId}/issue`))
       .set(as(accountant))

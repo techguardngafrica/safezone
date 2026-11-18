@@ -248,7 +248,8 @@ export class PaymentsController {
   }
 
   @Get('manual-payments')
-  @Can('payment.reconcile')
+  // Approvers read office payments too, so they can see what they are approving.
+  @Can('payment.reconcile', 'billing.run.approve')
   @RequiresFeature('payments')
   @Contract({
     summary: 'Office payments',

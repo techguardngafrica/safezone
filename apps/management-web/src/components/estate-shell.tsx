@@ -28,12 +28,13 @@ interface NavSpec {
   path: string;
   label: Parameters<typeof t>[0];
   icon: NavItem['icon'];
-  permission?: Permission;
+  /** Shown when the user holds this permission, or any of them when a list is given. */
+  permission?: Permission | Permission[];
   feature?: string;
   badge?: 'joinRequests' | 'sos';
 }
 
-/** Sidebar per management-web.md §5. Phase 2 and 3 areas join as their screens ship. */
+/** Sidebar per management-web.md §5. Each item is gated like its API, so nobody sees a page that only 403s. */
 const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
   { items: [{ path: 'dashboard', label: 'nav.dashboard', icon: 'dashboard' }] },
   {
@@ -105,6 +106,39 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         icon: 'megaphone',
         permission: 'announcement.publish',
         feature: 'announcements',
+      },
+    ],
+  },
+  {
+    label: 'nav.group.finance',
+    items: [
+      {
+        path: 'finance/invoices',
+        label: 'nav.invoices',
+        icon: 'fileText',
+        permission: 'invoice.read',
+        feature: 'billing',
+      },
+      {
+        path: 'finance/billing-runs',
+        label: 'nav.billingRuns',
+        icon: 'layers',
+        permission: ['billing.run.create', 'billing.run.approve'],
+        feature: 'billing',
+      },
+      {
+        path: 'finance/charges',
+        label: 'nav.charges',
+        icon: 'receipt',
+        permission: 'invoice.read',
+        feature: 'billing',
+      },
+      {
+        path: 'finance/payments',
+        label: 'nav.payments',
+        icon: 'wallet',
+        permission: ['payment.reconcile', 'billing.run.approve'],
+        feature: 'payments',
       },
     ],
   },
@@ -209,7 +243,8 @@ function Shell({ children }: { children: ReactNode }) {
     items: group.items
       .filter(
         (item) =>
-          (!item.permission || can(item.permission)) && (!item.feature || hasFeature(item.feature)),
+          (!item.permission || [item.permission].flat().some((permission) => can(permission))) &&
+          (!item.feature || hasFeature(item.feature)),
       )
       .map((item) => ({
         href: `/${estateId}/${item.path}`,

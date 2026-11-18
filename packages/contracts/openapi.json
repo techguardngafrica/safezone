@@ -1693,13 +1693,16 @@
       "get": {
         "operationId": "billing_listRuns",
         "summary": "Billing runs, newest first",
-        "description": "Requires `billing.run.create`. Needs the `billing` feature.",
+        "description": "Requires `billing.run.create` or `billing.run.approve`. Needs the `billing` feature.",
         "tags": [
           "billing"
         ],
         "x-safezone-access": {
           "kind": "permission",
-          "permission": "billing.run.create"
+          "permission": "billing.run.create",
+          "alternatives": [
+            "billing.run.approve"
+          ]
         },
         "parameters": [
           {
@@ -2166,13 +2169,16 @@
       "get": {
         "operationId": "billing_getRun",
         "summary": "Billing run detail",
-        "description": "Requires `billing.run.create`. Needs the `billing` feature.",
+        "description": "Requires `billing.run.create` or `billing.run.approve`. Needs the `billing` feature.",
         "tags": [
           "billing"
         ],
         "x-safezone-access": {
           "kind": "permission",
-          "permission": "billing.run.create"
+          "permission": "billing.run.create",
+          "alternatives": [
+            "billing.run.approve"
+          ]
         },
         "parameters": [
           {
@@ -3075,13 +3081,16 @@
       "get": {
         "operationId": "billing_runItems",
         "summary": "A run's per-unit bills (the preview)",
-        "description": "Requires `billing.run.create`. Needs the `billing` feature.",
+        "description": "Requires `billing.run.create` or `billing.run.approve`. Needs the `billing` feature.",
         "tags": [
           "billing"
         ],
         "x-safezone-access": {
           "kind": "permission",
-          "permission": "billing.run.create"
+          "permission": "billing.run.create",
+          "alternatives": [
+            "billing.run.approve"
+          ]
         },
         "parameters": [
           {
@@ -29387,13 +29396,16 @@
       "get": {
         "operationId": "payments_manualPayments",
         "summary": "Office payments",
-        "description": "Requires `payment.reconcile`. Needs the `payments` feature.",
+        "description": "Requires `payment.reconcile` or `billing.run.approve`. Needs the `payments` feature.",
         "tags": [
           "payments"
         ],
         "x-safezone-access": {
           "kind": "permission",
-          "permission": "payment.reconcile"
+          "permission": "payment.reconcile",
+          "alternatives": [
+            "billing.run.approve"
+          ]
         },
         "parameters": [
           {

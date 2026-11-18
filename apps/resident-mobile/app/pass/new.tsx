@@ -12,11 +12,20 @@ import {
 } from '@safezone/mobile-ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { normalizeNigerianPhone } from '@safezone/schemas';
 import { useMemo, useRef, useState } from 'react';
 import { Text } from 'react-native';
 import { Icon } from '../../src/components/icon';
-import { type ArrivalWindow, availableWindows, passValidity } from '../../src/features/passes';
+import {
+  type ArrivalWindow,
+  availableWindows,
+  checkVisitor,
+  passValidity,
+  VISITOR_FIELD_PATHS,
+  type VisitorInput,
+} from '../../src/features/passes';
 import { errorText } from '../../src/lib/errors';
+import { formErrors } from '../../src/lib/form-errors';
 import { useResident } from '../../src/lib/resident';
 import { api } from '../../src/lib/session';
 
@@ -41,7 +50,8 @@ export default function NewPassScreen() {
   const [day, setDay] = useState(0);
   const [window, setWindow] = useState<ArrivalWindow>('next4');
   const [gateId, setGateId] = useState<string>('any');
-  const [nameError, setNameError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<VisitorInput, string>>>({});
+  const [otherErrors, setOtherErrors] = useState<string[]>([]);
   const idempotencyKey = useRef(newIdempotencyKey());
 
   const windows = useMemo(() => availableWindows(day), [day]);
@@ -55,8 +65,14 @@ export default function NewPassScreen() {
   });
   const openGates = (gates.data ?? []).filter((gate) => gate.status === 'active');
 
+  /** Edits a field and clears its error, so the message goes away as soon as the user fixes it. */
+  const edit = (input: VisitorInput, setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    if (errors[input]) setErrors((current) => ({ ...current, [input]: undefined }));
+  };
+
   const create = useMutation({
-    mutationFn: () => {
+    mutationFn: (visitor: { name: string; phone?: string; vehiclePlate?: string }) => {
       const { validFrom, validTo } = passValidity(day, chosenWindow);
       return unwrap(
         api.POST('/v1/estates/{estateId}/visitor-invitations', {
@@ -68,13 +84,7 @@ export default function NewPassScreen() {
             validFrom,
             validTo,
             gateIds: gateId === 'any' ? undefined : [gateId],
-            visitors: [
-              {
-                name: name.trim(),
-                phone: phone.trim() || undefined,
-                vehiclePlate: plate.trim().toUpperCase() || undefined,
-              },
-            ],
+            visitors: [visitor],
           },
         }),
       );
@@ -87,23 +97,46 @@ export default function NewPassScreen() {
         router.replace(`/pass/${first.id}`);
       } else router.back();
     },
-    onError: () => {
+    onError: (error) => {
       // A new attempt after a failure is a new request.
       idempotencyKey.current = newIdempotencyKey();
+      // Anything the checks below missed: show the API's message on the matching input.
+      const server = formErrors(error, VISITOR_FIELD_PATHS);
+      setErrors(server.fields);
+      setOtherErrors(server.other);
     },
   });
 
   const submit = () => {
-    if (name.trim().length < 2) return setNameError(t('res.newPass.nameRequired'));
-    setNameError(null);
-    create.mutate();
+    setOtherErrors([]);
+    const checked = checkVisitor({ name, phone, plate }, normalizeNigerianPhone);
+    if (!checked.ok) {
+      setErrors(checked.errors);
+      return;
+    }
+    setErrors({});
+    create.mutate(checked.visitor);
   };
+  const invalidCount = Object.values(errors).filter(Boolean).length + otherErrors.length;
 
   return (
     <ScrollScreen
       edges={['top', 'left', 'right', 'bottom']}
       footer={
-        <ActionButton label={t('res.newPass.create')} onPress={submit} busy={create.isPending} />
+        <>
+          {invalidCount > 0 ? (
+            <Text
+              accessibilityRole="alert"
+              accessibilityLiveRegion="polite"
+              style={{ color: colors.status.danger, fontSize: 14, marginBottom: 8 }}
+            >
+              {invalidCount === 1
+                ? t('res.newPass.fixOne')
+                : t('res.newPass.fixMany', { count: invalidCount })}
+            </Text>
+          ) : null}
+          <ActionButton label={t('res.newPass.create')} onPress={submit} busy={create.isPending} />
+        </>
       }
     >
       <ScreenHeader
@@ -115,25 +148,29 @@ export default function NewPassScreen() {
         <TextField
           label={t('res.newPass.name')}
           value={name}
-          onChangeText={setName}
+          onChangeText={edit('name', setName)}
           autoCapitalize="words"
-          error={nameError}
+          error={errors.name}
           maxLength={120}
         />
         <TextField
           label={t('res.newPass.phone')}
           helper={t('res.newPass.phoneHelp')}
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={edit('phone', setPhone)}
           keyboardType="phone-pad"
+          placeholder={t('auth.phone.placeholder')}
+          error={errors.phone}
           maxLength={20}
         />
         <TextField
           label={t('res.newPass.plate')}
           value={plate}
-          onChangeText={setPlate}
+          onChangeText={edit('plate', setPlate)}
           autoCapitalize="characters"
-          maxLength={12}
+          helper={t('res.newPass.plateHelp')}
+          error={errors.plate}
+          maxLength={18}
         />
       </Card>
       <Card>
@@ -174,7 +211,14 @@ export default function NewPassScreen() {
         ) : null}
       </Card>
       {!household ? <Banner tone="warning">{t('res.newPass.noHousehold')}</Banner> : null}
-      {create.isError ? <Banner tone="danger">{errorText(create.error)}</Banner> : null}
+      {otherErrors.map((message) => (
+        <Banner key={message} tone="danger">
+          {message}
+        </Banner>
+      ))}
+      {create.isError && invalidCount === 0 ? (
+        <Banner tone="danger">{errorText(create.error)}</Banner>
+      ) : null}
       <Text style={{ color: colors.semantic.textMuted, fontSize: 13 }}>
         {t('res.newPass.footnote')}
       </Text>

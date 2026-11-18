@@ -8,6 +8,8 @@ import {
   ALLOW_MFA_PENDING_KEY,
   type AuthenticatedRequest,
   FEATURE_KEY,
+  permits,
+  rulePermissions,
 } from '../../common/auth/auth.decorators';
 import { PUBLIC_KEY } from '../../common/auth/public.decorator';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../common/errors/domain-error';
@@ -68,15 +70,17 @@ export class AuthorizationGuard implements CanActivate {
     if (rawEstateId === undefined) {
       if (rule.kind === 'member')
         throw new Error('@Member() requires an :estateId route parameter');
-      if (
-        !rule.permission.startsWith('platform.') &&
-        !rule.permission.startsWith('ad.') &&
-        rule.permission !== 'vendor.approve'
-      ) {
-        throw new Error(`@Can('${rule.permission}') on a route without :estateId`);
+      for (const permission of rulePermissions(rule)) {
+        if (
+          !permission.startsWith('platform.') &&
+          !permission.startsWith('ad.') &&
+          permission !== 'vendor.approve'
+        ) {
+          throw new Error(`@Can('${permission}') on a route without :estateId`);
+        }
       }
       const grant = this.authz.grantIn(assignments, null);
-      if (!grant.permissions.has(rule.permission)) throw new ForbiddenError();
+      if (!permits(rule, grant.permissions)) throw new ForbiddenError();
       return true;
     }
 
@@ -86,8 +90,7 @@ export class AuthorizationGuard implements CanActivate {
     if (!membership) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
 
     const grant = this.authz.grantIn(assignments, rawEstateId);
-    if (rule.kind === 'permission' && !grant.permissions.has(rule.permission))
-      throw new ForbiddenError();
+    if (rule.kind === 'permission' && !permits(rule, grant.permissions)) throw new ForbiddenError();
 
     if (
       blockedBySuspension(

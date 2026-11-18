@@ -130,6 +130,21 @@ export async function unwrap<R extends { data?: unknown; error?: unknown; respon
   );
 }
 
+/**
+ * Field errors from a VALIDATION_FAILED response, keyed by field path without the request part, for
+ * example `{ 'visitors.0.phone': 'Enter a valid…' }`. Empty for any other error, so forms can always
+ * call it. The first message per field wins.
+ */
+export function fieldErrors(error: unknown): Record<string, string> {
+  if (!(error instanceof ApiClientError) || error.code !== 'VALIDATION_FAILED') return {};
+  const fields: Record<string, string> = {};
+  for (const detail of error.details) {
+    const path = detail.path.replace(/^(body|query|params)\.?/, '');
+    if (path && !(path in fields)) fields[path] = detail.message;
+  }
+  return fields;
+}
+
 /** A cursor page: the rows plus the cursor for the next page (null on the last page). */
 export interface CursorPage<T> {
   items: T[];

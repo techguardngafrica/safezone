@@ -9,7 +9,27 @@ import type { FeatureKey } from '@safezone/schemas';
  */
 export const ACCESS_KEY = 'safezone:access';
 export type AccessRule =
-  { kind: 'signed_in' } | { kind: 'member' } | { kind: 'permission'; permission: Permission };
+  | { kind: 'signed_in' }
+  | { kind: 'member' }
+  | {
+      kind: 'permission';
+      permission: Permission;
+      /** Other permissions that also grant access (any one is enough). */
+      alternatives?: readonly Permission[];
+    };
+
+/** Every permission that satisfies a permission rule: the primary one first. */
+export function rulePermissions(rule: Extract<AccessRule, { kind: 'permission' }>): Permission[] {
+  return [rule.permission, ...(rule.alternatives ?? [])];
+}
+
+/** True when the granted set holds the rule's permission or one of its alternatives. */
+export function permits(
+  rule: Extract<AccessRule, { kind: 'permission' }>,
+  granted: ReadonlySet<string>,
+): boolean {
+  return rulePermissions(rule).some((permission) => granted.has(permission));
+}
 
 /** Any signed-in user acting on their own data (/v1/me, /v1/auth/signout). */
 export const SignedIn = (): MethodDecorator =>
@@ -21,10 +41,16 @@ export const Member = (): MethodDecorator =>
 
 /**
  * Requires a permission. With an `:estateId` path parameter it is evaluated in that estate;
- * `platform.*` permissions are evaluated against platform role assignments.
+ * `platform.*` permissions are evaluated against platform role assignments. Extra permissions are
+ * alternatives: `@Can('billing.run.create', 'billing.run.approve')` admits either, so the people
+ * who approve something can also read it.
  */
-export const Can = (permission: Permission): MethodDecorator =>
-  SetMetadata(ACCESS_KEY, { kind: 'permission', permission } satisfies AccessRule);
+export const Can = (permission: Permission, ...alternatives: Permission[]): MethodDecorator =>
+  SetMetadata(ACCESS_KEY, {
+    kind: 'permission',
+    permission,
+    ...(alternatives.length > 0 ? { alternatives } : {}),
+  } satisfies AccessRule);
 
 export const ALLOW_MFA_PENDING_KEY = 'safezone:allow-mfa-pending';
 /** Reachable before MFA is completed (MFA verify and enrolment only). */

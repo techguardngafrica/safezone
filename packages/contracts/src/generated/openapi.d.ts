@@ -241,7 +241,7 @@ export interface paths {
     };
     /**
      * Billing runs, newest first
-     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     * @description Requires `billing.run.create` or `billing.run.approve`. Needs the `billing` feature.
      */
     get: operations['billing_listRuns'];
     put?: never;
@@ -265,7 +265,7 @@ export interface paths {
     };
     /**
      * Billing run detail
-     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     * @description Requires `billing.run.create` or `billing.run.approve`. Needs the `billing` feature.
      */
     get: operations['billing_getRun'];
     put?: never;
@@ -345,7 +345,7 @@ export interface paths {
     };
     /**
      * A run's per-unit bills (the preview)
-     * @description Requires `billing.run.create`. Needs the `billing` feature.
+     * @description Requires `billing.run.create` or `billing.run.approve`. Needs the `billing` feature.
      */
     get: operations['billing_runItems'];
     put?: never;
@@ -2197,7 +2197,7 @@ export interface paths {
     };
     /**
      * Office payments
-     * @description Requires `payment.reconcile`. Needs the `payments` feature.
+     * @description Requires `payment.reconcile` or `billing.run.approve`. Needs the `payments` feature.
      */
     get: operations['payments_manualPayments'];
     put?: never;

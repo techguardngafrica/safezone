@@ -35,6 +35,16 @@ describe('loadEnv', () => {
     expect(env.JWT_ACCESS_TTL).toBe(900);
     expect(env.JWT_REFRESH_TTL).toBe(30 * 86_400);
     expect(new URL(env.DATABASE_URL).username).toBe('safezone_app');
+    expect(env.MAIL_TRANSPORT).toBe('smtp');
+    expect(env.STORAGE_DRIVER).toBe('s3');
+  });
+
+  it('allows the Docker-free development adapters locally', () => {
+    const env = loadEnv({ MAIL_TRANSPORT: 'file', STORAGE_DRIVER: 'local' });
+    expect(env.MAIL_TRANSPORT).toBe('file');
+    expect(env.DEV_OUTBOX_DIR).toBe('.dev-outbox');
+    expect(env.STORAGE_DRIVER).toBe('local');
+    expect(env.DEV_STORAGE_DIR).toBe('.dev-storage');
   });
 
   it('accepts a complete production configuration', () => {
@@ -49,6 +59,8 @@ describe('loadEnv', () => {
     ['JWT_ACCESS_SECRET', undefined, /JWT_ACCESS_SECRET: required/],
     ['SMS_PROVIDER', 'fake', /SMS_PROVIDER: fake/],
     ['PAYMENTS_PROVIDER', 'fake', /PAYMENTS_PROVIDER: fake/],
+    ['MAIL_TRANSPORT', 'file', /MAIL_TRANSPORT: file/],
+    ['STORAGE_DRIVER', 'local', /STORAGE_DRIVER: local/],
     ['PAYSTACK_SECRET_KEY', undefined, /PAYSTACK_SECRET_KEY: required/],
     ['CORS_ORIGINS', 'http://manage.safezone.ng', /https origins/],
     ['DATABASE_URL', 'postgres://safezone:pw@db:5432/safezone', /safezone_app/],

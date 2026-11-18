@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -425,6 +426,87 @@ export function CheckboxRow({
   );
 }
 
+/** A setting with a switch; the label and helper are one 48 px row (UI_GUIDELINES §8.1 profile rows). */
+export function ToggleRow({
+  label,
+  helper,
+  value,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  helper?: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <View style={styles.toggleRow}>
+      <View style={styles.flex}>
+        <Text style={styles.rowTitle}>{label}</Text>
+        {helper ? <Text style={styles.helper}>{helper}</Text> : null}
+      </View>
+      <Switch
+        accessibilityLabel={label}
+        value={value}
+        onValueChange={onChange}
+        disabled={disabled}
+        trackColor={{ true: colors.brand.primary, false: colors.semantic.border }}
+        thumbColor="#FFFFFF"
+      />
+    </View>
+  );
+}
+
+/** Chips where several options can be on (e.g. working days). */
+export function MultiChipGroup<K extends string>({
+  options,
+  value,
+  onChange,
+  label,
+  error,
+}: {
+  options: { key: K; label: string }[];
+  value: K[];
+  onChange: (keys: K[]) => void;
+  label: string;
+  error?: string | null;
+}) {
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.chips}>
+        {options.map((option) => {
+          const selected = value.includes(option.key);
+          return (
+            <Pressable
+              key={option.key}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: selected }}
+              accessibilityLabel={option.label}
+              onPress={() =>
+                onChange(
+                  selected ? value.filter((key) => key !== option.key) : [...value, option.key],
+                )
+              }
+              style={[styles.chip, selected && styles.chipSelected]}
+            >
+              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                {option.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {error ? (
+        <Text accessibilityLiveRegion="polite" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 /** Segmented control for 2 to 4 options (UI_GUIDELINES §6.10). */
 export function Segmented<K extends string>({
   options,
@@ -465,11 +547,14 @@ export function ChipGroup<K extends string>({
   value,
   onChange,
   label,
+  error,
 }: {
   options: { key: K; label: string }[];
   value: K | null;
   onChange: (key: K) => void;
   label: string;
+  /** Shown under the chips, e.g. when no option is chosen. */
+  error?: string | null;
 }) {
   return (
     <View style={{ gap: spacing[2] }}>
@@ -492,6 +577,11 @@ export function ChipGroup<K extends string>({
           );
         })}
       </View>
+      {error ? (
+        <Text accessibilityLiveRegion="polite" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -715,6 +805,13 @@ const styles = StyleSheet.create({
   checkBoxOn: { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
   checkMark: { color: colors.brand.onPrimary, fontSize: 16, fontWeight: typography.weight.bold },
   checkLabel: { flex: 1, fontSize: typography.size.sm, color: colors.semantic.text },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+    minHeight: touchTarget.default,
+    paddingVertical: spacing[1],
+  },
   segmented: {
     flexDirection: 'row',
     backgroundColor: colors.semantic.surfaceMuted,

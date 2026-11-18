@@ -3,6 +3,7 @@ import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
 import { EmailSender } from './email/email-sender';
 import { KeyVault, LocalKeyVault } from './keys/key-vault';
+import { FileEmailSender } from './email/file-email.sender';
 import { SmtpEmailSender } from './email/smtp-email.sender';
 import { ExpoPushSender } from './push/expo-push.sender';
 import { MalwareScanner, StubMalwareScanner } from './scan/malware-scanner';
@@ -15,6 +16,7 @@ import { FakePaymentGateway } from './payments/fake-payment.gateway';
 import { PaymentGateway } from './payments/payment-gateway';
 import { PaystackPaymentGateway } from './payments/paystack-payment.gateway';
 import { ObjectStorage } from './storage/object-storage';
+import { LocalObjectStorage } from './storage/local-object-storage';
 import { S3ObjectStorage } from './storage/s3-object-storage';
 import { PushSender } from './push/push-sender';
 import { FakeSmsSender } from './sms/fake-sms.sender';
@@ -28,7 +30,14 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
 @Global()
 @Module({
   providers: [
-    { provide: EmailSender, inject: [ENV], useFactory: (env: Env) => new SmtpEmailSender(env) },
+    {
+      provide: EmailSender,
+      inject: [ENV],
+      useFactory: (env: Env): EmailSender =>
+        env.MAIL_TRANSPORT === 'file'
+          ? new FileEmailSender(env.DEV_OUTBOX_DIR)
+          : new SmtpEmailSender(env),
+    },
     {
       provide: KeyVault,
       inject: [ENV],
@@ -54,16 +63,21 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
       provide: ObjectStorage,
       inject: [ENV],
       useFactory: (env: Env): ObjectStorage =>
-        new S3ObjectStorage({
-          bucket: env.STORAGE_BUCKET,
-          region: env.STORAGE_REGION,
-          forcePathStyle: env.STORAGE_FORCE_PATH_STYLE,
-          ...(env.STORAGE_ENDPOINT ? { endpoint: env.STORAGE_ENDPOINT } : {}),
-          ...(env.STORAGE_ACCESS_KEY_ID ? { accessKeyId: env.STORAGE_ACCESS_KEY_ID } : {}),
-          ...(env.STORAGE_SECRET_ACCESS_KEY
-            ? { secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY }
-            : {}),
-        }),
+        env.STORAGE_DRIVER === 'local'
+          ? new LocalObjectStorage(
+              env.DEV_STORAGE_DIR,
+              env.API_PUBLIC_URL ?? `http://localhost:${env.API_PORT}`,
+            )
+          : new S3ObjectStorage({
+              bucket: env.STORAGE_BUCKET,
+              region: env.STORAGE_REGION,
+              forcePathStyle: env.STORAGE_FORCE_PATH_STYLE,
+              ...(env.STORAGE_ENDPOINT ? { endpoint: env.STORAGE_ENDPOINT } : {}),
+              ...(env.STORAGE_ACCESS_KEY_ID ? { accessKeyId: env.STORAGE_ACCESS_KEY_ID } : {}),
+              ...(env.STORAGE_SECRET_ACCESS_KEY
+                ? { secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY }
+                : {}),
+            }),
     },
     { provide: MalwareScanner, useClass: StubMalwareScanner },
     {
@@ -84,7 +98,13 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
             throw new Error('PAYSTACK_SECRET_KEY is required for paystack');
           return new PaystackPaymentGateway({ secretKey: env.PAYSTACK_SECRET_KEY });
         }
-        return new FakePaymentGateway();
+        // Development: checkout links open the API's own test checkout page (dev-checkout-routes.ts).
+        return new FakePaymentGateway(
+          undefined,
+          env.NODE_ENV === 'development'
+            ? (env.API_PUBLIC_URL ?? `http://localhost:${env.API_PORT}`)
+            : undefined,
+        );
       },
     },
   ],

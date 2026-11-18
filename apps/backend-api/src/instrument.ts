@@ -2,6 +2,8 @@
  * Observability bootstrap: import this FIRST in every process entry point (main, worker, realtime)
  * so OpenTelemetry can patch modules before they load. Both are off unless configured.
  */
+// Must stay the first import: it fills process.env from .env before anything reads it.
+import './config/load-dotenv';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { NodeSDK } from '@opentelemetry/sdk-node';

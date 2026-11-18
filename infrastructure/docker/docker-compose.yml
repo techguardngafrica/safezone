@@ -38,19 +38,19 @@ services:
       - '8025:8025'
 
   # S3-compatible object storage for uploads. Console: http://localhost:9001 (minio / minio-password)
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
+  # S3-compatible storage. MinIO community images can no longer be pulled, so this uses RustFS (the
+  # same image the integration tests use). Credentials match .env.example.
+  storage:
+    image: rustfs/rustfs:latest
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio-password
+      RUSTFS_ACCESS_KEY: minio
+      RUSTFS_SECRET_KEY: minio-password
     ports:
       - '9000:9000'
-      - '9001:9001'
     volumes:
-      - minio-data:/data
+      - storage-data:/data
 
 volumes:
   postgres-data:
   redis-data:
-  minio-data:
+  storage-data:
