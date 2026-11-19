@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checklistSummary, isValidIsoDate, parseVehiclePlates } from './moves';
+import { checklistSummary, isValidIsoDate, parseVehiclePlates, vehiclePlatesValid } from './moves';
 
 describe('moves helpers', () => {
   it('validates YYYY-MM-DD dates strictly', () => {
@@ -9,9 +9,19 @@ describe('moves helpers', () => {
     expect(isValidIsoDate('')).toBe(false);
   });
 
-  it('parses comma-separated vehicle plates up to 5 valid entries', () => {
-    expect(parseVehiclePlates(' kja-123ab, lnd-456cd , x ')).toEqual(['KJA-123AB', 'LND-456CD']);
-    expect(parseVehiclePlates('AAA,BBB,CCC,DDD,EEE,FFF')).toHaveLength(5);
+  it('parses comma-separated vehicle plates without dropping any', () => {
+    expect(parseVehiclePlates(' kja-123ab, lnd-456cd , x ,')).toEqual([
+      'KJA-123AB',
+      'LND-456CD',
+      'X',
+    ]);
+  });
+
+  it('flags short plates and more than 5 plates instead of dropping them', () => {
+    expect(vehiclePlatesValid(['KJA-123AB', 'LND-456CD'])).toBe(true);
+    expect(vehiclePlatesValid(['KJA-123AB', 'X'])).toBe(false);
+    expect(vehiclePlatesValid(['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF'])).toBe(false);
+    expect(vehiclePlatesValid([])).toBe(true);
   });
 
   it('counts completed checklist items', () => {

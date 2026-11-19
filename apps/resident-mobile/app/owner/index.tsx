@@ -25,6 +25,7 @@ import {
   awaitingOwnerRequests,
   canCancelTransfer,
   canSellerConfirm,
+  canSellerReject,
   formatShare,
   type OwnerJoinRequest,
   type OwnershipTransfer,
@@ -157,6 +158,7 @@ export default function OwnerScreen() {
   const pull = usePullRefresh(() =>
     Promise.all([units.refetch(), joinRequests.refetch(), transfers.refetch()]),
   );
+  const myOwnershipIds = new Set((units.data ?? []).map((unit) => unit.ownershipId));
   const pendingApprovals = awaitingOwnerRequests(joinRequests.data?.items ?? []);
 
   return (
@@ -337,27 +339,27 @@ export default function OwnerScreen() {
               </Text>
               {item.reason ? <Text style={styles.meta}>{item.reason}</Text> : null}
               <View style={styles.actionRow}>
-                {canSellerConfirm(item) ? (
-                  <>
-                    <View style={{ flex: 1 }}>
-                      <ActionButton
-                        label={t('res.owner.transfer.confirm')}
-                        onPress={() => setConfirmingTransfer(item)}
-                      />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <ActionButton
-                        label={t('res.owner.transfer.reject')}
-                        variant="outline"
-                        onPress={() => {
-                          setClosingTransfer({ transfer: item, action: 'reject' });
-                          setTransferReason('');
-                        }}
-                      />
-                    </View>
-                  </>
+                {canSellerConfirm(item, myOwnershipIds) ? (
+                  <View style={{ flex: 1 }}>
+                    <ActionButton
+                      label={t('res.owner.transfer.confirm')}
+                      onPress={() => setConfirmingTransfer(item)}
+                    />
+                  </View>
                 ) : null}
-                {canCancelTransfer(item, me) && !canSellerConfirm(item) ? (
+                {canSellerReject(item, myOwnershipIds, me) ? (
+                  <View style={{ flex: 1 }}>
+                    <ActionButton
+                      label={t('res.owner.transfer.reject')}
+                      variant="outline"
+                      onPress={() => {
+                        setClosingTransfer({ transfer: item, action: 'reject' });
+                        setTransferReason('');
+                      }}
+                    />
+                  </View>
+                ) : null}
+                {canCancelTransfer(item, me) ? (
                   <View style={{ flex: 1 }}>
                     <ActionButton
                       label={t('res.owner.transfer.cancel')}
@@ -539,7 +541,7 @@ const styles = StyleSheet.create({
   },
   scrim: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'flex-end',
   },
   sheet: {

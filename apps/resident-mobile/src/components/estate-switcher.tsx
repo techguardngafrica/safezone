@@ -1,13 +1,14 @@
-import { colors, radii, spacing, typography } from '@safezone/design-tokens';
+import { colors, radii, spacing, touchTarget, typography } from '@safezone/design-tokens';
 import { t } from '@safezone/i18n';
 import { ActionButton, ListRow } from '@safezone/mobile-ui';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { roleText } from '../lib/labels';
 import { type Membership, useResident } from '../lib/resident';
 import { Icon } from './icon';
 
 function formatRoles(roles: Membership['roles']): string | undefined {
   if (roles.length === 0) return undefined;
-  return roles.map((role) => role.replace(/_/g, ' ')).join(', ');
+  return roles.map(roleText).join(', ');
 }
 
 /** Bottom-sheet estate switcher: last-used estate first, with roles and a join shortcut. */
@@ -51,7 +52,10 @@ export function EstateSwitcherModal({
                   leading={<Icon name="business-outline" color={colors.brand.primary} size={20} />}
                   trailing={
                     current ? (
-                      <Icon name="checkmark-circle" color={colors.brand.primary} size={22} />
+                      <View style={styles.current}>
+                        <Icon name="checkmark-circle" color={colors.brand.primary} size={18} />
+                        <Text style={styles.currentText}>{t('res.estates.current')}</Text>
+                      </View>
                     ) : undefined
                   }
                   onPress={() => {
@@ -80,7 +84,7 @@ export function EstateSwitcherModal({
 const styles = StyleSheet.create({
   scrim: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'flex-end',
   },
   sheet: {
@@ -106,12 +110,18 @@ const styles = StyleSheet.create({
     color: colors.semantic.textMuted,
   },
   close: {
-    width: 44,
-    height: 44,
+    width: touchTarget.default,
+    height: touchTarget.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
   list: {
     maxHeight: 320,
+  },
+  current: { flexDirection: 'row', alignItems: 'center', gap: spacing[1] },
+  currentText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: colors.brand.primary,
   },
 });

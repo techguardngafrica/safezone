@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   },
   scrim: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'flex-end',
   },
   sheet: {

@@ -94,11 +94,13 @@ export default function PayScreen() {
             onPress={() => router.push('/bills/receipts')}
           />
         ) : null}
-        <QuickPill
-          icon="document-text-outline"
-          label={t('res.bills.statement')}
-          onPress={() => router.push('/bills/statement')}
-        />
+        {hasFeature('billing') ? (
+          <QuickPill
+            icon="document-text-outline"
+            label={t('res.bills.statement')}
+            onPress={() => router.push('/bills/statement')}
+          />
+        ) : null}
         {hasFeature('billing') ? (
           <QuickPill
             icon="flash-outline"

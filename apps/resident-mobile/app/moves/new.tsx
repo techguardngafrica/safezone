@@ -14,7 +14,12 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Icon } from '../../src/components/icon';
 import { todayWat } from '../../src/features/bills';
-import { isValidIsoDate, type MoveType, parseVehiclePlates } from '../../src/features/moves';
+import {
+  isValidIsoDate,
+  type MoveType,
+  parseVehiclePlates,
+  vehiclePlatesValid,
+} from '../../src/features/moves';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
 import { api } from '../../src/lib/session';
@@ -31,6 +36,8 @@ export default function NewMoveScreen() {
   const [notes, setNotes] = useState('');
 
   const occupancyId = household?.occupancy?.id;
+  const plates = parseVehiclePlates(vehicles);
+  const platesOk = vehiclePlatesValid(plates);
 
   const submit = useMutation({
     mutationFn: () =>
@@ -43,7 +50,7 @@ export default function NewMoveScreen() {
             scheduledOn: scheduledOn.trim(),
             gateNotice: {
               ...(items.trim() ? { items: items.trim() } : {}),
-              vehicles: parseVehiclePlates(vehicles),
+              vehicles: plates,
               ...(notes.trim() ? { notes: notes.trim() } : {}),
             },
           },
@@ -55,7 +62,7 @@ export default function NewMoveScreen() {
     },
   });
 
-  const valid = Boolean(occupancyId) && isValidIsoDate(scheduledOn.trim());
+  const valid = Boolean(occupancyId) && isValidIsoDate(scheduledOn.trim()) && platesOk;
 
   return (
     <ScrollScreen edges={['top', 'left', 'right', 'bottom']}>
@@ -96,6 +103,7 @@ export default function NewMoveScreen() {
           label={t('res.moves.vehiclesLabel')}
           placeholder={t('res.moves.vehiclesPlaceholder')}
           helper={t('res.moves.vehiclesHelp')}
+          error={platesOk ? null : t('res.moves.vehiclesInvalid')}
           value={vehicles}
           onChangeText={setVehicles}
           autoCapitalize="characters"

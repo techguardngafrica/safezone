@@ -3,6 +3,7 @@ import {
   awaitingOwnerRequests,
   canCancelTransfer,
   canSellerConfirm,
+  canSellerReject,
   formatShare,
   type OwnerJoinRequest,
   type OwnershipTransfer,
@@ -60,14 +61,31 @@ describe('owner helpers', () => {
     expect(list[0]?.status).toBe('awaiting_owner');
   });
 
-  it('checks transfer confirm and cancel eligibility', () => {
-    const req = transfer({ status: 'requested', requestedBy: 'owner-1' });
-    const confirmed = transfer({ status: 'seller_confirmed', requestedBy: 'owner-1' });
+  it('lets only the seller confirm or reject, and only the requester cancel', () => {
+    const mine = new Set(['ownership-1']);
+    const sale = transfer({
+      status: 'requested',
+      requestedBy: 'buyer-1',
+      fromOwnershipIds: ['ownership-1'],
+    });
+    const otherUnit = transfer({ status: 'requested', fromOwnershipIds: ['ownership-9'] });
+    const confirmed = transfer({
+      status: 'seller_confirmed',
+      requestedBy: 'owner-1',
+      fromOwnershipIds: ['ownership-1'],
+    });
     const done = transfer({ status: 'completed', requestedBy: 'owner-1' });
 
-    expect(canSellerConfirm(req)).toBe(true);
-    expect(canSellerConfirm(confirmed)).toBe(false);
-    expect(canCancelTransfer(req, 'owner-1')).toBe(true);
+    expect(canSellerConfirm(sale, mine)).toBe(true);
+    expect(canSellerReject(sale, mine, 'owner-1')).toBe(true);
+    expect(canSellerConfirm(otherUnit, mine)).toBe(false);
+    expect(canSellerConfirm(confirmed, mine)).toBe(false);
+    // The buyer who opened it is not a seller: no confirm, but they can cancel.
+    expect(canSellerConfirm(sale, new Set())).toBe(false);
+    expect(canCancelTransfer(sale, 'buyer-1')).toBe(true);
+    // A seller who opened it themselves confirms or cancels, never "rejects" their own request.
+    const ownRequest = transfer({ requestedBy: 'owner-1', fromOwnershipIds: ['ownership-1'] });
+    expect(canSellerReject(ownRequest, mine, 'owner-1')).toBe(false);
     expect(canCancelTransfer(confirmed, 'owner-1')).toBe(true);
     expect(canCancelTransfer(confirmed, 'other')).toBe(false);
     expect(canCancelTransfer(done, 'owner-1')).toBe(false);

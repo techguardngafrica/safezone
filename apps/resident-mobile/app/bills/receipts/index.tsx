@@ -12,6 +12,7 @@ import {
   Skeleton,
   StatusPill,
   type Tone,
+  useSession,
 } from '@safezone/mobile-ui';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -19,8 +20,9 @@ import { useState } from 'react';
 import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../../../src/components/icon';
 import { errorText } from '../../../src/lib/errors';
+import { paymentMethodText } from '../../../src/lib/labels';
 import { useResident } from '../../../src/lib/resident';
-import { api } from '../../../src/lib/session';
+import { api, session } from '../../../src/lib/session';
 import { usePullRefresh } from '../../../src/lib/use-pull-refresh';
 
 type Transaction = ApiRow<'/v1/estates/{estateId}/transactions', 'get'>;
@@ -35,16 +37,22 @@ const STATUS_TONE: Record<Transaction['status'], Tone> = {
 export default function ReceiptsScreen() {
   const router = useRouter();
   const { estateId, estateName } = useResident();
+  const me = useSession(session).user?.id;
   const [selected, setSelected] = useState<Transaction | null>(null);
 
   const transactions = useInfiniteQuery({
-    queryKey: ['estate', estateId, 'transactions', 'mine'],
+    // Always the signed-in payer: staff who reconcile would otherwise get the whole estate's payments.
+    queryKey: ['estate', estateId, 'transactions', 'mine', me],
     queryFn: ({ pageParam }) =>
       unwrapPage(
         api.GET('/v1/estates/{estateId}/transactions', {
-          params: { path: { estateId }, query: { limit: 50, cursor: pageParam } },
+          params: {
+            path: { estateId },
+            query: { limit: 50, cursor: pageParam, payerUserId: me ?? '' },
+          },
         }),
       ),
+    enabled: Boolean(me),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
@@ -59,7 +67,7 @@ export default function ReceiptsScreen() {
         amount: formatKobo(item.amount),
         status: t(`res.receipts.status.${item.status}` as MessageKey),
         date: formatDateTime(item.paidAt),
-        channel: item.channel,
+        channel: paymentMethodText(item.channel),
         reference: item.reference,
       }),
     });
@@ -95,7 +103,7 @@ export default function ReceiptsScreen() {
             <ListRow
               key={item.id}
               title={formatKobo(item.amount)}
-              subtitle={`${formatDateTime(item.paidAt)} · ${item.channel}`}
+              subtitle={`${formatDateTime(item.paidAt)} · ${paymentMethodText(item.channel)}`}
               leading={
                 <Icon name="checkmark-circle-outline" color={colors.status.success} size={22} />
               }
@@ -150,7 +158,10 @@ export default function ReceiptsScreen() {
                     label={t('res.receipts.paidAt')}
                     value={formatDateTime(selected.paidAt)}
                   />
-                  <DetailRow label={t('res.receipts.channel')} value={selected.channel} />
+                  <DetailRow
+                    label={t('res.receipts.channel')}
+                    value={paymentMethodText(selected.channel)}
+                  />
                   <DetailRow label={t('res.receipts.provider')} value={selected.provider} />
                   <DetailRow label={t('res.receipts.reference')} value={selected.reference} />
                 </View>
@@ -187,7 +198,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   scrim: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'flex-end',
   },
   sheet: {

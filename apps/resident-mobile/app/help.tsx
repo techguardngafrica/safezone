@@ -24,9 +24,10 @@ const SUPPORT_EMAIL = 'support@safezone.ng';
 
 const FAQ_KEYS = ['passes', 'sos', 'pay', 'moves'] as const;
 
+/** 112 works nationwide; 767 is Lagos State only, so it shows only for estates in Lagos. */
 const PUBLIC_EMERGENCY_LINES = [
-  { key: 'national', number: '112', labelKey: 'res.help.nationalEmergency' as const },
-  { key: 'lagos', number: '767', labelKey: 'res.help.lagosEmergency' as const },
+  { key: 'national', number: '112', labelKey: 'res.help.nationalEmergency' as const, state: null },
+  { key: 'lagos', number: '767', labelKey: 'res.help.lagosEmergency' as const, state: 'lagos' },
 ];
 
 /** Help screen (resident-mobile.md §6.1): estate details, public emergency lines, FAQ, support & legal. */
@@ -84,7 +85,9 @@ export default function HelpScreen() {
       <SectionHeader title={t('res.help.emergencySection')} />
       <Banner tone="info">{t('res.help.emergencyNote')}</Banner>
       <Card>
-        {PUBLIC_EMERGENCY_LINES.map((line) => (
+        {PUBLIC_EMERGENCY_LINES.filter(
+          (line) => !line.state || data?.state?.trim().toLowerCase().startsWith(line.state),
+        ).map((line) => (
           <ListRow
             key={line.key}
             title={t(line.labelKey)}
@@ -140,13 +143,13 @@ export default function HelpScreen() {
           title={t('res.help.privacyPolicy')}
           leading={<Icon name="shield-checkmark-outline" color={colors.brand.primary} size={20} />}
           trailing={<Icon name="open-outline" size={18} color={colors.semantic.textMuted} />}
-          onPress={() => void Linking.openURL(`${PUBLIC_WEB_URL}/privacy`)}
+          onPress={() => void Linking.openURL(`${PUBLIC_WEB_URL}/legal/privacy`)}
         />
         <ListRow
           title={t('res.help.terms')}
           leading={<Icon name="document-text-outline" color={colors.brand.primary} size={20} />}
           trailing={<Icon name="open-outline" size={18} color={colors.semantic.textMuted} />}
-          onPress={() => void Linking.openURL(`${PUBLIC_WEB_URL}/terms`)}
+          onPress={() => void Linking.openURL(`${PUBLIC_WEB_URL}/legal/terms`)}
         />
       </Card>
 
