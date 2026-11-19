@@ -141,3 +141,39 @@ export const incidentTransitionSchema = z
     message: 'Say how it was resolved',
     path: ['resolution'],
   });
+
+/** Shift sessions and handover (security.md §2.5 to §2.7, security-mobile.md §7.8). */
+export const startShiftSchema = z.object({ gateId: z.uuid() });
+export const endShiftSchema = z.object({
+  /** Required (rule 4); "Nothing to report" is fine. */
+  handoverNote: z.string().trim().min(3).max(4000),
+});
+export const shiftSessionSchema = z.object({
+  id: z.uuid(),
+  userId: z.uuid(),
+  gateId: z.uuid(),
+  gateName: z.string().nullable(),
+  startedAt: z.iso.datetime(),
+  endedAt: z.iso.datetime().nullable(),
+  handoverNote: z.string().nullable(),
+  endedBy: z.uuid().nullable(),
+});
+export const currentShiftQuerySchema = z.object({ gateId: z.uuid() });
+export const currentShiftSchema = z.object({
+  /** The caller's open shift in this estate, at any gate. */
+  mine: shiftSessionSchema.nullable(),
+  /** The last finished shift at this gate, with its handover note. */
+  previous: shiftSessionSchema.nullable(),
+  /** Incidents still open that the caller reported or was assigned (managers: all). */
+  openIncidents: z.number().int(),
+});
+export const shiftListQuerySchema = z.object({
+  gateId: z.uuid().optional(),
+  userId: z.uuid().optional(),
+  from: z.iso.datetime({ offset: true }).optional(),
+  to: z.iso.datetime({ offset: true }).optional(),
+  /** Only shifts still open. */
+  open: z.stringbool().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  cursor: z.string().min(1).optional(),
+});

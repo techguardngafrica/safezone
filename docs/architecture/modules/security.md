@@ -115,4 +115,15 @@ Decisions made while building, open to review:
 - Events: `security.incident.reported`, `.reviewed`, `.assigned`, `.resolved`, `.reopened`, `.closed`, `.noted`, `.evidence_added`, each audited.
 - The evidence export (PDF pack) and `linked_sos_id` input are not built yet.
 
-**Not yet built:** security personnel, gate assignments, shift templates, rosters and sessions (PIN sign-in, kiosk), attendance, handovers, security alerts, gate-device registration, incident evidence export.
+**Shift sessions (19 Nov 2026).** Table `tenant.shift_sessions` (migration `20261119130000_security_shift_sessions`) with RLS, no DELETE grant, a partial unique index allowing one open shift per guard per estate, and a check that an ended shift has a handover note. Endpoints under `/v1/estates/:estateId/shift-sessions`:
+
+| Method | Path       | Permission                               | Notes                                                                                         |
+| ------ | ---------- | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| POST   | `/start`   | `gate.verify`                            | Starting again at the same gate resumes the open shift; another gate is a 409                 |
+| GET    | `/current` | `gate.verify`                            | `?gateId=`: my open shift, the last finished shift there with its handover, my open incidents |
+| POST   | `/:id/end` | `gate.verify` or `security.staff.manage` | Handover note required (rule 4). Guards end their own; supervisors any (remote sign-out)      |
+| GET    | `/`        | `security.staff.manage`                  | Attendance: filter by gate, guard, time, open. Cursor paged                                   |
+
+Phase 1 differs from §3: shifts are keyed on `user_id` (no `security_personnel` yet) and start from the guard's own sign-in, not a PIN on a registered device. `device_id` is there for later. Events: `security.shift.started`, `security.shift.ended`, both audited.
+
+**Not yet built:** security personnel, gate assignments, shift templates and rosters, late and absent flags, PIN sign-in and kiosk sessions, security alerts, gate-device registration, incident evidence export.

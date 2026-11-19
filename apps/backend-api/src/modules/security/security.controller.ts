@@ -2,6 +2,9 @@ import { Controller, Get, HttpCode, Patch, Post } from '@nestjs/common';
 import {
   createGateSchema,
   createIncidentSchema,
+  currentShiftQuerySchema,
+  currentShiftSchema,
+  endShiftSchema,
   estateItemParamsSchema,
   estateParamSchema,
   gateSchema,
@@ -11,6 +14,9 @@ import {
   incidentNoteInputSchema,
   incidentSchema,
   incidentTransitionSchema,
+  shiftListQuerySchema,
+  shiftSessionSchema,
+  startShiftSchema,
   updateGateSchema,
 } from '@safezone/schemas';
 import { z } from 'zod';
@@ -24,6 +30,7 @@ import {
 import { Contract, ValidBody, ValidParams, ValidQuery } from '../../common/contract/contract';
 import { GatesService } from './gates.service';
 import { IncidentsService } from './incidents.service';
+import { ShiftsService } from './shifts.service';
 
 @Controller('v1/estates/:estateId/gates')
 export class SecurityController {
@@ -197,5 +204,85 @@ export class IncidentsController {
     @ValidBody() body: z.infer<typeof incidentTransitionSchema>,
   ) {
     return this.incidents.transition(estate, params.id, body);
+  }
+}
+
+@Controller('v1/estates/:estateId/shift-sessions')
+export class ShiftsController {
+  constructor(private readonly shifts: ShiftsService) {}
+
+  @Post('start')
+  @Can('gate.verify')
+  @RequiresFeature('security')
+  @HttpCode(200)
+  @Contract({
+    summary: 'Start a shift at a gate (resumes your open shift there)',
+    tags: ['security'],
+    params: estateParamSchema,
+    body: startShiftSchema,
+    response: shiftSessionSchema,
+    errors: [404, 409],
+  })
+  start(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidBody() body: z.infer<typeof startShiftSchema>,
+  ) {
+    return this.shifts.start(estate, body.gateId);
+  }
+
+  @Get('current')
+  @Can('gate.verify')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'My open shift, the last handover at this gate, and my open incidents',
+    tags: ['security'],
+    params: estateParamSchema,
+    query: currentShiftQuerySchema,
+    response: currentShiftSchema,
+    errors: [404],
+  })
+  current(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof currentShiftQuerySchema>,
+  ) {
+    return this.shifts.current(estate, query.gateId);
+  }
+
+  @Post(':id/end')
+  @Can('gate.verify', 'security.staff.manage')
+  @RequiresFeature('security')
+  @HttpCode(200)
+  @Contract({
+    summary: 'End a shift with a handover note (supervisors may end any shift)',
+    tags: ['security'],
+    params: estateItemParamsSchema,
+    body: endShiftSchema,
+    response: shiftSessionSchema,
+    errors: [404, 409],
+  })
+  end(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+    @ValidBody() body: z.infer<typeof endShiftSchema>,
+  ) {
+    return this.shifts.end(estate, params.id, body.handoverNote);
+  }
+
+  @Get()
+  @Can('security.staff.manage')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Shifts and attendance',
+    tags: ['security'],
+    params: estateParamSchema,
+    query: shiftListQuerySchema,
+    response: shiftSessionSchema,
+    paginated: true,
+  })
+  list(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof shiftListQuerySchema>,
+  ) {
+    return this.shifts.list(estate, query);
   }
 }

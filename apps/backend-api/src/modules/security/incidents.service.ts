@@ -149,6 +149,19 @@ export class IncidentsService {
     return this.detail(access, created.id);
   }
 
+  /** Open incidents the caller can see (shift start and handover, security-mobile.md §7.8). */
+  async openCount(access: EstateAccess): Promise<number> {
+    return this.db.withTenant(access, (tx) =>
+      tx.incident.count({
+        where: {
+          estateId: access.estateId,
+          status: { in: [...OPEN_INCIDENT_STATUSES] },
+          AND: [this.visibleWhere(access)],
+        },
+      }),
+    );
+  }
+
   async list(access: EstateAccess, query: z.infer<typeof incidentListQuerySchema>) {
     const after = query.cursor
       ? decodeCursor(

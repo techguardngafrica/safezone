@@ -7,12 +7,13 @@ import { OnboardingModule } from '../tenancy/onboarding/onboarding.module';
 import { IncidentsService } from './incidents.service';
 import { SetupVerifiers } from '../tenancy/onboarding/setup.service';
 import { GatesService } from './gates.service';
-import { IncidentsController, SecurityController } from './security.controller';
+import { IncidentsController, SecurityController, ShiftsController } from './security.controller';
+import { ShiftsService } from './shifts.service';
 
 @Module({
   imports: [AuthzModule, FilesModule, NotificationsModule, OnboardingModule, PropertyModule],
-  controllers: [SecurityController, IncidentsController],
-  providers: [GatesService, IncidentsService],
+  controllers: [SecurityController, IncidentsController, ShiftsController],
+  providers: [GatesService, IncidentsService, ShiftsService],
   exports: [GatesService],
 })
 export class SecurityModule implements OnModuleInit {

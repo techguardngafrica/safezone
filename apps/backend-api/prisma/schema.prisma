@@ -879,6 +879,29 @@ model Gate {
   @@schema("tenant")
 }
 
+/// A guard's shift at a gate (security.md §2.5 to §2.7). Phase 1 starts shifts from the guard's own
+/// sign-in; `device_id` and `personnel_id` arrive with gate-device registration and personnel records.
+/// Attendance is read from started_at and ended_at.
+model ShiftSession {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  gateId       String    @map("gate_id") @db.Uuid
+  deviceId     String?   @map("device_id")
+  startedAt    DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
+  endedAt      DateTime? @map("ended_at") @db.Timestamptz(3)
+  /// Required at shift end (rule 4); "Nothing to report" is fine.
+  handoverNote String?   @map("handover_note")
+  /// Who ended it: the guard, or a supervisor ending it remotely.
+  endedBy      String?   @map("ended_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, gateId, startedAt])
+  @@index([estateId, userId, startedAt])
+  @@map("shift_sessions")
+  @@schema("tenant")
+}
+
 /// Security incidents (security.md §2.8, §4). Never deleted; corrections are appended as notes.
 model Incident {
   id              String    @id @default(uuid(7)) @db.Uuid

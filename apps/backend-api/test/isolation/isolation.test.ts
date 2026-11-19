@@ -180,6 +180,37 @@ describe('cross-tenant isolation', () => {
     expect(listB.body.data.map((item: { id: string }) => item.id)).not.toContain(id);
   });
 
+  it("Estate A's shifts cannot be read or ended through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const gate = await stack.http
+      .post(`/v1/estates/${estateA}/gates`)
+      .set(auth(adminA))
+      .send({ name: 'Isolation gate', type: 'both' })
+      .expect(201);
+    const shift = await stack.http
+      .post(`/v1/estates/${estateA}/shift-sessions/start`)
+      .set(auth(adminA))
+      .send({ gateId: gate.body.data.id })
+      .expect(200);
+    await stack.http
+      .post(`/v1/estates/${estateB}/shift-sessions/${shift.body.data.id}/end`)
+      .set(auth(adminB))
+      .send({ handoverNote: 'Not mine' })
+      .expect(404);
+    await stack.http
+      .get(`/v1/estates/${estateB}/shift-sessions/current`)
+      .query({ gateId: gate.body.data.id })
+      .set(auth(adminB))
+      .expect(404);
+    const listB = await stack.http
+      .get(`/v1/estates/${estateB}/shift-sessions`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(listB.body.data.map((item: { id: string }) => item.id)).not.toContain(
+      shift.body.data.id,
+    );
+  });
+
   it('a permission snapshot for a foreign estate is empty', async () => {
     const snapshot = await stack.http
       .get('/v1/me/permissions')
