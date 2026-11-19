@@ -106,6 +106,14 @@ export default function MoreScreen() {
             onPress={() => router.push('/bookings')}
           />
         ) : null}
+        {hasFeature('visitors') ? (
+          <Row
+            title={t('res.parcels.title')}
+            subtitle={t('res.parcels.hint')}
+            icon="cube-outline"
+            onPress={() => router.push('/parcels')}
+          />
+        ) : null}
         {hasFeature('occupancy') ? (
           <Row
             title={t('res.more.moves')}

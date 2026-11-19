@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { availableWindows, checkVisitor, passValidity } from './passes';
+import { availableWindows, checkVisitor, parseGuestList, passValidity } from './passes';
 
 // 10:00 WAT on 14 Nov 2026.
 const now = Date.parse('2026-11-14T09:00:00Z');
@@ -59,5 +59,18 @@ describe('checkVisitor', () => {
     const result = checkVisitor({ name: 'A', phone: '12345', plate: 'AB' }, normalise);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(Object.keys(result.errors).sort()).toEqual(['name', 'phone', 'plate']);
+  });
+});
+
+describe('parseGuestList', () => {
+  it('splits by line or comma, trims, and drops duplicates', () => {
+    expect(parseGuestList(' Bola Ade\nchika obi, Chika Obi\n\n  Dayo  Bello ')).toEqual({
+      guests: ['Bola Ade', 'chika obi', 'Dayo Bello'],
+      invalid: [],
+    });
+  });
+
+  it('reports names that are too short', () => {
+    expect(parseGuestList('A\nBola').invalid).toEqual(['A']);
   });
 });

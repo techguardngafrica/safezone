@@ -176,6 +176,14 @@ export default function ResultScreen() {
                 />
               </>
             ) : null}
+            {pass?.type === 'event' && result.decision !== 'deny' && direction === 'in' ? (
+              <BigButton
+                label={t('sec.events.openList')}
+                tone="light"
+                icon="people-outline"
+                onPress={() => router.replace({ pathname: '/events', params: { passId: pass.id } })}
+              />
+            ) : null}
             <BigButton
               label={t('sec.result.back')}
               tone={result.decision === 'deny' || !pass ? 'light' : 'ghostLight'}

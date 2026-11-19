@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BodyText, GateTile, gateStyles, StatusBar } from '../src/components/gate-ui';
 import { Icon } from '../src/components/icon';
 import { useCurrentShift } from '../src/features/shift';
+import { useParcelsAtGate } from '../src/features/parcels';
 import { useActiveSos } from '../src/features/sos';
 import { useGate } from '../src/lib/gate';
 import { session } from '../src/lib/session';
@@ -88,6 +89,7 @@ export default function GateHome() {
   const user = sessionState.user;
   const offlineSession = sessionState.offline === true;
   const expected = useExpectedCount();
+  const parcels = useParcelsAtGate();
   const guard = user?.fullName ?? user?.phone ?? '';
 
   return (
@@ -146,6 +148,22 @@ export default function GateHome() {
             label={t('sec.home.walkin')}
             icon="person-add-outline"
             onPress={() => router.push('/walkin/new')}
+          />
+          <GateTile
+            label={t('sec.home.delivery')}
+            icon="cube-outline"
+            onPress={() => router.push('/delivery')}
+          />
+          <GateTile
+            label={t('sec.home.parcels')}
+            icon="file-tray-stacked-outline"
+            badge={parcels.data?.items.length}
+            onPress={() => router.push('/parcels')}
+          />
+          <GateTile
+            label={t('sec.home.events')}
+            icon="people-circle-outline"
+            onPress={() => router.push('/events')}
           />
           <GateTile
             label={t('sec.home.expected')}

@@ -1,79 +1,26 @@
-import { type ApiRow, unwrap, unwrapPage } from '@safezone/api-client';
+import { unwrap } from '@safezone/api-client';
 import { colors, radii, spacing, typography } from '@safezone/design-tokens';
 import { t } from '@safezone/i18n';
-import { ScrollScreen, Skeleton, TextField } from '@safezone/mobile-ui';
+import { ScrollScreen, TextField } from '@safezone/mobile-ui';
 import { normalizeNigerianPhone } from '@safezone/schemas';
-import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { BackRow, BigButton, BodyText, GateTitle } from '../../src/components/gate-ui';
+import { PickedUnit, type Unit, UnitPicker } from '../../src/components/unit-picker';
 import { errorText } from '../../src/lib/errors';
 import { useGate } from '../../src/lib/gate';
 import { api } from '../../src/lib/session';
 
-type Unit = ApiRow<'/v1/estates/{estateId}/units', 'get'>;
-
-function useDebounced(value: string, ms = 300): string {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms);
-    return () => clearTimeout(timer);
-  }, [ms, value]);
-  return debounced;
-}
-
-function UnitPicker({ onPick }: { onPick: (unit: Unit) => void }) {
-  const { estateId } = useGate();
-  const [query, setQuery] = useState('');
-  const q = useDebounced(query.trim());
-  const units = useQuery({
-    queryKey: ['estate', estateId, 'units', 'search', q],
-    queryFn: () =>
-      unwrapPage(
-        api.GET('/v1/estates/{estateId}/units', {
-          params: { path: { estateId }, query: { q, limit: 8 } },
-        }),
-      ),
-    enabled: q.length >= 1,
-  });
-  return (
-    <View style={{ gap: spacing[2] }}>
-      <TextField
-        label={t('sec.walkin.unit')}
-        value={query}
-        onChangeText={setQuery}
-        placeholder={t('sec.walkin.unitSearch')}
-        autoCapitalize="characters"
-      />
-      {units.isFetching && !units.data ? <Skeleton height={56} /> : null}
-      {units.data?.items.map((unit) => (
-        <Pressable
-          key={unit.id}
-          accessibilityRole="button"
-          accessibilityLabel={`${unit.code}, ${unit.name}`}
-          onPress={() => onPick(unit)}
-          style={({ pressed }) => [styles.unit, pressed && { opacity: 0.8 }]}
-        >
-          <Text style={styles.unitCode}>{unit.code}</Text>
-          <Text style={styles.unitName}>{unit.name}</Text>
-        </Pressable>
-      ))}
-      {units.data && units.data.items.length === 0 ? (
-        <BodyText muted>{t('sec.walkin.unitNone', { query: q })}</BodyText>
-      ) : null}
-      {units.isError ? <Text style={styles.error}>{errorText(units.error)}</Text> : null}
-    </View>
-  );
-}
-
 /** Walk-in visitor (security-mobile.md §7.3): asks the household, then waits for their answer. */
 export default function NewWalkin() {
   const { estateId, gate, sync } = useGate();
-  const [name, setName] = useState('');
+  // A delivery rider who must come in arrives here prefilled from the delivery form.
+  const prefill = useLocalSearchParams<{ name?: string; purpose?: string; plate?: string }>();
+  const [name, setName] = useState(prefill.name ?? '');
   const [phone, setPhone] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [plate, setPlate] = useState('');
+  const [purpose, setPurpose] = useState(prefill.purpose ?? '');
+  const [plate, setPlate] = useState(prefill.plate ?? '');
   const [unit, setUnit] = useState<Unit | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -142,15 +89,7 @@ export default function NewWalkin() {
         error={errors.name}
       />
       {unit ? (
-        <View style={styles.picked}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.unitCode}>{unit.code}</Text>
-            <Text style={styles.unitName}>{unit.name}</Text>
-          </View>
-          <Pressable accessibilityRole="button" onPress={() => setUnit(null)} style={styles.change}>
-            <Text style={styles.changeText}>{t('sec.walkin.unitChange')}</Text>
-          </Pressable>
-        </View>
+        <PickedUnit unit={unit} onChange={() => setUnit(null)} />
       ) : (
         <>
           <UnitPicker onPick={setUnit} />

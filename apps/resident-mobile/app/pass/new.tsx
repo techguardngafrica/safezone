@@ -20,6 +20,7 @@ import {
   type ArrivalWindow,
   availableWindows,
   checkVisitor,
+  parseGuestList,
   passValidity,
   VISITOR_FIELD_PATHS,
   type VisitorInput,
@@ -29,7 +30,7 @@ import { formErrors } from '../../src/lib/form-errors';
 import { useResident } from '../../src/lib/resident';
 import { api } from '../../src/lib/session';
 
-type PassKind = 'one_time' | 'multi_entry';
+type PassKind = 'one_time' | 'multi_entry' | 'event';
 const DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 function dayLabel(offset: number): string {
@@ -47,6 +48,10 @@ export default function NewPassScreen() {
   const [phone, setPhone] = useState('');
   const [plate, setPlate] = useState('');
   const [kind, setKind] = useState<PassKind>('one_time');
+  const [eventName, setEventName] = useState('');
+  const [guestText, setGuestText] = useState('');
+  const [eventErrors, setEventErrors] = useState<{ name?: string; guests?: string }>({});
+  const guestList = useMemo(() => parseGuestList(guestText), [guestText]);
   const [day, setDay] = useState(0);
   const [window, setWindow] = useState<ArrivalWindow>('next4');
   const [gateId, setGateId] = useState<string>('any');
@@ -72,7 +77,11 @@ export default function NewPassScreen() {
   };
 
   const create = useMutation({
-    mutationFn: (visitor: { name: string; phone?: string; vehiclePlate?: string }) => {
+    mutationFn: (
+      who:
+        | { visitor: { name: string; phone?: string; vehiclePlate?: string } }
+        | { event: { name: string; guests: string[] } },
+    ) => {
       const { validFrom, validTo } = passValidity(day, chosenWindow);
       return unwrap(
         api.POST('/v1/estates/{estateId}/visitor-invitations', {
@@ -84,7 +93,8 @@ export default function NewPassScreen() {
             validFrom,
             validTo,
             gateIds: gateId === 'any' ? undefined : [gateId],
-            visitors: [visitor],
+            // An event is one pass for the event with a guest list (visitor.md §3).
+            ...('event' in who ? { event: who.event } : { visitors: [who.visitor] }),
           },
         }),
       );
@@ -109,15 +119,30 @@ export default function NewPassScreen() {
 
   const submit = () => {
     setOtherErrors([]);
+    if (kind === 'event') {
+      const next: { name?: string; guests?: string } = {};
+      if (eventName.trim().length < 2) next.name = t('res.newPass.eventNameRequired');
+      if (guestList.invalid.length > 0)
+        next.guests = t('res.newPass.guestsInvalid', { names: guestList.invalid.join(', ') });
+      else if (guestList.guests.length === 0) next.guests = t('res.newPass.guestsRequired');
+      else if (guestList.guests.length > 300) next.guests = t('res.newPass.guestsTooMany');
+      setEventErrors(next);
+      if (next.name || next.guests) return;
+      create.mutate({ event: { name: eventName.trim(), guests: guestList.guests } });
+      return;
+    }
     const checked = checkVisitor({ name, phone, plate }, normalizeNigerianPhone);
     if (!checked.ok) {
       setErrors(checked.errors);
       return;
     }
     setErrors({});
-    create.mutate(checked.visitor);
+    create.mutate({ visitor: checked.visitor });
   };
-  const invalidCount = Object.values(errors).filter(Boolean).length + otherErrors.length;
+  const invalidCount =
+    (kind === 'event'
+      ? Object.values(eventErrors).filter(Boolean).length
+      : Object.values(errors).filter(Boolean).length) + otherErrors.length;
 
   return (
     <ScrollScreen
@@ -144,7 +169,34 @@ export default function NewPassScreen() {
         onBack={() => router.back()}
         backIcon={<Icon name="arrow-back" />}
       />
-      <Card>
+      {kind === 'event' ? (
+        <Card>
+          <TextField
+            label={t('res.newPass.eventName')}
+            placeholder={t('res.newPass.eventNamePlaceholder')}
+            value={eventName}
+            onChangeText={setEventName}
+            autoCapitalize="sentences"
+            error={eventErrors.name}
+            maxLength={120}
+          />
+          <TextField
+            label={t('res.newPass.guests')}
+            helper={
+              guestList.guests.length > 0
+                ? `${t('res.newPass.guestsCount', { count: guestList.guests.length })}. ${t('res.newPass.guestsHelp')}`
+                : t('res.newPass.guestsHelp')
+            }
+            value={guestText}
+            onChangeText={setGuestText}
+            autoCapitalize="words"
+            multiline
+            error={eventErrors.guests}
+            maxLength={20000}
+          />
+        </Card>
+      ) : null}
+      <Card style={kind === 'event' ? { display: 'none' } : undefined}>
         <TextField
           label={t('res.newPass.name')}
           value={name}
@@ -196,6 +248,7 @@ export default function NewPassScreen() {
           options={[
             { key: 'one_time', label: t('res.newPass.kind.one_time') },
             { key: 'multi_entry', label: t('res.newPass.kind.multi_entry') },
+            { key: 'event', label: t('res.newPass.kind.event') },
           ]}
         />
         {openGates.length > 1 ? (

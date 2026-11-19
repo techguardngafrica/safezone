@@ -135,3 +135,23 @@ export function checkVisitor(
     visitor: { name, ...(phone ? { phone } : {}), ...(plate ? { vehiclePlate: plate } : {}) },
   };
 }
+
+/** Event guest list typed one name per line (or comma separated): trimmed, de-duplicated, 2+ letters. */
+export function parseGuestList(raw: string): { guests: string[]; invalid: string[] } {
+  const seen = new Set<string>();
+  const guests: string[] = [];
+  const invalid: string[] = [];
+  for (const part of raw.split(/[\n,]/)) {
+    const name = part.trim().replace(/\s+/g, ' ');
+    if (!name) continue;
+    if (name.length < 2 || name.length > 120) {
+      invalid.push(name);
+      continue;
+    }
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    guests.push(name);
+  }
+  return { guests, invalid };
+}

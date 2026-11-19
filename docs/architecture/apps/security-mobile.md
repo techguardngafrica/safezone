@@ -215,6 +215,8 @@ Differences from this spec, until their APIs exist:
 - A pass picked from the expected list by name is never stronger than CHECK, because the guard has not seen its QR or PIN.
 - Offline entries the server rejects during sync leave the queue, and the home screen shows how many so the guard can tell the supervisor.
 
+- Deliveries and events (§7.4, 20 Nov 2026): **Delivery** logs a parcel left at the gate for a unit (the household is notified) or sends the rider through a prefilled walk-in; **Parcels at gate** lists what is waiting and closes each as collected (by whom) or returned. **Events today** shows event passes for this gate with guest lists; guards search a name and check the guest in once (entry recorded against the event pass). Scanning an event pass offers **Open guest list**. Logging parcels and checking guests off need a connection. Contractor passes are not built.
+
 ## 15. Acceptance highlights (Phase 1)
 
 - With the network off, a valid pass is accepted, a revoked pass (revoked before the last sync) is denied, and all entries sync correctly when the network returns.

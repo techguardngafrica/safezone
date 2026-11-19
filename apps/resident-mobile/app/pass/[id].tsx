@@ -42,6 +42,18 @@ export default function PassScreen() {
         }),
       ),
   });
+  const isEvent = pass.data?.type === 'event';
+  const guests = useQuery({
+    queryKey: ['estate', estateId, 'visitor-pass', id, 'guests'],
+    queryFn: () =>
+      unwrap(
+        api.GET('/v1/estates/{estateId}/visitor-passes/{id}/guests', {
+          params: { path: { estateId, id } },
+        }),
+      ),
+    enabled: isEvent,
+    refetchInterval: isEvent ? 60_000 : false,
+  });
   const sms = useMutation({
     mutationFn: () =>
       unwrap(
@@ -127,6 +139,30 @@ export default function PassScreen() {
               value={data.maxUses ? `${data.usesCount} / ${data.maxUses}` : String(data.usesCount)}
             />
           </Card>
+          {isEvent && guests.data ? (
+            <Card>
+              <Text accessibilityRole="header" style={styles.guestsTitle}>
+                {t('res.pass.guests')}
+              </Text>
+              <Text style={{ color: colors.semantic.textMuted }}>
+                {t('res.pass.guestsIn', {
+                  in: guests.data.filter((guest) => guest.checkedInAt).length,
+                  total: guests.data.length,
+                })}
+              </Text>
+              {guests.data.map((guest) => (
+                <Row
+                  key={guest.id}
+                  label={guest.name}
+                  value={
+                    guest.checkedInAt
+                      ? t('res.pass.guestIn', { time: formatDateTime(guest.checkedInAt) })
+                      : t('res.pass.guestWaiting')
+                  }
+                />
+              ))}
+            </Card>
+          ) : null}
           {isUpcoming(data) ? (
             <View style={{ gap: spacing[2] }}>
               <ActionButton
@@ -192,6 +228,11 @@ function Row({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   pinLabel: { fontSize: typography.size.sm, color: colors.semantic.textMuted },
+  guestsTitle: {
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
+    color: colors.semantic.text,
+  },
   pin: {
     fontSize: 32,
     fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
