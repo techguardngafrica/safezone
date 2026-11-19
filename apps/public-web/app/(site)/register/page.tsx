@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { Card, PageShell } from '@safezone/web-ui';
+import { Card } from '@safezone/web-ui';
+import { PageTitle } from '../../../src/components/site-shell';
 
 export const metadata: Metadata = { title: 'Register your estate' };
 
@@ -10,10 +11,11 @@ export const metadata: Metadata = { title: 'Register your estate' };
  */
 export default function RegisterPage() {
   return (
-    <PageShell title="Register your estate">
+    <>
+      <PageTitle title={'Register your estate'} />
       <Card>
         <p>Estate registration opens in Phase 1.</p>
       </Card>
-    </PageShell>
+    </>
   );
 }

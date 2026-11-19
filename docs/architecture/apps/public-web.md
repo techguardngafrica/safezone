@@ -144,3 +144,11 @@ apps/public-web/
 - A visitor can open their pass and show the QR at the gate on a basic smartphone over 3G.
 - An estate representative can submit a complete registration in under 10 minutes.
 - A revoked pass page stops showing the QR within 1 minute of revocation.
+
+## 14. Implementation status (20 Nov 2026)
+
+Built: a shared header and footer (`app/(site)/layout.tsx`) with legal links on every public page except the visitor pass page; `/estates`; `/help` (FAQ with structured data); `/download` (no store links until the apps are published, set in `src/site.ts`); `/status` (live checks of the API's public `/health/live` and `/health/ready`, refreshed every minute, `noindex`); `/legal/terms`, `/legal/privacy`, `/legal/cookies` and `/legal/ad-policy`; `sitemap.xml` and `robots.txt` (pass pages, account and status excluded).
+
+- Content lives as typed data in `content/` (no MDX dependency). The legal pages are **drafts written from how the product works today** and say so on the page. They need legal review, and `src/site.ts` still needs the registered company name, RC number, address and the data protection contact.
+- `/register` and `/contact` are still placeholders ("opens in Phase 1"): the self-service registration and assisted onboarding forms are not built.
+- No favicon or Apple touch icon yet (ship gate, needs a brand asset). No Playwright tests yet.

@@ -2,9 +2,10 @@
 
 import { unwrap } from '@safezone/api-client';
 import { t } from '@safezone/i18n';
-import { AccountBar, Card, PageShell, SessionGate } from '@safezone/web-ui';
+import { AccountBar, Card, SessionGate } from '@safezone/web-ui';
+import { PageTitle } from '../../../src/components/site-shell';
 import { useQuery } from '@tanstack/react-query';
-import { api, session } from '../../lib/session';
+import { api, session } from '../../../lib/session';
 
 function Profile() {
   const me = useQuery({ queryKey: ['me'], queryFn: () => unwrap(api.GET('/v1/me')) });
@@ -17,12 +18,13 @@ function Profile() {
 export function Account() {
   return (
     <SessionGate controller={session} title={t('app.name')} intro={t('public.account.signInIntro')}>
-      <PageShell title={t('public.account.title')}>
+      <>
+        <PageTitle title={t('public.account.title')} />
         <AccountBar controller={session} />
         <Card>
           <Profile />
         </Card>
-      </PageShell>
+      </>
     </SessionGate>
   );
 }

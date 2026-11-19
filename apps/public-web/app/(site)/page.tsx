@@ -1,10 +1,12 @@
 import { t } from '@safezone/i18n';
-import { Card, PageShell } from '@safezone/web-ui';
+import { Card } from '@safezone/web-ui';
+import { PageTitle } from '../../src/components/site-shell';
 import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <PageShell title={t('public.home.headline')}>
+    <>
+      <PageTitle title={t('public.home.headline')} />
       <p>{t('app.tagline')}</p>
       <div
         style={{
@@ -22,6 +24,6 @@ export default function HomePage() {
           <Link href="/contact">Talk to us</Link>
         </Card>
       </div>
-    </PageShell>
+    </>
   );
 }
