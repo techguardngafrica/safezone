@@ -10,6 +10,7 @@ import {
   gateEventInputSchema,
   gateEventListQuerySchema,
   gateEventSchema,
+  gateDeviceSyncSchema,
   gateSyncResultSchema,
   gateSyncSchema,
   insideItemSchema,
@@ -38,6 +39,7 @@ import {
 } from '../../common/auth/auth.decorators';
 import { Public } from '../../common/auth/public.decorator';
 import { Contract, ValidBody, ValidParams, ValidQuery } from '../../common/contract/contract';
+import { GateAccessService } from '../security/gate-access.service';
 import { GateService } from './gate.service';
 import { PassesService } from './passes.service';
 
@@ -416,5 +418,63 @@ export class VisitorController {
     @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
   ) {
     await this.gate.removeRestricted(estate, params.id);
+  }
+}
+
+/**
+ * Offline-signed gate events (ADR-0017 point 6): the gate device sends what guards recorded after an
+ * offline PIN sign-in, authenticated by its own credential. Events are flagged `offlineSignin`.
+ */
+@Controller('v1/gate-devices')
+export class GateDeviceSyncController {
+  constructor(
+    private readonly gate: GateService,
+    private readonly gateAccess: GateAccessService,
+  ) {}
+
+  @Post('sync')
+  @Public()
+  @HttpCode(200)
+  @Contract({
+    summary: 'Upload events recorded under an offline guard sign-in (device credential)',
+    tags: ['gate'],
+    body: gateDeviceSyncSchema,
+    response: gateSyncResultSchema,
+    errors: [401],
+  })
+  async sync(@ValidBody() body: z.infer<typeof gateDeviceSyncSchema>) {
+    const device = await this.gateAccess.verifyDevice(body.deviceCredential);
+    const guards = await this.gateAccess.guardsOf(device.estateId);
+    const result = {
+      accepted: 0,
+      duplicates: 0,
+      rejected: [] as { clientUuid: string; code: string }[],
+    };
+    const byGuard = new Map<string, typeof body.events>();
+    for (const event of body.events) {
+      // A device may only report its own gate, for guards of its own estate.
+      if (event.gateId !== device.gateId) {
+        result.rejected.push({ clientUuid: event.clientUuid, code: 'WRONG_GATE' });
+        continue;
+      }
+      if (!guards.has(event.guardUserId)) {
+        result.rejected.push({ clientUuid: event.clientUuid, code: 'GUARD_INVALID' });
+        continue;
+      }
+      byGuard.set(event.guardUserId, [...(byGuard.get(event.guardUserId) ?? []), event]);
+    }
+    for (const [guardUserId, events] of byGuard) {
+      const access = await this.gateAccess.guardAccess(device.estateId, guardUserId);
+      const part = await this.gate.sync(
+        access,
+        body.deviceNow,
+        events.map(({ guardUserId: _guard, ...event }) => ({ ...event, deviceId: device.id })),
+        { offlineSignin: true },
+      );
+      result.accepted += part.accepted;
+      result.duplicates += part.duplicates;
+      result.rejected.push(...part.rejected);
+    }
+    return result;
   }
 }

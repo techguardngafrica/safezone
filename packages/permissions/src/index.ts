@@ -340,6 +340,17 @@ export const RESIDENT_ROLE_KEYS: readonly string[] = [
 ];
 
 /** True when any of the roles is a platform role or an estate staff role. Unknown keys count as staff. */
+/**
+ * The ceiling of a guard PIN session on a shared gate device (ADR-0017): only these, and only those the
+ * guard already holds, in the device's own estate.
+ */
+export const GATE_SESSION_PERMISSIONS: readonly Permission[] = [
+  'gate.verify',
+  'incident.report',
+  'sos.trigger',
+  'sos.respond',
+];
+
 export function requiresMfa(roleKeys: readonly string[]): boolean {
   return roleKeys.some((key) => {
     const role = getRole(key);

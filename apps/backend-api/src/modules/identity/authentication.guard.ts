@@ -46,6 +46,7 @@ export class AuthenticationGuard implements CanActivate {
       sessionId: session.sessionId,
       app: session.app,
       mfaVerified: session.mfaVerified,
+      ...(session.gateScope ? { gateScope: session.gateScope } : {}),
     };
     requestContext.assign({ userId: session.userId, sessionId: session.sessionId });
     return true;

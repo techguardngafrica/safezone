@@ -95,6 +95,8 @@ create(@Body() dto, @CurrentUser() user) { ... }
 
 Extra arguments are alternatives: `@Can('billing.run.create', 'billing.run.approve')` admits a user with either, so approvers can read what they approve ([ADR-0016](../adr/0016-approvers-read-what-they-approve.md)).
 
+**Gate shift sessions** ([ADR-0017](../adr/0017-gate-devices-and-guard-pin-sessions.md)): a guard PIN session on a shared gate device reaches only its own estate (others answer 404), and only `GATE_SESSION_PERMISSIONS` from `@safezone/permissions` (`gate.verify`, `incident.report`, `sos.trigger`, `sos.respond`) that the guard already holds, whatever else their roles allow. Signed-in routes are refused unless marked `@AllowGateSession()` (profile, memberships, permission snapshot, sign-out, push token). The permission snapshot and memberships answer within the same ceiling.
+
 Client usage: `GET /v1/me/permissions?estateId=` returns a compact permission snapshot used to show/hide UI.
 
 ## 7. Business rules

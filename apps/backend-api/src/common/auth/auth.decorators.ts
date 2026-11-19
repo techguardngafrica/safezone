@@ -52,6 +52,13 @@ export const Can = (permission: Permission, ...alternatives: Permission[]): Meth
     ...(alternatives.length > 0 ? { alternatives } : {}),
   } satisfies AccessRule);
 
+export const ALLOW_GATE_SESSION_KEY = 'safezone:allow-gate-session';
+/**
+ * Lets a gate shift session (ADR-0017) call this signed-in route. Without it, gate sessions reach only
+ * estate routes of their own estate, within the gate permission ceiling.
+ */
+export const AllowGateSession = (): MethodDecorator => SetMetadata(ALLOW_GATE_SESSION_KEY, true);
+
 export const ALLOW_MFA_PENDING_KEY = 'safezone:allow-mfa-pending';
 /** Reachable before MFA is completed (MFA verify and enrolment only). */
 export const AllowMfaPending = (): MethodDecorator => SetMetadata(ALLOW_MFA_PENDING_KEY, true);
@@ -67,6 +74,8 @@ export interface AuthContext {
   sessionId: string;
   app: string;
   mfaVerified: boolean;
+  /** Guard PIN session on a gate device (ADR-0017): one estate, gate permissions only. */
+  gateScope?: { estateId: string; deviceId: string };
 }
 
 /** Set by AuthorizationGuard on estate routes. */

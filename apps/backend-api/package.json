@@ -2,7 +2,7 @@
   "name": "@safezone/backend-api",
   "version": "0.0.0",
   "private": true,
-  "description": "Safezone backend \u2014 NestJS modular monolith with API, worker and realtime entry points",
+  "description": "Safezone backend — NestJS modular monolith with API, worker and realtime entry points",
   "scripts": {
     "build": "prisma generate && nest build",
     "dev": "prisma generate && nest start --watch",
@@ -41,6 +41,7 @@
     "@nestjs/platform-express": "^12.5.0",
     "@nestjs/platform-socket.io": "^12.5.0",
     "@nestjs/websockets": "^12.5.0",
+    "@node-rs/argon2": "^2.2.2",
     "@opentelemetry/auto-instrumentations-node": "0.83.1",
     "@opentelemetry/exporter-trace-otlp-http": "0.301.2",
     "@opentelemetry/sdk-node": "0.301.2",

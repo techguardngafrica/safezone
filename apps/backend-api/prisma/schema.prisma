@@ -145,8 +145,13 @@ model Session {
   lastSeenAt    DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
   expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
   revokedAt     DateTime? @map("revoked_at") @db.Timestamptz(3)
-  /// signout | user_revoked | refresh_reuse | expired | support | phone_changed
+  /// signout | user_revoked | refresh_reuse | expired | support | phone_changed | device_revoked | pin_reset
   revokedReason String?   @map("revoked_reason")
+  /// personal | gate_shift (ADR-0017: guard PIN sign-in on a registered gate device, no refresh token)
+  kind          String    @default("personal")
+  /// gate_shift only: the device and the one estate the session may act in.
+  gateDeviceId  String?   @map("gate_device_id") @db.Uuid
+  scopeEstateId String?   @map("scope_estate_id") @db.Uuid
 
   user          User           @relation(fields: [userId], references: [id])
   device        UserDevice?    @relation(fields: [deviceId], references: [id])
@@ -879,6 +884,44 @@ model Gate {
   @@schema("tenant")
 }
 
+/// A shared gate phone registered to an estate and gate (ADR-0017). Owned by identity. The credential
+/// is shown once; only its HMAC is stored.
+model GateDevice {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  gateId         String    @map("gate_id") @db.Uuid
+  name           String
+  /// HMAC-SHA256(JWT_REFRESH_SECRET, "gate-device:v1:" + secret)
+  credentialHash String    @map("credential_hash")
+  registeredBy   String    @map("registered_by") @db.Uuid
+  /// active | revoked
+  status         String    @default("active")
+  lastSeenAt     DateTime? @map("last_seen_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  revokedAt      DateTime? @map("revoked_at") @db.Timestamptz(3)
+  revokedBy      String?   @map("revoked_by") @db.Uuid
+
+  @@index([estateId, status])
+  @@map("gate_devices")
+  @@schema("tenant")
+}
+
+/// A guard's 6-digit PIN for gate sign-in in one estate (ADR-0017). Argon2id only.
+model GuardPin {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  pinHash        String    @map("pin_hash")
+  failedAttempts Int       @default(0) @map("failed_attempts")
+  lockedAt       DateTime? @map("locked_at") @db.Timestamptz(3)
+  setAt          DateTime  @default(now()) @map("set_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, userId])
+  @@map("guard_pins")
+  @@schema("tenant")
+}
+
 /// A guard's shift at a gate (security.md §2.5 to §2.7). Phase 1 starts shifts from the guard's own
 /// sign-in; `device_id` and `personnel_id` arrive with gate-device registration and personnel records.
 /// Attendance is read from started_at and ended_at.
@@ -1083,6 +1126,8 @@ model GateEvent {
   /// Device clock differed from the server by more than 5 minutes.
   clockSkewed    Boolean  @default(false) @map("clock_skewed")
   offline        Boolean  @default(false)
+  /// Recorded under an offline PIN sign-in (ADR-0017); the guard was not checked by the server.
+  offlineSignin  Boolean  @default(false) @map("offline_signin")
 
   @@unique([estateId, clientUuid])
   @@index([estateId, occurredAt])

@@ -219,4 +219,35 @@ describe('cross-tenant isolation', () => {
       .expect(200);
     expect(snapshot.body.data).toMatchObject({ roles: [], permissions: [] });
   });
+  it("Estate A's gate devices cannot be listed or revoked through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    // A separate supervisor: registering signs them out of the device.
+    const supervisorA = await privilegedAdmin('+2348036000009', estateA);
+    const gate = await stack.http
+      .post(`/v1/estates/${estateA}/gates`)
+      .set(auth(adminA))
+      .send({ name: 'Device isolation gate', type: 'both' })
+      .expect(201);
+    const device = await stack.http
+      .post(`/v1/estates/${estateA}/gate-devices`)
+      .set(auth(supervisorA))
+      .send({ gateId: gate.body.data.id, name: 'A phone' })
+      .expect(201);
+    const id = device.body.data.device.id as string;
+    await stack.http
+      .delete(`/v1/estates/${estateB}/gate-devices/${id}`)
+      .set(auth(adminB))
+      .expect(404);
+    const listB = await stack.http
+      .get(`/v1/estates/${estateB}/gate-devices`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(listB.body.data.map((item: { id: string }) => item.id)).not.toContain(id);
+    // The credential still names Estate A only; B's guards are never listed through it.
+    const guards = await stack.http
+      .post('/v1/auth/gate/guards')
+      .send({ deviceCredential: device.body.data.credential })
+      .expect(200);
+    expect(guards.body.data.estate.id).toBe(estateA);
+  });
 });

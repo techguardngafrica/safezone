@@ -178,6 +178,15 @@ export const INTENTS = {
     title: 'notifications.security.incident_critical.title',
     body: 'notifications.security.incident_critical.body',
   },
+  'security.pin_locked': {
+    category: 'security',
+    priority: 'high',
+    mandatory: true,
+    channels: ['push'],
+    smsOnlyWithoutPush: false,
+    title: 'notifications.security.pin_locked.title',
+    body: 'notifications.security.pin_locked.body',
+  },
   'security.incident_updated': {
     category: 'security',
     priority: 'normal',

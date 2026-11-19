@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { ENV } from '../../config/config.module';
 import type { Env } from '../../config/env';
 import {
+  AllowGateSession,
   AllowMfaPending,
   type AuthContext,
   CurrentAuth,
@@ -135,6 +136,7 @@ export class AuthController {
 
   @Post('signout')
   @SignedIn()
+  @AllowGateSession()
   @AllowMfaPending()
   @HttpCode(204)
   @Contract({ summary: 'Sign out this session', tags: ['auth'], status: 204 })

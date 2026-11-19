@@ -10,6 +10,7 @@ import {
 } from '@safezone/schemas';
 import { z } from 'zod';
 import {
+  AllowGateSession,
   AllowMfaPending,
   type AuthContext,
   CurrentAuth,
@@ -31,6 +32,7 @@ export class MeController {
 
   @Get()
   @SignedIn()
+  @AllowGateSession()
   @AllowMfaPending()
   @Contract({ summary: 'My profile', tags: ['me'], response: userProfileSchema })
   profile(@CurrentAuth() auth: AuthContext) {

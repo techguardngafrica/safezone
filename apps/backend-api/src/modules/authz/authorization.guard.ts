@@ -1,10 +1,11 @@
 import { type CanActivate, type ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { requiresMfa } from '@safezone/permissions';
+import { GATE_SESSION_PERMISSIONS, requiresMfa } from '@safezone/permissions';
 import { z } from 'zod';
 import {
   ACCESS_KEY,
   type AccessRule,
+  ALLOW_GATE_SESSION_KEY,
   ALLOW_MFA_PENDING_KEY,
   type AuthenticatedRequest,
   FEATURE_KEY,
@@ -28,6 +29,8 @@ const estateIdSchema = z.uuid();
  * 4. the permission, in the estate or at platform level;
  * 5. the estate's entitlement for @RequiresFeature routes;
  * 6. suspension: only reads and safety actions in a suspended estate (tenancy.md §7.5).
+ * Gate shift sessions (ADR-0017) reach only their own estate, within GATE_SESSION_PERMISSIONS, plus
+ * signed-in routes marked @AllowGateSession.
  */
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -64,9 +67,19 @@ export class AuthorizationGuard implements CanActivate {
     if (!auth.mfaVerified && !allowMfaPending && requiresMfa(assignments.map((a) => a.roleKey))) {
       throw new ForbiddenError('Complete two-step verification to continue', 'MFA_REQUIRED');
     }
-    if (rule.kind === 'signed_in') return true;
+    const gateScope = auth.gateScope;
+    if (rule.kind === 'signed_in') {
+      if (gateScope && !this.reflector.getAllAndOverride<boolean>(ALLOW_GATE_SESSION_KEY, targets))
+        throw new ForbiddenError('Not available on a gate device', 'GATE_SESSION_SCOPE');
+      return true;
+    }
 
     const rawEstateId = request.params?.estateId;
+    if (gateScope && rawEstateId !== gateScope.estateId) {
+      if (rawEstateId === undefined)
+        throw new ForbiddenError('Not available on a gate device', 'GATE_SESSION_SCOPE');
+      throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+    }
     if (rawEstateId === undefined) {
       if (rule.kind === 'member')
         throw new Error('@Member() requires an :estateId route parameter');
@@ -89,7 +102,15 @@ export class AuthorizationGuard implements CanActivate {
     const membership = await this.tenancy.activeMembership(auth.userId, rawEstateId);
     if (!membership) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
 
-    const grant = this.authz.grantIn(assignments, rawEstateId);
+    const fullGrant = this.authz.grantIn(assignments, rawEstateId);
+    const grant = gateScope
+      ? {
+          ...fullGrant,
+          permissions: new Set(
+            GATE_SESSION_PERMISSIONS.filter((permission) => fullGrant.permissions.has(permission)),
+          ),
+        }
+      : fullGrant;
     if (rule.kind === 'permission' && !permits(rule, grant.permissions)) throw new ForbiddenError();
 
     if (

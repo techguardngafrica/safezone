@@ -8,7 +8,12 @@ import {
   registerPushTokenSchema,
 } from '@safezone/schemas';
 import { z } from 'zod';
-import { type AuthContext, CurrentAuth, SignedIn } from '../../common/auth/auth.decorators';
+import {
+  AllowGateSession,
+  type AuthContext,
+  CurrentAuth,
+  SignedIn,
+} from '../../common/auth/auth.decorators';
 import { Contract, ValidBody, ValidParams, ValidQuery } from '../../common/contract/contract';
 import { DatabaseService } from '../../common/database/database.service';
 import { DomainError, NotFoundError } from '../../common/errors/domain-error';
@@ -136,6 +141,7 @@ export class NotificationsController {
 
   @Post('push-tokens')
   @SignedIn()
+  @AllowGateSession()
   @HttpCode(200)
   @Contract({
     summary: 'Register this device for push (Expo)',

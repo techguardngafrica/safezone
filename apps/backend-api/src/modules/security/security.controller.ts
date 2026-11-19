@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Patch, Post } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Patch, Post, Put, Req } from '@nestjs/common';
 import {
   createGateSchema,
   createIncidentSchema,
@@ -7,27 +7,41 @@ import {
   endShiftSchema,
   estateItemParamsSchema,
   estateParamSchema,
+  gateDeviceRegisteredSchema,
+  gateDeviceRequestSchema,
+  gateDeviceSchema,
+  gateGuardsSchema,
   gateSchema,
+  gateSignInResultSchema,
+  gateSignInSchema,
+  guardPinStatusSchema,
   incidentDetailSchema,
   incidentEvidenceInputSchema,
   incidentListQuerySchema,
   incidentNoteInputSchema,
   incidentSchema,
   incidentTransitionSchema,
+  registerGateDeviceSchema,
+  setGuardPinSchema,
   shiftListQuerySchema,
   shiftSessionSchema,
   startShiftSchema,
   updateGateSchema,
 } from '@safezone/schemas';
 import { z } from 'zod';
+import type { Request } from 'express';
 import {
+  type AuthContext,
   Can,
+  CurrentAuth,
   CurrentEstate,
   type EstateAccess,
   Member,
   RequiresFeature,
 } from '../../common/auth/auth.decorators';
+import { Public } from '../../common/auth/public.decorator';
 import { Contract, ValidBody, ValidParams, ValidQuery } from '../../common/contract/contract';
+import { GateAccessService } from './gate-access.service';
 import { GatesService } from './gates.service';
 import { IncidentsService } from './incidents.service';
 import { ShiftsService } from './shifts.service';
@@ -284,5 +298,146 @@ export class ShiftsController {
     @ValidQuery() query: z.infer<typeof shiftListQuerySchema>,
   ) {
     return this.shifts.list(estate, query);
+  }
+}
+
+@Controller('v1/estates/:estateId')
+export class GateDevicesController {
+  constructor(private readonly access: GateAccessService) {}
+
+  @Post('gate-devices')
+  @Can('gate.device.manage')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Register this phone as a gate device (signs the supervisor out of it)',
+    tags: ['security'],
+    params: estateParamSchema,
+    body: registerGateDeviceSchema,
+    response: gateDeviceRegisteredSchema,
+    status: 201,
+    errors: [403, 404],
+  })
+  register(
+    @CurrentEstate() estate: EstateAccess,
+    @CurrentAuth() auth: AuthContext,
+    @ValidBody() body: z.infer<typeof registerGateDeviceSchema>,
+  ) {
+    return this.access.register(estate, auth, body);
+  }
+
+  @Get('gate-devices')
+  @Can('gate.device.manage')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Gate devices',
+    tags: ['security'],
+    params: estateParamSchema,
+    response: z.array(gateDeviceSchema),
+  })
+  devices(@CurrentEstate() estate: EstateAccess) {
+    return this.access.list(estate);
+  }
+
+  @Delete('gate-devices/:id')
+  @Can('gate.device.manage')
+  @RequiresFeature('security')
+  @HttpCode(204)
+  @Contract({
+    summary: 'Deregister a gate device (ends every shift session on it)',
+    tags: ['security'],
+    params: estateItemParamsSchema,
+    errors: [404],
+  })
+  async deregister(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+  ) {
+    await this.access.revoke(estate, params.id);
+  }
+
+  @Get('me/guard-pin')
+  @Can('gate.verify')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Whether I have a gate PIN here',
+    tags: ['security'],
+    params: estateParamSchema,
+    response: guardPinStatusSchema,
+  })
+  pinStatus(@CurrentEstate() estate: EstateAccess) {
+    return this.access.pinStatus(estate);
+  }
+
+  @Put('me/guard-pin')
+  @Can('gate.verify')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Set my 6-digit gate PIN (from a full sign-in only)',
+    tags: ['security'],
+    params: estateParamSchema,
+    body: setGuardPinSchema,
+    response: guardPinStatusSchema,
+    errors: [403, 422],
+  })
+  setPin(
+    @CurrentEstate() estate: EstateAccess,
+    @CurrentAuth() auth: AuthContext,
+    @ValidBody() body: z.infer<typeof setGuardPinSchema>,
+  ) {
+    return this.access.setPin(estate, auth, body.pin);
+  }
+
+  @Post('guards/:id/pin-reset')
+  @Can('security.staff.manage')
+  @RequiresFeature('security')
+  @HttpCode(204)
+  @Contract({
+    summary: "Reset a guard's PIN (locked or forgotten); ends their gate sessions",
+    tags: ['security'],
+    params: estateItemParamsSchema,
+    errors: [404],
+  })
+  async resetPin(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+  ) {
+    await this.access.resetPin(estate, params.id);
+  }
+}
+
+/** Device-authenticated gate sign-in (ADR-0017). The device credential travels in the body, never a URL. */
+@Controller('v1/auth/gate')
+export class GateAuthController {
+  constructor(private readonly access: GateAccessService) {}
+
+  @Post('guards')
+  @Public()
+  @HttpCode(200)
+  @Contract({
+    summary: 'Guards who can sign in on this gate device',
+    tags: ['auth'],
+    body: gateDeviceRequestSchema,
+    response: gateGuardsSchema,
+    errors: [401],
+  })
+  guards(@ValidBody() body: z.infer<typeof gateDeviceRequestSchema>) {
+    return this.access.guards(body.deviceCredential);
+  }
+
+  @Post('signin')
+  @Public()
+  @HttpCode(200)
+  @Contract({
+    summary: 'Guard PIN sign-in on a gate device; starts the shift',
+    tags: ['auth'],
+    body: gateSignInSchema,
+    response: gateSignInResultSchema,
+    errors: [401, 422, 429],
+  })
+  signIn(@ValidBody() body: z.infer<typeof gateSignInSchema>, @Req() request: Request) {
+    return this.access.signIn(body, {
+      ...(request.ip ? { ip: request.ip } : {}),
+      ...(request.header('user-agent') ? { userAgent: request.header('user-agent') } : {}),
+    });
   }
 }

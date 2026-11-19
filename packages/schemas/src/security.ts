@@ -177,3 +177,80 @@ export const shiftListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).default(50),
   cursor: z.string().min(1).optional(),
 });
+
+/** Gate devices and guard PIN sign-in (ADR-0017). */
+export const deviceCredentialSchema = z.string().min(40).max(200);
+export const guardPinSchema = z.string().regex(/^\d{6}$/, 'Use 6 digits');
+
+export const registerGateDeviceSchema = z.object({
+  gateId: z.uuid(),
+  name: z.string().trim().min(2).max(60),
+});
+export const gateDeviceSchema = z.object({
+  id: z.uuid(),
+  gateId: z.uuid(),
+  gateName: z.string().nullable(),
+  name: z.string(),
+  status: z.enum(['active', 'revoked']),
+  registeredBy: z.uuid(),
+  lastSeenAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  revokedAt: z.iso.datetime().nullable(),
+});
+export const gateDeviceRegisteredSchema = z.object({
+  device: gateDeviceSchema,
+  /** Shown once. Store it in the device keychain; the server keeps only its HMAC. */
+  credential: z.string(),
+});
+
+export const setGuardPinSchema = z.object({ pin: guardPinSchema });
+export const guardPinStatusSchema = z.object({ pinSet: z.boolean(), locked: z.boolean() });
+
+export const gateDeviceRequestSchema = z.object({ deviceCredential: deviceCredentialSchema });
+export const gateGuardsSchema = z.object({
+  estate: z.object({ id: z.uuid(), name: z.string() }),
+  gate: z.object({ id: z.uuid(), name: z.string() }),
+  device: z.object({ id: z.uuid(), name: z.string() }),
+  /** First name and last initial only (AGENTS.md §6.5). */
+  guards: z.array(
+    z.object({
+      userId: z.uuid(),
+      displayName: z.string(),
+      pinSet: z.boolean(),
+      locked: z.boolean(),
+      /** When the PIN was last set, so the device can drop offline verifiers made before it. */
+      pinSetAt: z.iso.datetime().nullable(),
+    }),
+  ),
+});
+
+export const gateSignInSchema = z.object({
+  deviceCredential: deviceCredentialSchema,
+  userId: z.uuid(),
+  pin: guardPinSchema,
+  platform: z.enum(['android', 'ios']),
+  appVersion: z.string().min(1).max(40),
+});
+export const gateSignInResultSchema = z.object({
+  accessToken: z.string(),
+  accessTokenExpiresAt: z.iso.datetime(),
+  refreshToken: z.string(),
+  mfaRequired: z.literal(false),
+  mfaEnrolled: z.boolean(),
+  isNewUser: z.literal(false),
+  user: z.object({
+    id: z.uuid(),
+    /** Masked: a shared device never shows a guard's full number. */
+    phone: z.string(),
+    fullName: z.string().nullable(),
+    mfaEnabled: z.boolean(),
+  }),
+  /** The session ends here whatever happens (12 hours). */
+  sessionExpiresAt: z.iso.datetime(),
+  estateId: z.uuid(),
+  gateId: z.uuid(),
+  deviceId: z.uuid(),
+  /** Null when the guard still has a shift open at another gate. */
+  shiftId: z.uuid().nullable(),
+  pinSetAt: z.iso.datetime(),
+});

@@ -5,8 +5,14 @@ import {
   permissionSnapshotQuerySchema,
   permissionSnapshotSchema,
 } from '@safezone/schemas';
+import { GATE_SESSION_PERMISSIONS } from '@safezone/permissions';
 import { z } from 'zod';
-import { type AuthContext, CurrentAuth, SignedIn } from '../../common/auth/auth.decorators';
+import {
+  AllowGateSession,
+  type AuthContext,
+  CurrentAuth,
+  SignedIn,
+} from '../../common/auth/auth.decorators';
 import { Contract, ValidQuery } from '../../common/contract/contract';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { AuthzService } from './authz.service';
@@ -24,6 +30,7 @@ export class AccessController {
 
   @Get('me/memberships')
   @SignedIn()
+  @AllowGateSession()
   @Contract({
     summary: 'My estates and roles',
     tags: ['me'],
@@ -34,16 +41,22 @@ export class AccessController {
       this.tenancy.membershipsOf(auth.userId),
       this.authz.activeAssignments(auth.userId),
     ]);
-    return memberships.map(({ membership, estate }) => ({
-      estate,
-      status: membership.status,
-      roles: this.authz.grantIn(assignments, estate.id).roles,
-      joinedAt: membership.joinedAt.toISOString(),
-    }));
+    return (
+      memberships
+        // A gate session lists only the estate of its device (ADR-0017).
+        .filter(({ estate }) => !auth.gateScope || estate.id === auth.gateScope.estateId)
+        .map(({ membership, estate }) => ({
+          estate,
+          status: membership.status,
+          roles: this.authz.grantIn(assignments, estate.id).roles,
+          joinedAt: membership.joinedAt.toISOString(),
+        }))
+    );
   }
 
   @Get('me/permissions')
   @SignedIn()
+  @AllowGateSession()
   @Contract({
     summary: 'Permission snapshot for showing and hiding UI',
     tags: ['me'],
@@ -56,13 +69,19 @@ export class AccessController {
   ) {
     const assignments = await this.authz.activeAssignments(auth.userId);
     const estateId = query.estateId ?? null;
+    // A gate session sees only its own estate and its ceiling (ADR-0017).
+    if (auth.gateScope && estateId !== auth.gateScope.estateId)
+      return { estateId, roles: [], permissions: [], features: [] };
     if (estateId) {
       const membership = await this.tenancy.activeMembership(auth.userId, estateId);
       if (!membership) return { estateId, roles: [], permissions: [], features: [] };
     }
     const grant = this.authz.grantIn(assignments, estateId);
+    const permissions = auth.gateScope
+      ? GATE_SESSION_PERMISSIONS.filter((permission) => grant.permissions.has(permission))
+      : [...grant.permissions];
     const features = estateId ? await this.tenancy.enabledFeatures(estateId) : [];
-    return { estateId, roles: grant.roles, permissions: [...grant.permissions].sort(), features };
+    return { estateId, roles: grant.roles, permissions: permissions.sort(), features };
   }
 
   @Get('permissions/catalogue')

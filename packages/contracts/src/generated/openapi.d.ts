@@ -44,6 +44,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/auth/gate/guards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Guards who can sign in on this gate device
+     * @description Public.
+     */
+    post: operations['gateAuth_guards'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/gate/signin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Guard PIN sign-in on a gate device; starts the shift
+     * @description Public.
+     */
+    post: operations['gateAuth_signIn'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/mfa/verify': {
     parameters: {
       query?: never;
@@ -1324,6 +1364,50 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/gate-devices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Gate devices
+     * @description Requires `gate.device.manage`. Needs the `security` feature.
+     */
+    get: operations['gateDevices_devices'];
+    put?: never;
+    /**
+     * Register this phone as a gate device (signs the supervisor out of it)
+     * @description Requires `gate.device.manage`. Needs the `security` feature.
+     */
+    post: operations['gateDevices_register'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/gate-devices/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Deregister a gate device (ends every shift session on it)
+     * @description Requires `gate.device.manage`. Needs the `security` feature.
+     */
+    delete: operations['gateDevices_deregister'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/gate/events': {
     parameters: {
       query?: never;
@@ -1510,6 +1594,26 @@ export interface paths {
      * @description Requires `security.staff.manage`. Needs the `security` feature.
      */
     patch: operations['security_update'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/guards/{id}/pin-reset': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset a guard's PIN (locked or forgotten); ends their gate sessions
+     * @description Requires `security.staff.manage`. Needs the `security` feature.
+     */
+    post: operations['gateDevices_resetPin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/estates/{estateId}/household-members/{id}': {
@@ -2350,6 +2454,30 @@ export interface paths {
      * @description Requires `billing.run.approve`. Needs the `payments` feature.
      */
     post: operations['payments_rejectManual'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/me/guard-pin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Whether I have a gate PIN here
+     * @description Requires `gate.verify`. Needs the `security` feature.
+     */
+    get: operations['gateDevices_pinStatus'];
+    /**
+     * Set my 6-digit gate PIN (from a full sign-in only)
+     * @description Requires `gate.verify`. Needs the `security` feature.
+     */
+    put: operations['gateDevices_setPin'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -4276,6 +4404,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/gate-devices/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Upload events recorded under an offline guard sign-in (device credential)
+     * @description Public.
+     */
+    post: operations['gateDeviceSync_sync'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/invitations/{token}/accept': {
     parameters: {
       query?: never;
@@ -5574,6 +5722,132 @@ export interface operations {
       400: components['responses']['Error400'];
       500: components['responses']['Error500'];
       503: components['responses']['Error503'];
+    };
+  };
+  gateAuth_guards: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          deviceCredential: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              estate: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+              };
+              gate: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+              };
+              device: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+              };
+              guards: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string;
+                pinSet: boolean;
+                locked: boolean;
+                pinSetAt: string | null;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateAuth_signIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          deviceCredential: string;
+          /** Format: uuid */
+          userId: string;
+          pin: string;
+          /** @enum {string} */
+          platform: 'android' | 'ios';
+          appVersion: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              accessToken: string;
+              /** Format: date-time */
+              accessTokenExpiresAt: string;
+              refreshToken: string;
+              /** @constant */
+              mfaRequired: false;
+              mfaEnrolled: boolean;
+              /** @constant */
+              isNewUser: false;
+              user: {
+                /** Format: uuid */
+                id: string;
+                phone: string;
+                fullName: string | null;
+                mfaEnabled: boolean;
+              };
+              /** Format: date-time */
+              sessionExpiresAt: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              gateId: string;
+              /** Format: uuid */
+              deviceId: string;
+              shiftId: string | null;
+              /** Format: date-time */
+              pinSetAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      422: components['responses']['Error422'];
+      429: components['responses']['Error429'];
+      500: components['responses']['Error500'];
     };
   };
   auth_verifyMfa: {
@@ -10864,6 +11138,135 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  gateDevices_devices: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              gateId: string;
+              gateName: string | null;
+              name: string;
+              /** @enum {string} */
+              status: 'active' | 'revoked';
+              /** Format: uuid */
+              registeredBy: string;
+              lastSeenAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              revokedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDevices_register: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          gateId: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              device: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                gateId: string;
+                gateName: string | null;
+                name: string;
+                /** @enum {string} */
+                status: 'active' | 'revoked';
+                /** Format: uuid */
+                registeredBy: string;
+                lastSeenAt: string | null;
+                /** Format: date-time */
+                createdAt: string;
+                revokedAt: string | null;
+              };
+              credential: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDevices_deregister: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   visitor_log: {
     parameters: {
       query?: {
@@ -10911,6 +11314,7 @@ export interface operations {
               occurredAt: string;
               clockSkewed: boolean;
               offline: boolean;
+              offlineSignin: boolean;
               created: boolean;
             }[];
             meta?: components['schemas']['PageMeta'];
@@ -10987,6 +11391,7 @@ export interface operations {
               occurredAt: string;
               clockSkewed: boolean;
               offline: boolean;
+              offlineSignin: boolean;
               created: boolean;
             };
           };
@@ -11445,6 +11850,32 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDevices_resetPin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -15289,6 +15720,81 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDevices_pinStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              pinSet: boolean;
+              locked: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDevices_setPin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          pin: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              pinSet: boolean;
+              locked: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
   };
@@ -22249,6 +22755,71 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDeviceSync_sync: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          deviceCredential: string;
+          /** Format: date-time */
+          deviceNow: string;
+          events: {
+            /** Format: uuid */
+            clientUuid: string;
+            /** Format: uuid */
+            gateId: string;
+            /** @enum {string} */
+            direction: 'in' | 'out';
+            /** Format: uuid */
+            passId?: string;
+            /** Format: uuid */
+            walkinId?: string;
+            visitorName?: string;
+            vehiclePlate?: string;
+            /** @enum {string} */
+            decision: 'allow' | 'check' | 'deny' | 'override';
+            reason?: string;
+            deviceId?: string;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            guardUserId: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              accepted: number;
+              duplicates: number;
+              rejected: {
+                /** Format: uuid */
+                clientUuid: string;
+                code: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
       500: components['responses']['Error500'];
     };
   };

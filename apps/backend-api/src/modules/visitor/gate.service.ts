@@ -44,6 +44,7 @@ function toEvent(row: GateEventRow, created: boolean) {
     occurredAt: row.occurredAt.toISOString(),
     clockSkewed: row.clockSkewed,
     offline: row.offline,
+    offlineSignin: row.offlineSignin,
     created,
   };
 }
@@ -141,6 +142,7 @@ export class GateService {
     access: EstateAccess,
     deviceNow: string,
     events: z.infer<typeof gateEventInputSchema>[],
+    options: { offlineSignin?: boolean } = {},
   ) {
     const skewed = Math.abs(new Date(deviceNow).getTime() - Date.now()) > CLOCK_SKEW_MS;
     let accepted = 0;
@@ -149,7 +151,11 @@ export class GateService {
     for (const event of events) {
       try {
         const result = await this.db.withTenant(access, (tx) =>
-          this.insertEvent(tx, access, event, { offline: true, skewed }),
+          this.insertEvent(tx, access, event, {
+            offline: true,
+            skewed,
+            offlineSignin: options.offlineSignin ?? false,
+          }),
         );
         if (result.created) accepted += 1;
         else duplicates += 1;
@@ -515,7 +521,7 @@ export class GateService {
     tx: Tx,
     access: EstateAccess,
     input: z.infer<typeof gateEventInputSchema>,
-    flags: { offline: boolean; skewed: boolean },
+    flags: { offline: boolean; skewed: boolean; offlineSignin?: boolean },
   ) {
     const existing = await tx.gateEvent.findUnique({
       where: { estateId_clientUuid: { estateId: access.estateId, clientUuid: input.clientUuid } },
@@ -575,6 +581,7 @@ export class GateService {
         occurredAt: new Date(input.occurredAt),
         clockSkewed: flags.skewed,
         offline: flags.offline,
+        offlineSignin: flags.offlineSignin ?? false,
       },
     });
 

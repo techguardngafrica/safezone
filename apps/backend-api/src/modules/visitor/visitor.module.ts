@@ -11,11 +11,15 @@ import { TenancyModule } from '../tenancy/tenancy.module';
 import { GateService } from './gate.service';
 import { PassKeysService } from './pass-keys.service';
 import { PassesService } from './passes.service';
-import { PublicPassController, VisitorController } from './visitor.controller';
+import {
+  PublicPassController,
+  VisitorController,
+  GateDeviceSyncController,
+} from './visitor.controller';
 
 @Module({
   imports: [TenancyModule, PropertyModule, OccupancyModule, SecurityModule, NotificationsModule],
-  controllers: [PublicPassController, VisitorController],
+  controllers: [PublicPassController, VisitorController, GateDeviceSyncController],
   providers: [
     PassKeysService,
     PassesService,

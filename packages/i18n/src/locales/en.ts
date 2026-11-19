@@ -123,6 +123,9 @@ export const en = {
 
   'notifications.security.incident_critical.title': 'Critical incident reported',
   'notifications.security.incident_critical.body': '{title}. Please review it now.',
+  'notifications.security.pin_locked.title': 'Guard PIN locked',
+  'notifications.security.pin_locked.body':
+    'A guard entered a wrong PIN too many times on {deviceName}. Reset their PIN to let them sign in.',
   'notifications.security.incident_updated.title': 'Incident update',
   'notifications.security.incident_updated.body': '{title}: {status}',
   'notifications.maintenance.request_urgent.title': 'Urgent request {number}',

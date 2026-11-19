@@ -126,4 +126,17 @@ Decisions made while building, open to review:
 
 Phase 1 differs from §3: shifts are keyed on `user_id` (no `security_personnel` yet) and start from the guard's own sign-in, not a PIN on a registered device. `device_id` is there for later. Events: `security.shift.started`, `security.shift.ended`, both audited.
 
-**Not yet built:** security personnel, gate assignments, shift templates and rosters, late and absent flags, PIN sign-in and kiosk sessions, security alerts, gate-device registration, incident evidence export.
+**Gate devices and guard PINs (19 Nov 2026, [ADR-0017](../adr/0017-gate-devices-and-guard-pin-sessions.md)).** Tables `tenant.gate_devices` and `tenant.guard_pins` (migration `20261119140000_gate_devices_and_guard_pins`), RLS on, devices revoked never deleted. Endpoints:
+
+| Method  | Path                                         | Access                  | Notes                                                                                                                        |
+| ------- | -------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| POST    | `/v1/estates/:estateId/gate-devices`         | `gate.device.manage`    | Returns the device credential once; signs the supervisor out of that phone                                                   |
+| GET     | `/v1/estates/:estateId/gate-devices`         | `gate.device.manage`    | List with last seen                                                                                                          |
+| DELETE  | `/v1/estates/:estateId/gate-devices/:id`     | `gate.device.manage`    | Revokes the credential and every gate session on it                                                                          |
+| GET/PUT | `/v1/estates/:estateId/me/guard-pin`         | `gate.verify`           | Set my 6-digit PIN (Argon2id) from a full sign-in only; easy PINs refused                                                    |
+| POST    | `/v1/estates/:estateId/guards/:id/pin-reset` | `security.staff.manage` | Clears the PIN and ends that guard's gate sessions                                                                           |
+| POST    | `/v1/auth/gate/guards`                       | device credential       | Guards of the estate: first name and last initial, PIN set or locked                                                         |
+| POST    | `/v1/auth/gate/signin`                       | device credential + PIN | Scoped 12-hour gate session and shift start; 5 wrong PINs lock (supervisors notified); 20 attempts per device per 10 minutes |
+| POST    | `/v1/gate-devices/sync`                      | device credential       | Events recorded under an offline PIN sign-in, flagged `offline_signin`, own gate and estate guards only                      |
+
+**Not yet built:** security personnel, gate assignments, shift templates and rosters, late and absent flags, security alerts, incident evidence export, the management web pages for devices and PIN reset.

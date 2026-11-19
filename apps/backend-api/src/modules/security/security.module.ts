@@ -7,14 +7,44 @@ import { OnboardingModule } from '../tenancy/onboarding/onboarding.module';
 import { IncidentsService } from './incidents.service';
 import { SetupVerifiers } from '../tenancy/onboarding/setup.service';
 import { GatesService } from './gates.service';
-import { IncidentsController, SecurityController, ShiftsController } from './security.controller';
+import { RateLimiter, RedisRateLimiter } from '../../common/rate-limit/rate-limiter';
+import { IdentityModule } from '../identity/identity.module';
+import { TenancyModule } from '../tenancy/tenancy.module';
+import { GateAccessService } from './gate-access.service';
+import {
+  GateAuthController,
+  GateDevicesController,
+  IncidentsController,
+  SecurityController,
+  ShiftsController,
+} from './security.controller';
 import { ShiftsService } from './shifts.service';
 
 @Module({
-  imports: [AuthzModule, FilesModule, NotificationsModule, OnboardingModule, PropertyModule],
-  controllers: [SecurityController, IncidentsController, ShiftsController],
-  providers: [GatesService, IncidentsService, ShiftsService],
-  exports: [GatesService],
+  imports: [
+    AuthzModule,
+    FilesModule,
+    IdentityModule,
+    NotificationsModule,
+    OnboardingModule,
+    PropertyModule,
+    TenancyModule,
+  ],
+  controllers: [
+    SecurityController,
+    IncidentsController,
+    ShiftsController,
+    GateDevicesController,
+    GateAuthController,
+  ],
+  providers: [
+    GatesService,
+    IncidentsService,
+    ShiftsService,
+    GateAccessService,
+    { provide: RateLimiter, useClass: RedisRateLimiter },
+  ],
+  exports: [GatesService, GateAccessService],
 })
 export class SecurityModule implements OnModuleInit {
   constructor(

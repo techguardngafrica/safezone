@@ -183,6 +183,8 @@ export const gateEventSchema = z.object({
   occurredAt: z.iso.datetime(),
   clockSkewed: z.boolean(),
   offline: z.boolean(),
+  /** Recorded under an offline guard PIN sign-in; the server never checked the guard (ADR-0017). */
+  offlineSignin: z.boolean(),
   /** False when this client_uuid was already recorded (idempotent replay). */
   created: z.boolean(),
 });
@@ -190,6 +192,18 @@ export const gateSyncSchema = z.object({
   /** The device clock when it sent the batch; events are flagged when it is off by more than 5 minutes. */
   deviceNow: z.iso.datetime({ offset: true }),
   events: z.array(gateEventInputSchema).min(1).max(500),
+});
+/**
+ * Events recorded under an offline guard PIN sign-in (ADR-0017), sent by the gate device with its own
+ * credential. Each names the guard who signed in on the device; the server never checked that PIN.
+ */
+export const gateDeviceSyncSchema = z.object({
+  deviceCredential: z.string().min(40).max(200),
+  deviceNow: z.iso.datetime({ offset: true }),
+  events: z
+    .array(gateEventInputSchema.extend({ guardUserId: z.uuid() }))
+    .min(1)
+    .max(500),
 });
 export const gateSyncResultSchema = z.object({
   accepted: z.number().int(),
