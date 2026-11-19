@@ -125,6 +125,13 @@ export default function GateHome() {
             icon="car-outline"
             onPress={() => router.push('/vehicle')}
           />
+          {can('incident.report') || can('incident.manage') ? (
+            <GateTile
+              label={t('sec.home.incident')}
+              icon="document-text-outline"
+              onPress={() => router.push('/incidents')}
+            />
+          ) : null}
           {can('sos.respond') ? (
             <GateTile
               label={t('sec.home.sos')}

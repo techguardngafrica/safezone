@@ -206,7 +206,8 @@ Built: gate home, QR scan and PIN check (online, with the offline signed-pass fa
 Differences from this spec, until their APIs exist:
 
 - Sign-in is phone + OTP (+ MFA) per person, not device registration plus guard PIN (§4). Idle auto-lock (§10) waits for the PIN sign-in.
-- Incidents (§7.7) and shifts and handover (§7.8) have no screens yet.
+- Incidents (§7.7) are built: report with category, severity, place (this gate, a unit, a common area or elsewhere), time, people involved and up to 10 camera photos as evidence; my incidents list; detail with photo fingerprints (SHA-256), timeline, notes and more photos. Reporting needs a connection; incidents are not in the offline sync queue yet.
+- Shifts and handover (§7.8) have no screens yet.
 - **Request backup** and **Call resident** are not offered on the SOS screen: there is no backup endpoint, and guards do not get the resident's number. Emergency contacts on the alert can be called.
 - A pass picked from the expected list by name is never stronger than CHECK, because the guard has not seen its QR or PIN.
 - Offline entries the server rejects during sync leave the queue, and the home screen shows how many so the guard can tell the supervisor.
