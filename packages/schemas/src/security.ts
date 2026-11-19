@@ -254,3 +254,23 @@ export const gateSignInResultSchema = z.object({
   shiftId: z.uuid().nullable(),
   pinSetAt: z.iso.datetime(),
 });
+
+/** Supervisor view of the estate's guards (security.md §2.2, ADR-0017). */
+export const guardRosterItemSchema = z.object({
+  userId: z.uuid(),
+  fullName: z.string().nullable(),
+  /** Masked unless the viewer holds pii.view. */
+  phone: z.string(),
+  roles: z.array(z.string()),
+  pinSet: z.boolean(),
+  locked: z.boolean(),
+  pinSetAt: z.iso.datetime().nullable(),
+  openShift: z
+    .object({
+      id: z.uuid(),
+      gateId: z.uuid(),
+      gateName: z.string().nullable(),
+      startedAt: z.iso.datetime(),
+    })
+    .nullable(),
+});

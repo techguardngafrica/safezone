@@ -190,6 +190,21 @@ describe('gate devices and guard PIN sign-in (ADR-0017)', () => {
     await stack.http.get(url('/gate-devices')).set(as(signed.body.data.accessToken)).expect(403);
   });
 
+  it('shows supervisors the guard roster with PIN status and open shifts', async () => {
+    await stack.http.get(url('/guards')).set(as(guard.token)).expect(403);
+    const roster = await stack.http.get(url('/guards')).set(as(supervisor.token)).expect(200);
+    const musa = roster.body.data.find((row: { userId: string }) => row.userId === guard.userId);
+    expect(musa).toMatchObject({
+      fullName: 'Musa Bello',
+      roles: ['security_officer'],
+      pinSet: true,
+      locked: false,
+      openShift: { gateId, gateName: 'Main gate' },
+    });
+    // Supervisors without pii.view see masked numbers.
+    expect(musa.phone).toContain('****');
+  });
+
   it('never extends a gate session on refresh', async () => {
     const before = await stack.db.owner.query<{ expires_at: Date }>(
       `select expires_at from platform.sessions where kind = 'gate_shift' and user_id = $1 and revoked_at is null`,

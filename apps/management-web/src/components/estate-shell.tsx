@@ -95,6 +95,20 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         permission: 'visitor.log.read',
         feature: 'visitors',
       },
+      {
+        path: 'security/guards',
+        label: 'nav.guards',
+        icon: 'shield',
+        permission: 'security.staff.manage',
+        feature: 'security',
+      },
+      {
+        path: 'security/devices',
+        label: 'nav.gateDevices',
+        icon: 'smartphone',
+        permission: 'gate.device.manage',
+        feature: 'security',
+      },
     ],
   },
   {

@@ -1596,6 +1596,26 @@ export interface paths {
     patch: operations['security_update'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/guards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Guards with PIN status and open shifts
+     * @description Requires `security.staff.manage`. Needs the `security` feature.
+     */
+    get: operations['gateDevices_guards'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/guards/{id}/pin-reset': {
     parameters: {
       query?: never;
@@ -11850,6 +11870,55 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  gateDevices_guards: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              fullName: string | null;
+              phone: string;
+              roles: string[];
+              pinSet: boolean;
+              locked: boolean;
+              pinSetAt: string | null;
+              openShift: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                gateId: string;
+                gateName: string | null;
+                /** Format: date-time */
+                startedAt: string;
+              } | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };

@@ -200,6 +200,59 @@ export class GateAccessService {
     await this.sessions.revokeGateSessions({ userId, estateId: access.estateId }, 'pin_reset');
   }
 
+  /** Supervisors: every guard with PIN status and any open shift. */
+  async roster(access: EstateAccess) {
+    const ids = await this.guardIds(access.estateId);
+    const [contacts, assignments, rows] = await Promise.all([
+      this.users.contactsOf(ids),
+      Promise.all(ids.map((id) => this.authz.activeAssignments(id))),
+      this.db.withTenant(access, async (tx) => {
+        const [pins, shifts] = await Promise.all([
+          tx.guardPin.findMany({ where: { estateId: access.estateId, userId: { in: ids } } }),
+          tx.shiftSession.findMany({
+            where: { estateId: access.estateId, userId: { in: ids }, endedAt: null },
+          }),
+        ]);
+        const gates = await tx.gate.findMany({
+          where: { estateId: access.estateId, id: { in: shifts.map((shift) => shift.gateId) } },
+          select: { id: true, name: true },
+        });
+        return { pins, shifts, gates };
+      }),
+    ]);
+    const pinOf = new Map(rows.pins.map((pin) => [pin.userId, pin]));
+    const shiftOf = new Map(rows.shifts.map((shift) => [shift.userId, shift]));
+    const gateName = new Map(rows.gates.map((gate) => [gate.id, gate.name]));
+    const seesPhones = access.permissions.has('pii.view');
+    return ids
+      .map((userId, index) => {
+        const contact = contacts.get(userId);
+        const pin = pinOf.get(userId);
+        const shift = shiftOf.get(userId);
+        const roles = this.authz
+          .grantIn(assignments[index] ?? [], access.estateId)
+          .roles.filter((role) => GUARD_ROLE_KEYS.includes(role));
+        return {
+          userId,
+          fullName: contact?.fullName ?? null,
+          phone: contact ? (seesPhones ? contact.phone : maskPhone(contact.phone)) : '',
+          roles,
+          pinSet: Boolean(pin),
+          locked: Boolean(pin?.lockedAt),
+          pinSetAt: pin?.setAt.toISOString() ?? null,
+          openShift: shift
+            ? {
+                id: shift.id,
+                gateId: shift.gateId,
+                gateName: gateName.get(shift.gateId) ?? null,
+                startedAt: shift.startedAt.toISOString(),
+              }
+            : null,
+        };
+      })
+      .sort((a, b) => (a.fullName ?? a.phone).localeCompare(b.fullName ?? b.phone));
+  }
+
   // ---- Device-authenticated calls -------------------------------------------------------------
 
   /** The device behind a credential, or 401. Constant-time on the secret. */

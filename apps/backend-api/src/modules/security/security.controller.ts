@@ -15,6 +15,7 @@ import {
   gateSignInResultSchema,
   gateSignInSchema,
   guardPinStatusSchema,
+  guardRosterItemSchema,
   incidentDetailSchema,
   incidentEvidenceInputSchema,
   incidentListQuerySchema,
@@ -385,6 +386,19 @@ export class GateDevicesController {
     @ValidBody() body: z.infer<typeof setGuardPinSchema>,
   ) {
     return this.access.setPin(estate, auth, body.pin);
+  }
+
+  @Get('guards')
+  @Can('security.staff.manage')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Guards with PIN status and open shifts',
+    tags: ['security'],
+    params: estateParamSchema,
+    response: z.array(guardRosterItemSchema),
+  })
+  guards(@CurrentEstate() estate: EstateAccess) {
+    return this.access.roster(estate);
   }
 
   @Post('guards/:id/pin-reset')

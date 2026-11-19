@@ -112,6 +112,7 @@ Progress is saved per step; the dashboard shows a setup checklist until complete
 - **Visitor log**: search by name, phone, plate, unit, date; export.
 - **Restricted visitors** (estate-only blacklist) with reason and expiry.
 - **Guards**: profiles, gate assignments, PINs (reset), devices.
+  - Built (19 Nov 2026, [ADR-0017](../adr/0017-gate-devices-and-guard-pin-sessions.md)): **Guards** (`/security/guards`, `security.staff.manage`): name, phone (masked without `pii.view`), role, gate PIN status, open shift, and **Reset PIN** with confirmation. **Gate devices** (`/security/devices`, `gate.device.manage`): name, gate, status, last seen, registered, and **Deregister** with confirmation. Phones are registered from the Security App, not here. Profiles and gate assignments are not built.
 - **Shifts and patrols**: rosters, attendance, checkpoints, patrol logs, handover notes.
 - **Incidents**: reports from guards and residents, categories, attachments, assignment, resolution, export for police.
 - **SOS console**: live map/list of active alerts, timer since trigger, acknowledgement and assignment, escalation status, notes, resolution; drill mode; SOS history and response-time reports.

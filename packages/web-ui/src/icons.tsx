@@ -25,6 +25,12 @@ const paths = {
       <path d="M13 4.56v16.16a1 1 0 0 1-1.24.97L5 20V5.56a2 2 0 0 1 1.52-1.94l4-1A2 2 0 0 1 13 4.56Z" />
     </>
   ),
+  smartphone: (
+    <>
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+      <path d="M12 18h.01" />
+    </>
+  ),
   users: (
     <>
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
