@@ -25,6 +25,7 @@
     "db:seed": "node dist/scripts/seed.js",
     "db:seed:dev": "node dist/scripts/seed.js --dev",
     "openapi": "pnpm build && node dist/scripts/generate-openapi.js && pnpm --filter @safezone/contracts generate",
+    "test:integration:host": "prisma generate && node scripts/test-host.mjs",
     "test:isolation": "prisma generate && vitest run --config vitest.integration.config.ts test/isolation",
     "dev:otp": "node scripts/dev-otp.mjs",
     "dev:otp:reset": "node scripts/dev-otp-reset.mjs",

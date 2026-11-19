@@ -2,12 +2,12 @@
 
 ## Two ways to run locally
 
-|                                             | **Without Docker** (lighter)                                                        | **With Docker**                 |
-| ------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------- |
-| Postgres 17, Redis                          | Installed natively (Homebrew)                                                       | `pnpm infra:up` (or native)     |
-| OTP codes and email                         | Files in `apps/backend-api/.dev-outbox/` (`MAIL_TRANSPORT=file`)                    | Mailpit, http://localhost:8025  |
-| Uploaded files                              | Folder `apps/backend-api/.dev-storage/`, served by the API (`STORAGE_DRIVER=local`) | RustFS (S3-compatible) on :9000 |
-| Integration tests (`pnpm test:integration`) | Not available (Testcontainers needs Docker)                                         | Yes                             |
+|                     | **Without Docker** (lighter)                                                          | **With Docker**                 |
+| ------------------- | ------------------------------------------------------------------------------------- | ------------------------------- |
+| Postgres 17, Redis  | Installed natively (Homebrew)                                                         | `pnpm infra:up` (or native)     |
+| OTP codes and email | Files in `apps/backend-api/.dev-outbox/` (`MAIL_TRANSPORT=file`)                      | Mailpit, http://localhost:8025  |
+| Uploaded files      | Folder `apps/backend-api/.dev-storage/`, served by the API (`STORAGE_DRIVER=local`)   | RustFS (S3-compatible) on :9000 |
+| Integration tests   | `pnpm --filter @safezone/backend-api test:integration:host` (host Postgres and Redis) | `pnpm test:integration`         |
 
 Both use the same code paths for everything except the two adapters above, which exist only for development; the API refuses `MAIL_TRANSPORT=file` and `STORAGE_DRIVER=local` in staging and production.
 
@@ -97,6 +97,9 @@ Visitor pass links use `PUBLIC_WEB_URL` (default `http://localhost:3000`), so th
 ```bash
 pnpm format:check && pnpm build && pnpm typecheck && pnpm lint && pnpm test
 pnpm test:integration   # database and cross-tenant isolation tests (Testcontainers); needs Docker running
+pnpm --filter @safezone/backend-api test:integration:host   # the same suites without Docker
 ```
+
+**Without Docker**, `test:integration:host` runs the integration and isolation suites against your native PostgreSQL and Redis. It reads `apps/backend-api/.env`: the superuser from `DATABASE_MIGRATION_URL` (database switched to `postgres`), the `safezone_app` password from `DATABASE_URL`, and `REDIS_URL` with database index 15. Override with `TEST_PG_ADMIN_URL`, `TEST_PG_APP_PASSWORD` and `TEST_REDIS_URL`. Each test file creates its own `safezone_test_<random>` database and drops it afterwards; your `safezone` database and Redis index 0 are never touched, and the shared `safezone_app` role is not altered. Pass a file path to run one suite. CI keeps using Testcontainers on PostgreSQL 17; a native PostgreSQL 18 is fine locally.
 
 The pre-commit hook (husky + lint-staged) runs Prettier on staged files. `pnpm install` enables it.

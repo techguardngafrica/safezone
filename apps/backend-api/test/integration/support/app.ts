@@ -18,6 +18,25 @@ import { builtInRoleId, seedBuiltInRoles } from '../../../src/scripts/seed-roles
 import { startTestDatabase, type TestDatabase } from './database';
 
 /**
+ * Host mode (no Docker): TEST_REDIS_URL points at a local Redis with a dedicated database index (not 0),
+ * e.g. redis://127.0.0.1:6379/15. Only that index is flushed, so dev data in index 0 is never touched.
+ */
+async function startTestRedis(): Promise<{ url: string; release(): Promise<void> }> {
+  const hostUrl = process.env.TEST_REDIS_URL;
+  if (hostUrl) {
+    const index = Number(new URL(hostUrl).pathname.replace('/', '') || '0');
+    if (!Number.isInteger(index) || index === 0)
+      throw new Error('TEST_REDIS_URL must name a Redis database index other than 0');
+    const client = new Redis(hostUrl);
+    await client.flushdb();
+    client.disconnect();
+    return { url: hostUrl, release: async () => undefined };
+  }
+  const container = (await new RedisContainer('redis:7-alpine').start()) as StartedRedisContainer;
+  return { url: container.getConnectionUrl(), release: async () => void (await container.stop()) };
+}
+
+/**
  * Full API against real PostgreSQL 17 and Redis 7 (Testcontainers). SMS and email are fakes so tests
  * can read OTP codes. Each test file gets its own stack.
  */
@@ -40,10 +59,23 @@ export interface TestStack {
 export async function startTestStack(
   options: { env?: Record<string, string>; realStorage?: boolean } = {},
 ): Promise<TestStack> {
-  const [db, redisContainer] = await Promise.all([
-    startTestDatabase(),
-    new RedisContainer('redis:7-alpine').start() as Promise<StartedRedisContainer>,
-  ]);
+  const [db, redisTarget] = await Promise.all([startTestDatabase(), startTestRedis()]);
+  try {
+    return await buildStack(db, redisTarget, options);
+  } catch (error) {
+    // A failed start must not leave a database or Redis data behind.
+    await redisTarget.release().catch(() => undefined);
+    await db.stop().catch(() => undefined);
+    throw error;
+  }
+}
+
+async function buildStack(
+  db: TestDatabase,
+  redisTarget: { url: string; release(): Promise<void> },
+  options: { env?: Record<string, string>; realStorage?: boolean },
+): Promise<TestStack> {
+  const redisUrl = redisTarget.url;
   const owner = await db.owner.connect();
   try {
     await seedBuiltInRoles(owner);
@@ -53,7 +85,7 @@ export async function startTestStack(
 
   process.env.NODE_ENV = 'test';
   process.env.DATABASE_URL = db.appUrl;
-  process.env.REDIS_URL = redisContainer.getConnectionUrl();
+  process.env.REDIS_URL = redisUrl;
   process.env.CORS_ORIGINS = 'http://localhost:3001';
   for (const [key, value] of Object.entries(options.env ?? {})) process.env[key] = value;
 
@@ -70,7 +102,7 @@ export async function startTestStack(
   const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication({ rawBody: true });
   await app.init();
-  const redis = new Redis(redisContainer.getConnectionUrl());
+  const redis = new Redis(redisUrl);
   const ownerQuery = (sql: string, values: unknown[]) => db.owner.query(sql, values);
 
   return {
@@ -81,7 +113,7 @@ export async function startTestStack(
     email,
     redis,
     async resetRateLimits() {
-      await redis.flushall();
+      await redis.flushdb();
     },
     async createEstate(name = 'Test Estate') {
       const id = uuidv7();
@@ -121,7 +153,7 @@ export async function startTestStack(
     async stop() {
       await app.close();
       redis.disconnect();
-      await redisContainer.stop();
+      await redisTarget.release();
       await db.stop();
     },
   };

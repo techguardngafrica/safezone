@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
@@ -40,22 +41,81 @@ export function runPrisma(ownerUrl: string, args: readonly string[]): string {
   });
 }
 
-export async function startTestDatabase(): Promise<TestDatabase> {
+/**
+ * Host mode (no Docker): set TEST_PG_ADMIN_URL to a superuser connection on a local PostgreSQL. Each test
+ * file gets a fresh `safezone_test_<random>` database that is dropped afterwards; no other database is
+ * touched. The cluster-wide safezone_app role is reused as it is (never altered), so its password comes
+ * from TEST_PG_APP_PASSWORD (empty for trust auth).
+ */
+const HOST_ADMIN_URL = process.env.TEST_PG_ADMIN_URL;
+const TEST_DB_NAME = /^safezone_test_[0-9a-f]{16}$/;
+
+interface Provisioned {
+  ownerUrl: string;
+  appPassword: string;
+  /** Fresh cluster: enable login for safezone_app with the test password. */
+  enableAppLogin: boolean;
+  release(): Promise<void>;
+}
+
+async function provisionContainer(): Promise<Provisioned> {
   const container: StartedPostgreSqlContainer = await new PostgreSqlContainer('postgres:17-alpine')
     .withDatabase('safezone')
     .withUsername('safezone')
     .withPassword('safezone')
     .start();
+  return {
+    ownerUrl: container.getConnectionUri(),
+    appPassword: APP_PASSWORD,
+    enableAppLogin: true,
+    release: async () => {
+      await container.stop();
+    },
+  };
+}
 
-  const ownerUrl = container.getConnectionUri();
+async function provisionHost(adminUrl: string): Promise<Provisioned> {
+  const name = `safezone_test_${randomBytes(8).toString('hex')}`;
+  const admin = new pg.Client({ connectionString: adminUrl });
+  await admin.connect();
+  try {
+    await admin.query(`CREATE DATABASE ${name}`);
+  } finally {
+    await admin.end();
+  }
+  const ownerUrl = new URL(adminUrl);
+  ownerUrl.pathname = `/${name}`;
+  return {
+    ownerUrl: ownerUrl.toString(),
+    appPassword: process.env.TEST_PG_APP_PASSWORD ?? '',
+    enableAppLogin: false,
+    release: async () => {
+      if (!TEST_DB_NAME.test(name)) throw new Error(`refusing to drop ${name}`);
+      const cleanup = new pg.Client({ connectionString: adminUrl });
+      await cleanup.connect();
+      try {
+        await cleanup.query(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
+      } finally {
+        await cleanup.end();
+      }
+    },
+  };
+}
+
+export async function startTestDatabase(): Promise<TestDatabase> {
+  const provisioned = HOST_ADMIN_URL
+    ? await provisionHost(HOST_ADMIN_URL)
+    : await provisionContainer();
+  const { ownerUrl } = provisioned;
   runPrisma(ownerUrl, ['migrate', 'deploy']);
 
   const owner = new pg.Pool({ connectionString: ownerUrl, max: 2 });
-  await owner.query(`ALTER ROLE safezone_app WITH LOGIN PASSWORD '${APP_PASSWORD}'`);
+  if (provisioned.enableAppLogin)
+    await owner.query(`ALTER ROLE safezone_app WITH LOGIN PASSWORD '${APP_PASSWORD}'`);
 
   const appUrlObject = new URL(ownerUrl);
   appUrlObject.username = 'safezone_app';
-  appUrlObject.password = APP_PASSWORD;
+  appUrlObject.password = provisioned.appPassword;
   const appUrl = appUrlObject.toString();
 
   const clients: PrismaClient[] = [];
@@ -80,7 +140,7 @@ export async function startTestDatabase(): Promise<TestDatabase> {
     async stop() {
       await Promise.all(clients.map((client) => client.$disconnect()));
       await owner.end();
-      await container.stop();
+      await provisioned.release();
     },
   };
 }
