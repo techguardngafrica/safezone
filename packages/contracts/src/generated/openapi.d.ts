@@ -1596,6 +1596,110 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/incidents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Incidents (managers: all; others: reported by or assigned to me)
+     * @description Requires `incident.report` or `incident.manage`. Needs the `security` feature.
+     */
+    get: operations['incidents_list'];
+    put?: never;
+    /**
+     * Report an incident (guards, residents, managers)
+     * @description Requires `incident.report` or `incident.manage`. Needs the `security` feature.
+     */
+    post: operations['incidents_report'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/incidents/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Incident with evidence and timeline
+     * @description Requires `incident.report` or `incident.manage`. Needs the `security` feature.
+     */
+    get: operations['incidents_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/incidents/{id}/evidence': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Attach uploaded photos or videos (hash recorded for chain of custody)
+     * @description Requires `incident.report` or `incident.manage`. Needs the `security` feature.
+     */
+    post: operations['incidents_evidence'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/incidents/{id}/notes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a note (append-only)
+     * @description Requires `incident.report` or `incident.manage`. Needs the `security` feature.
+     */
+    post: operations['incidents_note'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/incidents/{id}/transition': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Review, assign, resolve, reopen or close (send the version you saw)
+     * @description Requires `incident.manage`. Needs the `security` feature.
+     */
+    post: operations['incidents_transition'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/invoices': {
     parameters: {
       query?: never;
@@ -11665,6 +11769,664 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_list: {
+    parameters: {
+      query?: {
+        status?: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+        open?: string;
+        severity?: 'low' | 'medium' | 'high' | 'critical';
+        mine?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              category:
+                | 'suspicious_activity'
+                | 'unauthorised_access'
+                | 'theft'
+                | 'fight'
+                | 'fire'
+                | 'accident'
+                | 'damage'
+                | 'other';
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              title: string;
+              description: string;
+              /** @enum {string} */
+              locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+              gateId: string | null;
+              gateName: string | null;
+              spaceId: string | null;
+              unitCode: string | null;
+              locationText: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              peopleInvolved: string | null;
+              /** Format: uuid */
+              reportedBy: string;
+              /** @enum {string} */
+              reporterType: 'guard' | 'resident' | 'manager';
+              /** @enum {string} */
+              status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+              assignedTo: string | null;
+              resolution: string | null;
+              linkedSosId: string | null;
+              policeReportRef: string | null;
+              evidenceCount: number;
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          category:
+            | 'suspicious_activity'
+            | 'unauthorised_access'
+            | 'theft'
+            | 'fight'
+            | 'fire'
+            | 'accident'
+            | 'damage'
+            | 'other';
+          /** @enum {string} */
+          severity: 'low' | 'medium' | 'high' | 'critical';
+          title: string;
+          description: string;
+          /** @enum {string} */
+          locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+          /** Format: uuid */
+          gateId?: string;
+          /** Format: uuid */
+          spaceId?: string;
+          locationText?: string;
+          /** Format: date-time */
+          occurredAt: string;
+          peopleInvolved?: string;
+          /** @default [] */
+          evidenceFileIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              category:
+                | 'suspicious_activity'
+                | 'unauthorised_access'
+                | 'theft'
+                | 'fight'
+                | 'fire'
+                | 'accident'
+                | 'damage'
+                | 'other';
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              title: string;
+              description: string;
+              /** @enum {string} */
+              locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+              gateId: string | null;
+              gateName: string | null;
+              spaceId: string | null;
+              unitCode: string | null;
+              locationText: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              peopleInvolved: string | null;
+              /** Format: uuid */
+              reportedBy: string;
+              /** @enum {string} */
+              reporterType: 'guard' | 'resident' | 'manager';
+              /** @enum {string} */
+              status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+              assignedTo: string | null;
+              resolution: string | null;
+              linkedSosId: string | null;
+              policeReportRef: string | null;
+              evidenceCount: number;
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              evidence: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                fileId: string;
+                sha256: string | null;
+                /** Format: uuid */
+                uploadedBy: string;
+                uploadedAt: string | null;
+                /** Format: uuid */
+                addedBy: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              notes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                /** @enum {string} */
+                kind: 'note' | 'status';
+                body: string | null;
+                fromStatus:
+                  ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                toStatus: ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              category:
+                | 'suspicious_activity'
+                | 'unauthorised_access'
+                | 'theft'
+                | 'fight'
+                | 'fire'
+                | 'accident'
+                | 'damage'
+                | 'other';
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              title: string;
+              description: string;
+              /** @enum {string} */
+              locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+              gateId: string | null;
+              gateName: string | null;
+              spaceId: string | null;
+              unitCode: string | null;
+              locationText: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              peopleInvolved: string | null;
+              /** Format: uuid */
+              reportedBy: string;
+              /** @enum {string} */
+              reporterType: 'guard' | 'resident' | 'manager';
+              /** @enum {string} */
+              status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+              assignedTo: string | null;
+              resolution: string | null;
+              linkedSosId: string | null;
+              policeReportRef: string | null;
+              evidenceCount: number;
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              evidence: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                fileId: string;
+                sha256: string | null;
+                /** Format: uuid */
+                uploadedBy: string;
+                uploadedAt: string | null;
+                /** Format: uuid */
+                addedBy: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              notes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                /** @enum {string} */
+                kind: 'note' | 'status';
+                body: string | null;
+                fromStatus:
+                  ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                toStatus: ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_evidence: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          fileIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              category:
+                | 'suspicious_activity'
+                | 'unauthorised_access'
+                | 'theft'
+                | 'fight'
+                | 'fire'
+                | 'accident'
+                | 'damage'
+                | 'other';
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              title: string;
+              description: string;
+              /** @enum {string} */
+              locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+              gateId: string | null;
+              gateName: string | null;
+              spaceId: string | null;
+              unitCode: string | null;
+              locationText: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              peopleInvolved: string | null;
+              /** Format: uuid */
+              reportedBy: string;
+              /** @enum {string} */
+              reporterType: 'guard' | 'resident' | 'manager';
+              /** @enum {string} */
+              status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+              assignedTo: string | null;
+              resolution: string | null;
+              linkedSosId: string | null;
+              policeReportRef: string | null;
+              evidenceCount: number;
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              evidence: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                fileId: string;
+                sha256: string | null;
+                /** Format: uuid */
+                uploadedBy: string;
+                uploadedAt: string | null;
+                /** Format: uuid */
+                addedBy: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              notes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                /** @enum {string} */
+                kind: 'note' | 'status';
+                body: string | null;
+                fromStatus:
+                  ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                toStatus: ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_note: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              category:
+                | 'suspicious_activity'
+                | 'unauthorised_access'
+                | 'theft'
+                | 'fight'
+                | 'fire'
+                | 'accident'
+                | 'damage'
+                | 'other';
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              title: string;
+              description: string;
+              /** @enum {string} */
+              locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+              gateId: string | null;
+              gateName: string | null;
+              spaceId: string | null;
+              unitCode: string | null;
+              locationText: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              peopleInvolved: string | null;
+              /** Format: uuid */
+              reportedBy: string;
+              /** @enum {string} */
+              reporterType: 'guard' | 'resident' | 'manager';
+              /** @enum {string} */
+              status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+              assignedTo: string | null;
+              resolution: string | null;
+              linkedSosId: string | null;
+              policeReportRef: string | null;
+              evidenceCount: number;
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              evidence: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                fileId: string;
+                sha256: string | null;
+                /** Format: uuid */
+                uploadedBy: string;
+                uploadedAt: string | null;
+                /** Format: uuid */
+                addedBy: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              notes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                /** @enum {string} */
+                kind: 'note' | 'status';
+                body: string | null;
+                fromStatus:
+                  ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                toStatus: ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_transition: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          action: 'review' | 'assign' | 'resolve' | 'reopen' | 'close';
+          version: number;
+          /** Format: uuid */
+          assigneeId?: string;
+          resolution?: string;
+          policeReportRef?: string;
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              category:
+                | 'suspicious_activity'
+                | 'unauthorised_access'
+                | 'theft'
+                | 'fight'
+                | 'fire'
+                | 'accident'
+                | 'damage'
+                | 'other';
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              title: string;
+              description: string;
+              /** @enum {string} */
+              locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+              gateId: string | null;
+              gateName: string | null;
+              spaceId: string | null;
+              unitCode: string | null;
+              locationText: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              peopleInvolved: string | null;
+              /** Format: uuid */
+              reportedBy: string;
+              /** @enum {string} */
+              reporterType: 'guard' | 'resident' | 'manager';
+              /** @enum {string} */
+              status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+              assignedTo: string | null;
+              resolution: string | null;
+              linkedSosId: string | null;
+              policeReportRef: string | null;
+              evidenceCount: number;
+              version: number;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              closedAt: string | null;
+              evidence: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                fileId: string;
+                sha256: string | null;
+                /** Format: uuid */
+                uploadedBy: string;
+                uploadedAt: string | null;
+                /** Format: uuid */
+                addedBy: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              notes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                authorId: string;
+                /** @enum {string} */
+                kind: 'note' | 'status';
+                body: string | null;
+                fromStatus:
+                  ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                toStatus: ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
   };

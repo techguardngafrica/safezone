@@ -1,13 +1,18 @@
 import { Module, type OnModuleInit } from '@nestjs/common';
+import { AuthzModule } from '../authz/authz.module';
+import { FilesModule } from '../files/files.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { PropertyModule } from '../property/property.module';
 import { OnboardingModule } from '../tenancy/onboarding/onboarding.module';
+import { IncidentsService } from './incidents.service';
 import { SetupVerifiers } from '../tenancy/onboarding/setup.service';
 import { GatesService } from './gates.service';
-import { SecurityController } from './security.controller';
+import { IncidentsController, SecurityController } from './security.controller';
 
 @Module({
-  imports: [OnboardingModule],
-  controllers: [SecurityController],
-  providers: [GatesService],
+  imports: [AuthzModule, FilesModule, NotificationsModule, OnboardingModule, PropertyModule],
+  controllers: [SecurityController, IncidentsController],
+  providers: [GatesService, IncidentsService],
   exports: [GatesService],
 })
 export class SecurityModule implements OnModuleInit {

@@ -145,6 +145,41 @@ describe('cross-tenant isolation', () => {
     expect(profile.body.data.id).toBe(estateB);
   });
 
+  it("Estate A's incidents cannot be read or changed through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const incident = await stack.http
+      .post(`/v1/estates/${estateA}/incidents`)
+      .set(auth(adminA))
+      .send({
+        category: 'theft',
+        severity: 'high',
+        title: 'Bike stolen',
+        description: 'Taken from the rack by block A',
+        locationKind: 'other',
+        locationText: 'Bike rack',
+        occurredAt: new Date(Date.now() - 60_000).toISOString(),
+      })
+      .expect(201);
+    const id = incident.body.data.id as string;
+    // B's administrator manages incidents in B, but A's incident does not exist there.
+    await stack.http.get(`/v1/estates/${estateB}/incidents/${id}`).set(auth(adminB)).expect(404);
+    await stack.http
+      .post(`/v1/estates/${estateB}/incidents/${id}/transition`)
+      .set(auth(adminB))
+      .send({ action: 'review', version: 1 })
+      .expect(404);
+    await stack.http
+      .post(`/v1/estates/${estateB}/incidents/${id}/notes`)
+      .set(auth(adminB))
+      .send({ body: 'Not mine' })
+      .expect(404);
+    const listB = await stack.http
+      .get(`/v1/estates/${estateB}/incidents`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(listB.body.data.map((item: { id: string }) => item.id)).not.toContain(id);
+  });
+
   it('a permission snapshot for a foreign estate is empty', async () => {
     const snapshot = await stack.http
       .get('/v1/me/permissions')

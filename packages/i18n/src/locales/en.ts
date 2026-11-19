@@ -121,6 +121,10 @@ export const en = {
   'notifications.community.announcement.title': 'Official: {title}',
   'notifications.community.announcement.body': '{body}',
 
+  'notifications.security.incident_critical.title': 'Critical incident reported',
+  'notifications.security.incident_critical.body': '{title}. Please review it now.',
+  'notifications.security.incident_updated.title': 'Incident update',
+  'notifications.security.incident_updated.body': '{title}: {status}',
   'notifications.maintenance.request_urgent.title': 'Urgent request {number}',
   'notifications.maintenance.request_urgent.body': '{title}. Please triage it now.',
   'notifications.maintenance.request_updated.title': 'Request {number}: {status}',

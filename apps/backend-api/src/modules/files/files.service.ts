@@ -287,6 +287,27 @@ export class FilesService {
     return rows.map((row) => row.id);
   }
 
+  /**
+   * Uploaded, non-infected incident evidence of this uploader, with the hash and upload time recorded for
+   * chain of custody (security.md §4.6). Files missing from the result are not usable.
+   */
+  async evidenceFilesOf(estateId: string, userId: string, fileIds: readonly string[]) {
+    if (fileIds.length === 0) return [];
+    return this.db.withTenant({ estateId, userId }, (tx) =>
+      tx.storedFile.findMany({
+        where: {
+          id: { in: [...fileIds] },
+          estateId,
+          uploadedBy: userId,
+          purpose: 'incident_evidence',
+          uploadedAt: { not: null },
+          scanStatus: { notIn: ['infected', 'rejected', 'awaiting_upload'] },
+        },
+        select: { id: true, sha256: true, uploadedBy: true, uploadedAt: true },
+      }),
+    );
+  }
+
   /** Scan status of files, for a platform reviewer (e.g. application documents). */
   async platformStatuses(fileIds: readonly string[]) {
     if (fileIds.length === 0) return [];

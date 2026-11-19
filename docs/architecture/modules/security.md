@@ -96,4 +96,23 @@ Gate throughput by hour, average verification time, overrides, denies, walk-in r
 
 Built in `src/modules/security`: `tenant.gates` and `GET/POST/PATCH /v1/estates/:estateId/gates` (`security.staff.manage` to change). Registers the setup wizard's `gates` verifier.
 
-**Not yet built:** security personnel, gate assignments, shift templates, rosters and sessions (PIN sign-in, kiosk), attendance, handovers, incidents and evidence, security alerts, gate-device registration.
+**Incidents (19 Nov 2026).** Tables `tenant.incidents`, `tenant.incident_evidence` and `tenant.incident_notes` (migration `20261119120000_security_incidents`), with RLS, no DELETE grant on incidents, and append-only triggers on evidence and notes. Endpoints, all under `/v1/estates/:estateId/incidents`:
+
+| Method | Path              | Permission                             | Notes                                                                                                               |
+| ------ | ----------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/`               | `incident.report` or `incident.manage` | Reporter type comes from the caller's roles; evidence must be the caller's own finished `incident_evidence` uploads |
+| GET    | `/`               | `incident.report` or `incident.manage` | Managers see all; others see incidents they reported or are assigned (rule 7). Cursor paged                         |
+| GET    | `/:id`            | same                                   | With evidence (hash, uploader, upload time) and the timeline                                                        |
+| POST   | `/:id/notes`      | same                                   | Append-only; refused once closed                                                                                    |
+| POST   | `/:id/evidence`   | same                                   | Up to 30 files per incident; hash copied from the file record                                                       |
+| POST   | `/:id/transition` | `incident.manage`                      | `review`, `assign`, `resolve`, `reopen`, `close`; the body carries the `version` seen (optimistic concurrency)      |
+
+Decisions made while building, open to review:
+
+- The status set has no separate "under review" step after assignment; `assign` works from reported, under review or assigned (reassign). `reopen` goes from resolved back to under review.
+- Assignees must hold an estate role with `incident.manage` or `gate.verify`.
+- Critical incidents notify every holder of an estate role with `incident.manage` (`security.incident_critical`, push and SMS without push). Status changes notify the reporter and a new assignee (`security.incident_updated`).
+- Events: `security.incident.reported`, `.reviewed`, `.assigned`, `.resolved`, `.reopened`, `.closed`, `.noted`, `.evidence_added`, each audited.
+- The evidence export (PDF pack) and `linked_sos_id` input are not built yet.
+
+**Not yet built:** security personnel, gate assignments, shift templates, rosters and sessions (PIN sign-in, kiosk), attendance, handovers, security alerts, gate-device registration, incident evidence export.

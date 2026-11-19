@@ -860,7 +860,7 @@ model EmergencyContact {
 }
 
 // ---------------------------------------------------------------------------------------------------
-// Security (Phase 1, security.md): gates. Personnel, shifts and incidents follow.
+// Security (Phase 1, security.md): gates and incidents. Personnel and shifts follow.
 // ---------------------------------------------------------------------------------------------------
 
 model Gate {
@@ -876,6 +876,86 @@ model Gate {
 
   @@index([estateId, status])
   @@map("gates")
+  @@schema("tenant")
+}
+
+/// Security incidents (security.md §2.8, §4). Never deleted; corrections are appended as notes.
+model Incident {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String    @map("estate_id") @db.Uuid
+  /// suspicious_activity | unauthorised_access | theft | fight | fire | accident | damage | other
+  category        String
+  /// low | medium | high | critical
+  severity        String
+  title           String
+  description     String
+  /// gate | unit | common_area | other
+  locationKind    String    @map("location_kind")
+  gateId          String?   @map("gate_id") @db.Uuid
+  locationSpaceId String?   @map("location_space_id") @db.Uuid
+  locationText    String?   @map("location_text")
+  occurredAt      DateTime  @map("occurred_at") @db.Timestamptz(3)
+  peopleInvolved  String?   @map("people_involved")
+  reportedBy      String    @map("reported_by") @db.Uuid
+  /// guard | resident | manager
+  reporterType    String    @map("reporter_type")
+  /// reported | under_review | assigned | resolved | closed
+  status          String    @default("reported")
+  assignedTo      String?   @map("assigned_to") @db.Uuid
+  resolution      String?
+  linkedSosId     String?   @map("linked_sos_id") @db.Uuid
+  policeReportRef String?   @map("police_report_ref")
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  resolvedAt      DateTime? @map("resolved_at") @db.Timestamptz(3)
+  closedAt        DateTime? @map("closed_at") @db.Timestamptz(3)
+
+  evidence IncidentEvidence[]
+  notes    IncidentNote[]
+
+  @@index([estateId, status, createdAt])
+  @@index([estateId, reportedBy])
+  @@map("incidents")
+  @@schema("tenant")
+}
+
+/// Chain of custody (security.md §4.6): the file hash and uploader at the time it was attached. Append-only.
+model IncidentEvidence {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  incidentId String    @map("incident_id") @db.Uuid
+  fileId     String    @map("file_id") @db.Uuid
+  sha256     String?
+  uploadedBy String    @map("uploaded_by") @db.Uuid
+  uploadedAt DateTime? @map("uploaded_at") @db.Timestamptz(3)
+  addedBy    String    @map("added_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+
+  @@unique([incidentId, fileId])
+  @@map("incident_evidence")
+  @@schema("tenant")
+}
+
+/// Timeline of an incident: notes and status changes. Append-only.
+model IncidentNote {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  incidentId String   @map("incident_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  /// note | status
+  kind       String
+  body       String?
+  fromStatus String?  @map("from_status")
+  toStatus   String?  @map("to_status")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+
+  @@index([incidentId, createdAt])
+  @@map("incident_notes")
   @@schema("tenant")
 }
 

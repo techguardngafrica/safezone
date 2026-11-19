@@ -22,3 +22,4 @@ export * from './utilities';
 export * from './facilities';
 export * from './documents';
 export * from './channels';
+export * from './security';
