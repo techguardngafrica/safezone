@@ -8,6 +8,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BodyText, GateTile, gateStyles, StatusBar } from '../src/components/gate-ui';
 import { Icon } from '../src/components/icon';
+import { useCurrentShift } from '../src/features/shift';
 import { useActiveSos } from '../src/features/sos';
 import { useGate } from '../src/lib/gate';
 import { session } from '../src/lib/session';
@@ -25,6 +26,35 @@ function useExpectedCount(): number {
         (pass.maxUses === null || pass.usesCount < pass.maxUses),
     ).length;
   }, [gate, sync.expected, sync.revokedPassIds]);
+}
+
+/** Prompts the guard to start a shift; shows the shift start time once on shift. */
+function ShiftBanner() {
+  const shift = useCurrentShift();
+  if (!shift.data) return null;
+  const mine = shift.data.mine;
+  const label = mine
+    ? t('sec.shift.since', { time: formatTime(mine.startedAt) })
+    : t('sec.shift.none');
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={() => router.push('/shift')}
+      style={({ pressed }) => [
+        styles.shift,
+        !mine && styles.shiftNone,
+        pressed && { opacity: 0.85 },
+      ]}
+    >
+      <Icon
+        name={mine ? 'time-outline' : 'play-circle-outline'}
+        size={28}
+        color={mine ? colors.brand.primary : colors.neutral[0]}
+      />
+      <Text style={[styles.shiftText, !mine && { color: colors.neutral[0] }]}>{label}</Text>
+    </Pressable>
+  );
 }
 
 function SosBanner() {
@@ -79,6 +109,7 @@ export default function GateHome() {
         </View>
 
         <SosBanner />
+        <ShiftBanner />
         {!sync.online ? (
           <View style={styles.offline} accessibilityLiveRegion="polite">
             <BodyText>{t('sec.offlineNote')}</BodyText>
@@ -185,6 +216,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
+  shift: {
+    minHeight: touchTarget.security,
+    borderRadius: radii.lg,
+    borderWidth: 2,
+    borderColor: colors.brand.primary,
+    backgroundColor: colors.neutral[0],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+    paddingHorizontal: spacing[4],
+  },
+  shiftNone: { backgroundColor: colors.brand.primary },
+  shiftText: {
+    flex: 1,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    color: colors.semantic.text,
+  },
   sos: {
     minHeight: 72,
     borderRadius: radii.lg,

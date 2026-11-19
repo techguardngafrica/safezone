@@ -65,6 +65,12 @@ export default function SettingsScreen() {
             />
           ))}
         <BigButton
+          label={t('sec.shift.end')}
+          tone="outline"
+          icon="stop-outline"
+          onPress={() => router.push('/shift')}
+        />
+        <BigButton
           label={t('auth.signOut')}
           tone="outline"
           icon="log-out-outline"
