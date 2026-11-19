@@ -219,6 +219,31 @@ describe('cross-tenant isolation', () => {
       .expect(200);
     expect(snapshot.body.data).toMatchObject({ roles: [], permissions: [] });
   });
+  it("Estate A's deliveries and event guests cannot be reached through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const fakeId = '0193a1b2-0000-7000-8000-00000000abcd';
+    // No rows of A exist under B: closing or checking in by id answers 404, lists are empty.
+    await stack.http
+      .post(`/v1/estates/${estateB}/deliveries/${fakeId}/close`)
+      .set(auth(adminB))
+      .send({ outcome: 'collected', note: 'Not mine' })
+      .expect(404);
+    const listB = await stack.http
+      .get(`/v1/estates/${estateB}/deliveries`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(listB.body.data).toEqual([]);
+    const rows = await stack.db.owner.query<{ id: string }>(
+      `insert into tenant.event_guests (id, estate_id, pass_id, name) values ($1, $2, $3, 'Guest A') returning id`,
+      [fakeId, estateA, fakeId],
+    );
+    await stack.http
+      .post(`/v1/estates/${estateB}/event-guests/${rows.rows[0]?.id}/check-in`)
+      .set(auth(adminB))
+      .send({ gateId: fakeId, clientUuid: fakeId })
+      .expect(404);
+  });
+
   it("Estate A's gate devices cannot be listed or revoked through Estate B", async () => {
     const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
     // A separate supervisor: registering signs them out of the device.

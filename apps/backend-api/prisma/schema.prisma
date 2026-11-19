@@ -1160,6 +1160,48 @@ model WalkinRequest {
   @@schema("tenant")
 }
 
+/// A parcel a courier left at the gate for a unit (visitor.md §2, security-mobile.md §7.4 "drop at gate").
+model GateDelivery {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  gateId       String    @map("gate_id") @db.Uuid
+  spaceId      String    @map("space_id") @db.Uuid
+  householdId  String    @map("household_id") @db.Uuid
+  company      String
+  riderName    String?   @map("rider_name")
+  vehiclePlate String?   @map("vehicle_plate")
+  note         String?
+  /// at_gate | collected | returned
+  status       String    @default("at_gate")
+  recordedBy   String    @map("recorded_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  closedAt     DateTime? @map("closed_at") @db.Timestamptz(3)
+  closedBy     String?   @map("closed_by") @db.Uuid
+  /// Who took the parcel, or why it went back to the courier.
+  closedNote   String?   @map("closed_note")
+
+  @@index([estateId, status, createdAt])
+  @@index([estateId, householdId, createdAt])
+  @@map("gate_deliveries")
+  @@schema("tenant")
+}
+
+/// One guest on an event pass (visitor.md §3 event_guest_lists). Checked in once at the gate.
+model EventGuest {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  passId      String    @map("pass_id") @db.Uuid
+  name        String
+  checkedInAt DateTime? @map("checked_in_at") @db.Timestamptz(3)
+  checkedInBy String?   @map("checked_in_by") @db.Uuid
+  gateId      String?   @map("gate_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, passId])
+  @@map("event_guests")
+  @@schema("tenant")
+}
+
 model RestrictedVisitor {
   id              String    @id @default(uuid(7)) @db.Uuid
   estateId        String    @map("estate_id") @db.Uuid

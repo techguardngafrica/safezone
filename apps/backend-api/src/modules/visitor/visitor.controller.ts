@@ -1,16 +1,24 @@
 import { Controller, Delete, Get, HttpCode, Post, Req } from '@nestjs/common';
 import {
+  checkInGuestSchema,
+  closeDeliverySchema,
+  createDeliverySchema,
   createRestrictedVisitorSchema,
   createVisitorInvitationSchema,
   createWalkinSchema,
+  deliveryListQuerySchema,
+  deliverySchema,
   estateItemParamsSchema,
   estateParamSchema,
+  eventGuestSchema,
   expectedListSchema,
   expectedQuerySchema,
   gateEventInputSchema,
   gateEventListQuerySchema,
   gateEventSchema,
   gateDeviceSyncSchema,
+  gateEventPassSchema,
+  gateEventsQuerySchema,
   gateSyncResultSchema,
   gateSyncSchema,
   insideItemSchema,
@@ -40,6 +48,7 @@ import {
 import { Public } from '../../common/auth/public.decorator';
 import { Contract, ValidBody, ValidParams, ValidQuery } from '../../common/contract/contract';
 import { GateAccessService } from '../security/gate-access.service';
+import { ArrivalsService } from './arrivals.service';
 import { GateService } from './gate.service';
 import { PassesService } from './passes.service';
 
@@ -67,6 +76,7 @@ export class VisitorController {
   constructor(
     private readonly passes: PassesService,
     private readonly gate: GateService,
+    private readonly arrivals: ArrivalsService,
   ) {}
 
   // ---- Hosts -----------------------------------------------------------------------------------
@@ -350,6 +360,120 @@ export class VisitorController {
     @ValidBody() body: z.infer<typeof createWalkinSchema>,
   ) {
     return this.gate.createWalkin(estate, body);
+  }
+
+  // ---- Deliveries and event guests (security-mobile.md §7.4) -----------------------------------
+
+  @Post('deliveries')
+  @Can('gate.verify')
+  @RequiresFeature('visitors')
+  @Contract({
+    summary: 'Record a parcel left at the gate and tell the household',
+    tags: ['gate'],
+    params: estateParamSchema,
+    body: createDeliverySchema,
+    response: deliverySchema,
+    status: 201,
+    errors: [404, 422],
+  })
+  createDelivery(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidBody() body: z.infer<typeof createDeliverySchema>,
+  ) {
+    return this.arrivals.createDelivery(estate, body);
+  }
+
+  @Get('deliveries')
+  @Member()
+  @RequiresFeature('visitors')
+  @Contract({
+    summary: 'Parcels at the gate (guards: all; residents: their household)',
+    tags: ['gate'],
+    params: estateParamSchema,
+    query: deliveryListQuerySchema,
+    response: deliverySchema,
+    paginated: true,
+  })
+  deliveries(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof deliveryListQuerySchema>,
+  ) {
+    return this.arrivals.deliveries(estate, query);
+  }
+
+  @Post('deliveries/:id/close')
+  @Can('gate.verify')
+  @RequiresFeature('visitors')
+  @HttpCode(200)
+  @Contract({
+    summary: 'Mark a parcel collected or returned to the courier',
+    tags: ['gate'],
+    params: estateItemParamsSchema,
+    body: closeDeliverySchema,
+    response: deliverySchema,
+    errors: [404, 409],
+  })
+  closeDelivery(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+    @ValidBody() body: z.infer<typeof closeDeliverySchema>,
+  ) {
+    return this.arrivals.closeDelivery(estate, params.id, body.outcome, body.note);
+  }
+
+  @Get('gate/event-passes')
+  @Can('gate.verify')
+  @RequiresFeature('visitors')
+  @Contract({
+    summary: 'Event passes for this gate around now, with guest lists',
+    tags: ['gate'],
+    params: estateParamSchema,
+    query: gateEventsQuerySchema,
+    response: z.array(gateEventPassSchema),
+    errors: [404],
+  })
+  eventPasses(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof gateEventsQuerySchema>,
+  ) {
+    return this.arrivals.gateEvents(estate, query.gateId);
+  }
+
+  @Post('event-guests/:id/check-in')
+  @Can('gate.verify')
+  @RequiresFeature('visitors')
+  @HttpCode(200)
+  @Contract({
+    summary: 'Check an event guest in (records the entry)',
+    tags: ['gate'],
+    params: estateItemParamsSchema,
+    body: checkInGuestSchema,
+    response: eventGuestSchema,
+    errors: [404, 409, 422],
+  })
+  checkIn(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+    @ValidBody() body: z.infer<typeof checkInGuestSchema>,
+  ) {
+    return this.arrivals.checkIn(estate, params.id, body.gateId, body.clientUuid);
+  }
+
+  @Get('visitor-passes/:id/guests')
+  @Member()
+  @RequiresFeature('visitors')
+  @Contract({
+    summary: "An event pass's guest list with check-in times (host)",
+    tags: ['visitors'],
+    params: estateItemParamsSchema,
+    response: z.array(eventGuestSchema),
+    errors: [404],
+  })
+  guests(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+  ) {
+    return this.arrivals.passGuests(estate, params.id);
   }
 
   // ---- Management -------------------------------------------------------------------------------

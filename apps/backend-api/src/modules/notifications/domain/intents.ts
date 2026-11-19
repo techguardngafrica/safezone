@@ -113,6 +113,15 @@ export const INTENTS = {
     title: 'notifications.visitor.walkin_request.title',
     body: 'notifications.visitor.walkin_request.body',
   },
+  'visitor.delivery_at_gate': {
+    category: 'visitors',
+    priority: 'normal',
+    mandatory: false,
+    channels: ['push'],
+    smsOnlyWithoutPush: false,
+    title: 'notifications.visitor.delivery_at_gate.title',
+    body: 'notifications.visitor.delivery_at_gate.body',
+  },
   'visitor.arrived': {
     category: 'visitors',
     priority: 'normal',

@@ -132,7 +132,9 @@ export class PassesService {
         },
       });
       const passIds: string[] = [];
-      for (const visitor of input.visitors) {
+      // An event is one pass for the whole event plus its guest list (visitor.md §3).
+      const people = input.event ? [{ name: input.event.name }] : input.visitors;
+      for (const visitor of people as { name: string; phone?: string; vehiclePlate?: string }[]) {
         const id = uuidv7();
         await this.insertWithUniquePin(tx, {
           id,
@@ -154,6 +156,16 @@ export class PassesService {
         });
         passIds.push(id);
       }
+      const [eventPassId] = passIds;
+      if (input.event && eventPassId) {
+        await tx.eventGuest.createMany({
+          data: input.event.guests.map((name) => ({
+            estateId: access.estateId,
+            passId: eventPassId,
+            name,
+          })),
+        });
+      }
       await appendOutboxEvents(tx, [
         {
           type: 'visitor.pass.created',
@@ -170,6 +182,7 @@ export class PassesService {
             after: {
               type: input.type,
               passes: passIds.length,
+              ...(input.event ? { guests: input.event.guests.length } : {}),
               validFrom: input.validFrom,
               validTo: input.validTo,
             },

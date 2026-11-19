@@ -8,6 +8,7 @@ import { OccupancyModule } from '../occupancy/occupancy.module';
 import { PropertyModule } from '../property/property.module';
 import { SecurityModule } from '../security/security.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
+import { ArrivalsService } from './arrivals.service';
 import { GateService } from './gate.service';
 import { PassKeysService } from './pass-keys.service';
 import { PassesService } from './passes.service';
@@ -24,6 +25,7 @@ import {
     PassKeysService,
     PassesService,
     GateService,
+    ArrivalsService,
     { provide: RateLimiter, useClass: RedisRateLimiter },
   ],
   exports: [PassesService, GateService],

@@ -916,6 +916,50 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/deliveries': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Parcels at the gate (guards: all; residents: their household)
+     * @description Any active member of the estate. Needs the `visitors` feature.
+     */
+    get: operations['visitor_deliveries'];
+    put?: never;
+    /**
+     * Record a parcel left at the gate and tell the household
+     * @description Requires `gate.verify`. Needs the `visitors` feature.
+     */
+    post: operations['visitor_createDelivery'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/deliveries/{id}/close': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark a parcel collected or returned to the courier
+     * @description Requires `gate.verify`. Needs the `visitors` feature.
+     */
+    post: operations['visitor_closeDelivery'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/direct-channels': {
     parameters: {
       query?: never;
@@ -1146,6 +1190,26 @@ export interface paths {
      * @description Requires `broadcast.emergency`. Needs the `emergency` feature.
      */
     post: operations['emergency_broadcast'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/event-guests/{id}/check-in': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check an event guest in (records the entry)
+     * @description Requires `gate.verify`. Needs the `visitors` feature.
+     */
+    post: operations['visitor_checkIn'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1403,6 +1467,26 @@ export interface paths {
      * @description Requires `gate.device.manage`. Needs the `security` feature.
      */
     delete: operations['gateDevices_deregister'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/gate/event-passes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Event passes for this gate around now, with guest lists
+     * @description Requires `gate.verify`. Needs the `visitors` feature.
+     */
+    get: operations['visitor_eventPasses'];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -4188,6 +4272,26 @@ export interface paths {
      * @description Any active member of the estate. Needs the `visitors` feature.
      */
     get: operations['visitor_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/visitor-passes/{id}/guests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * An event pass's guest list with check-in times (host)
+     * @description Any active member of the estate. Needs the `visitors` feature.
+     */
+    get: operations['visitor_guests'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8953,6 +9057,185 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  visitor_deliveries: {
+    parameters: {
+      query?: {
+        status?: 'at_gate' | 'collected' | 'returned';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              gateId: string;
+              gateName: string | null;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              company: string;
+              riderName: string | null;
+              vehiclePlate: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'at_gate' | 'collected' | 'returned';
+              /** Format: date-time */
+              createdAt: string;
+              closedAt: string | null;
+              closedNote: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  visitor_createDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          gateId: string;
+          /** Format: uuid */
+          spaceId: string;
+          company: string;
+          riderName?: string;
+          vehiclePlate?: string;
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              gateId: string;
+              gateName: string | null;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              company: string;
+              riderName: string | null;
+              vehiclePlate: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'at_gate' | 'collected' | 'returned';
+              /** Format: date-time */
+              createdAt: string;
+              closedAt: string | null;
+              closedNote: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  visitor_closeDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          outcome: 'collected' | 'returned';
+          note: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              gateId: string;
+              gateName: string | null;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              company: string;
+              riderName: string | null;
+              vehiclePlate: string | null;
+              note: string | null;
+              /** @enum {string} */
+              status: 'at_gate' | 'collected' | 'returned';
+              /** Format: date-time */
+              createdAt: string;
+              closedAt: string | null;
+              closedNote: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   channels_direct: {
     parameters: {
       query?: never;
@@ -10091,6 +10374,54 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  visitor_checkIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          gateId: string;
+          /** Format: uuid */
+          clientUuid: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              checkedInAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
   };
@@ -11287,6 +11618,54 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  visitor_eventPasses: {
+    parameters: {
+      query: {
+        gateId: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              passId: string;
+              eventName: string;
+              unitCode: string | null;
+              /** Format: date-time */
+              validFrom: string;
+              /** Format: date-time */
+              validTo: string;
+              guests: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                checkedInAt: string | null;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   visitor_log: {
     parameters: {
       query?: {
@@ -11455,7 +11834,13 @@ export interface operations {
                 /** Format: uuid */
                 id: string;
                 /** @enum {string} */
-                type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+                type:
+                  | 'one_time'
+                  | 'multi_entry'
+                  | 'recurring'
+                  | 'domestic_staff'
+                  | 'delivery'
+                  | 'event';
                 visitorName: string;
                 vehiclePlate: string | null;
                 unitCode: string | null;
@@ -11716,7 +12101,13 @@ export interface operations {
                 /** Format: uuid */
                 id: string;
                 /** @enum {string} */
-                type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+                type:
+                  | 'one_time'
+                  | 'multi_entry'
+                  | 'recurring'
+                  | 'domestic_staff'
+                  | 'delivery'
+                  | 'event';
                 visitorName: string;
                 vehiclePlate: string | null;
                 unitCode: string | null;
@@ -21733,7 +22124,7 @@ export interface operations {
           /** Format: uuid */
           householdId?: string;
           /** @enum {string} */
-          type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+          type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery' | 'event';
           purpose?: string;
           /** Format: date-time */
           validFrom: string;
@@ -21749,11 +22140,16 @@ export interface operations {
           gateIds?: string[];
           /** Format: uuid */
           domesticStaffId?: string;
-          visitors: {
+          /** @default [] */
+          visitors?: {
             name: string;
             phone?: string;
             vehiclePlate?: string;
           }[];
+          event?: {
+            name: string;
+            guests: string[];
+          };
         };
       };
     };
@@ -21773,7 +22169,8 @@ export interface operations {
               /** Format: uuid */
               invitationId: string;
               /** @enum {string} */
-              type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+              type:
+                'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery' | 'event';
               /** @enum {string} */
               status: 'scheduled' | 'active' | 'used' | 'expired' | 'revoked';
               visitorName: string;
@@ -21841,7 +22238,8 @@ export interface operations {
               /** Format: uuid */
               invitationId: string;
               /** @enum {string} */
-              type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+              type:
+                'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery' | 'event';
               /** @enum {string} */
               status: 'scheduled' | 'active' | 'used' | 'expired' | 'revoked';
               visitorName: string;
@@ -21902,7 +22300,8 @@ export interface operations {
               /** Format: uuid */
               invitationId: string;
               /** @enum {string} */
-              type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+              type:
+                'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery' | 'event';
               /** @enum {string} */
               status: 'scheduled' | 'active' | 'used' | 'expired' | 'revoked';
               visitorName: string;
@@ -21928,6 +22327,43 @@ export interface operations {
               qr: string;
               passUrl: string;
             };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  visitor_guests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              checkedInAt: string | null;
+            }[];
           };
         };
       };
@@ -21971,7 +22407,8 @@ export interface operations {
               /** Format: uuid */
               invitationId: string;
               /** @enum {string} */
-              type: 'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery';
+              type:
+                'one_time' | 'multi_entry' | 'recurring' | 'domestic_staff' | 'delivery' | 'event';
               /** @enum {string} */
               status: 'scheduled' | 'active' | 'used' | 'expired' | 'revoked';
               visitorName: string;

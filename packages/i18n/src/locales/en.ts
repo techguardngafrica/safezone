@@ -92,6 +92,9 @@ export const en = {
   'notifications.occupancy.added_to_household.body':
     'You were added to the household at {unitCode} in {estateName}. Sign in to Safezone with this number.',
 
+  'notifications.visitor.delivery_at_gate.title': 'Parcel at the gate',
+  'notifications.visitor.delivery_at_gate.body':
+    'A delivery from {company} is waiting for you at {gate}.',
   'notifications.visitor.walkin_request.title': 'Visitor at the gate',
   'notifications.visitor.walkin_request.body':
     '{name} is at {gate} asking to visit {unitCode}. Open Safezone to let them in or decline.',
@@ -1081,6 +1084,7 @@ export const en = {
   'passes.type.recurring': 'Recurring',
   'passes.type.domestic_staff': 'Domestic staff',
   'passes.type.delivery': 'Delivery',
+  'passes.type.event': 'Event',
   'passes.status.scheduled': 'Scheduled',
   'passes.status.active': 'Active',
   'passes.status.used': 'Used',

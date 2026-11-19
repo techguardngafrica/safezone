@@ -9,6 +9,7 @@ export const PASS_TYPES = [
   'recurring',
   'domestic_staff',
   'delivery',
+  'event',
 ] as const;
 export type PassType = (typeof PASS_TYPES)[number];
 

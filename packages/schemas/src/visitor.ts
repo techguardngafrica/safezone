@@ -26,6 +26,7 @@ export const passTypeSchema = z.enum([
   'recurring',
   'domestic_staff',
   'delivery',
+  'event',
 ]);
 export const passStatusSchema = z.enum(['scheduled', 'active', 'used', 'expired', 'revoked']);
 const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM');
@@ -57,8 +58,23 @@ export const createVisitorInvitationSchema = z
           vehiclePlate: z.string().trim().min(3).max(15).optional(),
         }),
       )
-      .min(1)
-      .max(20),
+      .max(20)
+      .default([]),
+    /** event only: one pass for the event, with the guest list guards check off (visitor.md §3). */
+    event: z
+      .object({
+        name: z.string().trim().min(2).max(120),
+        guests: z.array(z.string().trim().min(2).max(120)).min(1).max(300),
+      })
+      .optional(),
+  })
+  .refine((value) => (value.type === 'event') === (value.event !== undefined), {
+    message: 'Event passes need an event name and guest list, and only they have one',
+    path: ['event'],
+  })
+  .refine((value) => value.type === 'event' || value.visitors.length > 0, {
+    message: 'Add at least one visitor',
+    path: ['visitors'],
   })
   .refine((value) => new Date(value.validTo) > new Date(value.validFrom), {
     message: 'The end must be after the start',
@@ -299,6 +315,63 @@ export const walkinSchema = z.object({
   expiresAt: z.iso.datetime(),
   respondedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
+});
+
+/** Event guest list (visitor.md §3). Guards see names only. */
+export const eventGuestSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  checkedInAt: z.iso.datetime().nullable(),
+});
+export const gateEventPassSchema = z.object({
+  passId: z.uuid(),
+  eventName: z.string(),
+  unitCode: z.string().nullable(),
+  validFrom: z.iso.datetime(),
+  validTo: z.iso.datetime(),
+  guests: z.array(eventGuestSchema),
+});
+export const gateEventsQuerySchema = z.object({ gateId: z.uuid() });
+export const checkInGuestSchema = z.object({
+  gateId: z.uuid(),
+  /** Idempotency for the gate event (retries never record twice). */
+  clientUuid: z.uuid(),
+});
+
+/** A parcel left at the gate (security-mobile.md §7.4). */
+export const deliveryStatusSchema = z.enum(['at_gate', 'collected', 'returned']);
+export const createDeliverySchema = z.object({
+  gateId: z.uuid(),
+  spaceId: z.uuid(),
+  company: z.string().trim().min(2).max(80),
+  riderName: z.string().trim().min(2).max(120).optional(),
+  vehiclePlate: z.string().trim().min(3).max(15).optional(),
+  note: z.string().trim().max(300).optional(),
+});
+export const deliverySchema = z.object({
+  id: z.uuid(),
+  gateId: z.uuid(),
+  gateName: z.string().nullable(),
+  spaceId: z.uuid(),
+  unitCode: z.string().nullable(),
+  company: z.string(),
+  riderName: z.string().nullable(),
+  vehiclePlate: z.string().nullable(),
+  note: z.string().nullable(),
+  status: deliveryStatusSchema,
+  createdAt: z.iso.datetime(),
+  closedAt: z.iso.datetime().nullable(),
+  closedNote: z.string().nullable(),
+});
+export const deliveryListQuerySchema = z.object({
+  status: deliveryStatusSchema.optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().min(1).optional(),
+});
+export const closeDeliverySchema = z.object({
+  outcome: z.enum(['collected', 'returned']),
+  /** Who collected it, or why it went back to the courier. */
+  note: z.string().trim().min(2).max(200),
 });
 
 export const restrictedVisitorSchema = z.object({
