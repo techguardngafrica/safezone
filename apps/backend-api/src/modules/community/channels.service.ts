@@ -55,6 +55,13 @@ function directKey(a: string, b: string): string {
   return [a, b].sort().join(':');
 }
 
+export function otherDirectUserId(key: string | null, me: string): string | null {
+  if (!key) return null;
+  const parts = key.split(':');
+  if (parts.length !== 2) return null;
+  return parts[0] === me ? (parts[1] ?? null) : parts[1] === me ? (parts[0] ?? null) : null;
+}
+
 /**
  * Channels and messages (community.md §2.4–2.11). Building channels are per building or block, created on
  * demand, with membership derived from active occupancy (rules 1–2), so move-ins and move-outs apply at
@@ -139,17 +146,33 @@ export class ChannelsService {
         orderBy: [{ type: 'asc' }, { name: 'asc' }],
       });
       const prefs = new Map(explicit.map((row) => [row.channelId, row]));
+      const directPeerIds = [
+        ...new Set(
+          rows
+            .filter((row) => row.type === 'direct')
+            .map((row) => otherDirectUserId(row.key, access.userId))
+            .filter((id): id is string => id !== null),
+        ),
+      ];
+      const peerNames =
+        directPeerIds.length > 0 ? await this.users.contactsOf(directPeerIds) : new Map();
       return rows.map((row) => {
         const pref = prefs.get(row.id);
         const derived = row.type === 'estate' || row.type === 'building';
-        return this.channelView(row, {
-          member: derived || pref?.status === 'active',
-          role: (pref?.role as Membership['role']) ?? (derived ? 'member' : null),
-          status: (pref?.status as Membership['status']) ?? (derived ? 'active' : null),
-          notify: (pref?.notify as Membership['notify']) ?? (derived ? 'mentions' : null),
-          mutedUntil: pref?.mutedUntil ?? null,
-          since: null,
-        });
+        const peerId = row.type === 'direct' ? otherDirectUserId(row.key, access.userId) : null;
+        const displayName = peerId ? (peerNames.get(peerId)?.fullName ?? undefined) : undefined;
+        return this.channelView(
+          row,
+          {
+            member: derived || pref?.status === 'active',
+            role: (pref?.role as Membership['role']) ?? (derived ? 'member' : null),
+            status: (pref?.status as Membership['status']) ?? (derived ? 'active' : null),
+            notify: (pref?.notify as Membership['notify']) ?? (derived ? 'mentions' : null),
+            mutedUntil: pref?.mutedUntil ?? null,
+            since: null,
+          },
+          displayName,
+        );
       });
     });
   }
@@ -416,7 +439,12 @@ export class ChannelsService {
         })),
         skipDuplicates: true,
       });
-      return this.channelView(row, await this.membership(tx, access, row));
+      const peerNames = await this.users.contactsOf([userId]);
+      return this.channelView(
+        row,
+        await this.membership(tx, access, row),
+        peerNames.get(userId)?.fullName ?? undefined,
+      );
     });
   }
 
@@ -794,11 +822,11 @@ export class ChannelsService {
     });
   }
 
-  private channelView(row: ChannelRow, membership: Membership) {
+  private channelView(row: ChannelRow, membership: Membership, displayName?: string) {
     return {
       id: row.id,
       type: row.type as 'building' | 'estate' | 'resident' | 'direct',
-      name: row.name,
+      name: displayName ?? row.name,
       description: row.description,
       category: row.category,
       privacy: row.privacy as 'public' | 'restricted' | 'invite_only',

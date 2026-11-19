@@ -36,6 +36,7 @@ export function usableMemberships(data: Memberships | undefined): Membership[] {
 interface ResidentContextValue {
   estateId: string;
   estateName: string;
+  activeMembership: Membership | null;
   memberships: Membership[];
   switchEstate: (estateId: string) => void;
   household: Household | null;
@@ -90,10 +91,14 @@ export function ResidentProvider({
   const value = useMemo<ResidentContextValue>(() => {
     const permissions = new Set(access.data?.permissions ?? []);
     const features = new Set(access.data?.features ?? []);
+    const ordered = active
+      ? [active, ...memberships.filter((item) => item.estate.id !== active.estate.id)]
+      : memberships;
     return {
       estateId,
       estateName: active?.estate.name ?? '',
-      memberships,
+      activeMembership: active ?? null,
+      memberships: ordered,
       switchEstate,
       household: households.data?.find((item) => item.status === 'active') ?? null,
       householdLoading: households.isPending && households.fetchStatus !== 'idle',

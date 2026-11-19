@@ -325,6 +325,12 @@ export default function JoinScreen() {
         />
       )}
       <ActionButton
+        label={t('res.more.help')}
+        variant="outline"
+        icon={<Icon name="help-circle-outline" color={colors.brand.primary} size={20} />}
+        onPress={() => router.push('/help')}
+      />
+      <ActionButton
         label={t('auth.signOut')}
         variant="text"
         onPress={() => void session.signOut()}

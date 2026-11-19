@@ -41,8 +41,13 @@ export default function CommunityScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { estateId, can } = useResident();
-  const [view, setView] = useState<'groups' | 'polls'>('groups');
+  const [view, setView] = useState<'groups' | 'messages' | 'polls'>('groups');
   const guidelines = useGuidelines();
+  const settings = useQuery({
+    queryKey: ['estate', estateId, 'settings'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/settings', { params: { path: { estateId } } })),
+  });
   const channels = useQuery({
     queryKey: ['estate', estateId, 'channels'],
     queryFn: () =>
@@ -54,7 +59,7 @@ export default function CommunityScreen() {
       unwrap(api.GET('/v1/estates/{estateId}/polls', { params: { path: { estateId } } })),
   });
   const pull = usePullRefresh(() =>
-    Promise.all([channels.refetch(), polls.refetch(), guidelines.refetch()]),
+    Promise.all([channels.refetch(), polls.refetch(), guidelines.refetch(), settings.refetch()]),
   );
   const join = useMutation({
     mutationFn: (channel: Channel) =>
@@ -72,6 +77,10 @@ export default function CommunityScreen() {
   const all = (channels.data ?? []).filter(
     (channel) => channel.type !== 'direct' && channel.status !== 'archived',
   );
+  const direct = (channels.data ?? []).filter(
+    (channel) => channel.type === 'direct' && channel.status !== 'archived',
+  );
+  const showMessages = Boolean(settings.data?.['community.private_messaging']) || direct.length > 0;
   const mine = all.filter((channel) => channel.myStatus === 'active');
   const others = all.filter((channel) => channel.myStatus !== 'active');
   const openPolls = (polls.data ?? []).filter((poll) => poll.status === 'open');
@@ -93,12 +102,15 @@ export default function CommunityScreen() {
           </Text>
         </Card>
       ) : null}
-      <Segmented
+      <Segmented<'groups' | 'messages' | 'polls'>
         label={t('res.community.title')}
         value={view}
         onChange={setView}
         options={[
           { key: 'groups', label: t('res.community.groups') },
+          ...(showMessages
+            ? [{ key: 'messages' as const, label: t('res.community.messages') }]
+            : []),
           {
             key: 'polls',
             label:
@@ -198,6 +210,39 @@ export default function CommunityScreen() {
               icon={<Icon name="add" color={colors.brand.primary} size={20} />}
               onPress={() => router.push('/channel/new')}
             />
+          ) : null}
+        </>
+      ) : view === 'messages' ? (
+        <>
+          {channels.isPending ? <Skeleton height={120} /> : null}
+          {channels.isError ? (
+            <ErrorState
+              message={errorText(channels.error)}
+              onRetry={() => void channels.refetch()}
+            />
+          ) : null}
+          {channels.data && direct.length === 0 ? (
+            <EmptyState
+              icon={<Icon name="mail-outline" size={28} color={colors.brand.primary} />}
+              title={t('res.community.messagesEmpty')}
+              body={t('res.community.messagesEmptyBody')}
+            />
+          ) : null}
+          {direct.length > 0 ? (
+            <Card>
+              {direct.map((channel) => (
+                <ListRow
+                  key={channel.id}
+                  title={channel.name}
+                  subtitle={t('res.community.type.direct')}
+                  leading={<Icon name="person-outline" color={colors.brand.primary} size={20} />}
+                  trailing={
+                    <Icon name="chevron-forward" size={18} color={colors.semantic.textMuted} />
+                  }
+                  onPress={() => router.push(`/channel/${channel.id}`)}
+                />
+              ))}
+            </Card>
           ) : null}
         </>
       ) : (

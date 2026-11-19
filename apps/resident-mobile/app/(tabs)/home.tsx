@@ -11,7 +11,9 @@ import {
 } from '@safezone/mobile-ui';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { EstateSwitcherModal } from '../../src/components/estate-switcher';
 import { Icon, type IconName } from '../../src/components/icon';
 import { SOS_CLEARANCE } from '../../src/components/sos-button';
 import { AnnouncementCard } from '../../src/features/announcement-card';
@@ -58,7 +60,8 @@ function Tile({
 export default function HomeScreen() {
   const router = useRouter();
   const user = useSession(session).user;
-  const { estateId, estateName, household, can, hasFeature } = useResident();
+  const { estateId, estateName, memberships, household, can, hasFeature } = useResident();
+  const [switchingEstate, setSwitchingEstate] = useState(false);
   const firstName = user?.fullName?.split(' ')[0] ?? '';
 
   const passes = useQuery({
@@ -113,12 +116,31 @@ export default function HomeScreen() {
         <Text accessibilityRole="header" style={styles.title}>
           {t('res.home.welcome')}
         </Text>
-        <View style={styles.place}>
-          <Icon name="location-outline" size={16} color={colors.semantic.textMuted} />
-          <Text style={styles.placeText}>
-            {household ? `${household.unit.code}, ${estateName}` : estateName}
-          </Text>
-        </View>
+        {memberships.length > 1 ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('res.estates.switchLabel', { estate: estateName })}
+            onPress={() => setSwitchingEstate(true)}
+            style={({ pressed }) => [
+              styles.place,
+              styles.placePressable,
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Icon name="location-outline" size={16} color={colors.brand.primary} />
+            <Text style={styles.placeText}>
+              {household ? `${household.unit.code}, ${estateName}` : estateName}
+            </Text>
+            <Icon name="chevron-down" size={16} color={colors.brand.primary} />
+          </Pressable>
+        ) : (
+          <View style={styles.place}>
+            <Icon name="location-outline" size={16} color={colors.semantic.textMuted} />
+            <Text style={styles.placeText}>
+              {household ? `${household.unit.code}, ${estateName}` : estateName}
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.tiles}>
@@ -213,6 +235,11 @@ export default function HomeScreen() {
           ))}
         </>
       ) : null}
+      <EstateSwitcherModal
+        visible={switchingEstate}
+        onClose={() => setSwitchingEstate(false)}
+        onJoinAnother={() => router.push('/join')}
+      />
     </ScrollScreen>
   );
 }
@@ -225,6 +252,7 @@ const styles = StyleSheet.create({
     color: colors.semantic.text,
   },
   place: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  placePressable: { alignSelf: 'flex-start', paddingVertical: spacing[1] },
   placeText: { fontSize: typography.size.sm, color: colors.semantic.text },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
   headerRow: { flexDirection: 'row', alignItems: 'center' },

@@ -1,3 +1,4 @@
+import { unwrap } from '@safezone/api-client';
 import { colors } from '@safezone/design-tokens';
 import { t } from '@safezone/i18n';
 import {
@@ -9,12 +10,13 @@ import {
   SectionHeader,
   useSession,
 } from '@safezone/mobile-ui';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Icon, type IconName } from '../../src/components/icon';
 import { SOS_CLEARANCE } from '../../src/components/sos-button';
 import { useResident } from '../../src/lib/resident';
-import { session } from '../../src/lib/session';
+import { api, session } from '../../src/lib/session';
 
 function Row({
   title,
@@ -44,6 +46,13 @@ export default function MoreScreen() {
   const user = useSession(session).user;
   const { memberships, estateId, switchEstate, household, hasFeature } = useResident();
   const [signingOut, setSigningOut] = useState(false);
+  const ownedUnits = useQuery({
+    queryKey: ['estate', estateId, 'owned-units'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/owned-units', { params: { path: { estateId } } })),
+    enabled: Boolean(estateId) && hasFeature('property'),
+  });
+  const ownedCount = ownedUnits.data?.length ?? 0;
   return (
     <ScrollScreen bottomInset={SOS_CLEARANCE}>
       <ScreenHeader title={t('res.more.title')} />
@@ -97,6 +106,38 @@ export default function MoreScreen() {
             onPress={() => router.push('/bookings')}
           />
         ) : null}
+        {hasFeature('occupancy') ? (
+          <Row
+            title={t('res.more.moves')}
+            subtitle={t('res.more.movesHint')}
+            icon="cube-outline"
+            onPress={() => router.push('/moves')}
+          />
+        ) : null}
+        {hasFeature('billing') ? (
+          <Row
+            title={t('res.more.utilities')}
+            subtitle={t('res.more.utilitiesHint')}
+            icon="flash-outline"
+            onPress={() => router.push('/utilities')}
+          />
+        ) : null}
+        {hasFeature('documents') ? (
+          <Row
+            title={t('res.more.documents')}
+            subtitle={t('res.more.documentsHint')}
+            icon="document-text-outline"
+            onPress={() => router.push('/documents')}
+          />
+        ) : null}
+        {ownedCount > 0 ? (
+          <Row
+            title={t('res.more.owner')}
+            subtitle={t('res.more.ownerHint', { count: ownedCount })}
+            icon="key-outline"
+            onPress={() => router.push('/owner')}
+          />
+        ) : null}
         <Row
           title={t('res.notifications.title')}
           icon="notifications-outline"
@@ -125,6 +166,12 @@ export default function MoreScreen() {
       ) : null}
       <SectionHeader title={t('res.more.account')} />
       <Card>
+        <Row
+          title={t('res.more.help')}
+          subtitle={t('res.more.helpHint')}
+          icon="help-circle-outline"
+          onPress={() => router.push('/help')}
+        />
         <Row
           title={t('res.more.joinAnother')}
           icon="add-circle-outline"

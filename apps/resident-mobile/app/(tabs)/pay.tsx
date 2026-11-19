@@ -15,8 +15,8 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Text } from 'react-native';
-import { Icon } from '../../src/components/icon';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Icon, type IconName } from '../../src/components/icon';
 import { SOS_CLEARANCE } from '../../src/components/sos-button';
 import { BankTransferCard } from '../../src/features/bank-transfer';
 import { type Invoice, isOpenInvoice } from '../../src/features/bills';
@@ -86,6 +86,28 @@ export default function PayScreen() {
       </Card>
       {start.isError ? <Banner tone="danger">{errorText(start.error)}</Banner> : null}
 
+      <View style={styles.quickRow}>
+        {hasFeature('payments') ? (
+          <QuickPill
+            icon="receipt-outline"
+            label={t('res.bills.receipts')}
+            onPress={() => router.push('/bills/receipts')}
+          />
+        ) : null}
+        <QuickPill
+          icon="document-text-outline"
+          label={t('res.bills.statement')}
+          onPress={() => router.push('/bills/statement')}
+        />
+        {hasFeature('billing') ? (
+          <QuickPill
+            icon="flash-outline"
+            label={t('res.bills.utilities')}
+            onPress={() => router.push('/utilities')}
+          />
+        ) : null}
+      </View>
+
       <Segmented
         label={t('res.bills.title')}
         value={view}
@@ -123,3 +145,50 @@ export default function PayScreen() {
     </ScrollScreen>
   );
 }
+
+function QuickPill({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: IconName;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [styles.quickPill, pressed && { opacity: 0.75 }]}
+    >
+      <Icon name={icon} size={18} color={colors.brand.primary} />
+      <Text style={styles.quickPillText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  quickRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  quickPill: {
+    flex: 1,
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.semantic.borderSubtle,
+    backgroundColor: colors.semantic.surface,
+    paddingHorizontal: 10,
+  },
+  quickPillText: {
+    fontSize: typography.size.sm,
+    fontWeight: '600',
+    color: colors.semantic.text,
+  },
+});

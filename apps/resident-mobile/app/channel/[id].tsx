@@ -59,7 +59,14 @@ export default function ChannelScreen() {
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState('');
   const [reported, setReported] = useState(false);
+  const [blocking, setBlocking] = useState<Message | null>(null);
+  const [blocked, setBlocked] = useState(false);
 
+  const settings = useQuery({
+    queryKey: ['estate', estateId, 'settings'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/settings', { params: { path: { estateId } } })),
+  });
   const channels = useQuery({
     queryKey: ['estate', estateId, 'channels'],
     queryFn: () =>
@@ -171,6 +178,32 @@ export default function ChannelScreen() {
     onSuccess: () =>
       void queryClient.invalidateQueries({ queryKey: ['estate', estateId, 'channels'] }),
   });
+  const startDirect = useMutation({
+    mutationFn: (userId: string) =>
+      unwrap(
+        api.POST('/v1/estates/{estateId}/direct-channels', {
+          params: { path: { estateId } },
+          body: { userId },
+        }),
+      ),
+    onSuccess: (dm) => {
+      void queryClient.invalidateQueries({ queryKey: ['estate', estateId, 'channels'] });
+      router.push(`/channel/${dm.id}`);
+    },
+  });
+  const blockUser = useMutation({
+    mutationFn: (userId: string) =>
+      unwrap(
+        api.POST('/v1/estates/{estateId}/blocks', {
+          params: { path: { estateId } },
+          body: { userId },
+        }),
+      ),
+    onSuccess: () => {
+      setBlocking(null);
+      setBlocked(true);
+    },
+  });
 
   const member = channel?.myStatus === 'active';
   const agreed = Boolean(guidelines.data?.acceptedAt);
@@ -262,6 +295,16 @@ export default function ChannelScreen() {
         {reported ? (
           <View style={{ paddingHorizontal: spacing[4] }}>
             <Banner tone="success">{t('res.chat.reported')}</Banner>
+          </View>
+        ) : null}
+        {blocked ? (
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <Banner tone="info">{t('res.chat.blocked')}</Banner>
+          </View>
+        ) : null}
+        {startDirect.isError ? (
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <Banner tone="danger">{errorText(startDirect.error)}</Banner>
           </View>
         ) : null}
         <FlatList
@@ -439,14 +482,40 @@ export default function ChannelScreen() {
                 />
               </>
             ) : (
-              <ActionButton
-                label={t('res.chat.report')}
-                variant="text"
-                onPress={() => {
-                  setReporting(selected);
-                  setSelected(null);
-                }}
-              />
+              <>
+                {selected &&
+                channel?.type !== 'direct' &&
+                settings.data?.['community.private_messaging'] ? (
+                  <ActionButton
+                    label={t('res.chat.messagePrivately')}
+                    variant="outline"
+                    busy={startDirect.isPending}
+                    onPress={() => {
+                      const authorId = selected.authorId;
+                      setSelected(null);
+                      startDirect.mutate(authorId);
+                    }}
+                  />
+                ) : null}
+                <ActionButton
+                  label={t('res.chat.report')}
+                  variant="text"
+                  onPress={() => {
+                    setReporting(selected);
+                    setSelected(null);
+                  }}
+                />
+                {selected ? (
+                  <ActionButton
+                    label={t('res.chat.blockUser')}
+                    variant="text"
+                    onPress={() => {
+                      setBlocking(selected);
+                      setSelected(null);
+                    }}
+                  />
+                ) : null}
+              </>
             )}
           </Pressable>
         </Pressable>
@@ -520,6 +589,19 @@ export default function ChannelScreen() {
         error={remove.isError ? errorText(remove.error) : null}
         onConfirm={() => deleting && remove.mutate(deleting)}
         onCancel={() => setDeleting(null)}
+      />
+
+      <ConfirmModal
+        visible={Boolean(blocking)}
+        title={t('res.chat.blockTitle', { name: blocking?.authorName ?? t('res.chat.someone') })}
+        body={t('res.chat.blockBody')}
+        confirmLabel={t('res.chat.blockConfirm')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        busy={blockUser.isPending}
+        error={blockUser.isError ? errorText(blockUser.error) : null}
+        onConfirm={() => blocking && blockUser.mutate(blocking.authorId)}
+        onCancel={() => setBlocking(null)}
       />
     </SafeAreaView>
   );

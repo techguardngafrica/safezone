@@ -112,6 +112,13 @@ export default function BillScreen() {
                   />
                 ))}
               </Card>
+              {hasFeature('payments') ? (
+                <ActionButton
+                  label={t('res.bills.viewReceipts')}
+                  variant="outline"
+                  onPress={() => router.push('/bills/receipts')}
+                />
+              ) : null}
             </>
           ) : null}
           {data.creditNotes.length > 0 ? (
