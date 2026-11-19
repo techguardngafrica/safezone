@@ -226,4 +226,43 @@ describe('SessionController', () => {
     expect(await controller.getAccessToken()).toBe('a');
     expect(controller.getState().status).toBe('signed_in');
   });
+  it('accepts an external sign-in (gate PIN) as signed in', async () => {
+    const storage = createMemorySessionStorage();
+    const controller = new SessionController(fakeApi(), storage, true);
+    await controller.restore();
+    await controller.acceptSignIn({
+      accessToken: 'gate-a',
+      accessTokenExpiresAt: future(),
+      refreshToken: 'gate-r',
+      mfaRequired: false,
+      mfaEnrolled: true,
+      user,
+      isNewUser: false,
+    });
+    expect(controller.getState()).toMatchObject({ status: 'signed_in', user, offline: false });
+    expect(await controller.getAccessToken()).toBe('gate-a');
+    expect(await storage.get()).toMatchObject({ refreshToken: 'gate-r' });
+  });
+
+  it('signs in offline without tokens and forgets the previous session', async () => {
+    const storage = createMemorySessionStorage();
+    await storage.set({
+      accessToken: 'old',
+      accessTokenExpiresAt: future(),
+      refreshToken: 'r',
+      user,
+    });
+    const controller = new SessionController(fakeApi(), storage, true);
+    const guard = { ...user, id: 'u2', fullName: 'Musa Bello' };
+    await controller.signInOffline(guard);
+    expect(controller.getState()).toMatchObject({
+      status: 'signed_in',
+      user: guard,
+      offline: true,
+    });
+    expect(await controller.getAccessToken()).toBeNull();
+    expect(await storage.get()).toBeNull();
+    await controller.handleUnauthorized();
+    expect(controller.getState().status).toBe('signed_out');
+  });
 });

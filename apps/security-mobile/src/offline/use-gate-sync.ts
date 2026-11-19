@@ -1,7 +1,8 @@
 import { ApiClientError, newIdempotencyKey, unwrap } from '@safezone/api-client';
 import { useNetworkState } from 'expo-network';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { api } from '../lib/session';
+import { gateDevice, deviceApi } from '../lib/device';
+import { api, session } from '../lib/session';
 import { offlineStore, type QueuedEvent } from './store';
 import { verifyOffline, type Credential, type OfflineCache, type VerifyResult } from './verify';
 
@@ -61,16 +62,44 @@ export function useGateSync(estateId: string, gateId: string | null) {
   const flush = useCallback(async () => {
     const batch = offlineStore.pending(estateId);
     if (batch.length === 0) return;
-    const result = await unwrap(
-      api.POST('/v1/estates/{estateId}/gate/sync', {
-        params: { path: { estateId } },
-        body: { deviceNow: new Date().toISOString(), events: batch },
-      }),
-    );
+    const deviceNow = new Date().toISOString();
+    const signedOffline = batch.filter((event) => event.offlineGuardUserId);
+    const normal = batch.filter((event) => !event.offlineGuardUserId);
+    let rejectedCount = 0;
+    const done: string[] = [];
+    // Events of an offline PIN sign-in go with the device credential; the server flags them.
+    const device = gateDevice.current();
+    if (signedOffline.length > 0 && device) {
+      const result = await unwrap(
+        deviceApi.POST('/v1/gate-devices/sync', {
+          body: {
+            deviceCredential: device.credential,
+            deviceNow,
+            events: signedOffline.map(({ offlineGuardUserId, ...event }) => ({
+              ...event,
+              guardUserId: offlineGuardUserId as string,
+            })),
+          },
+        }),
+      );
+      rejectedCount += result.rejected.length;
+      done.push(...signedOffline.map((event) => event.clientUuid));
+    }
+    // The rest needs a guard session; an offline sign-in has none yet.
+    if (normal.length > 0 && !session.getState().offline) {
+      const result = await unwrap(
+        api.POST('/v1/estates/{estateId}/gate/sync', {
+          params: { path: { estateId } },
+          body: { deviceNow, events: normal },
+        }),
+      );
+      rejectedCount += result.rejected.length;
+      done.push(...normal.map((event) => event.clientUuid));
+    }
     // Accepted and duplicate events are done; rejected ones can never succeed, so they leave the queue
     // too and the guard is told how many (the supervisor sees the gap in the visitor log).
-    offlineStore.remove(batch.map((event) => event.clientUuid));
-    if (result.rejected.length > 0) setRejected((value) => value + result.rejected.length);
+    offlineStore.remove(done);
+    if (rejectedCount > 0) setRejected((value) => value + rejectedCount);
   }, [estateId]);
 
   const refresh = useCallback(
@@ -80,6 +109,8 @@ export function useGateSync(estateId: string, gateId: string | null) {
       const now = Date.now();
       try {
         await flush();
+        // An offline PIN sign-in has no token: only device-credential sync is possible.
+        if (session.getState().offline) return;
         if (force || now - last.current.keys > KEYS_EVERY_MS) {
           const keys = await unwrap(
             api.GET('/v1/estates/{estateId}/gate/keys', { params: { path: { estateId } } }),
@@ -134,7 +165,7 @@ export function useGateSync(estateId: string, gateId: string | null) {
   const verify = useCallback(
     async (credential: Credential, direction: 'in' | 'out'): Promise<VerifyResult> => {
       if (!gateId) throw new Error('No gate selected');
-      if (reachable) {
+      if (reachable && !session.getState().offline) {
         try {
           const result = await unwrap(
             api.POST('/v1/estates/{estateId}/gate/verify', {
@@ -159,13 +190,15 @@ export function useGateSync(estateId: string, gateId: string | null) {
   const record = useCallback(
     async (input: NewGateEvent): Promise<{ queued: boolean }> => {
       if (!gateId) throw new Error('No gate selected');
+      const state = session.getState();
       const event: QueuedEvent = {
         ...input,
         clientUuid: newIdempotencyKey(),
         gateId,
         occurredAt: new Date().toISOString(),
+        ...(state.offline && state.user ? { offlineGuardUserId: state.user.id } : {}),
       };
-      if (reachable) {
+      if (reachable && !state.offline) {
         try {
           await unwrap(
             api.POST('/v1/estates/{estateId}/gate/events', {

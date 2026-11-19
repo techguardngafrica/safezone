@@ -134,6 +134,8 @@ export interface QueuedEvent {
   decision: 'allow' | 'check' | 'deny' | 'override';
   reason?: string;
   occurredAt: string;
+  /** Set when recorded under an offline PIN sign-in: synced with the device credential (ADR-0017). */
+  offlineGuardUserId?: string;
 }
 
 function serialiseEvent(event: QueuedEvent): string {

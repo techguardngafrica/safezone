@@ -12,12 +12,29 @@ import {
   gateStyles,
   GateTitle,
 } from '../src/components/gate-ui';
+import { useSession } from '@safezone/mobile-ui';
+import { isGateSessionUser } from '../src/features/guard-auth';
+import { useGateDevice } from '../src/lib/device';
 import { useGate } from '../src/lib/gate';
 import { session } from '../src/lib/session';
 
 /** Gate settings: which gate this phone serves, manual sync, and sign-out at shift end. */
 export default function SettingsScreen() {
-  const { gate, estateName, chooseGate, sync, memberships, switchEstate, estateId } = useGate();
+  const {
+    gate,
+    estateName,
+    chooseGate,
+    sync,
+    memberships,
+    switchEstate,
+    estateId,
+    fixedDevice,
+    can,
+  } = useGate();
+  const { device } = useGateDevice();
+  const state = useSession(session);
+  // Phone sign-in (not a guard PIN session) may set a PIN and register the phone.
+  const personal = !state.offline && !isGateSessionUser(state.user?.id);
   const [syncing, setSyncing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
@@ -47,23 +64,48 @@ export default function SettingsScreen() {
           disabled={!sync.online}
           onPress={() => void syncNow()}
         />
-        <BigButton
-          label={t('sec.settings.changeGate')}
-          tone="outline"
-          icon="swap-horizontal-outline"
-          onPress={() => chooseGate(null)}
-        />
-        {memberships
-          .filter((membership) => membership.estate.id !== estateId)
-          .map((membership) => (
+        {device ? (
+          <BodyText>
+            {t('sec.device.registered', { name: device.deviceName, gate: device.gateName })}
+          </BodyText>
+        ) : null}
+        {!fixedDevice ? (
+          <>
             <BigButton
-              key={membership.estate.id}
-              label={`${t('sec.switchEstate')}: ${membership.estate.name}`}
+              label={t('sec.settings.changeGate')}
               tone="outline"
-              icon="business-outline"
-              onPress={() => switchEstate(membership.estate.id)}
+              icon="swap-horizontal-outline"
+              onPress={() => chooseGate(null)}
             />
-          ))}
+            {memberships
+              .filter((membership) => membership.estate.id !== estateId)
+              .map((membership) => (
+                <BigButton
+                  key={membership.estate.id}
+                  label={`${t('sec.switchEstate')}: ${membership.estate.name}`}
+                  tone="outline"
+                  icon="business-outline"
+                  onPress={() => switchEstate(membership.estate.id)}
+                />
+              ))}
+          </>
+        ) : null}
+        {personal && can('gate.verify') ? (
+          <BigButton
+            label={t('sec.pinSetup.open')}
+            tone="outline"
+            icon="keypad-outline"
+            onPress={() => router.push('/pin-setup')}
+          />
+        ) : null}
+        {personal && !device && can('gate.device.manage') ? (
+          <BigButton
+            label={t('sec.device.register')}
+            tone="outline"
+            icon="phone-portrait-outline"
+            onPress={() => router.push('/register-device')}
+          />
+        ) : null}
         <BigButton
           label={t('sec.shift.end')}
           tone="outline"

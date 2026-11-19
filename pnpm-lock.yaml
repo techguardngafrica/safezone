@@ -493,6 +493,9 @@ importers:
       '@safezone/mobile-ui':
         specifier: workspace:*
         version: link:../../packages/mobile-ui
+      '@safezone/permissions':
+        specifier: workspace:*
+        version: link:../../packages/permissions
       '@safezone/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas

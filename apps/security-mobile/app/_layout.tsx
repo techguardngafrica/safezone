@@ -7,9 +7,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { BigButton } from '../src/components/gate-ui';
 import { GatePicker, NotAGuard } from '../src/features/gate-setup';
+import { forgetGateSessionUser, isGateSessionUser } from '../src/features/guard-auth';
+import { GuardSignIn } from '../src/features/guard-sign-in';
+import { IdleLock } from '../src/features/idle-lock';
 import { SosWatcher } from '../src/features/sos-watcher';
 import { errorText } from '../src/lib/errors';
+import { gateDevice, useGateDevice } from '../src/lib/device';
 import { GateProvider, useGate, useMemberships, usableMemberships } from '../src/lib/gate';
 import { session } from '../src/lib/session';
 
@@ -27,10 +32,13 @@ function Splash() {
 /** Routes for a guard at a chosen gate. SOS alarms open over any screen. */
 function GateApp() {
   const { gate, can, permissionsLoaded } = useGate();
+  const { device } = useGateDevice();
+  const state = useSession(session);
+  const pinSession = state.offline === true || isGateSessionUser(state.user?.id);
   if (!permissionsLoaded) return <Splash />;
   if (!can('gate.verify')) return <NotAGuard />;
   if (!gate) return <GatePicker />;
-  return (
+  const routes = (
     <>
       <Stack
         screenOptions={{
@@ -46,6 +54,14 @@ function GateApp() {
       </Stack>
       <SosWatcher />
     </>
+  );
+  // On a shared gate phone, guard sessions lock after 10 minutes idle (personal phones do not).
+  return device ? (
+    <IdleLock device={device} pinUnlock={pinSession}>
+      {routes}
+    </IdleLock>
+  ) : (
+    routes
   );
 }
 
@@ -71,23 +87,49 @@ function SignedInApp() {
 }
 
 /**
- * Phase 1 start: supervisor or officer phone + OTP (+ MFA for staff). Gate-device registration and guard
- * PIN shift sign-in (identity.md §5.3) replace this once their API lands.
+ * Sign-in: on a registered gate phone, guards pick their name and enter their PIN (ADR-0017); phone,
+ * SMS code and MFA stay available for supervisors and for guards setting their first PIN.
  */
 function AuthGate() {
   const state = useSession(session);
+  const { loaded, device } = useGateDevice();
+  const [phoneSignIn, setPhoneSignIn] = useState(false);
   useEffect(() => {
+    void gateDevice.load();
     if (session.getState().status === 'restoring') void session.restore();
   }, []);
-  if (state.status === 'restoring') return <Splash />;
-  if (state.status !== 'signed_in')
+  useEffect(() => {
+    if (state.status === 'signed_in') setPhoneSignIn(false);
+  }, [state.status]);
+  if (state.status === 'restoring' || !loaded) return <Splash />;
+  if (state.status !== 'signed_in') {
+    if (device && !phoneSignIn)
+      return (
+        <GuardSignIn
+          device={device}
+          onPhoneSignIn={() => {
+            forgetGateSessionUser();
+            setPhoneSignIn(true);
+          }}
+        />
+      );
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.semantic.background }}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, gap: 8 }}>
           <SignInFlow controller={session} title={t('app.name')} intro={t('sec.signIn.intro')} />
+          {device && state.status === 'signed_out' ? (
+            <View style={{ padding: 16 }}>
+              <BigButton
+                label={t('sec.guard.backToGuards')}
+                tone="outline"
+                onPress={() => setPhoneSignIn(false)}
+              />
+            </View>
+          ) : null}
         </View>
       </SafeAreaView>
     );
+  }
   return <SignedInApp />;
 }
 

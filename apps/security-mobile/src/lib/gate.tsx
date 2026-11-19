@@ -1,4 +1,6 @@
 import { type ApiData, ApiClientError, unwrap } from '@safezone/api-client';
+import { useSession } from '@safezone/mobile-ui';
+import { GATE_SESSION_PERMISSIONS } from '@safezone/permissions';
 import { useQuery } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import {
@@ -12,7 +14,8 @@ import {
 } from 'react';
 import { offlineStore } from '../offline/store';
 import { type GateSync, useGateSync } from '../offline/use-gate-sync';
-import { api } from './session';
+import { useGateDevice } from './device';
+import { api, session } from './session';
 
 type Memberships = ApiData<'/v1/me/memberships', 'get'>;
 export type Membership = Memberships[number];
@@ -65,6 +68,8 @@ interface GateContextValue {
   gatesLoading: boolean;
   gate: Gate | null;
   chooseGate: (gateId: string | null) => void;
+  /** This phone is a registered gate device: estate and gate cannot change here. */
+  fixedDevice: boolean;
   permissionsLoaded: boolean;
   can: (permission: string) => boolean;
   hasFeature: (feature: string) => boolean;
@@ -105,9 +110,11 @@ export function GateProvider({
     void SecureStore.setItemAsync(SELECTION_KEY, JSON.stringify(next)).catch(() => undefined);
   }, []);
 
+  // A registered gate device is fixed to its estate and gate (ADR-0017).
+  const { device } = useGateDevice();
+  const wanted = device?.estateId ?? selection?.estateId;
   const active =
-    memberships.find((membership) => membership.estate.id === selection?.estateId) ??
-    memberships[0];
+    memberships.find((membership) => membership.estate.id === wanted) ?? memberships[0];
   const estateId = active?.estate.id ?? '';
 
   const access = useQuery({
@@ -130,24 +137,47 @@ export function GateProvider({
     () => (gatesQuery.data ?? []).filter((gate) => gate.status === 'active'),
     [gatesQuery.data],
   );
-  const gateId = selection?.estateId === estateId ? selection.gateId : null;
-  const gate = gates.find((item) => item.id === gateId) ?? null;
+  const gateId =
+    device && device.estateId === estateId
+      ? device.gateId
+      : selection?.estateId === estateId
+        ? selection.gateId
+        : null;
+  const gate =
+    gates.find((item) => item.id === gateId) ??
+    (device && gateId === device.gateId
+      ? {
+          id: device.gateId,
+          name: device.gateName,
+          type: 'both' as const,
+          status: 'active' as const,
+        }
+      : null);
 
   const sync = useGateSync(estateId, gate?.id ?? null);
 
+  const offline = useSession(session).offline === true;
   const value = useMemo<GateContextValue>(() => {
-    const permissions = new Set(access.data?.permissions ?? []);
+    // An offline PIN sign-in works within the gate ceiling only (ADR-0017 point 6).
+    const permissions = new Set<string>(
+      offline ? GATE_SESSION_PERMISSIONS : (access.data?.permissions ?? []),
+    );
     const features = new Set(access.data?.features ?? []);
     return {
       estateId,
       estateName: active?.estate.name ?? '',
       memberships,
-      switchEstate: (id) => save({ estateId: id, gateId: null }),
+      switchEstate: (id) => {
+        if (!device) save({ estateId: id, gateId: null });
+      },
       gates,
       gatesLoading: gatesQuery.isPending && gatesQuery.fetchStatus !== 'idle',
       gate,
-      chooseGate: (id) => save({ estateId, gateId: id }),
-      permissionsLoaded: access.isSuccess,
+      chooseGate: (id) => {
+        if (!device) save({ estateId, gateId: id });
+      },
+      fixedDevice: Boolean(device),
+      permissionsLoaded: offline || access.isSuccess,
       can: (permission) => permissions.has(permission),
       hasFeature: (feature) => features.has(feature),
       sync,
@@ -156,6 +186,8 @@ export function GateProvider({
     access.data,
     access.isSuccess,
     active,
+    device,
+    offline,
     estateId,
     gate,
     gates,

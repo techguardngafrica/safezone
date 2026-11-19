@@ -59,6 +59,11 @@ export interface SessionState {
   recoveryCodes?: string[];
   /** Stable API error code of the last failed action (shown through i18n by the UI). */
   errorCode?: string;
+  /**
+   * Signed in on this device without the server (Security App offline PIN sign-in, ADR-0017). There is
+   * no token: API calls fail until the guard signs in online.
+   */
+  offline?: boolean;
   busy: boolean;
 }
 
@@ -130,6 +135,27 @@ export class SessionController {
       }
       await this.clear();
     }
+  }
+
+  /**
+   * Accepts a sign-in done outside the OTP flow (Security App gate PIN sign-in, ADR-0017). Gate sessions
+   * are MFA-satisfied, so the result is signed in straight away.
+   */
+  async acceptSignIn(result: SignInResult): Promise<void> {
+    await this.acceptTokens(result);
+    this.set({ status: 'signed_in', user: result.user, offline: false, errorCode: undefined });
+  }
+
+  /**
+   * Signed in on the device only (offline PIN check). Nothing is stored: a restart, a sign-out or the
+   * first answer from the server ends it.
+   */
+  async signInOffline(user: SessionUser): Promise<void> {
+    this.accessToken = null;
+    this.accessTokenExpiresAt = null;
+    // A previous guard's stored session must never carry over to this one.
+    await this.storage.clear();
+    this.set({ status: 'signed_in', user, offline: true, busy: false, errorCode: undefined });
   }
 
   async requestCode(phone: string): Promise<void> {

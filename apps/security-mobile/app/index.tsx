@@ -84,7 +84,9 @@ function SosBanner() {
 export default function GateHome() {
   useKeepAwake();
   const { gate, estateName, sync, can } = useGate();
-  const user = useSession(session).user;
+  const sessionState = useSession(session);
+  const user = sessionState.user;
+  const offlineSession = sessionState.offline === true;
   const expected = useExpectedCount();
   const guard = user?.fullName ?? user?.phone ?? '';
 
@@ -110,6 +112,11 @@ export default function GateHome() {
 
         <SosBanner />
         <ShiftBanner />
+        {offlineSession ? (
+          <View style={styles.offline} accessibilityLiveRegion="polite">
+            <BodyText>{t('sec.offlineSession')}</BodyText>
+          </View>
+        ) : null}
         {!sync.online ? (
           <View style={styles.offline} accessibilityLiveRegion="polite">
             <BodyText>{t('sec.offlineNote')}</BodyText>
