@@ -22,6 +22,7 @@ It is designed for **shared phones mounted at the gate**, used by guards on rota
 - Android 8+ (priority; most gate devices) and iOS 15+.
 - Expo (React Native), TypeScript.
 - Camera QR scanning (`expo-camera`), local SQLite (`expo-sqlite`) for offline cache and sync queue.
+- Offline signature check: `@noble/curves` (Ed25519) and `@noble/hashes` (SHA-256 for PIN digests), pure JS so they run in Hermes without a native module. Approved by the product owner on 19 Nov 2026.
 - Kiosk mode: Android screen pinning / dedicated device policy where available; app stays foreground.
 - Push via Expo Notifications plus a foreground realtime socket for SOS.
 - **No advertising anywhere in this app.**
@@ -198,7 +199,19 @@ apps/security-mobile/
 - Maestro flows: register device, guard sign-in, scan valid/expired/revoked pass, walk-in approve/reject/timeout, SOS acknowledge/resolve, incident with photo, shift handover.
 - Field test at a real gate before every Phase 1 release (morning peak, sunlight, poor network).
 
-## 14. Acceptance highlights (Phase 1)
+## 14. Implementation status (19 Nov 2026)
+
+Built: gate home, QR scan and PIN check (online, with the offline signed-pass fallback in `src/offline/`), full-screen ALLOW / CHECK / DENY result with entry, exit, override and refusal recording, sync queue (`gate/sync`), expected list with search (name, plate, unit, PIN), inside now with exit, walk-in request and countdown, vehicle check, SOS alarm (polled every 4 s while open, plus Expo push when an EAS project id is set), SOS response actions, guard-raised SOS, gate settings.
+
+Differences from this spec, until their APIs exist:
+
+- Sign-in is phone + OTP (+ MFA) per person, not device registration plus guard PIN (§4). Idle auto-lock (§10) waits for the PIN sign-in.
+- Incidents (§7.7) and shifts and handover (§7.8) have no screens yet.
+- **Request backup** and **Call resident** are not offered on the SOS screen: there is no backup endpoint, and guards do not get the resident's number. Emergency contacts on the alert can be called.
+- A pass picked from the expected list by name is never stronger than CHECK, because the guard has not seen its QR or PIN.
+- Offline entries the server rejects during sync leave the queue, and the home screen shows how many so the guard can tell the supervisor.
+
+## 15. Acceptance highlights (Phase 1)
 
 - With the network off, a valid pass is accepted, a revoked pass (revoked before the last sync) is denied, and all entries sync correctly when the network returns.
 - A guard can process a pre-approved visitor in under 20 seconds.

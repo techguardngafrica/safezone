@@ -13,6 +13,11 @@ export interface StoredSession {
   refreshToken?: string;
   /** ISO timestamp from the API. */
   accessTokenExpiresAt: string;
+  /**
+   * Who was fully signed in (after MFA), kept so a mobile app can reopen without a connection. Never set
+   * while MFA is still pending, so an offline restore cannot skip MFA.
+   */
+  user?: { id: string; phone: string; fullName: string | null; mfaEnabled: boolean };
 }
 
 export interface SessionStorage {

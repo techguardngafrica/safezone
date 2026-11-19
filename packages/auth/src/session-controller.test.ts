@@ -181,4 +181,49 @@ describe('SessionController', () => {
     expect(second).toBe('access-2');
     expect(api.refresh).toHaveBeenCalledTimes(1);
   });
+  it('reopens a fully signed-in mobile session offline and keeps it when a refresh fails offline', async () => {
+    const storage = createMemorySessionStorage();
+    const online = new SessionController(fakeApi(), storage, true);
+    await online.requestCode('+2348031234567');
+    await online.verifyCode('123456');
+    await vi.waitFor(async () => expect((await storage.get())?.user).toEqual(user));
+
+    const offlineApi = fakeApi({ refresh: vi.fn().mockRejectedValue({ code: 'NETWORK_ERROR' }) });
+    const reopened = new SessionController(offlineApi, storage, true);
+    await reopened.restore();
+    expect(reopened.getState()).toMatchObject({ status: 'signed_in', user });
+    expect(await storage.get()).not.toBeNull();
+  });
+
+  it('does not reopen offline when MFA was never completed', async () => {
+    const storage = createMemorySessionStorage();
+    await storage.set({ accessToken: 'a', accessTokenExpiresAt: future(), refreshToken: 'r' });
+    const controller = new SessionController(
+      fakeApi({ refresh: vi.fn().mockRejectedValue({ code: 'NETWORK_ERROR' }) }),
+      storage,
+      true,
+    );
+    await controller.restore();
+    expect(controller.getState().status).toBe('signed_out');
+  });
+
+  it('keeps the session when a token refresh fails for lack of network', async () => {
+    const api = fakeApi({
+      verifyOtp: vi.fn().mockResolvedValue({
+        accessToken: 'a',
+        accessTokenExpiresAt: new Date(Date.now() + 10_000).toISOString(),
+        refreshToken: 'r',
+        mfaRequired: false,
+        mfaEnrolled: false,
+        user,
+        isNewUser: false,
+      }),
+      refresh: vi.fn().mockRejectedValue({ code: 'NETWORK_ERROR' }),
+    });
+    const controller = new SessionController(api, createMemorySessionStorage(), true);
+    await controller.requestCode('+2348031234567');
+    await controller.verifyCode('123456');
+    expect(await controller.getAccessToken()).toBe('a');
+    expect(controller.getState().status).toBe('signed_in');
+  });
 });

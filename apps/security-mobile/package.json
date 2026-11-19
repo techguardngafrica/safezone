@@ -2,7 +2,7 @@
   "name": "@safezone/security-mobile",
   "version": "0.0.0",
   "private": true,
-  "description": "Safezone Security App (Expo) \u2014 gate verification, offline passes, SOS response, incidents, shifts. No advertising.",
+  "description": "Safezone Security App (Expo) — gate verification, offline passes, SOS response, incidents, shifts. No advertising.",
   "main": "expo-router/entry",
   "scripts": {
     "dev": "node ../../scripts/phone-env.mjs && EXPO_NO_REDIRECT_PAGE=1 expo start --go",
@@ -31,6 +31,9 @@
     "clean": "rm -rf .expo .turbo"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "@noble/curves": "^1.9.7",
+    "@noble/hashes": "^1.8.0",
     "@safezone/api-client": "workspace:*",
     "@safezone/auth": "workspace:*",
     "@safezone/contracts": "workspace:*",

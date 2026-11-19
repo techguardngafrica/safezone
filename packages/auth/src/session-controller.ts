@@ -119,7 +119,15 @@ export class SessionController {
       await this.acceptTokens(tokens);
       const user = await this.api.me(tokens.accessToken);
       this.set({ status: this.statusAfterTokens(tokens), user, busy: false });
-    } catch {
+    } catch (error) {
+      // No connection is not a sign-out: a mobile app that was fully signed in reopens offline and
+      // refreshes once the network is back (gate devices must keep working, security-mobile.md §8).
+      if (codeOf(error) === 'NETWORK_ERROR' && this.keepsRefreshToken && stored?.user) {
+        this.accessToken = stored.accessToken;
+        this.accessTokenExpiresAt = stored.accessTokenExpiresAt;
+        this.set({ status: 'signed_in', user: stored.user, busy: false });
+        return;
+      }
       await this.clear();
     }
   }
@@ -201,7 +209,10 @@ export class SessionController {
       const tokens = await this.api.refresh(stored?.refreshToken);
       await this.acceptTokens(tokens);
       return tokens.accessToken;
-    } catch {
+    } catch (error) {
+      // Offline: keep the session and the current token (the call fails on the network anyway); the
+      // next call refreshes again once the connection is back.
+      if (codeOf(error) === 'NETWORK_ERROR') return this.accessToken;
       await this.clear();
       return null;
     }
@@ -228,7 +239,15 @@ export class SessionController {
       accessToken: tokens.accessToken,
       accessTokenExpiresAt: tokens.accessTokenExpiresAt,
       ...(refreshToken ? { refreshToken } : {}),
+      ...(previous?.user && !tokens.mfaRequired ? { user: previous.user } : {}),
     });
+  }
+
+  /** Remembers the fully signed-in user next to the tokens (mobile only) for offline restore. */
+  private async rememberUser(user: SessionUser): Promise<void> {
+    if (!this.keepsRefreshToken) return;
+    const stored = await this.storage.get();
+    if (stored) await this.storage.set({ ...stored, user });
   }
 
   private requireToken(): string {
@@ -256,7 +275,10 @@ export class SessionController {
   }
 
   private set(patch: Partial<SessionState>): void {
+    const wasSignedIn = this.state.status === 'signed_in';
     this.state = { ...this.state, ...patch };
+    if (!wasSignedIn && this.state.status === 'signed_in' && this.state.user)
+      void this.rememberUser(this.state.user).catch(() => undefined);
     this.emit();
   }
 
