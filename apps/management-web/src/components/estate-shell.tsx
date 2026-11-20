@@ -21,7 +21,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { EstateProvider, useEstate, useEstateAccess, useMemberships } from '../../lib/estate';
 import { errorText } from '../../lib/errors';
+import { RealtimeProvider } from '../../lib/realtime';
 import { api, session } from '../../lib/session';
+import { GlobalSearch } from './global-search';
 import { SosAlarm } from './sos-alarm';
 
 interface NavSpec {
@@ -48,6 +50,18 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         permission: 'security.staff.manage',
         feature: 'security',
       },
+      {
+        path: 'estate/import',
+        label: 'nav.bulkImport',
+        icon: 'upload',
+        permission: 'import.run',
+      },
+      {
+        path: 'onboarding',
+        label: 'nav.setupWizard',
+        icon: 'sliders',
+        permission: 'estate.configure',
+      },
     ],
   },
   {
@@ -61,6 +75,20 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         feature: 'occupancy',
       },
       {
+        path: 'people/households',
+        label: 'nav.households',
+        icon: 'home',
+        permission: 'resident.read',
+        feature: 'occupancy',
+      },
+      {
+        path: 'people/owners',
+        label: 'nav.owners',
+        icon: 'building',
+        permission: ['resident.read', 'space.manage'],
+        feature: 'property',
+      },
+      {
         path: 'people/join-requests',
         label: 'nav.joinRequests',
         icon: 'userCheck',
@@ -68,11 +96,37 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         feature: 'occupancy',
         badge: 'joinRequests',
       },
+      {
+        path: 'people/moves',
+        label: 'nav.moves',
+        icon: 'home',
+        permission: 'resident.approve',
+        feature: 'occupancy',
+      },
+      {
+        path: 'people/staff',
+        label: 'nav.staff',
+        icon: 'userPlus',
+        permission: 'role.assign',
+      },
+      {
+        path: 'people/roles',
+        label: 'nav.roles',
+        icon: 'key',
+        permission: 'role.assign',
+      },
     ],
   },
   {
     label: 'nav.group.security',
     items: [
+      {
+        path: 'security/live-gate',
+        label: 'nav.liveGate',
+        icon: 'activity',
+        permission: 'visitor.log.read',
+        feature: 'visitors',
+      },
       {
         path: 'security/sos',
         label: 'nav.sos',
@@ -96,10 +150,31 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         feature: 'visitors',
       },
       {
+        path: 'security/restricted-visitors',
+        label: 'nav.restrictedVisitors',
+        icon: 'ban',
+        permission: 'visitor.log.read',
+        feature: 'visitors',
+      },
+      {
         path: 'security/guards',
         label: 'nav.guards',
         icon: 'shield',
         permission: 'security.staff.manage',
+        feature: 'security',
+      },
+      {
+        path: 'security/shifts',
+        label: 'nav.shifts',
+        icon: 'clock',
+        permission: 'security.staff.manage',
+        feature: 'security',
+      },
+      {
+        path: 'security/incidents',
+        label: 'nav.incidents',
+        icon: 'flag',
+        permission: ['incident.manage', 'incident.report'],
         feature: 'security',
       },
       {
@@ -120,6 +195,53 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         icon: 'megaphone',
         permission: 'announcement.publish',
         feature: 'announcements',
+      },
+      {
+        path: 'community/channels',
+        label: 'nav.channels',
+        icon: 'messageSquare',
+        permission: ['community.moderate', 'community.channel.create'],
+        feature: 'community',
+      },
+      {
+        path: 'community/moderation',
+        label: 'nav.moderation',
+        icon: 'shield',
+        permission: 'community.moderate',
+        feature: 'community',
+      },
+      {
+        path: 'community/polls',
+        label: 'nav.polls',
+        icon: 'barChart',
+        permission: 'announcement.publish',
+        feature: 'community',
+      },
+    ],
+  },
+  {
+    label: 'nav.group.operations',
+    items: [
+      {
+        path: 'operations/maintenance',
+        label: 'nav.maintenance',
+        icon: 'wrench',
+        permission: ['maintenance.assign', 'maintenance.request'],
+        feature: 'maintenance',
+      },
+      {
+        path: 'operations/work-orders',
+        label: 'nav.workOrders',
+        icon: 'clipboard',
+        permission: 'maintenance.assign',
+        feature: 'maintenance',
+      },
+      {
+        path: 'operations/facilities',
+        label: 'nav.facilities',
+        icon: 'calendar',
+        permission: 'facility.manage',
+        feature: 'facilities',
       },
     ],
   },
@@ -154,6 +276,44 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         permission: ['payment.reconcile', 'billing.run.approve'],
         feature: 'payments',
       },
+      {
+        path: 'finance/approvals',
+        label: 'nav.approvals',
+        icon: 'fileCheck',
+        permission: 'billing.run.approve',
+        feature: 'billing',
+      },
+      {
+        path: 'finance/reconciliation',
+        label: 'nav.reconciliation',
+        icon: 'activity',
+        permission: 'payment.reconcile',
+        feature: 'payments',
+      },
+      {
+        path: 'finance/utilities',
+        label: 'nav.utilities',
+        icon: 'sliders',
+        permission: ['estate.configure', 'announcement.publish'],
+        feature: 'utilities',
+      },
+    ],
+  },
+  {
+    items: [
+      {
+        path: 'documents',
+        label: 'nav.documents',
+        icon: 'folder',
+        permission: 'document.manage',
+        feature: 'documents',
+      },
+      {
+        path: 'reports',
+        label: 'nav.reports',
+        icon: 'barChart',
+        permission: 'report.read',
+      },
     ],
   },
   {
@@ -163,6 +323,18 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         path: 'settings/estate',
         label: 'nav.estateSettings',
         icon: 'settings',
+        permission: 'estate.configure',
+      },
+      {
+        path: 'settings/support-access',
+        label: 'nav.supportAccess',
+        icon: 'shield',
+        permission: 'estate.configure',
+      },
+      {
+        path: 'settings/data-export',
+        label: 'nav.dataExport',
+        icon: 'download',
         permission: 'estate.configure',
       },
       {
@@ -233,6 +405,7 @@ function TopBar() {
         <strong style={{ fontSize: 16 }}>{estateName}</strong>
       )}
       <span style={{ flex: 1 }} />
+      <GlobalSearch />
       <span className="sz-muted" style={{ fontSize: 14 }}>
         {state.user?.fullName ?? state.user?.phone}
       </span>
@@ -353,7 +526,9 @@ function EstateAccess({ estateId, children }: { estateId: string; children: Reac
 export function EstateShell({ estateId, children }: { estateId: string; children: ReactNode }) {
   return (
     <SessionGate controller={session} title={t('app.name')}>
-      <EstateAccess estateId={estateId}>{children}</EstateAccess>
+      <RealtimeProvider>
+        <EstateAccess estateId={estateId}>{children}</EstateAccess>
+      </RealtimeProvider>
     </SessionGate>
   );
 }

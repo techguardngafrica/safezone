@@ -2609,3 +2609,53 @@ model PollVote {
   @@map("poll_votes")
   @@schema("tenant")
 }
+
+// ---- Bulk imports and support-access consent (management-web.md §6.4, §6.13; ADR-0019) ----------
+
+model BulkImportJob {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  /// units | owners | residents | households | vehicles | opening_balances
+  kind         String
+  /// dry_run | queued | running | completed | failed
+  status       String    @default("dry_run")
+  filename     String
+  totalRows    Int       @default(0) @map("total_rows")
+  validRows    Int       @default(0) @map("valid_rows")
+  errorRows    Int       @default(0) @map("error_rows")
+  createdCount Int       @default(0) @map("created_count")
+  updatedCount Int       @default(0) @map("updated_count")
+  errorsJson   Json      @default("[]") @map("errors_json")
+  payloadJson  Json      @default("[]") @map("payload_json")
+  createdBy    String    @map("created_by") @db.Uuid
+  confirmedBy  String?   @map("confirmed_by") @db.Uuid
+  confirmedAt  DateTime? @map("confirmed_at") @db.Timestamptz(3)
+  completedAt  DateTime? @map("completed_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, createdAt])
+  @@map("bulk_import_jobs")
+  @@schema("tenant")
+}
+
+model SupportSession {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  platformUserId   String    @map("platform_user_id") @db.Uuid
+  platformUserName String?   @map("platform_user_name")
+  reason           String
+  /// pending | approved | denied | revoked | expired
+  status           String    @default("pending")
+  durationMinutes  Int       @default(60) @map("duration_minutes")
+  requestedAt      DateTime  @default(now()) @map("requested_at") @db.Timestamptz(3)
+  decidedBy        String?   @map("decided_by") @db.Uuid
+  decidedAt        DateTime? @map("decided_at") @db.Timestamptz(3)
+  decisionReason   String?   @map("decision_reason")
+  expiresAt        DateTime? @map("expires_at") @db.Timestamptz(3)
+  revokedBy        String?   @map("revoked_by") @db.Uuid
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(3)
+
+  @@index([estateId, status, requestedAt])
+  @@map("support_sessions")
+  @@schema("tenant")
+}

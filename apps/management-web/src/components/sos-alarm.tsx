@@ -3,11 +3,12 @@
 import { unwrap } from '@safezone/api-client';
 import { t } from '@safezone/i18n';
 import { ActionButton, Banner } from '@safezone/web-ui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEstate } from '../../lib/estate';
+import { useRealtimeRoom } from '../../lib/realtime';
 import { api } from '../../lib/session';
 
 /** Short two-tone alarm through Web Audio; no audio files to load (UI_GUIDELINES §9.1 rule 9). */
@@ -34,7 +35,12 @@ function beep(context: AudioContext) {
  */
 export function SosAlarm() {
   const { estateId } = useEstate();
+  const queryClient = useQueryClient();
   const pathname = usePathname();
+  const onSosUpdate = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['estate', estateId, 'sos'] });
+  }, [queryClient, estateId]);
+  const rtStatus = useRealtimeRoom(`estate:${estateId}:sos`, 'sos:update', onSosUpdate);
   const active = useQuery({
     queryKey: ['estate', estateId, 'sos', 'active'],
     queryFn: () =>
@@ -43,7 +49,7 @@ export function SosAlarm() {
           params: { path: { estateId }, query: { status: 'active' } },
         }),
       ),
-    refetchInterval: 3_000,
+    refetchInterval: rtStatus === 'connected' ? 15_000 : 3_000,
   });
   const audio = useRef<AudioContext | null>(null);
   const [soundBlocked, setSoundBlocked] = useState(false);

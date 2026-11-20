@@ -27,9 +27,9 @@ const STEP_LINKS: Record<SetupStep, string | null> = {
   profile: 'settings/estate',
   spaces: 'estate/spaces',
   gates: 'estate/gates',
-  security_supervisor: null,
+  security_supervisor: 'people/staff',
   sos_policy: 'settings/estate',
-  residents: 'people/join-requests',
+  residents: 'estate/import',
 };
 
 /** Steps the API cannot detect from data, so the administrator marks them done. */

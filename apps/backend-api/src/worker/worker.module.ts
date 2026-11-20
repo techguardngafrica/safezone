@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../common/database/database.module';
 import { OutboxRelay } from '../common/outbox/outbox-relay';
 import { QueuesModule } from '../common/queues/queues.module';
+import { RealtimePublisherModule } from '../common/realtime/realtime-publisher.service';
 import { RedisModule } from '../common/redis/redis.module';
 import { ConfigModule } from '../config/config.module';
 import { IntegrationsModule } from '../integrations/integrations.module';
@@ -50,6 +51,7 @@ import { EmergencyModule } from '../modules/emergency/emergency.module';
     ConfigModule,
     DatabaseModule,
     RedisModule,
+    RealtimePublisherModule,
     QueuesModule,
     IntegrationsModule,
     BillingModule,

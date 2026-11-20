@@ -111,10 +111,23 @@ export const incidentListQuerySchema = z.object({
   /** Only open incidents (reported, under review, assigned). */
   open: z.stringbool().optional(),
   severity: incidentSeveritySchema.optional(),
+  category: incidentCategorySchema.optional(),
+  gateId: z.uuid().optional(),
+  assigneeId: z.uuid().optional(),
+  from: z.iso.datetime({ offset: true }).optional(),
+  to: z.iso.datetime({ offset: true }).optional(),
+  q: z.string().trim().min(1).max(120).optional(),
   /** Managers: only incidents I reported. Reporters always see only their own (security.md §4.7). */
   mine: z.stringbool().default(false),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   cursor: z.string().min(1).optional(),
+});
+
+export const incidentDossierSchema = z.object({
+  exportedAt: z.iso.datetime(),
+  exportedBy: z.uuid(),
+  estateId: z.uuid(),
+  incident: incidentDetailSchema,
 });
 
 export const incidentNoteInputSchema = z.object({ body: z.string().trim().min(1).max(2000) });

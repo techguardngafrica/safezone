@@ -1525,7 +1525,7 @@ export interface paths {
     };
     /**
      * Expected passes and restricted list for a gate (offline cache)
-     * @description Requires `gate.verify`. Needs the `visitors` feature.
+     * @description Requires `gate.verify` or `visitor.log.read`. Needs the `visitors` feature.
      */
     get: operations['visitor_expected'];
     put?: never;
@@ -1545,7 +1545,7 @@ export interface paths {
     };
     /**
      * Visitors currently inside
-     * @description Requires `gate.verify`. Needs the `visitors` feature.
+     * @description Requires `gate.verify` or `visitor.log.read`. Needs the `visitors` feature.
      */
     get: operations['visitor_inside'];
     put?: never;
@@ -1744,6 +1744,26 @@ export interface paths {
     patch: operations['estateOccupancy_updateMember'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/households': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Active estate households (staff)
+     * @description Requires `resident.read`. Needs the `occupancy` feature.
+     */
+    get: operations['estateOccupancy_listHouseholds'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/households/{id}': {
     parameters: {
       query?: never;
@@ -1796,6 +1816,106 @@ export interface paths {
      * @description Any active member of the estate. Needs the `occupancy` feature.
      */
     get: operations['estateOccupancy_mine'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/imports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List recent bulk import jobs
+     * @description Requires `import.run`.
+     */
+    get: operations['imports_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/imports/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get bulk import job status and row errors
+     * @description Requires `import.run`.
+     */
+    get: operations['imports_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/imports/{id}/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Execute a validated bulk import job idempotently
+     * @description Requires `import.run`.
+     */
+    post: operations['imports_confirm'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/imports/dry-run': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Validate a CSV upload and return row-by-row dry-run results
+     * @description Requires `import.run`.
+     */
+    post: operations['imports_dryRun'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/imports/templates/{kind}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download a CSV template for bulk import
+     * @description Requires `import.run`.
+     */
+    get: operations['imports_template'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1862,6 +1982,26 @@ export interface paths {
      * @description Requires `incident.report` or `incident.manage`. Needs the `security` feature.
      */
     post: operations['incidents_evidence'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/incidents/{id}/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Export incident dossier for police or legal records (audited)
+     * @description Requires `incident.manage`. Needs the `security` feature.
+     */
+    get: operations['incidents_exportDossier'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -3088,6 +3228,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/ownerships': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estate-wide owners directory (staff)
+     * @description Requires `resident.read` or `space.manage`. Needs the `property` feature.
+     */
+    get: operations['ownerships_directory'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/ownerships/{id}/end': {
     parameters: {
       query?: never;
@@ -3424,6 +3584,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/reports/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estate operational, security, attendance and financial report summary
+     * @description Requires `report.read`.
+     */
+    get: operations['reports_summary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/residents': {
     parameters: {
       query?: never;
@@ -3483,6 +3663,78 @@ export interface paths {
      * @description Requires `security.staff.manage`. Needs the `visitors` feature.
      */
     delete: operations['visitor_removeRestricted'];
+    options?: never;
+    head?: never;
+    /**
+     * Update reason or expiry on a restricted visitor entry
+     * @description Requires `security.staff.manage`. Needs the `visitors` feature.
+     */
+    patch: operations['visitor_updateRestricted'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/roles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Built-in and custom estate roles
+     * @description Requires `role.assign`.
+     */
+    get: operations['staffRoles_listRoles'];
+    put?: never;
+    /**
+     * Create a custom estate role
+     * @description Requires `role.assign`.
+     */
+    post: operations['staffRoles_createRole'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/roles/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete an unused custom estate role
+     * @description Requires `role.assign`.
+     */
+    delete: operations['staffRoles_deleteRole'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a custom estate role
+     * @description Requires `role.assign`.
+     */
+    patch: operations['staffRoles_updateRole'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Global search across units, residents, plates, passes and invoices
+     * @description Any active member of the estate.
+     */
+    get: operations['search_query'];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -3968,6 +4220,106 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/staff': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estate staff directory with assigned roles
+     * @description Requires `role.assign`.
+     */
+    get: operations['staffRoles_listStaff'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/staff/{userId}/roles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Assign a role to a staff member (optionally temporary with validTo)
+     * @description Requires `role.assign`.
+     */
+    post: operations['staffRoles_assignRole'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/staff/{userId}/roles/{assignmentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Revoke a role assignment from a staff member
+     * @description Requires `role.assign`.
+     */
+    delete: operations['staffRoles_revokeRole'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/staff/{userId}/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Suspend or reactivate a staff member
+     * @description Requires `role.assign`.
+     */
+    post: operations['staffRoles_updateStaffStatus'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/staff/invite': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Invite or add a staff member and assign estate roles
+     * @description Requires `role.assign`.
+     */
+    post: operations['staffRoles_inviteStaff'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/statements': {
     parameters: {
       query?: never;
@@ -3982,6 +4334,86 @@ export interface paths {
     get: operations['billing_statement'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/support-sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Techguard support-access requests and history for this estate
+     * @description Requires `estate.configure`.
+     */
+    get: operations['estateSupportAccess_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/support-sessions/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a Techguard support-access request
+     * @description Requires `estate.configure`.
+     */
+    post: operations['estateSupportAccess_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/support-sessions/{id}/deny': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Deny a Techguard support-access request
+     * @description Requires `estate.configure`.
+     */
+    post: operations['estateSupportAccess_deny'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/support-sessions/{id}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Revoke an active Techguard support session immediately
+     * @description Requires `estate.configure`.
+     */
+    post: operations['estateSupportAccess_revoke'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4451,7 +4883,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * List walk-in requests for live gate view and oversight
+     * @description Requires `visitor.log.read` or `gate.verify`. Needs the `visitors` feature.
+     */
+    get: operations['visitor_listWalkins'];
     put?: never;
     /**
      * Ask a household to let a walk-in visitor in
@@ -5430,6 +5866,26 @@ export interface paths {
      * @description Requires `platform.estate.create`.
      */
     post: operations['platformOnboarding_createEstate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{estateId}/support-sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Request time-bounded support access to an estate (requires estate admin consent)
+     * @description Requires `platform.support_access`.
+     */
+    post: operations['platformSupportAccess_request'];
     delete?: never;
     options?: never;
     head?: never;
@@ -12587,6 +13043,56 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  estateOccupancy_listHouseholds: {
+    parameters: {
+      query?: {
+        q?: string;
+        spaceId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              occupancyType: string;
+              startsOn: string | null;
+              endsOn: string | null;
+              memberCount: number;
+              vehicleCount: number;
+              domesticStaffCount: number;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   estateOccupancy_household: {
     parameters: {
       query?: never;
@@ -12827,12 +13333,302 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  imports_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind:
+                'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+              /** @enum {string} */
+              status: 'dry_run' | 'queued' | 'running' | 'completed' | 'failed';
+              filename: string;
+              totalRows: number;
+              validRows: number;
+              errorRows: number;
+              createdCount: number;
+              updatedCount: number;
+              errors: {
+                row: number;
+                field: string | null;
+                message: string;
+              }[];
+              /** Format: uuid */
+              createdBy: string;
+              confirmedAt: string | null;
+              completedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  imports_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind:
+                'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+              /** @enum {string} */
+              status: 'dry_run' | 'queued' | 'running' | 'completed' | 'failed';
+              filename: string;
+              totalRows: number;
+              validRows: number;
+              errorRows: number;
+              createdCount: number;
+              updatedCount: number;
+              errors: {
+                row: number;
+                field: string | null;
+                message: string;
+              }[];
+              /** Format: uuid */
+              createdBy: string;
+              confirmedAt: string | null;
+              completedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  imports_confirm: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind:
+                'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+              /** @enum {string} */
+              status: 'dry_run' | 'queued' | 'running' | 'completed' | 'failed';
+              filename: string;
+              totalRows: number;
+              validRows: number;
+              errorRows: number;
+              createdCount: number;
+              updatedCount: number;
+              errors: {
+                row: number;
+                field: string | null;
+                message: string;
+              }[];
+              /** Format: uuid */
+              createdBy: string;
+              confirmedAt: string | null;
+              completedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  imports_dryRun: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          kind: 'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+          filename: string;
+          csv: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind:
+                'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+              /** @enum {string} */
+              status: 'dry_run' | 'queued' | 'running' | 'completed' | 'failed';
+              filename: string;
+              totalRows: number;
+              validRows: number;
+              errorRows: number;
+              createdCount: number;
+              updatedCount: number;
+              errors: {
+                row: number;
+                field: string | null;
+                message: string;
+              }[];
+              /** Format: uuid */
+              createdBy: string;
+              confirmedAt: string | null;
+              completedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  imports_template: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        kind: 'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              kind:
+                'units' | 'owners' | 'residents' | 'households' | 'vehicles' | 'opening_balances';
+              filename: string;
+              headers: string[];
+              csv: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   incidents_list: {
     parameters: {
       query?: {
         status?: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
         open?: string;
         severity?: 'low' | 'medium' | 'high' | 'critical';
+        category?:
+          | 'suspicious_activity'
+          | 'unauthorised_access'
+          | 'theft'
+          | 'fight'
+          | 'fire'
+          | 'accident'
+          | 'damage'
+          | 'other';
+        gateId?: string;
+        assigneeId?: string;
+        from?: string;
+        to?: string;
+        q?: string;
         mine?: string;
         limit?: number;
         cursor?: string;
@@ -13254,6 +14050,118 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  incidents_exportDossier: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: date-time */
+              exportedAt: string;
+              /** Format: uuid */
+              exportedBy: string;
+              /** Format: uuid */
+              estateId: string;
+              incident: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                category:
+                  | 'suspicious_activity'
+                  | 'unauthorised_access'
+                  | 'theft'
+                  | 'fight'
+                  | 'fire'
+                  | 'accident'
+                  | 'damage'
+                  | 'other';
+                /** @enum {string} */
+                severity: 'low' | 'medium' | 'high' | 'critical';
+                title: string;
+                description: string;
+                /** @enum {string} */
+                locationKind: 'gate' | 'unit' | 'common_area' | 'other';
+                gateId: string | null;
+                gateName: string | null;
+                spaceId: string | null;
+                unitCode: string | null;
+                locationText: string | null;
+                /** Format: date-time */
+                occurredAt: string;
+                peopleInvolved: string | null;
+                /** Format: uuid */
+                reportedBy: string;
+                /** @enum {string} */
+                reporterType: 'guard' | 'resident' | 'manager';
+                /** @enum {string} */
+                status: 'reported' | 'under_review' | 'assigned' | 'resolved' | 'closed';
+                assignedTo: string | null;
+                resolution: string | null;
+                linkedSosId: string | null;
+                policeReportRef: string | null;
+                evidenceCount: number;
+                version: number;
+                /** Format: date-time */
+                createdAt: string;
+                resolvedAt: string | null;
+                closedAt: string | null;
+                evidence: {
+                  /** Format: uuid */
+                  id: string;
+                  /** Format: uuid */
+                  fileId: string;
+                  sha256: string | null;
+                  /** Format: uuid */
+                  uploadedBy: string;
+                  uploadedAt: string | null;
+                  /** Format: uuid */
+                  addedBy: string;
+                  /** Format: date-time */
+                  createdAt: string;
+                }[];
+                notes: {
+                  /** Format: uuid */
+                  id: string;
+                  /** Format: uuid */
+                  authorId: string;
+                  /** @enum {string} */
+                  kind: 'note' | 'status';
+                  body: string | null;
+                  fromStatus:
+                    ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                  toStatus:
+                    ('reported' | 'under_review' | 'assigned' | 'resolved' | 'closed') | null;
+                  /** Format: date-time */
+                  createdAt: string;
+                }[];
+              };
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -18078,6 +18986,63 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  ownerships_directory: {
+    parameters: {
+      query?: {
+        q?: string;
+        spaceId?: string;
+        active?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string;
+              /** @enum {string} */
+              ownerType: 'person' | 'company';
+              /** Format: uuid */
+              ownerUserId: string;
+              ownerName: string;
+              companyName: string | null;
+              shareBasisPoints: number;
+              /** Format: date */
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'active' | 'ended';
+              verifiedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   ownerships_end: {
     parameters: {
       query?: never;
@@ -19186,6 +20151,98 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  reports_summary: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: date */
+              from: string;
+              /** Format: date */
+              to: string;
+              /** Format: date-time */
+              generatedAt: string;
+              occupancy: {
+                totalUnits: number;
+                occupiedUnits: number;
+                vacantUnits: number;
+                activeHouseholds: number;
+                activeResidents: number;
+              };
+              visitors: {
+                totalEvents: number;
+                entries: number;
+                exits: number;
+                denials: number;
+                overrides: number;
+                activePasses: number;
+              };
+              incidents: {
+                total: number;
+                open: number;
+                resolved: number;
+                bySeverity: {
+                  severity: string;
+                  count: number;
+                }[];
+                byCategory: {
+                  category: string;
+                  count: number;
+                }[];
+              };
+              sos: {
+                total: number;
+                realAlerts: number;
+                drills: number;
+                avgAckSeconds: number | null;
+                avgResolveSeconds: number | null;
+              };
+              finance: {
+                billedKobo: number;
+                collectedKobo: number;
+                outstandingKobo: number;
+                ageing: {
+                  currentKobo: number;
+                  days30Kobo: number;
+                  days60Kobo: number;
+                  days90PlusKobo: number;
+                };
+              };
+              attendance: {
+                totalShifts: number;
+                openShifts: number;
+                totalMinutes: number;
+              };
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   estateOccupancy_residents: {
     parameters: {
       query?: {
@@ -19350,6 +20407,255 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  visitor_updateRestricted: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+          expiresAt?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string | null;
+              phone: string | null;
+              plate: string | null;
+              reason: string;
+              expiresAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_listRoles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              id: string | null;
+              key: string;
+              name: string;
+              isBuiltin: boolean;
+              permissions: string[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_createRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          permissions: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              id: string | null;
+              key: string;
+              name: string;
+              isBuiltin: boolean;
+              permissions: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_deleteRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_updateRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          permissions?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              id: string | null;
+              key: string;
+              name: string;
+              isBuiltin: boolean;
+              permissions: string[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  search_query: {
+    parameters: {
+      query: {
+        q: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              query: string;
+              hits: {
+                /** @enum {string} */
+                kind: 'space' | 'resident' | 'vehicle' | 'pass' | 'invoice';
+                id: string;
+                title: string;
+                subtitle: string | null;
+                href: string;
+              }[];
+            };
+          };
+        };
       };
       400: components['responses']['Error400'];
       401: components['responses']['Error401'];
@@ -21402,6 +22708,250 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  staffRoles_listStaff: {
+    parameters: {
+      query?: {
+        q?: string;
+        roleKey?: string;
+        status?: 'active' | 'suspended';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended' | 'pending' | 'left';
+              /** Format: date-time */
+              joinedAt: string;
+              assignments: {
+                /** Format: uuid */
+                id: string;
+                roleKey: string;
+                roleName: string;
+                /** Format: date-time */
+                validFrom: string;
+                validTo: string | null;
+              }[];
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_assignRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          roleKey: string;
+          /** Format: date-time */
+          validTo?: string;
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              roleKey: string;
+              roleName: string;
+              /** Format: date-time */
+              validFrom: string;
+              validTo: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_revokeRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        userId: string;
+        assignmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_updateStaffStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status: 'active' | 'suspended';
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  staffRoles_inviteStaff: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          fullName: string;
+          phone: string;
+          /** Format: email */
+          email?: string;
+          roleKeys: string[];
+          /** Format: date-time */
+          validTo?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended' | 'pending' | 'left';
+              /** Format: date-time */
+              joinedAt: string;
+              assignments: {
+                /** Format: uuid */
+                id: string;
+                roleKey: string;
+                roleName: string;
+                /** Format: date-time */
+                validFrom: string;
+                validTo: string | null;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
   billing_statement: {
     parameters: {
       query?: {
@@ -21457,6 +23007,233 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateSupportAccess_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateSupportAccess_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+          durationMinutes?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateSupportAccess_deny: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+          durationMinutes?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateSupportAccess_revoke: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+          durationMinutes?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
       500: components['responses']['Error500'];
     };
   };
@@ -22908,6 +24685,61 @@ export interface operations {
               createdAt: string;
               decidedAt: string | null;
             }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  visitor_listWalkins: {
+    parameters: {
+      query?: {
+        status?: 'pending' | 'approved' | 'rejected' | 'timed_out' | 'cancelled';
+        gateId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              gateId: string;
+              /** Format: uuid */
+              spaceId: string;
+              unitCode: string | null;
+              visitorName: string;
+              purpose: string | null;
+              vehiclePlate: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected' | 'timed_out' | 'cancelled';
+              /** Format: date-time */
+              expiresAt: string;
+              respondedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
           };
         };
       };
@@ -25987,6 +27819,64 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSupportAccess_request: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+          /** @default 60 */
+          durationMinutes?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };

@@ -6,6 +6,7 @@ import {
   endOwnershipSchema,
   estateItemParamsSchema,
   estateParamSchema,
+  ownershipListQuerySchema,
   ownershipSchema,
   ownershipTransferSchema,
   transferDecisionSchema,
@@ -28,6 +29,24 @@ type ItemParams = z.infer<typeof estateItemParamsSchema>;
 @Controller('v1/estates/:estateId')
 export class OwnershipsController {
   constructor(private readonly ownerships: OwnershipsService) {}
+
+  @Get('ownerships')
+  @Can('resident.read', 'space.manage')
+  @RequiresFeature('property')
+  @Contract({
+    summary: 'Estate-wide owners directory (staff)',
+    tags: ['property'],
+    params: estateParamSchema,
+    query: ownershipListQuerySchema,
+    response: ownershipSchema,
+    paginated: true,
+  })
+  directory(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof ownershipListQuerySchema>,
+  ) {
+    return this.ownerships.directory(estate, query);
+  }
 
   @Get('units/:id/ownerships')
   @Member()

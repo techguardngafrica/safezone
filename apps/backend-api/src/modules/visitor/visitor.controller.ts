@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpCode, Post, Req } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Patch, Post, Req } from '@nestjs/common';
 import {
   checkInGuestSchema,
   closeDeliverySchema,
@@ -30,10 +30,12 @@ import {
   revocationsSchema,
   revokePassSchema,
   signingKeysSchema,
+  updateRestrictedVisitorSchema,
   verifyCredentialSchema,
   verifyResultSchema,
   visitorPassCredentialsSchema,
   visitorPassSchema,
+  walkinListQuerySchema,
   walkinSchema,
 } from '@safezone/schemas';
 import type { Request } from 'express';
@@ -283,7 +285,7 @@ export class VisitorController {
   }
 
   @Get('gate/expected')
-  @Can('gate.verify')
+  @Can('gate.verify', 'visitor.log.read')
   @RequiresFeature('visitors')
   @Contract({
     summary: 'Expected passes and restricted list for a gate (offline cache)',
@@ -331,7 +333,7 @@ export class VisitorController {
   }
 
   @Get('gate/inside')
-  @Can('gate.verify')
+  @Can('gate.verify', 'visitor.log.read')
   @RequiresFeature('visitors')
   @Contract({
     summary: 'Visitors currently inside',
@@ -341,6 +343,24 @@ export class VisitorController {
   })
   inside(@CurrentEstate() estate: EstateAccess) {
     return this.gate.inside(estate);
+  }
+
+  @Get('walkins')
+  @Can('visitor.log.read', 'gate.verify')
+  @RequiresFeature('visitors')
+  @Contract({
+    summary: 'List walk-in requests for live gate view and oversight',
+    tags: ['gate'],
+    params: estateParamSchema,
+    query: walkinListQuerySchema,
+    response: walkinSchema,
+    paginated: true,
+  })
+  listWalkins(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof walkinListQuerySchema>,
+  ) {
+    return this.gate.walkins(estate, query);
   }
 
   @Post('walkins')
@@ -525,6 +545,25 @@ export class VisitorController {
     @ValidBody() body: z.infer<typeof createRestrictedVisitorSchema>,
   ) {
     return this.gate.addRestricted(estate, body);
+  }
+
+  @Patch('restricted-visitors/:id')
+  @Can('security.staff.manage')
+  @RequiresFeature('visitors')
+  @Contract({
+    summary: 'Update reason or expiry on a restricted visitor entry',
+    tags: ['visitors'],
+    params: estateItemParamsSchema,
+    body: updateRestrictedVisitorSchema,
+    response: restrictedVisitorSchema,
+    errors: [404],
+  })
+  updateRestricted(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+    @ValidBody() body: z.infer<typeof updateRestrictedVisitorSchema>,
+  ) {
+    return this.gate.updateRestricted(estate, params.id, body);
   }
 
   @Delete('restricted-visitors/:id')

@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import type {
   createRestrictedVisitorSchema,
   createWalkinSchema,
   gateEventInputSchema,
   gateEventListQuerySchema,
+  updateRestrictedVisitorSchema,
   verifyCredentialSchema,
+  walkinListQuerySchema,
 } from '@safezone/schemas';
 import { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
@@ -14,6 +16,7 @@ import type { TenantContext, Tx } from '../../common/database/tenant-context';
 import { ConflictError, DomainError, NotFoundError } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
+import { RealtimePublisherService } from '../../common/realtime/realtime-publisher.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { normalisePlate } from '../occupancy/domain/occupancy';
 import { isStaffWith, OccupancyService } from '../occupancy/occupancy.service';
@@ -26,6 +29,7 @@ import { passFacts, type PassRow } from './passes.service';
 
 const CLOCK_SKEW_MS = 5 * 60_000;
 const eventCursorSchema = z.object({ occurredAt: z.iso.datetime(), id: z.uuid() });
+const walkinCursorSchema = z.object({ createdAt: z.iso.datetime(), id: z.uuid() });
 type GateEventRow = Prisma.GateEventGetPayload<object>;
 type WalkinRow = Prisma.WalkinRequestGetPayload<object>;
 
@@ -60,6 +64,7 @@ export class GateService {
     private readonly property: PropertyService,
     private readonly tenancy: TenancyService,
     private readonly notifications: NotificationsService,
+    @Optional() private readonly realtime?: RealtimePublisherService,
   ) {}
 
   // ---- Verification --------------------------------------------------------------------------
@@ -129,9 +134,23 @@ export class GateService {
   // ---- Events --------------------------------------------------------------------------------
 
   async recordEvent(access: EstateAccess, input: z.infer<typeof gateEventInputSchema>) {
-    return this.db.withTenant(access, (tx) =>
+    const event = await this.db.withTenant(access, (tx) =>
       this.insertEvent(tx, access, input, { offline: false, skewed: false }),
     );
+    if (event.created && this.realtime) {
+      const data = {
+        gateEventId: event.id,
+        gateId: event.gateId,
+        direction: event.direction,
+        decision: event.decision,
+        occurredAt: event.occurredAt,
+      };
+      await this.realtime.publishMany([
+        { room: `estate:${access.estateId}:security`, event: 'gate:update', data },
+        { room: `estate:${access.estateId}:gate:${event.gateId}`, event: 'gate:update', data },
+      ]);
+    }
+    return event;
   }
 
   /**
@@ -333,7 +352,7 @@ export class GateService {
   /** Guard asks the household to let someone in (visitor.md §7.5). Never auto-allowed. */
   async createWalkin(access: EstateAccess, input: z.infer<typeof createWalkinSchema>) {
     const settings = await this.tenancy.getSettings(access);
-    return this.db.withTenant(access, async (tx) => {
+    const view = await this.db.withTenant(access, async (tx) => {
       const gate = await this.gates.activeGate(tx, access.estateId, input.gateId);
       const unit = await this.property.unit(tx, access.estateId, input.spaceId);
       if (!unit) throw new NotFoundError('Unit not found', 'SPACE_NOT_FOUND');
@@ -378,6 +397,75 @@ export class GateService {
         },
       ]);
       return this.walkinView(tx, row);
+    });
+    if (this.realtime) {
+      const data = { walkinId: view.id, gateId: view.gateId, status: view.status };
+      await this.realtime.publishMany([
+        { room: `estate:${access.estateId}:security`, event: 'gate:update', data },
+        { room: `estate:${access.estateId}:gate:${view.gateId}`, event: 'gate:update', data },
+      ]);
+    }
+    return view;
+  }
+
+  /** Paginated walk-in list for live gate view and security oversight. */
+  async walkins(access: EstateAccess, query: z.infer<typeof walkinListQuerySchema>) {
+    const after = query.cursor
+      ? decodeCursor(
+          query.cursor,
+          (value): value is z.infer<typeof walkinCursorSchema> =>
+            walkinCursorSchema.safeParse(value).success,
+        )
+      : undefined;
+    return this.db.withTenant(access, async (tx) => {
+      const now = new Date();
+      // Expire overdue pending walk-ins so the live view stays accurate.
+      await tx.walkinRequest.updateMany({
+        where: { estateId: access.estateId, status: 'pending', expiresAt: { lte: now } },
+        data: { status: 'timed_out' },
+      });
+      const rows = await tx.walkinRequest.findMany({
+        where: {
+          estateId: access.estateId,
+          ...(query.status ? { status: query.status } : {}),
+          ...(query.gateId ? { gateId: query.gateId } : {}),
+          ...(after
+            ? {
+                OR: [
+                  { createdAt: { lt: new Date(after.createdAt) } },
+                  { createdAt: new Date(after.createdAt), id: { lt: after.id } },
+                ],
+              }
+            : {}),
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: query.limit + 1,
+      });
+      const page = rows.slice(0, query.limit);
+      const units = await this.property.spacesByIds(tx, access.estateId, [
+        ...new Set(page.map((row) => row.spaceId)),
+      ]);
+      const unitById = new Map(units.map((unit) => [unit.id, unit.code]));
+      const last = page.at(-1);
+      return {
+        items: page.map((row) => ({
+          id: row.id,
+          gateId: row.gateId,
+          spaceId: row.spaceId,
+          unitCode: unitById.get(row.spaceId) ?? null,
+          visitorName: row.visitorName,
+          purpose: row.purpose,
+          vehiclePlate: row.vehiclePlate,
+          status: row.status as 'pending',
+          expiresAt: row.expiresAt.toISOString(),
+          respondedAt: row.respondedAt?.toISOString() ?? null,
+          createdAt: row.createdAt.toISOString(),
+        })),
+        nextCursor:
+          rows.length > query.limit && last
+            ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id })
+            : null,
+      };
     });
   }
 
@@ -474,6 +562,54 @@ export class GateService {
             resourceType: 'restricted_visitor',
             resourceId: row.id,
             reason: input.reason,
+          },
+        },
+      ]);
+      return {
+        id: row.id,
+        name: row.name,
+        phone: row.phone,
+        plate: row.plateNormalised,
+        reason: row.reason,
+        expiresAt: row.expiresAt?.toISOString() ?? null,
+        createdAt: row.createdAt.toISOString(),
+      };
+    });
+  }
+
+  async updateRestricted(
+    access: EstateAccess,
+    id: string,
+    input: z.infer<typeof updateRestrictedVisitorSchema>,
+  ) {
+    return this.db.withTenant(access, async (tx) => {
+      const existing = await tx.restrictedVisitor.findFirst({
+        where: { id, estateId: access.estateId, removedAt: null },
+      });
+      if (!existing) throw new NotFoundError('Entry not found', 'RESTRICTED_NOT_FOUND');
+      const row = await tx.restrictedVisitor.update({
+        where: { id: existing.id },
+        data: {
+          ...(input.reason !== undefined ? { reason: input.reason } : {}),
+          ...(input.expiresAt !== undefined
+            ? { expiresAt: input.expiresAt ? new Date(input.expiresAt) : null }
+            : {}),
+        },
+      });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'visitor.restricted.updated',
+          estateId: access.estateId,
+          aggregateType: 'restricted_visitor',
+          aggregateId: row.id,
+          payload: { restrictedId: row.id },
+          audit: {
+            actorType: 'user',
+            actorId: access.userId,
+            action: 'visitor.restricted.update',
+            resourceType: 'restricted_visitor',
+            resourceId: row.id,
+            reason: input.reason ?? row.reason,
           },
         },
       ]);

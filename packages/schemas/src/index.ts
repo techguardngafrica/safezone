@@ -23,3 +23,4 @@ export * from './facilities';
 export * from './documents';
 export * from './channels';
 export * from './security';
+export * from './management-extras';

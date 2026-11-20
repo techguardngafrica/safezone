@@ -248,3 +248,15 @@ export const ownedUnitSchema = z.object({
   /** Current household (owners see who lives in their unit, not their contact details). */
   household: z.object({ name: z.string(), occupancyType: z.string() }).nullable(),
 });
+
+export const ownershipListQuerySchema = z.object({
+  q: z.string().trim().min(1).max(120).optional(),
+  spaceId: z.uuid().optional(),
+  active: z.stringbool().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().min(1).optional(),
+});
+
+export const ownershipDirectoryItemSchema = ownershipSchema.extend({
+  unitCode: z.string().nullable(),
+});

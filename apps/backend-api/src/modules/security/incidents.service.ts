@@ -176,6 +176,26 @@ export class IncidentsService {
           ...(query.status ? { status: query.status } : {}),
           ...(query.open ? { status: { in: [...OPEN_INCIDENT_STATUSES] } } : {}),
           ...(query.severity ? { severity: query.severity } : {}),
+          ...(query.category ? { category: query.category } : {}),
+          ...(query.gateId ? { gateId: query.gateId } : {}),
+          ...(query.assigneeId ? { assignedTo: query.assigneeId } : {}),
+          ...(query.from || query.to
+            ? {
+                occurredAt: {
+                  ...(query.from ? { gte: new Date(query.from) } : {}),
+                  ...(query.to ? { lte: new Date(query.to) } : {}),
+                },
+              }
+            : {}),
+          ...(query.q
+            ? {
+                OR: [
+                  { title: { contains: query.q, mode: 'insensitive' } },
+                  { description: { contains: query.q, mode: 'insensitive' } },
+                  { policeReportRef: { contains: query.q, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
           ...(query.mine ? { reportedBy: access.userId } : {}),
           AND: [
             this.visibleWhere(access),
@@ -244,6 +264,29 @@ export class IncidentsService {
         })),
       };
     });
+  }
+
+  async exportDossier(access: EstateAccess, incidentId: string) {
+    const incident = await this.detail(access, incidentId);
+    await this.db.withTenant(access, async (tx) => {
+      await this.event(
+        tx,
+        access,
+        incident.id,
+        'security.incident.exported',
+        'security.incident.export',
+        {
+          incidentId: incident.id,
+          evidenceCount: incident.evidence.length,
+        },
+      );
+    });
+    return {
+      exportedAt: new Date().toISOString(),
+      exportedBy: access.userId,
+      estateId: access.estateId,
+      incident,
+    };
   }
 
   async addNote(access: EstateAccess, incidentId: string, body: string) {

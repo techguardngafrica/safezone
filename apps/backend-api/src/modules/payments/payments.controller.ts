@@ -325,7 +325,7 @@ export class PaymentsController {
   }
 
   @Get('refunds')
-  @Can('payment.refund')
+  @Can('payment.refund', 'billing.run.approve')
   @RequiresFeature('payments')
   @Contract({
     summary: 'Refunds',

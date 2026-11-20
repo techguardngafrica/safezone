@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { DatabaseModule } from './common/database/database.module';
 import { HealthController } from './common/health/health.controller';
 import { HttpCoreModule } from './common/http/http-core.module';
+import { RealtimePublisherModule } from './common/realtime/realtime-publisher.service';
 import { RedisModule } from './common/redis/redis.module';
 import { ConfigModule } from './config/config.module';
 import { IntegrationsModule } from './integrations/integrations.module';
@@ -14,6 +15,8 @@ import { MovesModule } from './modules/occupancy/moves/moves.module';
 import { ExportsModule } from './modules/platform/exports/exports.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { ImportsModule } from './modules/imports/imports.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { ExportRegistryModule } from './common/export/export-registry';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { UtilityPurchasesModule } from './modules/utilities/purchases/purchases.module';
@@ -44,6 +47,7 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     ConfigModule,
     DatabaseModule,
     RedisModule,
+    RealtimePublisherModule,
     HttpCoreModule,
     QueuesModule,
     IntegrationsModule,
@@ -71,6 +75,8 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     ExportsModule,
     FacilitiesModule,
     DocumentsModule,
+    ImportsModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
   providers: [

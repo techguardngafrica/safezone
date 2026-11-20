@@ -676,6 +676,96 @@ export class OccupancyService {
     });
   }
 
+  /** Estate-wide active households directory for staff (management-web.md §6.5). */
+  async listHouseholds(
+    access: EstateAccess,
+    query: { q?: string; spaceId?: string; limit: number; cursor?: string },
+  ) {
+    const cursorSchema = z.object({ createdAt: z.iso.datetime(), id: z.uuid() });
+    const after = query.cursor
+      ? decodeCursor(
+          query.cursor,
+          (value): value is z.infer<typeof cursorSchema> => cursorSchema.safeParse(value).success,
+        )
+      : undefined;
+    return this.db.withTenant(access, async (tx) => {
+      const rows = await tx.household.findMany({
+        where: {
+          estateId: access.estateId,
+          status: 'active',
+          ...(query.spaceId ? { spaceId: query.spaceId } : {}),
+          ...(query.q ? { name: { contains: query.q, mode: 'insensitive' } } : {}),
+          ...(after
+            ? {
+                OR: [
+                  { createdAt: { lt: new Date(after.createdAt) } },
+                  { createdAt: new Date(after.createdAt), id: { lt: after.id } },
+                ],
+              }
+            : {}),
+        },
+        include: {
+          occupancies: { where: { status: 'active' }, orderBy: { startsOn: 'desc' }, take: 1 },
+          _count: { select: { members: { where: { status: 'active' } } } },
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: query.limit + 1,
+      });
+      const page = rows.slice(0, query.limit);
+      const householdIds = page.map((r) => r.id);
+      const [units, vehicles, domestic] = await Promise.all([
+        this.property.spacesByIds(tx, access.estateId, [...new Set(page.map((r) => r.spaceId))]),
+        householdIds.length > 0
+          ? tx.vehicle.groupBy({
+              by: ['householdId'],
+              where: {
+                estateId: access.estateId,
+                householdId: { in: householdIds },
+                status: 'active',
+              },
+              _count: { _all: true },
+            })
+          : [],
+        householdIds.length > 0
+          ? tx.domesticStaff.groupBy({
+              by: ['householdId'],
+              where: {
+                estateId: access.estateId,
+                householdId: { in: householdIds },
+                status: 'active',
+              },
+              _count: { _all: true },
+            })
+          : [],
+      ]);
+      const unitById = new Map(units.map((u) => [u.id, u.code]));
+      const vehicleCount = new Map(vehicles.map((v) => [v.householdId, v._count._all]));
+      const domesticCount = new Map(domestic.map((d) => [d.householdId, d._count._all]));
+      const last = page.at(-1);
+      return {
+        items: page.map((row) => {
+          const occ = row.occupancies[0];
+          return {
+            id: row.id,
+            name: row.name,
+            spaceId: row.spaceId,
+            unitCode: unitById.get(row.spaceId) ?? null,
+            occupancyType: occ?.type ?? 'tenant',
+            startsOn: occ?.startsOn ? occ.startsOn.toISOString().slice(0, 10) : null,
+            endsOn: occ?.endsOn ? occ.endsOn.toISOString().slice(0, 10) : null,
+            memberCount: row._count.members,
+            vehicleCount: vehicleCount.get(row.id) ?? 0,
+            domesticStaffCount: domesticCount.get(row.id) ?? 0,
+          };
+        }),
+        nextCursor:
+          rows.length > query.limit && last
+            ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id })
+            : null,
+      };
+    });
+  }
+
   /** Resident directory for staff (occupancy.md §7). Phones are masked without pii.view. */
   async residents(access: EstateAccess, query: z.infer<typeof residentListQuerySchema>) {
     const after = query.cursor

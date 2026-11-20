@@ -256,3 +256,23 @@ export const moveListQuerySchema = z.object({
   status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
 });
 export const renewOccupancySchema = z.object({ endsOn: z.iso.date() });
+
+export const householdListQuerySchema = z.object({
+  q: z.string().trim().min(1).max(120).optional(),
+  spaceId: z.uuid().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().min(1).optional(),
+});
+
+export const householdSummarySchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  spaceId: z.uuid(),
+  unitCode: z.string().nullable(),
+  occupancyType: z.string(),
+  startsOn: z.iso.date().nullable(),
+  endsOn: z.iso.date().nullable(),
+  memberCount: z.number().int(),
+  vehicleCount: z.number().int(),
+  domesticStaffCount: z.number().int(),
+});

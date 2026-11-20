@@ -17,6 +17,7 @@ import {
   guardPinStatusSchema,
   guardRosterItemSchema,
   incidentDetailSchema,
+  incidentDossierSchema,
   incidentEvidenceInputSchema,
   incidentListQuerySchema,
   incidentNoteInputSchema,
@@ -159,6 +160,23 @@ export class IncidentsController {
     @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
   ) {
     return this.incidents.detail(estate, params.id);
+  }
+
+  @Get(':id/export')
+  @Can('incident.manage')
+  @RequiresFeature('security')
+  @Contract({
+    summary: 'Export incident dossier for police or legal records (audited)',
+    tags: ['security'],
+    params: estateItemParamsSchema,
+    response: incidentDossierSchema,
+    errors: [404],
+  })
+  exportDossier(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+  ) {
+    return this.incidents.exportDossier(estate, params.id);
   }
 
   @Post(':id/notes')

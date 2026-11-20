@@ -1,6 +1,7 @@
 import {
   Injectable,
   Logger,
+  Optional,
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
@@ -8,6 +9,10 @@ import { DatabaseService } from '../database/database.service';
 import { maskString } from '../observability/redact';
 import { QueueService } from '../queues/queue.service';
 import { QUEUES, type QueueName } from '../queues/queues';
+import {
+  RealtimePublisherService,
+  realtimeTargetsForOutbox,
+} from '../realtime/realtime-publisher.service';
 
 export interface RelayedEvent {
   id: string;
@@ -80,6 +85,7 @@ export class OutboxRelay implements OnApplicationBootstrap, OnApplicationShutdow
   constructor(
     private readonly db: DatabaseService,
     private readonly queues: QueueService,
+    @Optional() private readonly realtime?: RealtimePublisherService,
   ) {}
 
   onApplicationBootstrap(): void {
@@ -119,6 +125,10 @@ export class OutboxRelay implements OnApplicationBootstrap, OnApplicationShutdow
           try {
             for (const queue of routeEvent(event)) {
               await this.queues.add(queue, event.type, event, { jobId: event.id });
+            }
+            if (this.realtime) {
+              const targets = realtimeTargetsForOutbox(event);
+              if (targets.length > 0) await this.realtime.publishMany(targets);
             }
             await tx.outboxEvent.update({
               where: { id: event.id },

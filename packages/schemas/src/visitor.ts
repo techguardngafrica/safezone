@@ -316,6 +316,12 @@ export const walkinSchema = z.object({
   respondedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
 });
+export const walkinListQuerySchema = z.object({
+  status: walkinStatusSchema.optional(),
+  gateId: z.uuid().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().min(1).optional(),
+});
 
 /** Event guest list (visitor.md §3). Guards see names only. */
 export const eventGuestSchema = z.object({
@@ -393,4 +399,12 @@ export const createRestrictedVisitorSchema = z
   })
   .refine((value) => value.name || value.phone || value.plate, {
     message: 'Give a name, phone or plate',
+  });
+export const updateRestrictedVisitorSchema = z
+  .object({
+    reason: z.string().trim().min(3).max(300).optional(),
+    expiresAt: z.iso.datetime({ offset: true }).nullable().optional(),
+  })
+  .refine((value) => value.reason !== undefined || value.expiresAt !== undefined, {
+    message: 'Nothing to update',
   });

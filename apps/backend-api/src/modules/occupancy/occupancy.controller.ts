@@ -12,7 +12,9 @@ import {
   endOccupancySchema,
   estateItemParamsSchema,
   estateParamSchema,
+  householdListQuerySchema,
   householdSchema,
+  householdSummarySchema,
   idParamSchema,
   joinCodeParamSchema,
   joinDecisionSchema,
@@ -317,6 +319,24 @@ export class EstateOccupancyController {
     @ValidBody() body: z.infer<typeof renewOccupancySchema>,
   ) {
     return this.occupancy.renewOccupancy(estate, params.id, body.endsOn);
+  }
+
+  @Get('households')
+  @Can('resident.read')
+  @RequiresFeature('occupancy')
+  @Contract({
+    summary: 'Active estate households (staff)',
+    tags: ['occupancy'],
+    params: estateParamSchema,
+    query: householdListQuerySchema,
+    response: householdSummarySchema,
+    paginated: true,
+  })
+  listHouseholds(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof householdListQuerySchema>,
+  ) {
+    return this.occupancy.listHouseholds(estate, query);
   }
 
   @Get('households/mine')

@@ -4,11 +4,12 @@ import type {
   createOwnershipTransferSchema,
   endOwnershipSchema,
   ownerInputSchema,
+  ownershipListQuerySchema,
   transferDecisionSchema,
   transferListQuerySchema,
 } from '@safezone/schemas';
 import { RESIDENT_ROLE_KEYS } from '@safezone/permissions';
-import type { z } from 'zod';
+import { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
@@ -20,6 +21,7 @@ import {
   NotFoundError,
 } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
+import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { AuthzService } from '../authz/authz.service';
 import { IdentityService } from '../identity/identity.service';
 import { TenancyService } from '../tenancy/tenancy.service';
@@ -34,6 +36,7 @@ interface StoredOwner {
 }
 
 const FULL_SHARE = 10_000;
+const ownerCursorSchema = z.object({ createdAt: z.iso.datetime(), id: z.uuid() });
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -61,6 +64,57 @@ export class OwnershipsService {
     private readonly authz: AuthzService,
     private readonly tenancy: TenancyService,
   ) {}
+
+  /** Estate-wide owners directory for staff (management-web.md §6.5). */
+  async directory(access: EstateAccess, query: z.infer<typeof ownershipListQuerySchema>) {
+    const after = query.cursor
+      ? decodeCursor(
+          query.cursor,
+          (value): value is z.infer<typeof ownerCursorSchema> =>
+            ownerCursorSchema.safeParse(value).success,
+        )
+      : undefined;
+    return this.db.withTenant(access, async (tx) => {
+      const rows = await tx.ownership.findMany({
+        where: {
+          estateId: access.estateId,
+          ...(query.spaceId ? { spaceId: query.spaceId } : {}),
+          ...(query.active !== undefined ? { status: query.active ? 'active' : 'ended' } : {}),
+          ...(query.q
+            ? {
+                OR: [
+                  { ownerName: { contains: query.q, mode: 'insensitive' } },
+                  { companyName: { contains: query.q, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+          ...(after
+            ? {
+                OR: [
+                  { createdAt: { lt: new Date(after.createdAt) } },
+                  { createdAt: new Date(after.createdAt), id: { lt: after.id } },
+                ],
+              }
+            : {}),
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: query.limit + 1,
+      });
+      const page = rows.slice(0, query.limit);
+      const units = await this.property.spacesByIds(tx, access.estateId, [
+        ...new Set(page.map((row) => row.spaceId)),
+      ]);
+      const unitById = new Map(units.map((u) => [u.id, u.code]));
+      const last = page.at(-1);
+      return {
+        items: page.map((row) => this.view(row, unitById.get(row.spaceId) ?? '-')),
+        nextCursor:
+          rows.length > query.limit && last
+            ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id })
+            : null,
+      };
+    });
+  }
 
   /** Staff with space.manage or resident.read see all owners of a unit; an owner sees their unit's. */
   async list(access: EstateAccess, spaceId: string) {
