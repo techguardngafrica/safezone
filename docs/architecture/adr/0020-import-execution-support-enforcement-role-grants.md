@@ -1,7 +1,7 @@
 # ADR-0020: Import Execution, Support-Session Enforcement and Role-Grant Levels
 
 - **Date**: 2026-11-21
-- **Status**: Accepted (imports, support sessions); Proposed (role-grant rule, needs product confirmation)
+- **Status**: Accepted (role-grant rule confirmed by the product owner on 2026-11-21)
 - **Scope**: `apps/backend-api`, `apps/management-web`, `packages/permissions`, `packages/schemas`
 - **Amends**: [ADR-0019](0019-bulk-imports-and-support-sessions.md)
 
@@ -29,7 +29,7 @@ A review of the Phase 1-3 management-web commit found that:
 - A non-member holding `platform.support_access` reaches an estate route only while an approved, unexpired session exists. Only `GET`/`HEAD` requests are allowed, within `SUPPORT_SESSION_PERMISSIONS` (`audit.read`, `invoice.read`, `report.read`, `resident.read`, `visitor.log.read`; never `pii.view`). Every request writes an audited `platform.support_session.accessed` event carrying the session id.
 - Due sessions are marked `expired` with an audited `platform.support_session.expired` event when sessions are checked or listed. Decisions use conditional updates, and agents cannot decide their own requests.
 
-### Role grants cannot go above the granter's level (proposed)
+### Role grants cannot go above the granter's level
 
 authz.md §7.2 says a role may never be granted with more permissions than the granter holds. Applied literally it stops estate administrators from assigning built-in security, accountant or facility roles, because separation of duties keeps `gate.verify` and `billing.run.create` out of the administrator role. We therefore apply the rule to:
 
@@ -44,4 +44,4 @@ In all cases nobody may change their own roles, resident roles are never granted
 - Additive migration `20261121090000_import_execution_and_support_defaults` (new columns, a new RLS-protected insert-only table, a default change).
 - Importing opening balances needs both `import.run` and `billing.run.create`. No built-in role has both, so an administrator also needs the accountant role, which preserves separation of duties.
 - Each support-session request costs one outbox insert.
-- The role-grant rule should be confirmed or changed by the product owner; if the literal §7.2 rule is preferred, administrators would need the operational permissions themselves.
+- authz.md §7.2 is read through this rule: the "more permissions than they hold" check applies to custom and management roles; built-in operational roles stay assignable by any `role.assign` holder.

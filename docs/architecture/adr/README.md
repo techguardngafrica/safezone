@@ -23,4 +23,5 @@ Copy [0000-template.md](0000-template.md) to `NNNN-short-title.md`. One decision
 | [0017](0017-gate-devices-and-guard-pin-sessions.md)              | Gate devices and guard PIN shift sessions (including offline PIN sign-in)               | Accepted                             |
 | [0018](0018-prepaid-token-purchases.md)                          | Prepaid electricity tokens: Safezone collects and vends                                 | Accepted                             |
 | [0019](0019-bulk-imports-and-support-sessions.md)                | Bulk import jobs and support-access consent tables                                      | Accepted                             |
-| [0020](0020-import-execution-support-enforcement-role-grants.md) | Import execution through owning modules, support-session enforcement, role-grant levels | Accepted (role-grant rule proposed)  |
+| [0020](0020-import-execution-support-enforcement-role-grants.md) | Import execution through owning modules, support-session enforcement, role-grant levels | Accepted                             |
+| [0021](0021-composition-modules-for-cross-module-reads.md)       | Staff and search composition modules; reports and realtime read through owning modules  | Accepted                             |
