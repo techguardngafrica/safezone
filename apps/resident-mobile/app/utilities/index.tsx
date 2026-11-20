@@ -1,4 +1,4 @@
-import { unwrap } from '@safezone/api-client';
+import { unwrap, unwrapPage } from '@safezone/api-client';
 import { colors, spacing, typography } from '@safezone/design-tokens';
 import { formatDateTime, type MessageKey, t } from '@safezone/i18n';
 import {
@@ -7,6 +7,7 @@ import {
   ConfirmModal,
   EmptyState,
   ErrorState,
+  ListRow,
   ScreenHeader,
   ScrollScreen,
   SectionHeader,
@@ -24,6 +25,7 @@ import {
   partitionOutages,
   utilityIcon,
 } from '../../src/features/utilities';
+import { nairaText, TOKEN_TONE } from '../../src/features/tokens';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
 import { api } from '../../src/lib/session';
@@ -41,6 +43,16 @@ export default function UtilitiesScreen() {
     queryKey: ['estate', estateId, 'meters'],
     queryFn: () =>
       unwrap(api.GET('/v1/estates/{estateId}/meters', { params: { path: { estateId } } })),
+    enabled: hasFeature('billing'),
+  });
+  const purchases = useQuery({
+    queryKey: ['estate', estateId, 'utility-purchases', 'list'],
+    queryFn: () =>
+      unwrapPage(
+        api.GET('/v1/estates/{estateId}/utility-purchases', {
+          params: { path: { estateId }, query: { limit: 10 } },
+        }),
+      ),
     enabled: hasFeature('billing'),
   });
   const outages = useQuery({
@@ -171,6 +183,18 @@ export default function UtilitiesScreen() {
               })}
             </Text>
           ) : null}
+          {meter.type === 'electricity' && meter.supply === 'public' && meter.prepaid ? (
+            <ActionButton
+              label={t('res.tokens.buy')}
+              icon={<Icon name="flash" color={colors.brand.onPrimary} size={18} />}
+              onPress={() =>
+                router.push({
+                  pathname: '/utilities/buy',
+                  params: { meterId: meter.id, meterNumber: meter.meterNumber },
+                })
+              }
+            />
+          ) : null}
           {meter.supply === 'public' ? (
             <ActionButton
               label={t('res.utilities.removeMeter')}
@@ -180,6 +204,29 @@ export default function UtilitiesScreen() {
           ) : null}
         </Card>
       ))}
+
+      {(purchases.data?.items.length ?? 0) > 0 ? (
+        <>
+          <SectionHeader title={t('res.tokens.recent')} />
+          <Card>
+            {purchases.data?.items.map((item) => (
+              <ListRow
+                key={item.id}
+                title={`${nairaText(item.totalKobo)} · ${item.meterNumber}`}
+                subtitle={formatDateTime(item.createdAt)}
+                leading={<Icon name="flash-outline" color={colors.brand.primary} size={20} />}
+                trailing={
+                  <StatusPill
+                    tone={TOKEN_TONE[item.status]}
+                    label={t(`res.tokens.status.${item.status}` as MessageKey)}
+                  />
+                }
+                onPress={() => router.push(`/utilities/purchase/${item.id}`)}
+              />
+            ))}
+          </Card>
+        </>
+      ) : null}
 
       {household ? (
         <ActionButton

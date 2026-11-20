@@ -296,3 +296,7 @@ apps/resident-mobile/
 - A visitor invite can be created and shared in under 30 seconds.
 - SOS reaches the security team in under 5 seconds on a normal 4G connection.
 - The SOS button is visible and usable on every screen.
+
+## Implementation note: prepaid tokens (20 Nov 2026)
+
+[ADR-0018](../adr/0018-prepaid-token-purchases.md): **Buy token** on a verified prepaid DisCo meter (Utilities), quick amounts or a custom whole-naira amount within the API's limits, checkout on Safezone's account, then the purchase screen, which checks the payment through the API until it is verified and the token is vended. The token is shown only then, selectable and shareable; failures show the refund note. Recent tokens are listed under Utilities. Returning from checkout uses `safezone://utilities/return`. While no aggregator is configured the API reports purchases as unavailable and the screen says so.
