@@ -35,6 +35,11 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
+    },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": ["E2E_*", "CI"]
     }
   }
 }

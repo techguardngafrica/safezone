@@ -60,3 +60,7 @@ apps/backend-api/prisma/migrations/*.sql.bak
 # local development without Docker (MAIL_TRANSPORT=file, STORAGE_DRIVER=local)
 .dev-outbox/
 .dev-storage/
+
+# management-web e2e harness output
+.next-e2e/
+apps/management-web/e2e/.run/
