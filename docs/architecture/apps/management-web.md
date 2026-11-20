@@ -211,7 +211,7 @@ apps/management-web/
 ## 10. Testing
 
 - Component tests for complex forms (charges, billing runs, roles).
-- Playwright E2E: setup wizard, import, approve resident, live gate view, SOS console acknowledge/resolve, billing run and payment, maintenance work order, moderation action.
+- Playwright E2E: setup wizard, import, approve resident, live gate view, SOS console acknowledge/resolve, billing run and payment, maintenance work order, moderation action. Specs live in `apps/management-web/e2e/`; how to run them is in [docs/operations/e2e-tests.md](../../operations/e2e-tests.md).
 - Accessibility checks (axe) in CI on key pages.
 
 ## 11. Acceptance highlights (Phase 1)

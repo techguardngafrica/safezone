@@ -5,7 +5,7 @@
 | Packages, backend      | Vitest                                        | `pnpm test` (or `--filter <pkg>`)                                                      |
 | Backend integration    | Vitest + Testcontainers (real Postgres/Redis) | `pnpm test:integration` (needs Docker)                                                 |
 | Tenant isolation suite | Vitest, `apps/backend-api/test/isolation`     | `pnpm --filter @safezone/backend-api test:isolation` (also part of `test:integration`) |
-| Web apps               | Playwright                                    | To add with the first web feature                                                      |
+| Web apps               | Playwright (host mode, no Docker)             | `pnpm --filter @safezone/management-web e2e`; see [e2e-tests.md](e2e-tests.md)         |
 | Mobile apps            | Maestro                                       | To add with the first mobile feature                                                   |
 
 Minimum tests per change type are in [AGENTS.md §8](../../AGENTS.md).
