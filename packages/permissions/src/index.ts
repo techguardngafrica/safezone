@@ -351,6 +351,18 @@ export const GATE_SESSION_PERMISSIONS: readonly Permission[] = [
   'sos.respond',
 ];
 
+/**
+ * What a Techguard agent may do inside an estate during an approved support session (platform.md §4):
+ * read-only and never `pii.view`, so phone numbers stay masked. Only GET requests are allowed.
+ */
+export const SUPPORT_SESSION_PERMISSIONS: readonly Permission[] = [
+  'audit.read',
+  'invoice.read',
+  'report.read',
+  'resident.read',
+  'visitor.log.read',
+];
+
 export function requiresMfa(roleKeys: readonly string[]): boolean {
   return roleKeys.some((key) => {
     const role = getRole(key);

@@ -38,14 +38,14 @@ export class ReportsService {
         shifts,
       ] = await Promise.all([
         tx.space.count({
-          where: { estateId: access.estateId, type: 'unit', deletedAt: null },
+          where: { estateId: access.estateId, type: 'unit', archivedAt: null },
         }),
         tx.space.count({
           where: {
             estateId: access.estateId,
             type: 'unit',
             status: 'occupied',
-            deletedAt: null,
+            archivedAt: null,
           },
         }),
         tx.household.count({

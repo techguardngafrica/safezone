@@ -10,6 +10,7 @@ import type {
 import { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
 import { DatabaseService } from '../../common/database/database.service';
+import type { ImportOutcome } from '../../common/imports/import-outcome';
 import type { TenantContext, Tx } from '../../common/database/tenant-context';
 import { ConflictError, DomainError, NotFoundError } from '../../common/errors/domain-error';
 import { uuidv7 } from '../../common/ids/uuidv7';
@@ -438,6 +439,74 @@ export class PropertyService {
         },
       ]);
       return this.view(await this.load(tx, context.estateId, space.id), estateCode);
+    });
+  }
+
+  /**
+   * Bulk import of one unit (tenancy.md §7.8): matched by external reference, then by unit code
+   * (case-insensitive); a match is updated, otherwise a top-level unit is created. An occupied unit
+   * keeps its status (occupancy owns it).
+   */
+  async importUnit(
+    context: TenantContext,
+    row: {
+      code: string;
+      name: string;
+      unitType: 'house' | 'flat' | 'shop' | 'office' | 'other';
+      bedrooms: number | null;
+      status: 'vacant' | 'under_construction' | 'reserved';
+      externalRef: string | null;
+    },
+  ): Promise<ImportOutcome> {
+    const existing = await this.db.withTenant(context, (tx) =>
+      tx.space.findFirst({
+        where: {
+          estateId: context.estateId,
+          type: 'unit',
+          archivedAt: null,
+          OR: [
+            ...(row.externalRef ? [{ externalRef: row.externalRef }] : []),
+            { code: { equals: row.code, mode: 'insensitive' as const } },
+          ],
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+    );
+    if (!existing) {
+      await this.create(context, {
+        parentId: null,
+        type: 'unit',
+        code: row.code,
+        name: row.name,
+        unitType: row.unitType,
+        ...(row.bedrooms !== null ? { bedrooms: row.bedrooms } : {}),
+        status: row.status,
+        ...(row.externalRef ? { externalRef: row.externalRef } : {}),
+      });
+      return 'created';
+    }
+    const changes: z.infer<typeof updateSpaceSchema> = {};
+    if (existing.name !== row.name) changes.name = row.name;
+    if (existing.unitType !== row.unitType) changes.unitType = row.unitType;
+    if (row.bedrooms !== null && existing.bedrooms !== row.bedrooms)
+      changes.bedrooms = row.bedrooms;
+    if (existing.status !== 'occupied' && existing.status !== row.status)
+      changes.status = row.status;
+    if (Object.keys(changes).length === 0) return 'unchanged';
+    await this.update(context, existing.id, changes);
+    return 'updated';
+  }
+
+  /** A live unit by code (case-insensitive), or null. For imports in other modules. */
+  async unitByCode(tx: Tx, estateId: string, code: string) {
+    return tx.space.findFirst({
+      where: {
+        estateId,
+        type: 'unit',
+        archivedAt: null,
+        code: { equals: code.trim(), mode: 'insensitive' },
+      },
+      select: { id: true, code: true },
     });
   }
 

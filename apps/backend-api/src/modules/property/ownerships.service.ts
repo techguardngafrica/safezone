@@ -13,6 +13,7 @@ import { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
+import type { ImportOutcome } from '../../common/imports/import-outcome';
 import type { Tx } from '../../common/database/tenant-context';
 import {
   ConflictError,
@@ -162,6 +163,45 @@ export class OwnershipsService {
       });
       return this.view(row, unit.code);
     });
+  }
+
+  /**
+   * Bulk import of one owner (tenancy.md §7.8). An owner who already holds an active ownership of the
+   * unit is unchanged; a different share must go through a transfer, never an import.
+   */
+  async importOwner(
+    access: EstateAccess,
+    unitCode: string,
+    owner: { fullName: string; phone: string; shareBasisPoints: number },
+  ): Promise<ImportOutcome> {
+    const ownerUserId = await this.identity.findOrCreateByPhone(
+      owner.phone,
+      owner.fullName,
+      access.userId,
+    );
+    const found = await this.db.withTenant(access, async (tx) => {
+      const unit = await this.property.unitByCode(tx, access.estateId, unitCode);
+      if (!unit) return null;
+      const current = await tx.ownership.findFirst({
+        where: { estateId: access.estateId, spaceId: unit.id, ownerUserId, status: 'active' },
+        select: { shareBp: true },
+      });
+      return { unit, current };
+    });
+    if (!found) throw new NotFoundError(`Unit ${unitCode} not found`, 'SPACE_NOT_FOUND');
+    if (found.current) {
+      if (found.current.shareBp === owner.shareBasisPoints) return 'unchanged';
+      throw new ConflictError(
+        'OWNERSHIP_SHARE_DIFFERS',
+        'This owner already holds a different share of the unit. Use a transfer to change shares.',
+      );
+    }
+    await this.create(access, found.unit.id, {
+      owner: { type: 'person', fullName: owner.fullName, phone: owner.phone },
+      shareBasisPoints: owner.shareBasisPoints,
+      evidenceFileIds: [],
+    });
+    return 'created';
   }
 
   async end(access: EstateAccess, ownershipId: string, input: z.infer<typeof endOwnershipSchema>) {

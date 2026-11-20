@@ -19,10 +19,12 @@ import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
 import { AuthzService } from '../modules/authz/authz.service';
 import { TokenService } from '../modules/identity/token.service';
-import { parseRoom } from './room-auth';
+import { TenancyService } from '../modules/tenancy/tenancy.service';
+import { canonicalRoom, parseRoom, staffMayJoin } from './room-auth';
 
 interface SocketData {
   userId?: string;
+  expiryTimer?: NodeJS.Timeout;
 }
 
 function extractToken(client: Socket): string | null {
@@ -54,6 +56,7 @@ export class EventsGateway
     @Inject(ENV) private readonly env: Env,
     private readonly tokens: TokenService,
     private readonly authz: AuthzService,
+    private readonly tenancy: TenancyService,
     private readonly db: DatabaseService,
   ) {}
 
@@ -92,12 +95,29 @@ export class EventsGateway
       client.disconnect(true);
       return;
     }
-    (client.data as SocketData).userId = claims.sub;
+    const data = client.data as SocketData;
+    data.userId = claims.sub;
+    // Authorisation is decided at join time; disconnecting when the access token expires makes the
+    // client reconnect with a fresh token, which re-checks every room against current roles.
+    if (claims.exp !== undefined) {
+      const remainingMs = claims.exp * 1000 - Date.now();
+      if (remainingMs <= 0) {
+        client.emit('auth:error', { code: 'TOKEN_EXPIRED' });
+        client.disconnect(true);
+        return;
+      }
+      data.expiryTimer = setTimeout(() => {
+        client.emit('auth:error', { code: 'TOKEN_EXPIRED' });
+        client.disconnect(true);
+      }, remainingMs);
+    }
     await client.join(`user:${claims.sub}`);
     this.logger.debug(`client connected ${client.id}`);
   }
 
   handleDisconnect(client: Socket): void {
+    const timer = (client.data as SocketData).expiryTimer;
+    if (timer) clearTimeout(timer);
     this.logger.debug(`client disconnected ${client.id}`);
   }
 
@@ -120,8 +140,9 @@ export class EventsGateway
     const allowed = await this.canJoin(userId, parsed);
     if (!allowed) return { ok: false, error: 'FORBIDDEN' };
 
-    await client.join(room);
-    return { ok: true, room };
+    const canonical = canonicalRoom(parsed);
+    await client.join(canonical);
+    return { ok: true, room: canonical };
   }
 
   @SubscribeMessage('room:leave')
@@ -129,8 +150,10 @@ export class EventsGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room?: string },
   ): Promise<{ ok: boolean; room?: string }> {
-    const room = typeof body?.room === 'string' ? body.room : '';
-    if (room) await client.leave(room);
+    const parsed = typeof body?.room === 'string' ? parseRoom(body.room) : null;
+    if (!parsed) return { ok: true };
+    const room = canonicalRoom(parsed);
+    await client.leave(room);
     return { ok: true, room };
   }
 
@@ -138,6 +161,9 @@ export class EventsGateway
     userId: string,
     room: NonNullable<ReturnType<typeof parseRoom>>,
   ): Promise<boolean> {
+    // Same rule as REST: suspended or departed members see nothing of the estate.
+    const membership = await this.tenancy.activeMembership(userId, room.estateId);
+    if (!membership) return false;
     if (room.kind === 'channel') {
       return this.db.withTenant({ estateId: room.estateId, userId }, async (tx) => {
         const member = await tx.channelMember.findFirst({
@@ -155,12 +181,6 @@ export class EventsGateway
 
     const assignments = await this.authz.activeAssignments(userId);
     const grant = this.authz.grantIn(assignments, room.estateId);
-    if (grant.roles.length === 0) return false;
-
-    if (room.kind === 'sos') return grant.permissions.has('sos.respond');
-    if (room.kind === 'security' || room.kind === 'gate') {
-      return grant.permissions.has('visitor.log.read') || grant.permissions.has('gate.verify');
-    }
-    return true;
+    return staffMayJoin(room.kind, grant.staffPermissions);
   }
 }

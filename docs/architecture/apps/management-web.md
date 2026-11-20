@@ -96,6 +96,7 @@ Progress is saved per step; the dashboard shows a setup checklist until complete
 - Templates (XLSX/CSV) for units, owners, residents, households, vehicles, opening balances.
 - Upload → validation → dry-run report (errors per row) → confirm → import job → result report.
 - Imports are idempotent by external reference; re-running updates rather than duplicates.
+- The import runs in the worker; the screen polls the job and shows created, updated, unchanged and failed rows ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md)).
 
 ### 6.5 People
 

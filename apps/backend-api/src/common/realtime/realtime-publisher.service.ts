@@ -21,12 +21,13 @@ export function realtimeTargetsForOutbox(event: {
     event.payload && typeof event.payload === 'object'
       ? (event.payload as Record<string, unknown>)
       : {};
+  // Envelope fields last, so a payload can never overwrite the event type or estate.
   const data = {
+    ...payload,
     type: event.type,
     estateId: event.estateId,
     aggregateId: event.aggregateId,
     occurredAt: event.occurredAt,
-    ...payload,
   };
 
   if (event.type.startsWith('emergency.alert.') && event.estateId) {

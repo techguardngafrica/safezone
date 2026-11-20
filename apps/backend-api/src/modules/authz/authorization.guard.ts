@@ -1,6 +1,10 @@
 import { type CanActivate, type ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { GATE_SESSION_PERMISSIONS, requiresMfa } from '@safezone/permissions';
+import {
+  GATE_SESSION_PERMISSIONS,
+  requiresMfa,
+  SUPPORT_SESSION_PERMISSIONS,
+} from '@safezone/permissions';
 import { z } from 'zod';
 import {
   ACCESS_KEY,
@@ -15,6 +19,7 @@ import {
 import { PUBLIC_KEY } from '../../common/auth/public.decorator';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../common/errors/domain-error';
 import { requestContext } from '../../common/http/request-context';
+import { SupportAccessService } from '../platform/support-access.service';
 import { blockedBySuspension } from '../tenancy/domain/estate-lifecycle';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { AuthzService } from './authz.service';
@@ -31,6 +36,8 @@ const estateIdSchema = z.uuid();
  * 6. suspension: only reads and safety actions in a suspended estate (tenancy.md §7.5).
  * Gate shift sessions (ADR-0017) reach only their own estate, within GATE_SESSION_PERMISSIONS, plus
  * signed-in routes marked @AllowGateSession.
+ * A Techguard agent who is not a member reaches an estate only through an approved, unexpired support
+ * session (platform.md §4): GET requests only, within SUPPORT_SESSION_PERMISSIONS, each one audited.
  */
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -40,6 +47,7 @@ export class AuthorizationGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly authz: AuthzService,
     private readonly tenancy: TenancyService,
+    private readonly support: SupportAccessService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -100,7 +108,10 @@ export class AuthorizationGuard implements CanActivate {
     if (!estateIdSchema.safeParse(rawEstateId).success)
       throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
     const membership = await this.tenancy.activeMembership(auth.userId, rawEstateId);
-    if (!membership) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+    if (!membership) {
+      if (gateScope) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+      return this.admitSupportSession(request, rule, assignments, rawEstateId, targets);
+    }
 
     const fullGrant = this.authz.grantIn(assignments, rawEstateId);
     const grant = gateScope
@@ -108,6 +119,11 @@ export class AuthorizationGuard implements CanActivate {
           ...fullGrant,
           permissions: new Set(
             GATE_SESSION_PERMISSIONS.filter((permission) => fullGrant.permissions.has(permission)),
+          ),
+          staffPermissions: new Set(
+            GATE_SESSION_PERMISSIONS.filter((permission) =>
+              fullGrant.staffPermissions.has(permission),
+            ),
           ),
         }
       : fullGrant;
@@ -142,8 +158,60 @@ export class AuthorizationGuard implements CanActivate {
       userId: auth.userId,
       roles: grant.roles,
       permissions: grant.permissions,
+      staffPermissions: grant.staffPermissions,
     };
     requestContext.assign({ estateId: rawEstateId });
+    return true;
+  }
+
+  /** Non-members: only a Techguard agent with an approved support session, read-only (platform.md §4). */
+  private async admitSupportSession(
+    request: AuthenticatedRequest & {
+      params?: Record<string, string>;
+      method?: string;
+      route?: { path?: string };
+    },
+    rule: AccessRule,
+    assignments: Awaited<ReturnType<AuthzService['activeAssignments']>>,
+    estateId: string,
+    targets: Parameters<Reflector['getAllAndOverride']>[1],
+  ): Promise<boolean> {
+    const auth = request.auth;
+    const platform = this.authz.grantIn(assignments, null);
+    if (!auth || !platform.permissions.has('platform.support_access')) {
+      throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+    }
+    const session = await this.support.activeSession(auth.userId, estateId);
+    if (!session) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+    const method = (request.method ?? 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD') {
+      throw new ForbiddenError('Support sessions are read-only', 'SUPPORT_SESSION_READ_ONLY');
+    }
+    const permissions = new Set<string>(SUPPORT_SESSION_PERMISSIONS);
+    if (rule.kind === 'permission' && !permits(rule, permissions)) throw new ForbiddenError();
+    const feature = this.reflector.getAllAndOverride<string | undefined>(FEATURE_KEY, targets);
+    if (feature && !(await this.tenancy.enabledFeatures(estateId)).includes(feature as never)) {
+      throw new ForbiddenError(
+        'This feature is not enabled for your estate',
+        'FEATURE_NOT_ENABLED',
+      );
+    }
+    await this.support.recordAccess({
+      estateId,
+      platformUserId: auth.userId,
+      sessionId: session.id,
+      method,
+      route: request.route?.path ?? 'unknown',
+    });
+    request.estateAccess = {
+      estateId,
+      userId: auth.userId,
+      roles: ['support_agent'],
+      permissions,
+      staffPermissions: permissions,
+      supportSessionId: session.id,
+    };
+    requestContext.assign({ estateId });
     return true;
   }
 }

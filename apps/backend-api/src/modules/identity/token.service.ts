@@ -14,6 +14,8 @@ const claimsSchema = z.object({
   sub: z.uuid(),
   sid: z.uuid(),
   app: z.string().min(1).max(40),
+  /** Expiry (seconds since epoch), set by JwtService; long-lived sockets disconnect at this time. */
+  exp: z.number().int().optional(),
 });
 export type AccessClaims = z.infer<typeof claimsSchema>;
 

@@ -8,7 +8,9 @@ type Hit = z.infer<typeof globalSearchHitSchema>;
 
 /**
  * Estate-wide global search (management-web.md §5).
- * Runs permission-gated lookups across spaces, residents, vehicles/plates, visitor passes and invoices.
+ * Spaces are visible to every member (as in the spaces list). People, plates, passes and invoices are
+ * estate-wide data, so they need the permission through a staff role: a resident's own `invoice.read`
+ * covers only their household and must never list other households' invoices here.
  */
 @Injectable()
 export class SearchService {
@@ -18,13 +20,14 @@ export class SearchService {
     const q = query.q.trim();
     const take = query.limit;
     const hits: Hit[] = [];
+    const staff = access.staffPermissions ?? new Set<string>();
 
     await this.db.withTenant(access, async (tx) => {
       // 1. Spaces / units (all estate members)
       const spaces = await tx.space.findMany({
         where: {
           estateId: access.estateId,
-          deletedAt: null,
+          archivedAt: null,
           OR: [
             { code: { contains: q, mode: 'insensitive' } },
             { name: { contains: q, mode: 'insensitive' } },
@@ -43,8 +46,8 @@ export class SearchService {
         });
       }
 
-      // 2. Residents / household members (resident.read)
-      if (access.permissions.has('resident.read')) {
+      // 2. Residents / household members (staff resident.read)
+      if (staff.has('resident.read')) {
         const members = await tx.householdMember.findMany({
           where: {
             estateId: access.estateId,
@@ -67,7 +70,7 @@ export class SearchService {
       }
 
       // 3. Vehicles / plates (resident.read or visitor.log.read)
-      if (access.permissions.has('resident.read') || access.permissions.has('visitor.log.read')) {
+      if (staff.has('resident.read') || staff.has('visitor.log.read')) {
         const vehicles = await tx.vehicle.findMany({
           where: {
             estateId: access.estateId,
@@ -92,7 +95,7 @@ export class SearchService {
       }
 
       // 4. Visitor passes (visitor.log.read)
-      if (access.permissions.has('visitor.log.read')) {
+      if (staff.has('visitor.log.read')) {
         const passes = await tx.visitorPass.findMany({
           where: {
             estateId: access.estateId,
@@ -115,8 +118,8 @@ export class SearchService {
         }
       }
 
-      // 5. Invoices (invoice.read)
-      if (access.permissions.has('invoice.read')) {
+      // 5. Invoices (staff invoice.read)
+      if (staff.has('invoice.read')) {
         const invoices = await tx.invoice.findMany({
           where: {
             estateId: access.estateId,

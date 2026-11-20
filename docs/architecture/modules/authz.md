@@ -146,4 +146,6 @@ Built (`src/modules/authz`): `roles`, `role_permissions`, `role_assignments`; bu
 
 - Built-in role permissions are read from the package at runtime (code is the source of truth); custom roles use `role_permissions`.
 - Assignments are read per request (no cache yet), so a revocation applies on the next request.
-- Not built yet: custom role and assignment endpoints, scope rules (gate, building), household permissions.
+- Custom roles and staff assignment endpoints (`…/roles`, `…/staff`): custom roles carry only permissions found in built-in estate roles and that the creator holds; management roles (with `role.assign` or `estate.configure`) and custom roles can only be granted or revoked by someone holding all their permissions; built-in operational roles can be granted by any `role.assign` holder; nobody changes their own roles ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md), rule pending product confirmation).
+- `Grant.staffPermissions` / `EstateAccess.staffPermissions`: permissions held through staff roles only, for estate-wide reads such as global search.
+- Not built yet: scope rules (gate, building), household permissions.

@@ -118,4 +118,5 @@ Built in `src/modules/billing` ([ADR-0012](../adr/0012-billing-ledger-and-invoic
 - Database guarantees: immutable invoice terms, money checks, append-only financial tables, balanced journals checked at commit.
 - Daily job (06:00 WAT, `billing` queue): `billing.invoice.overdue` once per invoice, one late-penalty invoice per late invoice after `billing.penalty_grace_days`, reminders on `billing.reminder_offsets_days`, invoice-vs-ledger verification.
 - Routes are under `/v1/estates/:estateId/…` (residents see their own and their household's invoices there; no `/v1/me/invoices`).
-- **Not yet built:** PDF invoices and receipts, opening balances import, arrears ageing and collection reports, early-payment discounts, co-owner invoice splitting, chunked issuing for very large runs, recurring run scheduling.
+- Opening balances import: one-off invoices created through `InvoicesService.createOneOffIn` by the imports worker, once per `(unit, external_ref)` ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md)).
+- **Not yet built:** PDF invoices and receipts, arrears ageing and collection reports, early-payment discounts, co-owner invoice splitting, chunked issuing for very large runs, recurring run scheduling.

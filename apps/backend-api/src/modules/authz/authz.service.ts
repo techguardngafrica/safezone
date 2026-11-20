@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getRole, PERMISSIONS, type Permission } from '@safezone/permissions';
+import { getRole, PERMISSIONS, type Permission, RESIDENT_ROLE_KEYS } from '@safezone/permissions';
 import { DatabaseService } from '../../common/database/database.service';
 import { asModule, type Tx } from '../../common/database/tenant-context';
 import { DomainError } from '../../common/errors/domain-error';
@@ -16,6 +16,8 @@ export interface ActiveAssignment {
 export interface Grant {
   roles: string[];
   permissions: Set<string>;
+  /** Permissions held through staff roles only (not resident or owner roles). */
+  staffPermissions: Set<string>;
 }
 
 /**
@@ -60,9 +62,19 @@ export class AuthzService {
       estateId === null ? assignment.level === 'platform' : assignment.estateId === estateId,
     );
     const permissions = new Set<string>();
-    for (const assignment of matching)
-      for (const permission of assignment.permissions) permissions.add(permission);
-    return { roles: [...new Set(matching.map((assignment) => assignment.roleKey))], permissions };
+    const staffPermissions = new Set<string>();
+    for (const assignment of matching) {
+      const staff = !RESIDENT_ROLE_KEYS.includes(assignment.roleKey);
+      for (const permission of assignment.permissions) {
+        permissions.add(permission);
+        if (staff) staffPermissions.add(permission);
+      }
+    }
+    return {
+      roles: [...new Set(matching.map((assignment) => assignment.roleKey))],
+      permissions,
+      staffPermissions,
+    };
   }
 
   /**

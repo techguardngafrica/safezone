@@ -41,6 +41,8 @@ import { DocumentsModule } from '../modules/documents/documents.module';
 import { AuditModule } from '../modules/audit/audit.module';
 import { CommunityModule } from '../modules/community/community.module';
 import { EmergencyModule } from '../modules/emergency/emergency.module';
+import { ImportsConsumer } from '../modules/imports/imports.consumer';
+import { ImportsModule } from '../modules/imports/imports.module';
 
 /**
  * Root module for the worker process: outbox relay and queue consumers.
@@ -67,6 +69,7 @@ import { EmergencyModule } from '../modules/emergency/emergency.module';
     EmergencyModule,
     FacilitiesModule,
     DocumentsModule,
+    ImportsModule,
   ],
   providers: [
     OutboxRelay,
@@ -93,6 +96,7 @@ import { EmergencyModule } from '../modules/emergency/emergency.module';
     ExportsConsumer,
     FacilitiesConsumer,
     CommunityConsumer,
+    ImportsConsumer,
   ],
 })
 export class WorkerModule {}

@@ -71,7 +71,7 @@ Platform owns **Techguard's control plane** for Safezone: platform staff, featur
 | GET/PUT        | `/v1/platform/providers`                                                   | Provider config        |
 | GET/POST/PATCH | `/v1/platform/support-tickets[/:id]`                                       | Tickets                |
 | POST           | `/v1/me/support-tickets`                                                   | Users open tickets     |
-| POST           | `/v1/platform/support-sessions`                                            | Request access         |
+| POST           | `/v1/platform/support-sessions` (`estateId` in the body)                   | Request access         |
 | POST           | `/v1/estates/:estateId/support-sessions/:id/approve` · `/deny` · `/revoke` | Estate decides         |
 | GET/POST/PATCH | `/v1/platform/dsr[/:id]`                                                   | Data subject requests  |
 | GET/POST       | `/v1/platform/breaches`                                                    | Breach log             |
@@ -95,4 +95,5 @@ Built (`src/modules/platform`): `feature_flags` (default, targeting by estates, 
 ## 10. Phase 2 implementation notes
 
 - Estate data export: `POST/GET …/exports`, `POST …/exports/:id/download` (15-minute links, audited), built on the `exports` queue from datasets each module registers ([ADR-0014](../adr/0014-phase-2-operations-modules.md)).
-- **Not yet built:** uploaded files in exports, offboarding purge after the read-only period, DSR tooling, support sessions.
+- Support sessions ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md)): `POST /v1/platform/support-sessions`, estate `GET …/support-sessions` and `POST …/:id/approve|deny|revoke` (`estate.configure`, conditional, never by the requesting agent). While approved and unexpired, the authorization guard admits the agent read-only (GET) within `SUPPORT_SESSION_PERMISSIONS` (no `pii.view`) and audits each request as `platform.support_session.accessed`; due sessions become `expired` with an audited event.
+- **Not yet built:** uploaded files in exports, offboarding purge after the read-only period, DSR tooling, support tickets, emergency self-approved support access, read-write support sessions.

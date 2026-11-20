@@ -54,6 +54,11 @@ export const bulkImportJobSchema = z.object({
   errorRows: z.number().int(),
   createdCount: z.number().int(),
   updatedCount: z.number().int(),
+  /** Rows already matching the estate's records (re-imports change nothing). */
+  unchangedCount: z.number().int(),
+  /** Valid rows the owning module rejected while importing (e.g. unit already occupied). */
+  failedCount: z.number().int(),
+  /** Dry-run validation errors followed by import-time errors, by CSV row number. */
   errors: z.array(bulkImportRowErrorSchema),
   createdBy: z.uuid(),
   confirmedAt: z.iso.datetime().nullable(),
@@ -71,9 +76,11 @@ export const supportSessionStatusSchema = z.enum([
   'expired',
 ]);
 
+/** Support access defaults to 2 hours, read-only (platform.md §4.4). */
 export const requestSupportSessionSchema = z.object({
+  estateId: z.uuid(),
   reason: z.string().trim().min(5).max(500),
-  durationMinutes: z.number().int().min(15).max(480).default(60),
+  durationMinutes: z.number().int().min(15).max(480).default(120),
 });
 
 export const supportSessionDecisionSchema = z.object({

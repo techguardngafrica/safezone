@@ -91,25 +91,28 @@ export class EstateSupportAccessController {
   }
 }
 
-@Controller('v1/platform/estates/:estateId/support-sessions')
+/**
+ * Platform side (platform.md §5). No `:estateId` in the path: the agent is not a member, so estate
+ * routes would refuse them before the request exists.
+ */
+@Controller('v1/platform/support-sessions')
 export class PlatformSupportAccessController {
   constructor(private readonly support: SupportAccessService) {}
 
   @Post()
   @Can('platform.support_access')
   @Contract({
-    summary: 'Request time-bounded support access to an estate (requires estate admin consent)',
+    summary: 'Request time-bounded, read-only support access to an estate (needs estate consent)',
     tags: ['platform'],
-    params: estateParamSchema,
     body: requestSupportSessionSchema,
     response: supportSessionSchema,
     status: 201,
+    errors: [404],
   })
   request(
     @CurrentAuth() auth: AuthContext,
-    @ValidParams() params: z.infer<typeof estateParamSchema>,
     @ValidBody() body: z.infer<typeof requestSupportSessionSchema>,
   ) {
-    return this.support.requestAccess(auth, params.estateId, body);
+    return this.support.requestAccess(auth, body.estateId, body);
   }
 }

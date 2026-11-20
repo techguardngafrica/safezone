@@ -145,6 +145,58 @@ describe('cross-tenant isolation', () => {
     expect(profile.body.data.id).toBe(estateB);
   });
 
+  it("Estate A's import jobs and support sessions are invisible through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const job = await stack.http
+      .post(`/v1/estates/${estateA}/imports/dry-run`)
+      .set(auth(adminA))
+      .send({ kind: 'units', filename: 'units.csv', csv: 'code,name\nISO-1,Isolation unit\n' })
+      .expect(201);
+    const jobId = job.body.data.id as string;
+    await stack.http.get(`/v1/estates/${estateB}/imports/${jobId}`).set(auth(adminB)).expect(404);
+    await stack.http
+      .post(`/v1/estates/${estateB}/imports/${jobId}/confirm`)
+      .set(auth(adminB))
+      .expect(404);
+    const listB = await stack.http
+      .get(`/v1/estates/${estateB}/imports`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(listB.body.data.map((row: { id: string }) => row.id)).not.toContain(jobId);
+
+    // A support request for Estate A cannot be decided from Estate B.
+    const agentId = await stack.createUser('+2348036000019', 'Agent');
+    await stack.assignPlatformRole(agentId, 'platform_support_agent');
+    await stack.resetRateLimits();
+    const agent = (
+      await signIn(stack, '+2348036000019', {
+        app: 'super-admin',
+        platform: 'web',
+        appVersion: '1.0.0',
+      })
+    ).accessToken;
+    await stack.db.owner.query(
+      `update platform.sessions set mfa_verified_at = now() where user_id = $1`,
+      [agentId],
+    );
+    const request = await stack.http
+      .post('/v1/platform/support-sessions')
+      .set(auth(agent))
+      .send({ estateId: estateA, reason: 'Checking gate sync for estate A' })
+      .expect(201);
+    const sessionId = request.body.data.id as string;
+    await stack.http
+      .post(`/v1/estates/${estateB}/support-sessions/${sessionId}/approve`)
+      .set(auth(adminB))
+      .send({})
+      .expect(404);
+    const sessionsB = await stack.http
+      .get(`/v1/estates/${estateB}/support-sessions`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(sessionsB.body.data).toEqual([]);
+  });
+
   it("Estate A's incidents cannot be read or changed through Estate B", async () => {
     const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
     const incident = await stack.http

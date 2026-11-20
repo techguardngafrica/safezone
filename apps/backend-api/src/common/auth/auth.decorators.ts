@@ -84,6 +84,13 @@ export interface EstateAccess {
   userId: string;
   roles: readonly string[];
   permissions: ReadonlySet<string>;
+  /**
+   * Permissions held through staff roles only. Estate-wide data (e.g. every invoice) needs these, since a
+   * resident role's `invoice.read` covers only their own household. Absent means none (fail closed).
+   */
+  staffPermissions?: ReadonlySet<string>;
+  /** Set when a Techguard agent reads the estate through an approved support session. */
+  supportSessionId?: string;
 }
 
 export interface AuthenticatedRequest {

@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import type { requestSupportSessionSchema, supportSessionDecisionSchema } from '@safezone/schemas';
 import type { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
+import type { Tx } from '../../common/database/tenant-context';
 import type { AuthContext, EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
-import { ConflictError, NotFoundError } from '../../common/errors/domain-error';
+import { ConflictError, ForbiddenError, NotFoundError } from '../../common/errors/domain-error';
+import { TenancyService } from '../tenancy/tenancy.service';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 
 function toView(row: Prisma.SupportSessionGetPayload<object>) {
@@ -25,21 +27,105 @@ function toView(row: Prisma.SupportSessionGetPayload<object>) {
   };
 }
 
+/** Marks approved sessions past their end as expired, with an audited event for each. */
+async function expireDue(tx: Tx, estateId: string, now: Date): Promise<void> {
+  const due = await tx.supportSession.findMany({
+    where: { estateId, status: 'approved', expiresAt: { lte: now } },
+    select: { id: true, platformUserId: true },
+  });
+  if (due.length === 0) return;
+  await tx.supportSession.updateMany({
+    where: { id: { in: due.map((row) => row.id) }, status: 'approved' },
+    data: { status: 'expired' },
+  });
+  await appendOutboxEvents(
+    tx,
+    due.map((row) => ({
+      type: 'platform.support_session.expired',
+      estateId,
+      aggregateType: 'support_session',
+      aggregateId: row.id,
+      payload: { sessionId: row.id, platformUserId: row.platformUserId },
+      audit: {
+        actorType: 'system' as const,
+        actorId: null,
+        supportSessionId: row.id,
+        action: 'platform.support_session.expire',
+        resourceType: 'support_session',
+        resourceId: row.id,
+      },
+    })),
+  );
+}
+
 /**
- * Estate support-access consent (management-web.md §6.13; ADR-0019).
+ * Estate support-access consent (management-web.md §6.13, platform.md §4; ADR-0019).
  * Techguard staff request time-bounded access; estate administrators approve, deny or revoke it.
+ * AuthorizationGuard admits an agent into the estate only while their session is approved and unexpired,
+ * read-only, and audits every request (`platform.support_session.accessed`).
  */
 @Injectable()
 export class SupportAccessService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly tenancy: TenancyService,
+  ) {}
+
+  /** The agent's approved, unexpired session in this estate, or null. Expires due sessions first. */
+  async activeSession(platformUserId: string, estateId: string): Promise<{ id: string } | null> {
+    return this.db.withTenant({ estateId, userId: platformUserId }, async (tx) => {
+      const now = new Date();
+      await expireDue(tx, estateId, now);
+      return tx.supportSession.findFirst({
+        where: {
+          estateId,
+          platformUserId,
+          status: 'approved',
+          revokedAt: null,
+          expiresAt: { gt: now },
+        },
+        orderBy: { decidedAt: 'desc' },
+        select: { id: true },
+      });
+    });
+  }
+
+  /** Audit trail entry for one request made during a support session (platform.md §4.6). */
+  async recordAccess(input: {
+    estateId: string;
+    platformUserId: string;
+    sessionId: string;
+    method: string;
+    route: string;
+  }): Promise<void> {
+    await this.db.withTenant(
+      { estateId: input.estateId, userId: input.platformUserId },
+      async (tx) => {
+        await appendOutboxEvents(tx, [
+          {
+            type: 'platform.support_session.accessed',
+            estateId: input.estateId,
+            aggregateType: 'support_session',
+            aggregateId: input.sessionId,
+            payload: { sessionId: input.sessionId, method: input.method, route: input.route },
+            audit: {
+              actorType: 'platform_staff',
+              actorId: input.platformUserId,
+              supportSessionId: input.sessionId,
+              action: 'platform.support_session.access',
+              resourceType: 'route',
+              resourceId: null,
+              after: { method: input.method, route: input.route },
+            },
+          },
+        ]);
+      },
+    );
+  }
 
   async listForEstate(access: EstateAccess) {
     return this.db.withTenant(access, async (tx) => {
-      const now = new Date();
-      await tx.supportSession.updateMany({
-        where: { estateId: access.estateId, status: 'approved', expiresAt: { lte: now } },
-        data: { status: 'expired' },
-      });
+      await expireDue(tx, access.estateId, new Date());
       const rows = await tx.supportSession.findMany({
         where: { estateId: access.estateId },
         orderBy: { requestedAt: 'desc' },
@@ -54,6 +140,10 @@ export class SupportAccessService {
     estateId: string,
     input: z.infer<typeof requestSupportSessionSchema>,
   ) {
+    // No orphan requests for estates that do not exist.
+    if (!(await this.tenancy.estateExists(estateId))) {
+      throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+    }
     const user = await this.db.withContext(
       'identity',
       (tx) =>
@@ -103,13 +193,19 @@ export class SupportAccessService {
     return this.db.withTenant(access, async (tx) => {
       const row = await tx.supportSession.findFirst({ where: { id, estateId: access.estateId } });
       if (!row) throw new NotFoundError('Support session not found', 'SUPPORT_SESSION_NOT_FOUND');
+      if (row.platformUserId === access.userId) {
+        throw new ForbiddenError(
+          'You cannot decide your own support-access request',
+          'SUPPORT_SESSION_SELF_DECISION',
+        );
+      }
       if (row.status !== 'pending') {
         throw new ConflictError('SUPPORT_SESSION_DECIDED', 'This request has already been decided');
       }
       const minutes = input.durationMinutes ?? row.durationMinutes;
       const now = new Date();
-      const updated = await tx.supportSession.update({
-        where: { id: row.id },
+      const claimed = await tx.supportSession.updateMany({
+        where: { id: row.id, status: 'pending' },
         data: {
           status: 'approved',
           durationMinutes: minutes,
@@ -119,6 +215,9 @@ export class SupportAccessService {
           expiresAt: new Date(now.getTime() + minutes * 60_000),
         },
       });
+      if (claimed.count !== 1)
+        throw new ConflictError('SUPPORT_SESSION_DECIDED', 'This request has already been decided');
+      const updated = await tx.supportSession.findFirstOrThrow({ where: { id: row.id } });
       await appendOutboxEvents(tx, [
         {
           type: 'platform.support_session.approved',
@@ -148,11 +247,17 @@ export class SupportAccessService {
     return this.db.withTenant(access, async (tx) => {
       const row = await tx.supportSession.findFirst({ where: { id, estateId: access.estateId } });
       if (!row) throw new NotFoundError('Support session not found', 'SUPPORT_SESSION_NOT_FOUND');
+      if (row.platformUserId === access.userId) {
+        throw new ForbiddenError(
+          'You cannot decide your own support-access request',
+          'SUPPORT_SESSION_SELF_DECISION',
+        );
+      }
       if (row.status !== 'pending') {
         throw new ConflictError('SUPPORT_SESSION_DECIDED', 'This request has already been decided');
       }
-      const updated = await tx.supportSession.update({
-        where: { id: row.id },
+      const claimed = await tx.supportSession.updateMany({
+        where: { id: row.id, status: 'pending' },
         data: {
           status: 'denied',
           decidedBy: access.userId,
@@ -160,6 +265,9 @@ export class SupportAccessService {
           decisionReason: input.reason ?? 'Denied by estate administrator',
         },
       });
+      if (claimed.count !== 1)
+        throw new ConflictError('SUPPORT_SESSION_DECIDED', 'This request has already been decided');
+      const updated = await tx.supportSession.findFirstOrThrow({ where: { id: row.id } });
       await appendOutboxEvents(tx, [
         {
           type: 'platform.support_session.denied',
@@ -187,6 +295,7 @@ export class SupportAccessService {
     input: z.infer<typeof supportSessionDecisionSchema>,
   ) {
     return this.db.withTenant(access, async (tx) => {
+      await expireDue(tx, access.estateId, new Date());
       const row = await tx.supportSession.findFirst({ where: { id, estateId: access.estateId } });
       if (!row) throw new NotFoundError('Support session not found', 'SUPPORT_SESSION_NOT_FOUND');
       if (row.status !== 'approved') {
@@ -195,8 +304,8 @@ export class SupportAccessService {
           'Only active sessions can be revoked',
         );
       }
-      const updated = await tx.supportSession.update({
-        where: { id: row.id },
+      const claimed = await tx.supportSession.updateMany({
+        where: { id: row.id, status: 'approved' },
         data: {
           status: 'revoked',
           revokedBy: access.userId,
@@ -204,6 +313,12 @@ export class SupportAccessService {
           decisionReason: input.reason ?? row.decisionReason,
         },
       });
+      if (claimed.count !== 1)
+        throw new ConflictError(
+          'SUPPORT_SESSION_NOT_ACTIVE',
+          'Only active sessions can be revoked',
+        );
+      const updated = await tx.supportSession.findFirstOrThrow({ where: { id: row.id } });
       await appendOutboxEvents(tx, [
         {
           type: 'platform.support_session.revoked',

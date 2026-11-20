@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BUILT_IN_ROLES, PERMISSIONS, type Permission } from '@safezone/permissions';
+import {
+  BUILT_IN_ROLES,
+  getRole,
+  PERMISSIONS,
+  type Permission,
+  RESIDENT_ROLE_KEYS,
+} from '@safezone/permissions';
 import type {
   assignStaffRoleSchema,
   createEstateRoleSchema,
@@ -11,30 +17,79 @@ import type {
 import { z } from 'zod';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
-import { ConflictError, DomainError, NotFoundError } from '../../common/errors/domain-error';
+import {
+  ConflictError,
+  DomainError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { maskString } from '../../common/observability/redact';
 
 const staffCursorSchema = z.object({ joinedAt: z.iso.datetime(), userId: z.uuid() });
 
-/** Permissions that belong strictly to Techguard platform / marketplace / ads — never custom estate roles. */
-const DISALLOWED_ESTATE_PERMISSIONS = new Set<string>([
-  'platform.estate.approve',
-  'platform.estate.create',
-  'platform.user.manage',
-  'platform.support_access',
-  'platform.staff.manage',
-  'platform.config',
-  'platform.compliance',
-  'platform.finance',
-  'ad.enquiry.manage',
-  'ad.campaign.manage',
-  'ad.campaign.review',
-  'vendor.approve',
-]);
+/**
+ * Permissions an estate role may carry: exactly those some built-in estate role carries. Platform,
+ * advertising and vendor-approval permissions are never estate permissions, so a new platform permission
+ * can never become grantable by accident.
+ */
+const ESTATE_ROLE_PERMISSIONS: ReadonlySet<string> = new Set(
+  BUILT_IN_ROLES.filter((role) => role.level === 'estate')
+    .flatMap((role) => role.permissions)
+    .filter(
+      (permission) =>
+        !permission.startsWith('platform.') &&
+        !permission.startsWith('ad.') &&
+        permission !== 'vendor.approve',
+    ),
+);
 
-const RESIDENT_ONLY_ROLES = new Set<string>(['resident', 'owner', 'household_member']);
+/** Resident and owner roles come from occupancy and ownership records, never from staff management. */
+function isResidentRole(key: string): boolean {
+  return RESIDENT_ROLE_KEYS.includes(key);
+}
+
+/** The permissions a role grants: built-in roles from the catalogue, custom roles from their rows. */
+function permissionsOfRole(role: {
+  key: string;
+  isBuiltin: boolean;
+  permissions?: readonly { permission: string }[];
+}): readonly string[] {
+  if (role.isBuiltin) return getRole(role.key)?.permissions ?? [];
+  return (role.permissions ?? []).map((row) => row.permission);
+}
+
+/** Permissions that make a role a management role: whoever holds them can reshape the estate's access. */
+const MANAGEMENT_PERMISSIONS: readonly string[] = ['role.assign', 'estate.configure'];
+
+/**
+ * No privilege escalation (authz.md §7.2, §8 "cannot grant above own level"). Custom roles, and built-in
+ * management roles, can only be granted, changed or revoked by someone who holds every permission in
+ * them. Built-in operational roles (guards, accountants, facility staff) are curated in
+ * @safezone/permissions and may be assigned by any `role.assign` holder, so administrators can staff the
+ * estate without holding gate or billing permissions themselves (separation of duties).
+ */
+function assertCanGrant(
+  access: EstateAccess,
+  role: { key: string; isBuiltin: boolean; permissions?: readonly { permission: string }[] },
+): void {
+  const permissions = permissionsOfRole(role);
+  const management = permissions.some((permission) => MANAGEMENT_PERMISSIONS.includes(permission));
+  if (role.isBuiltin && !management) return;
+  assertHolds(access, permissions);
+}
+
+/** The caller holds every one of these permissions in this estate. */
+function assertHolds(access: EstateAccess, permissions: readonly string[]): void {
+  const missing = permissions.filter((permission) => !access.permissions.has(permission));
+  if (missing.length > 0) {
+    throw new ForbiddenError(
+      'You can only grant or change permissions that you hold yourself',
+      'PERMISSION_NOT_HELD',
+    );
+  }
+}
 
 function slugifyRoleKey(name: string): string {
   const base = name
@@ -48,7 +103,7 @@ function slugifyRoleKey(name: string): string {
 function validateEstatePermissions(permissions: readonly string[]): Permission[] {
   const unique = [...new Set(permissions)];
   for (const perm of unique) {
-    if (!(perm in PERMISSIONS) || DISALLOWED_ESTATE_PERMISSIONS.has(perm)) {
+    if (!(perm in PERMISSIONS) || !ESTATE_ROLE_PERMISSIONS.has(perm)) {
       throw new DomainError(
         'PERMISSION_NOT_ASSIGNABLE',
         `Permission "${perm}" cannot be granted to an estate role`,
@@ -83,7 +138,7 @@ export class StaffRolesService {
           include: { permissions: true },
           orderBy: { name: 'asc' },
         }),
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
 
     const builtins = BUILT_IN_ROLES.filter((role) => role.level === 'estate').map((role) => ({
@@ -107,6 +162,7 @@ export class StaffRolesService {
 
   async createRole(access: EstateAccess, input: z.infer<typeof createEstateRoleSchema>) {
     const permissions = validateEstatePermissions(input.permissions);
+    assertHolds(access, permissions);
     const key = slugifyRoleKey(input.name);
 
     return this.db.withContext(
@@ -161,7 +217,7 @@ export class StaffRolesService {
           permissions: role.permissions.map((p) => p.permission).sort(),
         };
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
   }
 
@@ -172,14 +228,17 @@ export class StaffRolesService {
   ) {
     const permissions =
       input.permissions !== undefined ? validateEstatePermissions(input.permissions) : undefined;
+    if (permissions) assertHolds(access, permissions);
 
     return this.db.withContext(
       'authz',
       async (tx) => {
         const existing = await tx.role.findFirst({
           where: { id: roleId, estateId: access.estateId, isBuiltin: false },
+          include: { permissions: true },
         });
         if (!existing) throw new NotFoundError('Custom role not found', 'ROLE_NOT_FOUND');
+        assertCanGrant(access, existing);
 
         if (input.name !== undefined) {
           await tx.role.update({
@@ -221,7 +280,7 @@ export class StaffRolesService {
           permissions: updated.permissions.map((p) => p.permission).sort(),
         };
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
   }
 
@@ -262,7 +321,7 @@ export class StaffRolesService {
           },
         ]);
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
   }
 
@@ -288,13 +347,13 @@ export class StaffRolesService {
             revokedAt: null,
             OR: [{ validTo: null }, { validTo: { gt: now } }],
             role: {
-              key: query.roleKey ? query.roleKey : { notIn: [...RESIDENT_ONLY_ROLES] },
+              key: query.roleKey ? query.roleKey : { notIn: [...RESIDENT_ROLE_KEYS] },
             },
           },
           include: { role: true },
           orderBy: { grantedAt: 'asc' },
         }),
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
 
     const byUser = new Map<string, typeof assignments>();
@@ -327,7 +386,7 @@ export class StaffRolesService {
           orderBy: [{ joinedAt: 'desc' }, { userId: 'desc' }],
           take: query.q ? 500 : query.limit + 1,
         }),
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
 
     const users = await this.db.withContext(
@@ -337,7 +396,7 @@ export class StaffRolesService {
           where: { id: { in: memberships.map((m) => m.userId) } },
           select: { id: true, fullName: true, phoneE164: true, email: true },
         }),
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
     const userById = new Map(users.map((u) => [u.id, u]));
 
@@ -404,8 +463,12 @@ export class StaffRolesService {
           },
         });
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
+
+    if (user.id === access.userId) {
+      throw new ForbiddenError('You cannot change your own roles', 'CANNOT_ASSIGN_SELF');
+    }
 
     // 2. Ensure active estate membership
     const membership = await this.db.withContext(
@@ -427,7 +490,7 @@ export class StaffRolesService {
           data: { userId: user.id, estateId: access.estateId, status: 'active' },
         });
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
 
     // 3. Assign requested estate roles
@@ -442,10 +505,12 @@ export class StaffRolesService {
               level: 'estate',
               OR: [{ estateId: null, isBuiltin: true }, { estateId: access.estateId }],
             },
+            include: { permissions: true },
           });
-          if (!role) {
+          if (!role || isResidentRole(role.key)) {
             throw new DomainError('ROLE_NOT_FOUND', `Role "${roleKey}" not found`, 422);
           }
+          assertCanGrant(access, role);
           const existing = await tx.roleAssignment.findFirst({
             where: { userId: user.id, roleId: role.id, estateId: access.estateId, revokedAt: null },
           });
@@ -483,7 +548,7 @@ export class StaffRolesService {
           include: { role: true },
         });
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
 
     const canViewPii = access.permissions.has('pii.view');
@@ -509,6 +574,9 @@ export class StaffRolesService {
     targetUserId: string,
     input: z.infer<typeof assignStaffRoleSchema>,
   ) {
+    if (targetUserId === access.userId) {
+      throw new ForbiddenError('You cannot change your own roles', 'CANNOT_ASSIGN_SELF');
+    }
     return this.db.withContext(
       'authz',
       async (tx) => {
@@ -518,8 +586,12 @@ export class StaffRolesService {
             level: 'estate',
             OR: [{ estateId: null, isBuiltin: true }, { estateId: access.estateId }],
           },
+          include: { permissions: true },
         });
-        if (!role) throw new DomainError('ROLE_NOT_FOUND', 'Role not found', 404);
+        if (!role || isResidentRole(role.key)) {
+          throw new DomainError('ROLE_NOT_FOUND', 'Role not found', 404);
+        }
+        assertCanGrant(access, role);
 
         const existing = await tx.roleAssignment.findFirst({
           where: {
@@ -576,7 +648,7 @@ export class StaffRolesService {
           validTo: created.validTo?.toISOString() ?? null,
         };
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
   }
 
@@ -585,6 +657,9 @@ export class StaffRolesService {
     targetUserId: string,
     assignmentId: string,
   ): Promise<void> {
+    if (targetUserId === access.userId) {
+      throw new ForbiddenError('You cannot change your own roles', 'CANNOT_ASSIGN_SELF');
+    }
     await this.db.withContext(
       'authz',
       async (tx) => {
@@ -595,11 +670,12 @@ export class StaffRolesService {
             estateId: access.estateId,
             revokedAt: null,
           },
-          include: { role: true },
+          include: { role: { include: { permissions: true } } },
         });
-        if (!assignment) {
+        if (!assignment || isResidentRole(assignment.role.key)) {
           throw new NotFoundError('Role assignment not found', 'ASSIGNMENT_NOT_FOUND');
         }
+        assertCanGrant(access, assignment.role);
         if (assignment.role.key === 'estate_owner') {
           const ownerCount = await tx.roleAssignment.count({
             where: {
@@ -636,7 +712,7 @@ export class StaffRolesService {
           },
         ]);
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
   }
 
@@ -648,6 +724,18 @@ export class StaffRolesService {
     if (targetUserId === access.userId && input.status === 'suspended') {
       throw new ConflictError('CANNOT_SUSPEND_SELF', 'You cannot suspend your own account');
     }
+    const targetRoles = await this.db.withContext(
+      'authz',
+      (tx) =>
+        tx.roleAssignment.findMany({
+          where: { userId: targetUserId, estateId: access.estateId, revokedAt: null },
+          include: { role: { include: { permissions: true } } },
+        }),
+      { userId: access.userId, estateId: access.estateId },
+    );
+    for (const assignment of targetRoles) {
+      if (!isResidentRole(assignment.role.key)) assertCanGrant(access, assignment.role);
+    }
     if (input.status === 'suspended') {
       const owners = await this.db.withContext(
         'authz',
@@ -656,7 +744,7 @@ export class StaffRolesService {
             where: { estateId: access.estateId, revokedAt: null, role: { key: 'estate_owner' } },
             select: { userId: true },
           }),
-        { userId: access.userId },
+        { userId: access.userId, estateId: access.estateId },
       );
       if (owners.length === 1 && owners[0]?.userId === targetUserId) {
         throw new ConflictError('LAST_ESTATE_OWNER', 'Cannot suspend the last Estate Owner');
@@ -693,7 +781,7 @@ export class StaffRolesService {
         ]);
         return { userId: updated.userId, status: updated.status as 'active' | 'suspended' };
       },
-      { userId: access.userId },
+      { userId: access.userId, estateId: access.estateId },
     );
   }
 }

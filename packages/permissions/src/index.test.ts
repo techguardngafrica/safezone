@@ -3,8 +3,10 @@ import {
   ALL_PERMISSIONS,
   BUILT_IN_ROLES,
   hasPermission,
+  PERMISSIONS,
   permissionsForRoles,
   requiresMfa,
+  SUPPORT_SESSION_PERMISSIONS,
 } from './index';
 
 describe('permission catalogue', () => {
@@ -62,5 +64,15 @@ describe('requiresMfa', () => {
 
   it('treats unknown roles as staff (fail safe)', () => {
     expect(requiresMfa(['custom_role_key'])).toBe(true);
+  });
+});
+
+describe('SUPPORT_SESSION_PERMISSIONS', () => {
+  it('is read-only and never reveals personal data', () => {
+    expect(SUPPORT_SESSION_PERMISSIONS).not.toContain('pii.view');
+    for (const permission of SUPPORT_SESSION_PERMISSIONS) {
+      expect(permission.endsWith('.read')).toBe(true);
+      expect(PERMISSIONS[permission]).toBeDefined();
+    }
   });
 });

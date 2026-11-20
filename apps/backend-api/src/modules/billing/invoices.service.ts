@@ -209,66 +209,72 @@ export class InvoicesService {
 
   /** A one-off invoice for a unit's current occupant (billing.md §2.4). */
   async createOneOff(access: EstateAccess, input: z.infer<typeof createInvoiceSchema>) {
+    return this.db.withTenant(access, (tx) => this.createOneOffIn(tx, access, input));
+  }
+
+  /**
+   * The same one-off invoice inside the caller's transaction, so an import can record its idempotency
+   * key atomically with the invoice (tenancy.md §7.8).
+   */
+  async createOneOffIn(tx: Tx, access: EstateAccess, input: z.infer<typeof createInvoiceSchema>) {
     const today = todayInLagos();
     if (input.dueDate < today)
       throw new DomainError('INVOICE_DUE_DATE_PAST', 'The due date cannot be in the past', 422);
-    return this.db.withTenant(access, async (tx) => {
-      const unit = await this.property.unit(tx, access.estateId, input.spaceId);
-      if (!unit) throw new NotFoundError('Unit not found', 'SPACE_NOT_FOUND');
-      const occupant = (await this.occupancy.billingOccupants(tx, access.estateId, [unit.id])).get(
-        unit.id,
-      );
-      if (!occupant)
-        throw new DomainError('INVOICE_NO_PAYER', 'This unit has no active household to bill', 422);
-      const chargeIds = input.lines.flatMap((line) => (line.chargeId ? [line.chargeId] : []));
-      const charges = await tx.charge.findMany({
-        where: { estateId: access.estateId, id: { in: chargeIds } },
-        select: { id: true, type: true },
-      });
-      if (charges.length !== new Set(chargeIds).size)
-        throw new NotFoundError('Charge not found', 'CHARGE_NOT_FOUND');
-      const typeOf = new Map(charges.map((charge) => [charge.id, charge.type]));
-      const [id] = await this.issue(tx, access.estateId, [
-        {
-          spaceId: unit.id,
-          unitCode: unit.code,
-          householdId: occupant.householdId,
-          payerUserId: occupant.payerUserId,
-          payerType: 'occupant',
-          billingRunId: null,
-          description: input.description,
-          issueDate: today,
-          dueDate: input.dueDate,
-          createdBy: access.userId,
-          lines: input.lines.map((line) => ({
-            chargeId: line.chargeId ?? null,
-            chargeType: (line.chargeId && typeOf.get(line.chargeId)) || 'custom',
-            description: line.description,
-            quantity: line.quantity,
-            unitAmount: line.unitAmount,
-            amount: line.quantity * line.unitAmount,
-          })),
-        },
-      ]);
-      await appendOutboxEvents(tx, [
-        {
-          type: 'billing.invoice.created',
-          estateId: access.estateId,
-          aggregateType: 'invoice',
-          aggregateId: id as string,
-          payload: { invoiceId: id as string },
-          audit: {
-            actorType: 'user',
-            actorId: access.userId,
-            action: 'billing.invoice.create',
-            resourceType: 'invoice',
-            resourceId: id as string,
-            after: { spaceId: unit.id, lines: input.lines.length },
-          },
-        },
-      ]);
-      return this.detailIn(tx, access, id as string);
+    const unit = await this.property.unit(tx, access.estateId, input.spaceId);
+    if (!unit) throw new NotFoundError('Unit not found', 'SPACE_NOT_FOUND');
+    const occupant = (await this.occupancy.billingOccupants(tx, access.estateId, [unit.id])).get(
+      unit.id,
+    );
+    if (!occupant)
+      throw new DomainError('INVOICE_NO_PAYER', 'This unit has no active household to bill', 422);
+    const chargeIds = input.lines.flatMap((line) => (line.chargeId ? [line.chargeId] : []));
+    const charges = await tx.charge.findMany({
+      where: { estateId: access.estateId, id: { in: chargeIds } },
+      select: { id: true, type: true },
     });
+    if (charges.length !== new Set(chargeIds).size)
+      throw new NotFoundError('Charge not found', 'CHARGE_NOT_FOUND');
+    const typeOf = new Map(charges.map((charge) => [charge.id, charge.type]));
+    const [id] = await this.issue(tx, access.estateId, [
+      {
+        spaceId: unit.id,
+        unitCode: unit.code,
+        householdId: occupant.householdId,
+        payerUserId: occupant.payerUserId,
+        payerType: 'occupant',
+        billingRunId: null,
+        description: input.description,
+        issueDate: today,
+        dueDate: input.dueDate,
+        createdBy: access.userId,
+        lines: input.lines.map((line) => ({
+          chargeId: line.chargeId ?? null,
+          chargeType: (line.chargeId && typeOf.get(line.chargeId)) || 'custom',
+          description: line.description,
+          quantity: line.quantity,
+          unitAmount: line.unitAmount,
+          amount: line.quantity * line.unitAmount,
+        })),
+      },
+    ]);
+    await appendOutboxEvents(tx, [
+      {
+        type: 'billing.invoice.created',
+        estateId: access.estateId,
+        aggregateType: 'invoice',
+        aggregateId: id as string,
+        payload: { invoiceId: id as string },
+        audit: {
+          actorType: 'user',
+          actorId: access.userId,
+          action: 'billing.invoice.create',
+          resourceType: 'invoice',
+          resourceId: id as string,
+          after: { spaceId: unit.id, lines: input.lines.length },
+        },
+      },
+    ]);
+    return this.detailIn(tx, access, id as string);
   }
 
   // ---- Reading -------------------------------------------------------------------------------

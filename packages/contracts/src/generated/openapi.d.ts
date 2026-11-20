@@ -3469,7 +3469,7 @@ export interface paths {
     };
     /**
      * Refunds
-     * @description Requires `payment.refund`. Needs the `payments` feature.
+     * @description Requires `payment.refund` or `billing.run.approve`. Needs the `payments` feature.
      */
     get: operations['payments_refunds'];
     put?: never;
@@ -5872,26 +5872,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/v1/platform/estates/{estateId}/support-sessions': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Request time-bounded support access to an estate (requires estate admin consent)
-     * @description Requires `platform.support_access`.
-     */
-    post: operations['platformSupportAccess_request'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/v1/platform/estates/{id}': {
     parameters: {
       query?: never;
@@ -6094,6 +6074,26 @@ export interface paths {
      * @description Requires `platform.estate.create`.
      */
     patch: operations['platformOnboarding_updateLead'];
+    trace?: never;
+  };
+  '/v1/platform/support-sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Request time-bounded, read-only support access to an estate (needs estate consent)
+     * @description Requires `platform.support_access`.
+     */
+    post: operations['platformSupportAccess_request'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/public/app-config': {
@@ -13367,6 +13367,8 @@ export interface operations {
               errorRows: number;
               createdCount: number;
               updatedCount: number;
+              unchangedCount: number;
+              failedCount: number;
               errors: {
                 row: number;
                 field: string | null;
@@ -13424,6 +13426,8 @@ export interface operations {
               errorRows: number;
               createdCount: number;
               updatedCount: number;
+              unchangedCount: number;
+              failedCount: number;
               errors: {
                 row: number;
                 field: string | null;
@@ -13481,6 +13485,8 @@ export interface operations {
               errorRows: number;
               createdCount: number;
               updatedCount: number;
+              unchangedCount: number;
+              failedCount: number;
               errors: {
                 row: number;
                 field: string | null;
@@ -13547,6 +13553,8 @@ export interface operations {
               errorRows: number;
               createdCount: number;
               updatedCount: number;
+              unchangedCount: number;
+              failedCount: number;
               errors: {
                 row: number;
                 field: string | null;
@@ -27822,64 +27830,6 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
-  platformSupportAccess_request: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        estateId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': {
-          reason: string;
-          /** @default 60 */
-          durationMinutes?: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Success */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            /** @constant */
-            success: true;
-            data: {
-              /** Format: uuid */
-              id: string;
-              /** Format: uuid */
-              estateId: string;
-              /** Format: uuid */
-              platformUserId: string;
-              platformUserName: string | null;
-              reason: string;
-              /** @enum {string} */
-              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
-              durationMinutes: number;
-              /** Format: date-time */
-              requestedAt: string;
-              decidedBy: string | null;
-              decidedAt: string | null;
-              decisionReason: string | null;
-              expiresAt: string | null;
-              revokedAt: string | null;
-            };
-          };
-        };
-      };
-      400: components['responses']['Error400'];
-      401: components['responses']['Error401'];
-      403: components['responses']['Error403'];
-      404: components['responses']['Error404'];
-      500: components['responses']['Error500'];
-    };
-  };
   platformOnboarding_getEstate: {
     parameters: {
       query?: never;
@@ -28488,6 +28438,64 @@ export interface operations {
               id: string;
               /** @enum {string} */
               status: 'new' | 'contacted' | 'converted' | 'closed';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSupportAccess_request: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          estateId: string;
+          reason: string;
+          /** @default 120 */
+          durationMinutes?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
             };
           };
         };

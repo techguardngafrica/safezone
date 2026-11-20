@@ -166,6 +166,7 @@ export class GateService {
     const skewed = Math.abs(new Date(deviceNow).getTime() - Date.now()) > CLOCK_SKEW_MS;
     let accepted = 0;
     let duplicates = 0;
+    const syncedGates = new Set<string>();
     const rejected: { clientUuid: string; code: string }[] = [];
     for (const event of events) {
       try {
@@ -176,14 +177,28 @@ export class GateService {
             offlineSignin: options.offlineSignin ?? false,
           }),
         );
-        if (result.created) accepted += 1;
-        else duplicates += 1;
+        if (result.created) {
+          accepted += 1;
+          syncedGates.add(result.gateId);
+        } else duplicates += 1;
       } catch (error) {
         rejected.push({
           clientUuid: event.clientUuid,
           code: error instanceof DomainError ? error.code : 'INTERNAL_ERROR',
         });
       }
+    }
+    if (accepted > 0 && this.realtime) {
+      // Offline events reached the server late: tell live gate views to refresh.
+      const data = { type: 'visitor.gate.synced', accepted, gateIds: [...syncedGates] };
+      await this.realtime.publishMany([
+        { room: `estate:${access.estateId}:security`, event: 'gate:update', data },
+        ...[...syncedGates].map((gateId) => ({
+          room: `estate:${access.estateId}:gate:${gateId}`,
+          event: 'gate:update',
+          data,
+        })),
+      ]);
     }
     return { accepted, duplicates, rejected };
   }
@@ -398,13 +413,7 @@ export class GateService {
       ]);
       return this.walkinView(tx, row);
     });
-    if (this.realtime) {
-      const data = { walkinId: view.id, gateId: view.gateId, status: view.status };
-      await this.realtime.publishMany([
-        { room: `estate:${access.estateId}:security`, event: 'gate:update', data },
-        { room: `estate:${access.estateId}:gate:${view.gateId}`, event: 'gate:update', data },
-      ]);
-    }
+    // Live views hear about it from `visitor.walkin.requested` via the outbox relay (one emit, not two).
     return view;
   }
 

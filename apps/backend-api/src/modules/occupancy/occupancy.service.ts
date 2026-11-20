@@ -14,6 +14,7 @@ import { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
+import type { ImportOutcome } from '../../common/imports/import-outcome';
 import type { TenantContext, Tx } from '../../common/database/tenant-context';
 import {
   ConflictError,
@@ -892,6 +893,190 @@ export class OccupancyService {
       }
       throw error;
     }
+  }
+
+  // ---- Bulk import (tenancy.md §7.8) --------------------------------------------------------------
+
+  private async importTarget(access: EstateAccess, unitCode: string) {
+    const found = await this.db.withTenant(access, async (tx) => {
+      const unit = await this.property.unitByCode(tx, access.estateId, unitCode);
+      if (!unit) return null;
+      return { unit, household: await this.activeHouseholdAt(tx, access.estateId, unit.id) };
+    });
+    if (!found) throw new NotFoundError(`Unit ${unitCode} not found`, 'SPACE_NOT_FOUND');
+    return found;
+  }
+
+  /**
+   * One resident row: starts an occupancy with them as head when the unit is empty, otherwise adds
+   * them to the unit's household. Someone already in that household is unchanged.
+   */
+  async importResident(
+    access: EstateAccess,
+    row: {
+      unitCode: string;
+      fullName: string;
+      phone: string;
+      occupancyType: 'owner_occupier' | 'tenant' | 'other';
+    },
+  ): Promise<ImportOutcome> {
+    const { unit, household } = await this.importTarget(access, row.unitCode);
+    if (!household) {
+      await this.createOccupancy(access, {
+        spaceId: unit.id,
+        type: row.occupancyType,
+        head: { fullName: row.fullName, phone: row.phone },
+      });
+      return 'created';
+    }
+    const userId = await this.identity.findOrCreateByPhone(row.phone, row.fullName, access.userId);
+    const already = await this.db.withTenant(access, (tx) =>
+      tx.householdMember.count({
+        where: { estateId: access.estateId, householdId: household.id, userId, status: 'active' },
+      }),
+    );
+    if (already > 0) return 'unchanged';
+    await this.addMember(access, household.id, {
+      fullName: row.fullName,
+      phone: row.phone,
+      relationship: row.occupancyType === 'tenant' ? 'tenant_co_occupant' : 'other',
+      isMinor: false,
+    });
+    return 'created';
+  }
+
+  /**
+   * One household row: starts the occupancy when the unit is empty, or renames the household when the
+   * same head already lives there. A unit with a different head is a conflict (use move-out first).
+   */
+  async importHousehold(
+    access: EstateAccess,
+    row: {
+      unitCode: string;
+      householdName: string;
+      headName: string;
+      headPhone: string;
+      occupancyType: 'owner_occupier' | 'tenant' | 'other';
+    },
+  ): Promise<ImportOutcome> {
+    const { unit, household } = await this.importTarget(access, row.unitCode);
+    let target = household;
+    let outcome: ImportOutcome = 'unchanged';
+    if (!target) {
+      const created = await this.createOccupancy(access, {
+        spaceId: unit.id,
+        type: row.occupancyType,
+        head: { fullName: row.headName, phone: row.headPhone },
+      });
+      target = { id: created.id, name: created.name, headUserId: '' };
+      outcome = 'created';
+    } else {
+      const headUserId = await this.identity.findOrCreateByPhone(
+        row.headPhone,
+        row.headName,
+        access.userId,
+      );
+      if (target.headUserId !== headUserId) {
+        throw new ConflictError(
+          'UNIT_OCCUPIED',
+          'This unit already has a household with a different head. Record the move-out first.',
+        );
+      }
+    }
+    if (target.name === row.householdName) return outcome;
+    const householdId = target.id;
+    const previousName = target.name;
+    await this.db.withTenant(access, async (tx) => {
+      await tx.household.update({ where: { id: householdId }, data: { name: row.householdName } });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'occupancy.household.renamed',
+          estateId: access.estateId,
+          aggregateType: 'household',
+          aggregateId: householdId,
+          payload: { householdId },
+          audit: {
+            actorType: 'user',
+            actorId: access.userId,
+            action: 'occupancy.household.rename',
+            resourceType: 'household',
+            resourceId: householdId,
+            before: { name: previousName },
+            after: { name: row.householdName },
+          },
+        },
+      ]);
+    });
+    return outcome === 'created' ? 'created' : 'updated';
+  }
+
+  /**
+   * One vehicle row: registered to the unit's active household. A plate already registered to that
+   * household is updated in place; a plate registered elsewhere in the estate is a conflict.
+   */
+  async importVehicle(
+    access: EstateAccess,
+    row: {
+      unitCode: string;
+      plate: string;
+      make: string | null;
+      model: string | null;
+      colour: string | null;
+    },
+  ): Promise<ImportOutcome> {
+    const { household } = await this.importTarget(access, row.unitCode);
+    if (!household) {
+      throw new DomainError(
+        'HOUSEHOLD_REQUIRED',
+        'This unit has no active household. Import residents or households first.',
+        422,
+      );
+    }
+    const plate = normalisePlate(row.plate);
+    const existing = await this.db.withTenant(access, (tx) =>
+      tx.vehicle.findFirst({
+        where: { estateId: access.estateId, plateNormalised: plate, status: 'active' },
+      }),
+    );
+    if (!existing) {
+      await this.addVehicle(access, {
+        householdId: household.id,
+        plate: row.plate,
+        ...(row.make ? { make: row.make } : {}),
+        ...(row.model ? { model: row.model } : {}),
+        ...(row.colour ? { colour: row.colour } : {}),
+      });
+      return 'created';
+    }
+    if (existing.householdId !== household.id) {
+      throw new ConflictError('PLATE_REGISTERED', 'This plate is registered to another household');
+    }
+    const changes: Prisma.VehicleUpdateInput = {};
+    if (row.make !== null && row.make !== existing.make) changes.make = row.make;
+    if (row.model !== null && row.model !== existing.model) changes.model = row.model;
+    if (row.colour !== null && row.colour !== existing.colour) changes.colour = row.colour;
+    if (Object.keys(changes).length === 0) return 'unchanged';
+    await this.db.withTenant(access, async (tx) => {
+      await tx.vehicle.update({ where: { id: existing.id }, data: changes });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'occupancy.vehicle.updated',
+          estateId: access.estateId,
+          aggregateType: 'vehicle',
+          aggregateId: existing.id,
+          payload: { vehicleId: existing.id, householdId: household.id },
+          audit: {
+            actorType: 'user',
+            actorId: access.userId,
+            action: 'occupancy.vehicle.update',
+            resourceType: 'vehicle',
+            resourceId: existing.id,
+            after: changes as Prisma.InputJsonValue,
+          },
+        },
+      ]);
+    });
+    return 'updated';
   }
 
   async deactivateVehicle(access: EstateAccess, vehicleId: string) {

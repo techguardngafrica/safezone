@@ -16,7 +16,8 @@ export const spaceTypeSchema = z.enum(SPACE_TYPE_KEYS);
 export const unitTypeSchema = z.enum(['house', 'flat', 'shop', 'office', 'other']);
 export const unitStatusSchema = z.enum(['vacant', 'occupied', 'under_construction', 'reserved']);
 
-const codeSchema = z
+/** Space code: unique among siblings (units: in the estate). Shared with bulk import validation. */
+export const spaceCodeSchema = z
   .string()
   .trim()
   .min(1)
@@ -71,7 +72,7 @@ const unitFieldsSchema = {
 export const createSpaceSchema = z.object({
   parentId: z.uuid().nullable().default(null),
   type: spaceTypeSchema,
-  code: codeSchema,
+  code: spaceCodeSchema,
   name: z.string().trim().min(1).max(120).optional(),
   externalRef: z.string().trim().min(1).max(100).optional(),
   ...unitFieldsSchema,
@@ -79,7 +80,7 @@ export const createSpaceSchema = z.object({
 
 export const updateSpaceSchema = z
   .object({
-    code: codeSchema.optional(),
+    code: spaceCodeSchema.optional(),
     name: z.string().trim().min(1).max(120).optional(),
     /** Re-parent (null = top level). The whole subtree moves with it. */
     parentId: z.uuid().nullable().optional(),

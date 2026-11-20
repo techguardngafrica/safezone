@@ -16,7 +16,7 @@ import { PropertyService } from './property.service';
   imports: [TenancyModule, OnboardingModule, IdentityModule, AuthzModule],
   controllers: [PropertyController, OwnershipsController],
   providers: [PropertyService, OwnershipsService],
-  exports: [PropertyService],
+  exports: [PropertyService, OwnershipsService],
 })
 export class PropertyModule implements OnModuleInit {
   constructor(

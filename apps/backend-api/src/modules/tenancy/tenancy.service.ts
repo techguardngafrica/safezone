@@ -98,6 +98,14 @@ export class TenancyService {
   }
 
   /** Estate by its join code, for residents asking to join. Only estates that accept residents. */
+  /** True when the estate exists (any status). For platform flows that run before any estate context. */
+  async estateExists(estateId: string): Promise<boolean> {
+    return this.db.withContext('tenancy', async (tx) => {
+      const estate = await tx.estate.findUnique({ where: { id: estateId }, select: { id: true } });
+      return estate !== null;
+    });
+  }
+
   async findByJoinCode(code: string): Promise<{ id: string; name: string } | null> {
     return this.db.withContext('tenancy', async (tx) => {
       const estate = await tx.estate.findUnique({

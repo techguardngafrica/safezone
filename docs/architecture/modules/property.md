@@ -100,7 +100,7 @@ Built in `src/modules/property` (path design in [ADR-0009](../adr/0009-spaces-ma
 - `GET/POST /v1/estates/:estateId/spaces`, `POST …/spaces/bulk` (levels with ranges, letters or lists; `{label}`, `{parentCode}`, `{chain}` templates; unit codes default to `{chain}-{label}`, e.g. `C-1-A`; `dryRun` previews; up to 5,000 spaces in one transaction), `GET/PATCH …/spaces/:id` (If-Match on `version`; re-parenting moves the subtree), `POST …/spaces/:id/archive` (leaves only, not occupied units), `GET …/units?withinId=&status=&q=`.
 - Units carry `propertyId` = `<estate code>-<unit code>`. Reads need membership; changes need `space.manage`. All routes require the `property` entitlement (core plan).
 - Registers the setup wizard's `spaces` verifier (at least one live unit).
-- **Not yet built:** `space_history` projection and `GET …/spaces/:id/history` (the audit log has the changes), imports (with the tenancy import framework), ownerships and transfers (Phase 2), archive checks for open invoices (billing, Phase 2). Occupancy will set unit `status` to `occupied`/`vacant`.
+- **Not yet built:** `space_history` projection and `GET …/spaces/:id/history` (the audit log has the changes), ownerships and transfers (Phase 2), archive checks for open invoices (billing, Phase 2). Occupancy will set unit `status` to `occupied`/`vacant`.
 
 ## 11. Phase 2 implementation notes
 

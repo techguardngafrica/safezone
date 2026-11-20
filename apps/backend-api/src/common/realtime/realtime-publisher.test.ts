@@ -60,4 +60,19 @@ describe('realtimeTargetsForOutbox', () => {
       }),
     ).toEqual([]);
   });
+
+  it('never lets a payload overwrite the envelope fields', () => {
+    const [target] = realtimeTargetsForOutbox({
+      type: 'emergency.alert.triggered',
+      estateId: ESTATE,
+      aggregateId: 'agg-1',
+      payload: { type: 'spoofed', estateId: 'other-estate', alertId: 'agg-1' },
+      occurredAt: '2026-11-20T00:00:00.000Z',
+    });
+    expect(target?.data).toMatchObject({
+      type: 'emergency.alert.triggered',
+      estateId: ESTATE,
+      alertId: 'agg-1',
+    });
+  });
 });

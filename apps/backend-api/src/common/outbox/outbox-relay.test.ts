@@ -17,6 +17,13 @@ describe('routeEvent', () => {
     );
   });
 
+  it('sends confirmed imports to the imports queue with their audit record', () => {
+    expect(routeEvent({ type: 'imports.job.confirmed', audit: { action: 'x' } })).toEqual([
+      'audit',
+      'imports',
+    ]);
+  });
+
   it('drops events nobody consumes', () => {
     expect(routeEvent({ type: 'tenancy.estate.viewed', audit: null })).toEqual([]);
   });

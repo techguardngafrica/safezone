@@ -2613,28 +2613,46 @@ model PollVote {
 // ---- Bulk imports and support-access consent (management-web.md §6.4, §6.13; ADR-0019) ----------
 
 model BulkImportJob {
-  id           String    @id @default(uuid(7)) @db.Uuid
-  estateId     String    @map("estate_id") @db.Uuid
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
   /// units | owners | residents | households | vehicles | opening_balances
-  kind         String
+  kind           String
   /// dry_run | queued | running | completed | failed
-  status       String    @default("dry_run")
-  filename     String
-  totalRows    Int       @default(0) @map("total_rows")
-  validRows    Int       @default(0) @map("valid_rows")
-  errorRows    Int       @default(0) @map("error_rows")
-  createdCount Int       @default(0) @map("created_count")
-  updatedCount Int       @default(0) @map("updated_count")
-  errorsJson   Json      @default("[]") @map("errors_json")
-  payloadJson  Json      @default("[]") @map("payload_json")
-  createdBy    String    @map("created_by") @db.Uuid
-  confirmedBy  String?   @map("confirmed_by") @db.Uuid
-  confirmedAt  DateTime? @map("confirmed_at") @db.Timestamptz(3)
-  completedAt  DateTime? @map("completed_at") @db.Timestamptz(3)
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  status         String    @default("dry_run")
+  filename       String
+  totalRows      Int       @default(0) @map("total_rows")
+  validRows      Int       @default(0) @map("valid_rows")
+  errorRows      Int       @default(0) @map("error_rows")
+  createdCount   Int       @default(0) @map("created_count")
+  updatedCount   Int       @default(0) @map("updated_count")
+  unchangedCount Int       @default(0) @map("unchanged_count")
+  failedCount    Int       @default(0) @map("failed_count")
+  errorsJson     Json      @default("[]") @map("errors_json")
+  payloadJson    Json      @default("[]") @map("payload_json")
+  createdBy      String    @map("created_by") @db.Uuid
+  confirmedBy    String?   @map("confirmed_by") @db.Uuid
+  confirmedAt    DateTime? @map("confirmed_at") @db.Timestamptz(3)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([estateId, createdAt])
   @@map("bulk_import_jobs")
+  @@schema("tenant")
+}
+
+/// Idempotency keys for imported rows without a natural key in the owning module (opening balances):
+/// re-importing the same reference never creates a second record. Insert-only.
+model BulkImportKey {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  kind       String
+  rowKey     String   @map("row_key")
+  jobId      String   @map("job_id") @db.Uuid
+  resourceId String?  @map("resource_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([estateId, kind, rowKey])
+  @@map("bulk_import_keys")
   @@schema("tenant")
 }
 
@@ -2646,7 +2664,7 @@ model SupportSession {
   reason           String
   /// pending | approved | denied | revoked | expired
   status           String    @default("pending")
-  durationMinutes  Int       @default(60) @map("duration_minutes")
+  durationMinutes  Int       @default(120) @map("duration_minutes")
   requestedAt      DateTime  @default(now()) @map("requested_at") @db.Timestamptz(3)
   decidedBy        String?   @map("decided_by") @db.Uuid
   decidedAt        DateTime? @map("decided_at") @db.Timestamptz(3)
