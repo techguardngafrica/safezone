@@ -1793,7 +1793,7 @@ model Refund {
 model PaymentRoute {
   provider  String
   routeKey  String   @map("route_key")
-  /// intent | virtual_account | refund
+  /// intent | virtual_account | refund | platform_purchase (ADR-0018)
   kind      String
   estateId  String   @map("estate_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -2065,6 +2065,64 @@ model SlaPolicy {
 }
 
 // ---- Utilities (utilities.md, Phase 2; ADR-0014) -------------------------------------------------
+
+/// A prepaid token purchase sold by Safezone on its own account (ADR-0018). Money is never the estate's.
+model UtilityPurchase {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  estateId              String    @map("estate_id") @db.Uuid
+  meterId               String    @map("meter_id") @db.Uuid
+  spaceId               String    @map("space_id") @db.Uuid
+  userId                String    @map("user_id") @db.Uuid
+  /// Token value in kobo.
+  amount                BigInt
+  fee                   BigInt    @default(0)
+  total                 BigInt
+  provider              String
+  paymentReference      String    @unique @map("payment_reference")
+  authorizationUrl      String?   @map("authorization_url")
+  idempotencyKey        String    @map("idempotency_key")
+  /// created | paid | vending | vended | failed | refund_pending | refunded
+  status                String    @default("created")
+  providerTransactionId String?   @map("provider_transaction_id")
+  vendRef               String?   @map("vend_ref")
+  /// KeyVault-wrapped token; never stored or logged in plain text.
+  tokenWrapped          String?   @map("token_wrapped")
+  unitsKwh              Decimal?  @map("units_kwh") @db.Decimal(12, 1)
+  attempts              Int       @default(0)
+  failureReason         String?   @map("failure_reason")
+  refundRef             String?   @map("refund_ref")
+  paidAt                DateTime? @map("paid_at") @db.Timestamptz(3)
+  vendedAt              DateTime? @map("vended_at") @db.Timestamptz(3)
+  refundedAt            DateTime? @map("refunded_at") @db.Timestamptz(3)
+  alertedAt             DateTime? @map("alerted_at") @db.Timestamptz(3)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  events UtilityPurchaseEvent[]
+
+  @@unique([estateId, userId, idempotencyKey])
+  @@index([estateId, userId, createdAt])
+  @@index([estateId, spaceId, createdAt])
+  @@index([status, paidAt])
+  @@map("utility_purchases")
+  @@schema("tenant")
+}
+
+/// Append-only history of a purchase (paid, vend attempts, vended, refund).
+model UtilityPurchaseEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  purchaseId String   @map("purchase_id") @db.Uuid
+  type       String
+  detail     String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  purchase UtilityPurchase @relation(fields: [purchaseId], references: [id])
+
+  @@index([purchaseId, createdAt])
+  @@map("utility_purchase_events")
+  @@schema("tenant")
+}
 
 model Meter {
   id           String    @id @default(uuid(7)) @db.Uuid

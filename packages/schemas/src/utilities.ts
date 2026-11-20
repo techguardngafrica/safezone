@@ -107,3 +107,54 @@ export const outageSchema = z.object({
 export const outageListQuerySchema = z.object({
   status: z.enum(['announced', 'resolved', 'cancelled']).optional(),
 });
+
+/** Prepaid token purchases sold by Safezone (ADR-0018). Amounts are integer kobo. */
+export const utilityPurchaseStatusSchema = z.enum([
+  'created',
+  'paid',
+  'vending',
+  'vended',
+  'failed',
+  'refund_pending',
+  'refunded',
+]);
+export const createUtilityPurchaseSchema = z.object({
+  meterId: z.uuid(),
+  /** Token value in kobo, whole naira, ₦1,000 to ₦200,000. */
+  amountKobo: z.number().int().positive(),
+  /** Where the provider sends the payer back (deep link or web page). */
+  callbackUrl: z.url().max(500).optional(),
+});
+export const utilityPurchaseSchema = z.object({
+  id: z.uuid(),
+  meterId: z.uuid(),
+  meterNumber: z.string(),
+  providerCode: z.string(),
+  unitCode: z.string().nullable(),
+  amountKobo: z.number().int(),
+  feeKobo: z.number().int(),
+  totalKobo: z.number().int(),
+  status: utilityPurchaseStatusSchema,
+  /** Present while the payer still has to pay. */
+  authorizationUrl: z.string().nullable(),
+  unitsKwh: z.number().nullable(),
+  createdAt: z.iso.datetime(),
+  paidAt: z.iso.datetime().nullable(),
+  vendedAt: z.iso.datetime().nullable(),
+  refundedAt: z.iso.datetime().nullable(),
+});
+/** Detail for the buyer and their household: the token appears only once vended. */
+export const utilityPurchaseDetailSchema = utilityPurchaseSchema.extend({
+  token: z.string().nullable(),
+  events: z.array(z.object({ type: z.string(), createdAt: z.iso.datetime() })),
+});
+export const utilityPurchaseListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+  cursor: z.string().min(1).optional(),
+});
+export const utilityPurchaseLimitsSchema = z.object({
+  available: z.boolean(),
+  minKobo: z.number().int(),
+  maxKobo: z.number().int(),
+  feeKobo: z.number().int(),
+});

@@ -74,9 +74,10 @@ export class PaystackPaymentGateway extends PaymentGateway {
         amount: input.amountKobo,
         currency: 'NGN',
         email: input.email,
-        subaccount: input.subaccountCode,
-        bearer: 'subaccount',
-        transaction_charge: 0,
+        // Estate payments settle in full to the estate; platform charges (ADR-0018) to Safezone.
+        ...(input.subaccountCode
+          ? { subaccount: input.subaccountCode, bearer: 'subaccount', transaction_charge: 0 }
+          : {}),
         callback_url: input.callbackUrl,
         metadata: input.metadata,
       },

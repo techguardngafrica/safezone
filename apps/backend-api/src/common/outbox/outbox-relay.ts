@@ -52,6 +52,7 @@ export function routeEvent(event: Pick<RelayedEvent, 'type' | 'audit'>): QueueNa
   // SOS has its own queue and worker pool; nothing else goes there.
   if (event.type === 'emergency.alert.triggered') queues.push(QUEUES.sos);
   if (event.type === 'payments.webhook.received') queues.push(QUEUES.payments);
+  if (event.type.startsWith('payments.platform_charge.')) queues.push(QUEUES.utilities);
   if (event.type === 'platform.export.requested') queues.push(QUEUES.exports);
   if (event.type === 'billing.invoice.paid') queues.push(QUEUES.facilities);
   if (event.type === 'visitor.pass.shared' || event.type === 'occupancy.occupancy.ended') {

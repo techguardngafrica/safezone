@@ -52,7 +52,7 @@ export class FakePaymentGateway extends PaymentGateway {
   }
 
   async initialize(input: InitializeInput) {
-    if (!input.subaccountCode.startsWith('ACCT_fake_'))
+    if (input.subaccountCode !== null && !input.subaccountCode.startsWith('ACCT_fake_'))
       throw new PaymentProviderError('fake', false, 'Unknown subaccount');
     this.charges.set(input.reference, {
       input,

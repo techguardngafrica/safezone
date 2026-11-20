@@ -25,6 +25,8 @@ export const QUEUES = {
   occupancy: 'occupancy',
   /** Estate onboarding: invitation sends. */
   onboarding: 'onboarding',
+  /** Prepaid token purchases: paid, vend with retries, refunds, stuck sweep (ADR-0018). */
+  utilities: 'utilities',
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 

@@ -16,6 +16,7 @@ import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { ExportRegistryModule } from './common/export/export-registry';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { UtilityPurchasesModule } from './modules/utilities/purchases/purchases.module';
 import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { CommunityModule } from './modules/community/community.module';
 import { EmergencyModule } from './modules/emergency/emergency.module';
@@ -64,6 +65,7 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     PaymentsModule,
     MaintenanceModule,
     UtilitiesModule,
+    UtilityPurchasesModule,
     MovesModule,
     ExportRegistryModule,
     ExportsModule,

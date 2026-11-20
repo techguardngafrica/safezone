@@ -4116,6 +4116,90 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/utility-purchases': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My household's token purchases
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    get: operations['purchases_list'];
+    put?: never;
+    /**
+     * Start a token purchase for my prepaid meter (Idempotency-Key required)
+     * @description Requires `payment.make`. Needs the `billing` feature.
+     */
+    post: operations['purchases_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/utility-purchases/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A purchase with its token once vended (buyer and household only)
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    get: operations['purchases_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/utility-purchases/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check the payment with the provider now (after returning from checkout)
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    post: operations['purchases_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/utility-purchases/limits': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Whether tokens can be bought now, and the amount limits and fee
+     * @description Any active member of the estate. Needs the `billing` feature.
+     */
+    get: operations['purchases_limits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/vehicles': {
     parameters: {
       query?: never;
@@ -21814,6 +21898,312 @@ export interface operations {
               /** @enum {string} */
               supply: 'public' | 'estate';
             }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  purchases_list: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              meterId: string;
+              meterNumber: string;
+              providerCode: string;
+              unitCode: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'vending'
+                | 'vended'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              unitsKwh: number | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              vendedAt: string | null;
+              refundedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  purchases_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          meterId: string;
+          amountKobo: number;
+          /** Format: uri */
+          callbackUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              meterId: string;
+              meterNumber: string;
+              providerCode: string;
+              unitCode: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'vending'
+                | 'vended'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              unitsKwh: number | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              vendedAt: string | null;
+              refundedAt: string | null;
+              token: string | null;
+              events: {
+                type: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+      503: components['responses']['Error503'];
+    };
+  };
+  purchases_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              meterId: string;
+              meterNumber: string;
+              providerCode: string;
+              unitCode: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'vending'
+                | 'vended'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              unitsKwh: number | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              vendedAt: string | null;
+              refundedAt: string | null;
+              token: string | null;
+              events: {
+                type: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  purchases_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              meterId: string;
+              meterNumber: string;
+              providerCode: string;
+              unitCode: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'vending'
+                | 'vended'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              unitsKwh: number | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              vendedAt: string | null;
+              refundedAt: string | null;
+              token: string | null;
+              events: {
+                type: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  purchases_limits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              available: boolean;
+              minKobo: number;
+              maxKobo: number;
+              feeKobo: number;
+            };
           };
         };
       };

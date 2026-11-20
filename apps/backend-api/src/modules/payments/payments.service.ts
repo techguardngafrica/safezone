@@ -47,6 +47,14 @@ type ManualRow = Prisma.ManualPaymentGetPayload<object>;
 /** Result of processing a provider reference (webhook or the payer's "check now"). */
 export type ProcessResult =
   | { outcome: 'recorded'; estateId: string; transactionId: string }
+  | {
+      /** A verified platform charge (ADR-0018): Safezone's own sale, never estate money. */
+      outcome: 'platform_paid';
+      estateId: string;
+      reference: string;
+      amountKobo: number;
+      providerTransactionId: string;
+    }
   | { outcome: 'duplicate' | 'pending' | 'failed' | 'unknown_reference' | 'ignored' };
 
 function last4(accountNumber: string): string {
@@ -439,6 +447,8 @@ export class PaymentsService {
       return { outcome: 'unknown_reference' };
     }
     const estateId = route.estateId;
+
+    if (route.kind === 'platform_purchase') return this.processPlatformCharge(estateId, charge);
 
     if (charge.status !== 'success') {
       if (
@@ -1151,6 +1161,98 @@ export class PaymentsService {
       decidedBy: row.decidedBy,
       providerRef: row.providerRef,
       createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  // ---- Platform charges (ADR-0018) --------------------------------------------------------------
+
+  /**
+   * Starts a checkout for a service Safezone sells on its own account (prepaid tokens): no estate
+   * subaccount, so the money settles to Safezone, and the route kind keeps it away from estate ledgers.
+   */
+  async startPlatformCharge(input: {
+    estateId: string;
+    payerUserId: string;
+    reference: string;
+    amountKobo: number;
+    /** Same allowlist as estate payments: the public site or the app's own scheme. */
+    callbackUrl?: string;
+    metadata: Record<string, string>;
+  }): Promise<{ authorizationUrl: string }> {
+    const callbackUrl = this.callbackUrl(input.callbackUrl);
+    await this.db.withContext('payments', (tx) =>
+      tx.paymentRoute.upsert({
+        where: {
+          provider_routeKey: { provider: this.gateway.provider, routeKey: input.reference },
+        },
+        create: {
+          provider: this.gateway.provider,
+          routeKey: input.reference,
+          kind: 'platform_purchase',
+          estateId: input.estateId,
+        },
+        update: {},
+      }),
+    );
+    try {
+      const checkout = await this.gateway.initialize({
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        email: `${input.payerUserId}@payers.safezone.ng`,
+        subaccountCode: null,
+        callbackUrl,
+        metadata: input.metadata,
+      });
+      return { authorizationUrl: checkout.authorizationUrl };
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
+  /** Full refund of a platform charge (vend failed). */
+  async refundPlatformCharge(reference: string, amountKobo: number) {
+    return this.gateway.refund({ transactionReference: reference, amountKobo });
+  }
+
+  get provider(): string {
+    return this.gateway.provider;
+  }
+
+  /** Verification result of a platform charge, announced as an event for its owning module. */
+  private async processPlatformCharge(
+    estateId: string,
+    charge: VerifiedCharge,
+  ): Promise<ProcessResult> {
+    if (charge.status === 'pending') return { outcome: 'pending' };
+    const succeeded =
+      charge.status === 'success' &&
+      charge.currency === 'NGN' &&
+      Number.isSafeInteger(charge.amountKobo) &&
+      charge.amountKobo > 0;
+    await this.db.withTenant({ estateId, userId: null }, (tx) =>
+      appendOutboxEvents(tx, [
+        {
+          type: succeeded
+            ? 'payments.platform_charge.succeeded'
+            : 'payments.platform_charge.failed',
+          estateId,
+          aggregateType: 'platform_charge',
+          aggregateId: charge.reference,
+          payload: {
+            reference: charge.reference,
+            amountKobo: charge.amountKobo,
+            providerTransactionId: charge.providerTransactionId,
+          },
+        },
+      ]),
+    );
+    if (!succeeded) return { outcome: 'failed' };
+    return {
+      outcome: 'platform_paid',
+      estateId,
+      reference: charge.reference,
+      amountKobo: charge.amountKobo,
+      providerTransactionId: charge.providerTransactionId,
     };
   }
 

@@ -28,6 +28,8 @@ import { MaintenanceConsumer } from '../modules/maintenance/maintenance.consumer
 import { MaintenanceModule } from '../modules/maintenance/maintenance.module';
 import { MovesConsumer } from '../modules/occupancy/moves/moves.consumer';
 import { MovesModule } from '../modules/occupancy/moves/moves.module';
+import { PurchasesConsumer } from '../modules/utilities/purchases/purchases.consumer';
+import { UtilityPurchasesModule } from '../modules/utilities/purchases/purchases.module';
 import { ExportRegistryModule } from '../common/export/export-registry';
 import { ExportsConsumer } from '../modules/platform/exports/exports.consumer';
 import { ExportsModule } from '../modules/platform/exports/exports.module';
@@ -54,6 +56,7 @@ import { EmergencyModule } from '../modules/emergency/emergency.module';
     PaymentsModule,
     MaintenanceModule,
     MovesModule,
+    UtilityPurchasesModule,
     ExportRegistryModule,
     ExportsModule,
     // Loaded so their export datasets are registered in the worker that builds exports.
@@ -84,6 +87,7 @@ import { EmergencyModule } from '../modules/emergency/emergency.module';
     BillingConsumer,
     MaintenanceConsumer,
     MovesConsumer,
+    PurchasesConsumer,
     ExportsConsumer,
     FacilitiesConsumer,
     CommunityConsumer,

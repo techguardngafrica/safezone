@@ -9,8 +9,11 @@ export interface InitializeInput {
   amountKobo: number;
   /** Paystack requires an email; we pass the payer's or a per-user placeholder on our domain. */
   email: string;
-  /** Estate subaccount: all of the payment settles there (Safezone never holds estate money). */
-  subaccountCode: string;
+  /**
+   * Estate subaccount: all of the payment settles there (Safezone never holds estate money). Null only for
+   * a platform charge, where Safezone sells its own service on its own account (ADR-0018).
+   */
+  subaccountCode: string | null;
   callbackUrl: string;
   metadata: Record<string, string>;
 }

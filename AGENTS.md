@@ -35,7 +35,7 @@ The architecture docs are the spec. If code and docs disagree, follow the docs a
 5. **No dedicated vendor app.** Vendors use the web Vendor Portal and/or Vendor mode in the Resident App.
 6. **Advertisers** use the web and/or Advertiser mode in the Resident App.
 7. **Push** is fully managed by **Expo Notifications**. **Email** goes through **Zoho SMTP**.
-8. **Safezone never holds estate money.** Payments settle directly to the estate via provider subaccounts / split payments (Paystack, Flutterwave).
+8. **Safezone never holds estate money.** Payments settle directly to the estate via provider subaccounts / split payments (Paystack, Flutterwave). Safezone may sell its own services (such as prepaid electricity tokens) on its own provider account; that money is never estate money ([ADR-0018](docs/architecture/adr/0018-prepaid-token-purchases.md)).
 
 ---
 

@@ -244,6 +244,26 @@ describe('cross-tenant isolation', () => {
       .expect(404);
   });
 
+  it("Estate A's token purchases cannot be read through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const id = '0193a1b2-0000-7000-8000-00000000beef';
+    await stack.db.owner.query(
+      `insert into tenant.utility_purchases (id, estate_id, meter_id, space_id, user_id, amount, fee, total,
+         provider, payment_reference, idempotency_key, updated_at)
+       values ($1, $2, $1, $1, $1, 100000, 0, 100000, 'fake', 'szt_isolation', 'isolation-key', now())`,
+      [id, estateA],
+    );
+    await stack.http
+      .get(`/v1/estates/${estateB}/utility-purchases/${id}`)
+      .set(auth(adminB))
+      .expect(404);
+    const listB = await stack.http
+      .get(`/v1/estates/${estateB}/utility-purchases`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(listB.body.data).toEqual([]);
+  });
+
   it("Estate A's gate devices cannot be listed or revoked through Estate B", async () => {
     const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
     // A separate supervisor: registering signs them out of the device.

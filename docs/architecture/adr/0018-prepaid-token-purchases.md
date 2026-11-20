@@ -1,6 +1,6 @@
 # ADR-0018: Prepaid electricity token purchases (Safezone collects)
 
-- **Status:** Proposed
+- **Status:** Accepted (20 Nov 2026; open points below still block launch)
 - **Date:** 2026-11-20
 - **Deciders:** Sunday Etom Eni
 - **Affects:** utilities, payments, integrations (payments, bills), worker, resident-mobile, super-admin (later), AGENTS.md §2.8 wording
@@ -30,7 +30,7 @@ Constraints: payment success only after server-side verification (§6.3); webhoo
 | Flutterwave         | Same adapter class; not built yet.                                                                                                             |
 | Stripe              | Not recommended: Stripe does not support NGN card acquiring for Nigerian residents in the way Paystack does. Revisit only for non-NGN markets. |
 
-## Decision (proposed)
+## Decision
 
 1. **Collection.** Token purchases use the existing `PaymentGateway` with a new **platform charge**: `initialize` without a subaccount, so the money settles to Safezone's own account. The purpose is `utility_purchase`; the route kind is `platform_purchase`, so webhook processing never touches estate ledgers or invoices.
 2. **Data.** `tenant.utility_purchases` (utilities module, RLS): `id`, `estate_id`, `meter_id`, `user_id`, `amount` (kobo, token value), `fee` (kobo), `total`, `payment_reference`, `provider_ref`, `token_wrapped` (KeyVault, like pass PINs), `units_kwh`, `status` (`created`, `paid`, `vending`, `vended`, `failed`, `refund_pending`, `refunded`), `attempts`, `vended_at`, `refunded_at`, `failure_reason`. Append-only history in `utility_purchase_events`.

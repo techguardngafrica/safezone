@@ -131,6 +131,12 @@ export const en = {
     'A guard entered a wrong PIN too many times on {deviceName}. Reset their PIN to let them sign in.',
   'notifications.security.incident_updated.title': 'Incident update',
   'notifications.security.incident_updated.body': '{title}: {status}',
+  'notifications.utilities.token_ready.title': 'Your electricity token is ready',
+  'notifications.utilities.token_ready.body':
+    'The token for meter {meterNumber} is in the Safezone app under Utilities.',
+  'notifications.utilities.purchase_refunded.title': 'Token purchase refunded',
+  'notifications.utilities.purchase_refunded.body':
+    'We could not get your token, so {amount} is being refunded to you.',
   'notifications.maintenance.request_urgent.title': 'Urgent request {number}',
   'notifications.maintenance.request_urgent.body': '{title}. Please triage it now.',
   'notifications.maintenance.request_updated.title': 'Request {number}: {status}',
