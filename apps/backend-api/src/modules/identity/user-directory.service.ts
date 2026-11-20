@@ -21,4 +21,23 @@ export class UserDirectory {
     );
     return new Map(rows.map((row) => [row.id, { phone: row.phoneE164, fullName: row.fullName }]));
   }
+
+  /** Name, phone and email of users, for the estate staff directory. */
+  async staffProfilesOf(
+    userIds: readonly string[],
+  ): Promise<Map<string, { fullName: string | null; phone: string; email: string | null }>> {
+    if (userIds.length === 0) return new Map();
+    const rows = await this.db.withContext('identity', (tx) =>
+      tx.user.findMany({
+        where: { id: { in: [...userIds] } },
+        select: { id: true, fullName: true, phoneE164: true, email: true },
+      }),
+    );
+    return new Map(
+      rows.map((row) => [
+        row.id,
+        { fullName: row.fullName, phone: row.phoneE164, email: row.email },
+      ]),
+    );
+  }
 }

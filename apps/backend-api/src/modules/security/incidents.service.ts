@@ -545,4 +545,12 @@ export class IncidentsService {
       },
     ]);
   }
+
+  /** Status, severity and category of incidents that occurred in the window (estate reports). */
+  async incidentsBetween(tx: Tx, estateId: string, from: Date, to: Date) {
+    return tx.incident.findMany({
+      where: { estateId, occurredAt: { gte: from, lte: to } },
+      select: { status: true, severity: true, category: true },
+    });
+  }
 }

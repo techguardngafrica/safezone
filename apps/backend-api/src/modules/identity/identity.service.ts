@@ -176,6 +176,35 @@ export class IdentityService {
     });
   }
 
+  /**
+   * The user with this phone for a staff invitation, created when new. An existing user without a name
+   * takes the invited name (and email, when given); an existing name is never overwritten.
+   */
+  async findOrCreateStaffUser(input: {
+    phone: string;
+    fullName: string;
+    email?: string | null;
+  }): Promise<{ id: string; fullName: string | null; phoneE164: string; email: string | null }> {
+    const select = { id: true, fullName: true, phoneE164: true, email: true } as const;
+    return this.db.withContext('identity', async (tx) => {
+      const existing = await tx.user.findUnique({ where: { phoneE164: input.phone }, select });
+      if (existing) {
+        if (!existing.fullName && input.fullName) {
+          return tx.user.update({
+            where: { id: existing.id },
+            data: { fullName: input.fullName, ...(input.email ? { email: input.email } : {}) },
+            select,
+          });
+        }
+        return existing;
+      }
+      return tx.user.create({
+        data: { phoneE164: input.phone, fullName: input.fullName, email: input.email ?? null },
+        select,
+      });
+    });
+  }
+
   /** Phone and name of users, for other modules' server-side checks and staff views (never to advertisers). */
   async contactsOf(
     userIds: readonly string[],

@@ -777,4 +777,34 @@ export class PropertyService {
       version: row.version,
     };
   }
+
+  // ---- Reads for other modules (search, reports), inside the caller's tenant transaction ----------
+
+  /** Live spaces whose code or name contains `q` (global search). */
+  async searchSpaces(tx: Tx, estateId: string, q: string, take: number) {
+    return tx.space.findMany({
+      where: {
+        estateId,
+        archivedAt: null,
+        OR: [
+          { code: { contains: q, mode: 'insensitive' } },
+          { name: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, code: true, name: true, type: true, unitType: true },
+      take,
+      orderBy: { code: 'asc' },
+    });
+  }
+
+  /** Live units and how many of them are occupied (estate reports). */
+  async unitCounts(tx: Tx, estateId: string): Promise<{ total: number; occupied: number }> {
+    const [total, occupied] = await Promise.all([
+      tx.space.count({ where: { estateId, type: 'unit', archivedAt: null } }),
+      tx.space.count({
+        where: { estateId, type: 'unit', status: 'occupied', archivedAt: null },
+      }),
+    ]);
+    return { total, occupied };
+  }
 }

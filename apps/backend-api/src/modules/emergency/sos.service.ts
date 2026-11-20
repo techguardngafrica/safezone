@@ -484,4 +484,12 @@ export class SosService {
       reused,
     };
   }
+
+  /** Drill flag and response times of alerts triggered in the window (estate reports). */
+  async alertsBetween(tx: Tx, estateId: string, from: Date, to: Date) {
+    return tx.sosAlert.findMany({
+      where: { estateId, triggeredAt: { gte: from, lte: to } },
+      select: { isDrill: true, triggeredAt: true, acknowledgedAt: true, resolvedAt: true },
+    });
+  }
 }

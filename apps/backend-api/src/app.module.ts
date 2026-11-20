@@ -17,6 +17,8 @@ import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { ImportsModule } from './modules/imports/imports.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { SearchModule } from './modules/search/search.module';
+import { StaffModule } from './modules/staff/staff.module';
 import { ExportRegistryModule } from './common/export/export-registry';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { UtilityPurchasesModule } from './modules/utilities/purchases/purchases.module';
@@ -77,6 +79,8 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     DocumentsModule,
     ImportsModule,
     ReportsModule,
+    SearchModule,
+    StaffModule,
   ],
   controllers: [HealthController],
   providers: [

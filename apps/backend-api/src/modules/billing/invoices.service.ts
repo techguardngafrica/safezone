@@ -1060,4 +1060,24 @@ export class InvoicesService {
       createdAt: row.createdAt.toISOString(),
     };
   }
+
+  // ---- Reads for other modules (search, reports), inside the caller's tenant transaction ----------
+
+  /** Invoices whose number contains `q` (global search; the caller checks staff `invoice.read`). */
+  async searchInvoices(tx: Tx, estateId: string, q: string, take: number) {
+    return tx.invoice.findMany({
+      where: { estateId, number: { contains: q, mode: 'insensitive' } },
+      select: { id: true, number: true, status: true },
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Amounts of non-void invoices created in the window (estate reports). */
+  async invoicesCreatedBetween(tx: Tx, estateId: string, from: Date, to: Date) {
+    return tx.invoice.findMany({
+      where: { estateId, createdAt: { gte: from, lte: to }, status: { not: 'void' } },
+      select: { total: true, amountPaid: true, dueDate: true, status: true },
+    });
+  }
 }

@@ -474,4 +474,27 @@ export class PassesService {
     }
     throw new NotFoundError('Pass not found', 'PASS_NOT_FOUND');
   }
+
+  // ---- Reads for other modules (search, reports), inside the caller's tenant transaction ----------
+
+  /** Passes whose visitor name or plate contains `q` (global search). */
+  async searchPasses(tx: Tx, estateId: string, q: string, take: number) {
+    return tx.visitorPass.findMany({
+      where: {
+        estateId,
+        OR: [
+          { visitorName: { contains: q, mode: 'insensitive' } },
+          { vehiclePlate: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, visitorName: true, vehiclePlate: true, revokedAt: true },
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Passes not revoked and still valid at `now` (estate reports). */
+  async activePassCount(tx: Tx, estateId: string, now: Date): Promise<number> {
+    return tx.visitorPass.count({ where: { estateId, revokedAt: null, validTo: { gte: now } } });
+  }
 }

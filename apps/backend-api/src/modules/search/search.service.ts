@@ -3,6 +3,10 @@ import type { globalSearchHitSchema, globalSearchQuerySchema } from '@safezone/s
 import type { z } from 'zod';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
+import { InvoicesService } from '../billing/invoices.service';
+import { OccupancyService } from '../occupancy/occupancy.service';
+import { PropertyService } from '../property/property.service';
+import { PassesService } from '../visitor/passes.service';
 
 type Hit = z.infer<typeof globalSearchHitSchema>;
 
@@ -11,130 +15,85 @@ type Hit = z.infer<typeof globalSearchHitSchema>;
  * Spaces are visible to every member (as in the spaces list). People, plates, passes and invoices are
  * estate-wide data, so they need the permission through a staff role: a resident's own `invoice.read`
  * covers only their household and must never list other households' invoices here.
+ * Each owning module runs its own query (AGENTS.md §5.1) inside this one tenant transaction.
  */
 @Injectable()
 export class SearchService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly property: PropertyService,
+    private readonly occupancy: OccupancyService,
+    private readonly passes: PassesService,
+    private readonly invoices: InvoicesService,
+  ) {}
 
   async search(access: EstateAccess, query: z.infer<typeof globalSearchQuerySchema>) {
     const q = query.q.trim();
     const take = query.limit;
     const hits: Hit[] = [];
     const staff = access.staffPermissions ?? new Set<string>();
+    const { estateId } = access;
 
     await this.db.withTenant(access, async (tx) => {
       // 1. Spaces / units (all estate members)
-      const spaces = await tx.space.findMany({
-        where: {
-          estateId: access.estateId,
-          archivedAt: null,
-          OR: [
-            { code: { contains: q, mode: 'insensitive' } },
-            { name: { contains: q, mode: 'insensitive' } },
-          ],
-        },
-        take,
-        orderBy: { code: 'asc' },
-      });
-      for (const s of spaces) {
+      for (const s of await this.property.searchSpaces(tx, estateId, q, take)) {
         hits.push({
           kind: 'space',
           id: s.id,
           title: `${s.code} - ${s.name}`,
           subtitle: s.unitType ?? s.type,
-          href: `/${access.estateId}/estate/spaces`,
+          href: `/${estateId}/estate/spaces`,
         });
       }
 
       // 2. Residents / household members (staff resident.read)
       if (staff.has('resident.read')) {
-        const members = await tx.householdMember.findMany({
-          where: {
-            estateId: access.estateId,
-            status: 'active',
-            fullName: { contains: q, mode: 'insensitive' },
-          },
-          include: { household: { select: { name: true } } },
-          take,
-          orderBy: { fullName: 'asc' },
-        });
-        for (const m of members) {
+        for (const m of await this.occupancy.searchMembers(tx, estateId, q, take)) {
           hits.push({
             kind: 'resident',
             id: m.id,
             title: m.fullName,
-            subtitle: m.household.name,
-            href: `/${access.estateId}/people/residents`,
+            subtitle: m.householdName,
+            href: `/${estateId}/people/residents`,
           });
         }
       }
 
       // 3. Vehicles / plates (resident.read or visitor.log.read)
       if (staff.has('resident.read') || staff.has('visitor.log.read')) {
-        const vehicles = await tx.vehicle.findMany({
-          where: {
-            estateId: access.estateId,
-            status: 'active',
-            OR: [
-              { plateNormalised: { contains: q.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() } },
-              { plateDisplay: { contains: q, mode: 'insensitive' } },
-            ],
-          },
-          take,
-          orderBy: { createdAt: 'desc' },
-        });
-        for (const v of vehicles) {
+        for (const v of await this.occupancy.searchVehicles(tx, estateId, q, take)) {
           hits.push({
             kind: 'vehicle',
             id: v.id,
             title: v.plateDisplay,
             subtitle: [v.make, v.model, v.colour].filter(Boolean).join(' ') || null,
-            href: `/${access.estateId}/people/households`,
+            href: `/${estateId}/people/households`,
           });
         }
       }
 
       // 4. Visitor passes (visitor.log.read)
       if (staff.has('visitor.log.read')) {
-        const passes = await tx.visitorPass.findMany({
-          where: {
-            estateId: access.estateId,
-            OR: [
-              { visitorName: { contains: q, mode: 'insensitive' } },
-              { vehiclePlate: { contains: q, mode: 'insensitive' } },
-            ],
-          },
-          take,
-          orderBy: { createdAt: 'desc' },
-        });
-        for (const p of passes) {
+        for (const p of await this.passes.searchPasses(tx, estateId, q, take)) {
           hits.push({
             kind: 'pass',
             id: p.id,
             title: p.visitorName,
             subtitle: p.vehiclePlate ?? (p.revokedAt ? 'revoked' : 'active'),
-            href: `/${access.estateId}/security/passes`,
+            href: `/${estateId}/security/passes`,
           });
         }
       }
 
       // 5. Invoices (staff invoice.read)
       if (staff.has('invoice.read')) {
-        const invoices = await tx.invoice.findMany({
-          where: {
-            estateId: access.estateId,
-            number: { contains: q, mode: 'insensitive' },
-          },
-          take,
-          orderBy: { createdAt: 'desc' },
-        });
-        for (const inv of invoices) {
+        for (const inv of await this.invoices.searchInvoices(tx, estateId, q, take)) {
           hits.push({
             kind: 'invoice',
             id: inv.id,
             title: inv.number,
             subtitle: inv.status,
-            href: `/${access.estateId}/finance/invoices`,
+            href: `/${estateId}/finance/invoices`,
           });
         }
       }

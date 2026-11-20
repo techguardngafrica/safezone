@@ -4231,7 +4231,7 @@ export interface paths {
      * Estate staff directory with assigned roles
      * @description Requires `role.assign`.
      */
-    get: operations['staffRoles_listStaff'];
+    get: operations['staff_listStaff'];
     put?: never;
     post?: never;
     delete?: never;
@@ -4293,7 +4293,7 @@ export interface paths {
      * Suspend or reactivate a staff member
      * @description Requires `role.assign`.
      */
-    post: operations['staffRoles_updateStaffStatus'];
+    post: operations['staff_updateStaffStatus'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4313,7 +4313,7 @@ export interface paths {
      * Invite or add a staff member and assign estate roles
      * @description Requires `role.assign`.
      */
-    post: operations['staffRoles_inviteStaff'];
+    post: operations['staff_inviteStaff'];
     delete?: never;
     options?: never;
     head?: never;
@@ -22716,7 +22716,7 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
-  staffRoles_listStaff: {
+  staff_listStaff: {
     parameters: {
       query?: {
         q?: string;
@@ -22851,7 +22851,7 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
-  staffRoles_updateStaffStatus: {
+  staff_updateStaffStatus: {
     parameters: {
       query?: never;
       header?: never;
@@ -22897,7 +22897,7 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
-  staffRoles_inviteStaff: {
+  staff_inviteStaff: {
     parameters: {
       query?: never;
       header?: never;

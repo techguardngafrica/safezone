@@ -1386,6 +1386,52 @@ export class OccupancyService {
     if (!member) throw new NotFoundError('Member not found', 'MEMBER_NOT_FOUND');
     return member;
   }
+
+  // ---- Reads for other modules (search, reports), inside the caller's tenant transaction ----------
+
+  /** Active household members whose name contains `q` (global search). */
+  async searchMembers(tx: Tx, estateId: string, q: string, take: number) {
+    const rows = await tx.householdMember.findMany({
+      where: { estateId, status: 'active', fullName: { contains: q, mode: 'insensitive' } },
+      select: { id: true, fullName: true, household: { select: { name: true } } },
+      take,
+      orderBy: { fullName: 'asc' },
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      fullName: row.fullName,
+      householdName: row.household.name,
+    }));
+  }
+
+  /** Active vehicles whose plate matches `q`, normalised or as displayed (global search). */
+  async searchVehicles(tx: Tx, estateId: string, q: string, take: number) {
+    return tx.vehicle.findMany({
+      where: {
+        estateId,
+        status: 'active',
+        OR: [
+          { plateNormalised: { contains: q.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() } },
+          { plateDisplay: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, plateDisplay: true, make: true, model: true, colour: true },
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Active households and active residents (estate reports). */
+  async residencyCounts(
+    tx: Tx,
+    estateId: string,
+  ): Promise<{ activeHouseholds: number; activeResidents: number }> {
+    const [activeHouseholds, activeResidents] = await Promise.all([
+      tx.household.count({ where: { estateId, status: 'active' } }),
+      tx.householdMember.count({ where: { estateId, status: 'active' } }),
+    ]);
+    return { activeHouseholds, activeResidents };
+  }
 }
 
 function toVehicle(row: VehicleRow) {

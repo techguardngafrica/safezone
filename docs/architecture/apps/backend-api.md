@@ -108,6 +108,7 @@ apps/backend-api/
 │       ├── authz/
 │       ├── tenancy/
 │       ├── ... (one folder per module)
+│       ├── staff/, search/  # composition modules: own no tables, call owners' services (ADR-0021)
 │       └── analytics/
 ├── prisma/                     # schema.prisma, migrations (SQL incl. RLS policies and grants)
 ├── prisma.config.ts            # Prisma CLI config (migrations run as the schema owner)
@@ -253,7 +254,7 @@ All jobs: retries with exponential backoff, dead-letter queue, alert when DLQ is
 
 - Clients connect with the access token; the gateway verifies and joins rooms.
 - Rooms: `user:<id>`, `estate:<id>:security`, `estate:<id>:sos`, `estate:<id>:gate:<gateId>`, `channel:<id>` (community), `estate:<id>:dashboard`.
-- Room joins are authorised with the same policy engine as REST.
+- Room joins are authorised with the same policy engine as REST; channel rooms ask community's `ChannelMembershipReader` (ADR-0021).
 - Messages are notifications of change (`{type, id, version}`); clients refetch over REST when needed, except SOS and chat which carry the payload.
 - Fallback: if a socket is down, push notifications still deliver; clients resync on reconnect.
 

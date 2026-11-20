@@ -3,13 +3,11 @@ import { EstateExportRegistry } from '../../common/export/export-registry';
 import { tenantDataset } from '../../common/export/tenant-dataset';
 import { DatabaseService } from '../../common/database/database.service';
 import { EstateController } from './estate.controller';
-import { SearchController } from './search.controller';
-import { SearchService } from './search.service';
 import { TenancyService } from './tenancy.service';
 
 @Module({
-  controllers: [EstateController, SearchController],
-  providers: [TenancyService, SearchService],
+  controllers: [EstateController],
+  providers: [TenancyService],
   exports: [TenancyService],
 })
 export class TenancyModule implements OnModuleInit {

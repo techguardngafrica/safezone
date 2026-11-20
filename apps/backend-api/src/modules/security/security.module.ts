@@ -44,7 +44,7 @@ import { ShiftsService } from './shifts.service';
     GateAccessService,
     { provide: RateLimiter, useClass: RedisRateLimiter },
   ],
-  exports: [GatesService, GateAccessService],
+  exports: [GatesService, GateAccessService, IncidentsService, ShiftsService],
 })
 export class SecurityModule implements OnModuleInit {
   constructor(

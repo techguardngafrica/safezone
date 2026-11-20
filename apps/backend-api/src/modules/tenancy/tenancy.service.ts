@@ -86,6 +86,119 @@ export class TenancyService {
     });
   }
 
+  /**
+   * Memberships of these users in the estate for the staff directory, newest first, keyset-paged on
+   * (joinedAt, userId).
+   */
+  async staffMemberships(
+    context: TenantContext,
+    userIds: readonly string[],
+    options: {
+      status?: string;
+      after?: { joinedAt: string; userId: string };
+      take: number;
+    },
+  ): Promise<{ userId: string; status: string; joinedAt: Date }[]> {
+    if (userIds.length === 0) return [];
+    const { after } = options;
+    return this.db.withContext(
+      'tenancy',
+      (tx) =>
+        tx.estateMembership.findMany({
+          where: {
+            estateId: context.estateId,
+            userId: { in: [...userIds] },
+            ...(options.status ? { status: options.status } : {}),
+            ...(after
+              ? {
+                  OR: [
+                    { joinedAt: { lt: new Date(after.joinedAt) } },
+                    { joinedAt: new Date(after.joinedAt), userId: { lt: after.userId } },
+                  ],
+                }
+              : {}),
+          },
+          orderBy: [{ joinedAt: 'desc' }, { userId: 'desc' }],
+          take: options.take,
+          select: { userId: true, status: true, joinedAt: true },
+        }),
+      { userId: context.userId, estateId: context.estateId },
+    );
+  }
+
+  /** Makes an invited staff member an active member of the estate (creating the membership if needed). */
+  async activateStaffMembership(
+    context: TenantContext,
+    userId: string,
+  ): Promise<{ status: string; joinedAt: Date }> {
+    const select = { id: true, status: true, joinedAt: true } as const;
+    return this.db.withContext(
+      'tenancy',
+      async (tx) => {
+        const existing = await tx.estateMembership.findFirst({
+          where: { userId, estateId: context.estateId },
+          select,
+        });
+        if (existing) {
+          if (existing.status !== 'active') {
+            return tx.estateMembership.update({
+              where: { id: existing.id },
+              data: { status: 'active' },
+              select,
+            });
+          }
+          return existing;
+        }
+        return tx.estateMembership.create({
+          data: { userId, estateId: context.estateId, status: 'active' },
+          select,
+        });
+      },
+      { userId: context.userId, estateId: context.estateId },
+    );
+  }
+
+  /** Suspends or reactivates a staff member's membership, with an audited `tenancy.staff.*` event. */
+  async setStaffMembershipStatus(
+    context: TenantContext & { userId: string },
+    targetUserId: string,
+    status: 'active' | 'suspended',
+    reason: string | undefined,
+  ): Promise<{ userId: string; status: 'active' | 'suspended' }> {
+    return this.db.withContext(
+      'tenancy',
+      async (tx) => {
+        const existing = await tx.estateMembership.findFirst({
+          where: { userId: targetUserId, estateId: context.estateId },
+        });
+        if (!existing) throw new NotFoundError('Staff member not found', 'STAFF_NOT_FOUND');
+        const updated = await tx.estateMembership.update({
+          where: { id: existing.id },
+          data: { status },
+        });
+        await appendOutboxEvents(tx, [
+          {
+            type: `tenancy.staff.${status}`,
+            estateId: context.estateId,
+            aggregateType: 'estate_membership',
+            aggregateId: targetUserId,
+            payload: { userId: targetUserId, status },
+            audit: {
+              actorType: 'user',
+              actorId: context.userId,
+              action: `tenancy.staff.${status}`,
+              resourceType: 'user',
+              resourceId: targetUserId,
+              reason,
+            },
+          },
+        ]);
+        return { userId: updated.userId, status: updated.status as 'active' | 'suspended' };
+      },
+      { userId: context.userId, estateId: context.estateId },
+    );
+  }
+
   /** Active members of an estate (emergency broadcasts, estate-wide announcements). */
   async activeMemberIds(estateId: string): Promise<string[]> {
     const rows = await this.db.withTenant({ estateId, userId: null }, (tx) =>

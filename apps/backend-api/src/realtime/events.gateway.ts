@@ -10,7 +10,6 @@ import {
 } from '@nestjs/websockets';
 import { Redis } from 'ioredis';
 import type { Server, Socket } from 'socket.io';
-import { DatabaseService } from '../common/database/database.service';
 import {
   REALTIME_REDIS_CHANNEL,
   type RealtimeMessage,
@@ -18,6 +17,7 @@ import {
 import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
 import { AuthzService } from '../modules/authz/authz.service';
+import { ChannelMembershipReader } from '../modules/community/channel-membership.service';
 import { TokenService } from '../modules/identity/token.service';
 import { TenancyService } from '../modules/tenancy/tenancy.service';
 import { canonicalRoom, parseRoom, staffMayJoin } from './room-auth';
@@ -57,7 +57,7 @@ export class EventsGateway
     private readonly tokens: TokenService,
     private readonly authz: AuthzService,
     private readonly tenancy: TenancyService,
-    private readonly db: DatabaseService,
+    private readonly channels: ChannelMembershipReader,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -165,18 +165,7 @@ export class EventsGateway
     const membership = await this.tenancy.activeMembership(userId, room.estateId);
     if (!membership) return false;
     if (room.kind === 'channel') {
-      return this.db.withTenant({ estateId: room.estateId, userId }, async (tx) => {
-        const member = await tx.channelMember.findFirst({
-          where: {
-            estateId: room.estateId,
-            channelId: room.channelId,
-            userId,
-            status: 'active',
-          },
-          select: { userId: true },
-        });
-        return Boolean(member);
-      });
+      return this.channels.isActiveMember(room.estateId, room.channelId, userId);
     }
 
     const assignments = await this.authz.activeAssignments(userId);

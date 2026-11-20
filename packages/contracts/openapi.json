@@ -54823,7 +54823,7 @@
     },
     "/v1/estates/{estateId}/staff": {
       "get": {
-        "operationId": "staffRoles_listStaff",
+        "operationId": "staff_listStaff",
         "summary": "Estate staff directory with assigned roles",
         "description": "Requires `role.assign`.",
         "tags": [
@@ -55250,7 +55250,7 @@
     },
     "/v1/estates/{estateId}/staff/{userId}/status": {
       "post": {
-        "operationId": "staffRoles_updateStaffStatus",
+        "operationId": "staff_updateStaffStatus",
         "summary": "Suspend or reactivate a staff member",
         "description": "Requires `role.assign`.",
         "tags": [
@@ -55375,7 +55375,7 @@
     },
     "/v1/estates/{estateId}/staff/invite": {
       "post": {
-        "operationId": "staffRoles_inviteStaff",
+        "operationId": "staff_inviteStaff",
         "summary": "Invite or add a staff member and assign estate roles",
         "description": "Requires `role.assign`.",
         "tags": [

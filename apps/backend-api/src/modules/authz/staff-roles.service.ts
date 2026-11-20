@@ -9,12 +9,9 @@ import {
 import type {
   assignStaffRoleSchema,
   createEstateRoleSchema,
-  inviteStaffSchema,
-  staffListQuerySchema,
   updateEstateRoleSchema,
-  updateStaffStatusSchema,
 } from '@safezone/schemas';
-import { z } from 'zod';
+import type { z } from 'zod';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
 import {
@@ -24,10 +21,30 @@ import {
   NotFoundError,
 } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
-import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
-import { maskString } from '../../common/observability/redact';
 
-const staffCursorSchema = z.object({ joinedAt: z.iso.datetime(), userId: z.uuid() });
+/** A staff member's role assignment as the staff directory shows it. */
+export interface StaffRoleAssignment {
+  id: string;
+  roleKey: string;
+  roleName: string;
+  validFrom: string;
+  validTo: string | null;
+}
+
+function toAssignment(row: {
+  id: string;
+  validFrom: Date;
+  validTo: Date | null;
+  role: { key: string; name: string };
+}): StaffRoleAssignment {
+  return {
+    id: row.id,
+    roleKey: row.role.key,
+    roleName: row.role.name,
+    validFrom: row.validFrom.toISOString(),
+    validTo: row.validTo?.toISOString() ?? null,
+  };
+}
 
 /**
  * Permissions an estate role may carry: exactly those some built-in estate role carries. Platform,
@@ -114,14 +131,11 @@ function validateEstatePermissions(permissions: readonly string[]): Permission[]
   return unique as Permission[];
 }
 
-function formatPhone(phone: string, canViewPii: boolean): string {
-  return canViewPii ? phone : maskString(phone);
-}
-
 /**
- * Estate-level non-security staff directory and custom role management (management-web.md §6.5).
- * Enforces permission boundaries, prevents self-suspension or removing the last Estate Owner,
- * and audits every role or membership status change.
+ * Estate roles and staff role assignments (management-web.md §6.5, authz.md §7). Owns only authz tables;
+ * the staff directory, invitations and membership status live in the staff module, which calls these
+ * methods. Enforces permission boundaries, never revokes or suspends the last Estate Owner, and audits
+ * every role change.
  */
 @Injectable()
 export class StaffRolesService {
@@ -325,19 +339,17 @@ export class StaffRolesService {
     );
   }
 
-  // ---- Staff ---------------------------------------------------------------------------------
+  // ---- Staff role assignments ----------------------------------------------------------------
 
-  async listStaff(access: EstateAccess, query: z.infer<typeof staffListQuerySchema>) {
-    const after = query.cursor
-      ? decodeCursor(
-          query.cursor,
-          (value): value is z.infer<typeof staffCursorSchema> =>
-            staffCursorSchema.safeParse(value).success,
-        )
-      : undefined;
+  /**
+   * Active, unexpired staff role assignments in the estate, grouped by user (resident roles excluded
+   * unless `roleKey` asks for one). Feeds the staff directory in the staff module.
+   */
+  async activeStaffAssignments(
+    access: EstateAccess,
+    roleKey?: string,
+  ): Promise<Map<string, StaffRoleAssignment[]>> {
     const now = new Date();
-    const canViewPii = access.permissions.has('pii.view');
-
     const assignments = await this.db.withContext(
       'authz',
       (tx) =>
@@ -347,7 +359,7 @@ export class StaffRolesService {
             revokedAt: null,
             OR: [{ validTo: null }, { validTo: { gt: now } }],
             role: {
-              key: query.roleKey ? query.roleKey : { notIn: [...RESIDENT_ROLE_KEYS] },
+              key: roleKey ? roleKey : { notIn: [...RESIDENT_ROLE_KEYS] },
             },
           },
           include: { role: true },
@@ -355,150 +367,33 @@ export class StaffRolesService {
         }),
       { userId: access.userId, estateId: access.estateId },
     );
-
-    const byUser = new Map<string, typeof assignments>();
+    const byUser = new Map<string, StaffRoleAssignment[]>();
     for (const row of assignments) {
       const list = byUser.get(row.userId) ?? [];
-      list.push(row);
+      list.push(toAssignment(row));
       byUser.set(row.userId, list);
     }
-
-    const staffUserIds = [...byUser.keys()];
-    if (staffUserIds.length === 0) return { items: [], nextCursor: null };
-
-    const memberships = await this.db.withContext(
-      'tenancy',
-      (tx) =>
-        tx.estateMembership.findMany({
-          where: {
-            estateId: access.estateId,
-            userId: { in: staffUserIds },
-            ...(query.status ? { status: query.status } : {}),
-            ...(after
-              ? {
-                  OR: [
-                    { joinedAt: { lt: new Date(after.joinedAt) } },
-                    { joinedAt: new Date(after.joinedAt), userId: { lt: after.userId } },
-                  ],
-                }
-              : {}),
-          },
-          orderBy: [{ joinedAt: 'desc' }, { userId: 'desc' }],
-          take: query.q ? 500 : query.limit + 1,
-        }),
-      { userId: access.userId, estateId: access.estateId },
-    );
-
-    const users = await this.db.withContext(
-      'identity',
-      (tx) =>
-        tx.user.findMany({
-          where: { id: { in: memberships.map((m) => m.userId) } },
-          select: { id: true, fullName: true, phoneE164: true, email: true },
-        }),
-      { userId: access.userId, estateId: access.estateId },
-    );
-    const userById = new Map(users.map((u) => [u.id, u]));
-
-    const q = query.q?.toLowerCase();
-    const filtered = memberships.filter((m) => {
-      if (!q) return true;
-      const u = userById.get(m.userId);
-      return (
-        u?.fullName?.toLowerCase().includes(q) ||
-        u?.phoneE164.toLowerCase().includes(q) ||
-        u?.email?.toLowerCase().includes(q)
-      );
-    });
-
-    const page = filtered.slice(0, query.limit);
-    const last = page.at(-1);
-
-    return {
-      items: page.map((m) => {
-        const u = userById.get(m.userId);
-        return {
-          userId: m.userId,
-          fullName: u?.fullName ?? null,
-          phone: u ? formatPhone(u.phoneE164, canViewPii) : '-',
-          email: u?.email ?? null,
-          status: m.status as 'active' | 'suspended' | 'pending' | 'left',
-          joinedAt: m.joinedAt.toISOString(),
-          assignments: (byUser.get(m.userId) ?? []).map((a) => ({
-            id: a.id,
-            roleKey: a.role.key,
-            roleName: a.role.name,
-            validFrom: a.validFrom.toISOString(),
-            validTo: a.validTo?.toISOString() ?? null,
-          })),
-        };
-      }),
-      nextCursor:
-        filtered.length > query.limit && last
-          ? encodeCursor({ joinedAt: last.joinedAt.toISOString(), userId: last.userId })
-          : null,
-    };
+    return byUser;
   }
 
-  async inviteStaff(access: EstateAccess, input: z.infer<typeof inviteStaffSchema>) {
-    // 1. Find or create user in identity context
-    const user = await this.db.withContext(
-      'identity',
-      async (tx) => {
-        const existing = await tx.user.findUnique({ where: { phoneE164: input.phone } });
-        if (existing) {
-          if (!existing.fullName && input.fullName) {
-            return tx.user.update({
-              where: { id: existing.id },
-              data: { fullName: input.fullName, ...(input.email ? { email: input.email } : {}) },
-            });
-          }
-          return existing;
-        }
-        return tx.user.create({
-          data: {
-            phoneE164: input.phone,
-            fullName: input.fullName,
-            email: input.email ?? null,
-          },
-        });
-      },
-      { userId: access.userId, estateId: access.estateId },
-    );
-
-    if (user.id === access.userId) {
+  /**
+   * Grants the estate roles a staff invitation asks for (skipping ones already held) and records the
+   * invitation. Returns every active assignment the user now holds in the estate.
+   */
+  async grantInvitedRoles(
+    access: EstateAccess,
+    targetUserId: string,
+    roleKeys: readonly string[],
+    validToIso: string | undefined,
+  ): Promise<StaffRoleAssignment[]> {
+    if (targetUserId === access.userId) {
       throw new ForbiddenError('You cannot change your own roles', 'CANNOT_ASSIGN_SELF');
     }
-
-    // 2. Ensure active estate membership
-    const membership = await this.db.withContext(
-      'tenancy',
-      async (tx) => {
-        const existing = await tx.estateMembership.findFirst({
-          where: { userId: user.id, estateId: access.estateId },
-        });
-        if (existing) {
-          if (existing.status !== 'active') {
-            return tx.estateMembership.update({
-              where: { id: existing.id },
-              data: { status: 'active' },
-            });
-          }
-          return existing;
-        }
-        return tx.estateMembership.create({
-          data: { userId: user.id, estateId: access.estateId, status: 'active' },
-        });
-      },
-      { userId: access.userId, estateId: access.estateId },
-    );
-
-    // 3. Assign requested estate roles
-    const assignments = await this.db.withContext(
+    return this.db.withContext(
       'authz',
       async (tx) => {
-        const validTo = input.validTo ? new Date(input.validTo) : null;
-        for (const roleKey of [...new Set(input.roleKeys)]) {
+        const validTo = validToIso ? new Date(validToIso) : null;
+        for (const roleKey of [...new Set(roleKeys)]) {
           const role = await tx.role.findFirst({
             where: {
               key: roleKey,
@@ -512,12 +407,17 @@ export class StaffRolesService {
           }
           assertCanGrant(access, role);
           const existing = await tx.roleAssignment.findFirst({
-            where: { userId: user.id, roleId: role.id, estateId: access.estateId, revokedAt: null },
+            where: {
+              userId: targetUserId,
+              roleId: role.id,
+              estateId: access.estateId,
+              revokedAt: null,
+            },
           });
           if (!existing) {
             await tx.roleAssignment.create({
               data: {
-                userId: user.id,
+                userId: targetUserId,
                 roleId: role.id,
                 estateId: access.estateId,
                 validTo,
@@ -532,41 +432,25 @@ export class StaffRolesService {
             type: 'authz.staff.invited',
             estateId: access.estateId,
             aggregateType: 'estate_membership',
-            aggregateId: user.id,
-            payload: { userId: user.id, roleKeys: input.roleKeys },
+            aggregateId: targetUserId,
+            payload: { userId: targetUserId, roleKeys: [...roleKeys] },
             audit: {
               actorType: 'user',
               actorId: access.userId,
               action: 'authz.staff.invite',
               resourceType: 'user',
-              resourceId: user.id,
+              resourceId: targetUserId,
             },
           },
         ]);
-        return tx.roleAssignment.findMany({
-          where: { userId: user.id, estateId: access.estateId, revokedAt: null },
+        const rows = await tx.roleAssignment.findMany({
+          where: { userId: targetUserId, estateId: access.estateId, revokedAt: null },
           include: { role: true },
         });
+        return rows.map(toAssignment);
       },
       { userId: access.userId, estateId: access.estateId },
     );
-
-    const canViewPii = access.permissions.has('pii.view');
-    return {
-      userId: user.id,
-      fullName: user.fullName,
-      phone: formatPhone(user.phoneE164, canViewPii),
-      email: user.email,
-      status: membership.status as 'active',
-      joinedAt: membership.joinedAt.toISOString(),
-      assignments: assignments.map((a) => ({
-        id: a.id,
-        roleKey: a.role.key,
-        roleName: a.role.name,
-        validFrom: a.validFrom.toISOString(),
-        validTo: a.validTo?.toISOString() ?? null,
-      })),
-    };
   }
 
   async assignRole(
@@ -716,12 +600,16 @@ export class StaffRolesService {
     );
   }
 
-  async updateStaffStatus(
+  /**
+   * Whether the caller may suspend or reactivate this member: no self-suspension, the caller must be able
+   * to grant every staff role the member holds, and the last Estate Owner can never be suspended.
+   */
+  async assertMayChangeStaffStatus(
     access: EstateAccess,
     targetUserId: string,
-    input: z.infer<typeof updateStaffStatusSchema>,
-  ) {
-    if (targetUserId === access.userId && input.status === 'suspended') {
+    status: 'active' | 'suspended',
+  ): Promise<void> {
+    if (targetUserId === access.userId && status === 'suspended') {
       throw new ConflictError('CANNOT_SUSPEND_SELF', 'You cannot suspend your own account');
     }
     const targetRoles = await this.db.withContext(
@@ -736,7 +624,7 @@ export class StaffRolesService {
     for (const assignment of targetRoles) {
       if (!isResidentRole(assignment.role.key)) assertCanGrant(access, assignment.role);
     }
-    if (input.status === 'suspended') {
+    if (status === 'suspended') {
       const owners = await this.db.withContext(
         'authz',
         (tx) =>
@@ -750,38 +638,5 @@ export class StaffRolesService {
         throw new ConflictError('LAST_ESTATE_OWNER', 'Cannot suspend the last Estate Owner');
       }
     }
-
-    return this.db.withContext(
-      'tenancy',
-      async (tx) => {
-        const existing = await tx.estateMembership.findFirst({
-          where: { userId: targetUserId, estateId: access.estateId },
-        });
-        if (!existing) throw new NotFoundError('Staff member not found', 'STAFF_NOT_FOUND');
-        const updated = await tx.estateMembership.update({
-          where: { id: existing.id },
-          data: { status: input.status },
-        });
-        await appendOutboxEvents(tx, [
-          {
-            type: `tenancy.staff.${input.status}`,
-            estateId: access.estateId,
-            aggregateType: 'estate_membership',
-            aggregateId: targetUserId,
-            payload: { userId: targetUserId, status: input.status },
-            audit: {
-              actorType: 'user',
-              actorId: access.userId,
-              action: `tenancy.staff.${input.status}`,
-              resourceType: 'user',
-              resourceId: targetUserId,
-              reason: input.reason,
-            },
-          },
-        ]);
-        return { userId: updated.userId, status: updated.status as 'active' | 'suspended' };
-      },
-      { userId: access.userId, estateId: access.estateId },
-    );
   }
 }

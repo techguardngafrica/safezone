@@ -19,6 +19,7 @@ Analytics turns operational data and events into **reports and dashboards**: est
 ## 3. Architecture
 
 - **Read models**: projection tables updated by event consumers (e.g. `rm_gate_daily`, `rm_sos_metrics`, `rm_collections_monthly`, `rm_maintenance_sla`, `rm_community_daily`), per estate, in a separate `analytics` schema.
+- **Today** (Phase 1-3): `GET /v1/estates/:estateId/reports/summary` computes live figures by calling each owning module's service inside one tenant transaction ([ADR-0021](../adr/0021-composition-modules-for-cross-module-reads.md)); projections replace those calls when reports outgrow live queries.
 - **Heavy queries** run on the read replica.
 - **Platform aggregates** computed nightly into `rm_platform_daily`.
 - **Product events** from apps: `POST /v1/analytics/events` (batched, max 50 per call) → queue → stored in partitioned `product_events` (user id, estate id, app, version, event, properties without personal data) → optional export to a product analytics tool.

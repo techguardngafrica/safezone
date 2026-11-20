@@ -102,7 +102,7 @@ Client usage: `GET /v1/me/permissions?estateId=` returns a compact permission sn
 ## 7. Business rules
 
 1. An estate must always have at least one active Estate Owner or Estate Administrator.
-2. Only roles with `role.assign` can assign roles, and never a role with more permissions than they hold.
+2. Only roles with `role.assign` can assign roles, and never a custom or management role (one with `role.assign` or `estate.configure`) with more permissions than they hold; built-in operational roles may be assigned by any `role.assign` holder, and nobody changes their own roles ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md)).
 3. Custom roles can include only estate-level permissions.
 4. Temporary assignments end automatically at `valid_to` (job every minute + check on evaluation).
 5. Revoking an assignment ends sessions' cached permissions immediately (cache bust + realtime room eviction).
@@ -146,6 +146,6 @@ Built (`src/modules/authz`): `roles`, `role_permissions`, `role_assignments`; bu
 
 - Built-in role permissions are read from the package at runtime (code is the source of truth); custom roles use `role_permissions`.
 - Assignments are read per request (no cache yet), so a revocation applies on the next request.
-- Custom roles and staff assignment endpoints (`…/roles`, `…/staff`): custom roles carry only permissions found in built-in estate roles and that the creator holds; management roles (with `role.assign` or `estate.configure`) and custom roles can only be granted or revoked by someone holding all their permissions; built-in operational roles can be granted by any `role.assign` holder; nobody changes their own roles ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md), rule pending product confirmation).
+- Custom roles and staff assignment endpoints (`…/roles`, `…/staff`; the staff directory, invitations and suspension live in `modules/staff`, which composes identity, tenancy and authz, [ADR-0021](../adr/0021-composition-modules-for-cross-module-reads.md)): custom roles carry only permissions found in built-in estate roles and that the creator holds; management roles (with `role.assign` or `estate.configure`) and custom roles can only be granted or revoked by someone holding all their permissions; built-in operational roles can be granted by any `role.assign` holder; nobody changes their own roles ([ADR-0020](../adr/0020-import-execution-support-enforcement-role-grants.md)).
 - `Grant.staffPermissions` / `EstateAccess.staffPermissions`: permissions held through staff roles only, for estate-wide reads such as global search.
 - Not built yet: scope rules (gate, building), household permissions.

@@ -3,6 +3,14 @@ import type { estateReportQuerySchema } from '@safezone/schemas';
 import type { z } from 'zod';
 import type { EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
+import { InvoicesService } from '../billing/invoices.service';
+import { SosService } from '../emergency/sos.service';
+import { OccupancyService } from '../occupancy/occupancy.service';
+import { PropertyService } from '../property/property.service';
+import { IncidentsService } from '../security/incidents.service';
+import { ShiftsService } from '../security/shifts.service';
+import { GateService } from '../visitor/gate.service';
+import { PassesService } from '../visitor/passes.service';
 
 function watStart(date: string): Date {
   return new Date(`${date}T00:00:00.000+01:00`);
@@ -13,11 +21,23 @@ function watEnd(date: string): Date {
 
 /**
  * Estate-wide operational and financial reports (management-web.md §6.12).
- * Queries run inside the tenant RLS transaction.
+ * Every figure comes from the module that owns the data (AGENTS.md §5.1, ADR-0021), all inside one tenant
+ * RLS transaction so the report is a consistent snapshot. Projection read models (analytics.md §3) can
+ * replace these calls once reports outgrow live queries.
  */
 @Injectable()
 export class ReportsService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly property: PropertyService,
+    private readonly occupancy: OccupancyService,
+    private readonly gate: GateService,
+    private readonly passes: PassesService,
+    private readonly incidents: IncidentsService,
+    private readonly shifts: ShiftsService,
+    private readonly sos: SosService,
+    private readonly invoices: InvoicesService,
+  ) {}
 
   async summary(access: EstateAccess, query: z.infer<typeof estateReportQuerySchema>) {
     const fromDate = watStart(query.from);
@@ -25,84 +45,21 @@ export class ReportsService {
     const now = new Date();
 
     return this.db.withTenant(access, async (tx) => {
-      const [
-        totalUnits,
-        occupiedUnits,
-        activeHouseholds,
-        activeResidents,
-        gateEvents,
-        activePasses,
-        incidents,
-        sosAlerts,
-        invoices,
-        shifts,
-      ] = await Promise.all([
-        tx.space.count({
-          where: { estateId: access.estateId, type: 'unit', archivedAt: null },
-        }),
-        tx.space.count({
-          where: {
-            estateId: access.estateId,
-            type: 'unit',
-            status: 'occupied',
-            archivedAt: null,
-          },
-        }),
-        tx.household.count({
-          where: { estateId: access.estateId, status: 'active' },
-        }),
-        tx.householdMember.count({
-          where: { estateId: access.estateId, status: 'active' },
-        }),
-        tx.gateEvent.findMany({
-          where: {
-            estateId: access.estateId,
-            occurredAt: { gte: fromDate, lte: toDate },
-          },
-          select: { direction: true, decision: true },
-        }),
-        tx.visitorPass.count({
-          where: {
-            estateId: access.estateId,
-            revokedAt: null,
-            validTo: { gte: now },
-          },
-        }),
-        tx.incident.findMany({
-          where: {
-            estateId: access.estateId,
-            occurredAt: { gte: fromDate, lte: toDate },
-          },
-          select: { status: true, severity: true, category: true },
-        }),
-        tx.sosAlert.findMany({
-          where: {
-            estateId: access.estateId,
-            triggeredAt: { gte: fromDate, lte: toDate },
-          },
-          select: {
-            isDrill: true,
-            triggeredAt: true,
-            acknowledgedAt: true,
-            resolvedAt: true,
-          },
-        }),
-        tx.invoice.findMany({
-          where: {
-            estateId: access.estateId,
-            createdAt: { gte: fromDate, lte: toDate },
-            status: { not: 'void' },
-          },
-          select: { total: true, amountPaid: true, dueDate: true, status: true },
-        }),
-        tx.shiftSession.findMany({
-          where: {
-            estateId: access.estateId,
-            startedAt: { gte: fromDate, lte: toDate },
-          },
-          select: { startedAt: true, endedAt: true },
-        }),
-      ]);
+      const { estateId } = access;
+      const [units, residency, gateEvents, activePasses, incidents, sosAlerts, invoices, shifts] =
+        await Promise.all([
+          this.property.unitCounts(tx, estateId),
+          this.occupancy.residencyCounts(tx, estateId),
+          this.gate.gateEventsBetween(tx, estateId, fromDate, toDate),
+          this.passes.activePassCount(tx, estateId, now),
+          this.incidents.incidentsBetween(tx, estateId, fromDate, toDate),
+          this.sos.alertsBetween(tx, estateId, fromDate, toDate),
+          this.invoices.invoicesCreatedBetween(tx, estateId, fromDate, toDate),
+          this.shifts.shiftsBetween(tx, estateId, fromDate, toDate),
+        ]);
+      const totalUnits = units.total;
+      const occupiedUnits = units.occupied;
+      const { activeHouseholds, activeResidents } = residency;
 
       // Visitors
       let entries = 0;

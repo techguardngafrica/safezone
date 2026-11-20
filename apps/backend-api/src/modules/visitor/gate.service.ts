@@ -874,4 +874,12 @@ export class GateService {
       createdAt: row.createdAt.toISOString(),
     };
   }
+
+  /** Direction and decision of every gate event in the window (estate reports). */
+  async gateEventsBetween(tx: Tx, estateId: string, from: Date, to: Date) {
+    return tx.gateEvent.findMany({
+      where: { estateId, occurredAt: { gte: from, lte: to } },
+      select: { direction: true, decision: true },
+    });
+  }
 }

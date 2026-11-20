@@ -10,6 +10,7 @@ import { FilesModule } from '../files/files.module';
 import { IdentityModule } from '../identity/identity.module';
 import { AnnouncementsService } from './announcements.service';
 import { ChannelsController, ModerationController, PollsController } from './channels.controller';
+import { ChannelMembershipReader } from './channel-membership.service';
 import { ChannelsService } from './channels.service';
 import { ModerationService } from './moderation.service';
 import { PollsService } from './polls.service';
@@ -25,8 +26,14 @@ import { CommunityController } from './community.controller';
     FilesModule,
   ],
   controllers: [CommunityController, ChannelsController, ModerationController, PollsController],
-  providers: [AnnouncementsService, ChannelsService, ModerationService, PollsService],
-  exports: [PollsService],
+  providers: [
+    AnnouncementsService,
+    ChannelsService,
+    ChannelMembershipReader,
+    ModerationService,
+    PollsService,
+  ],
+  exports: [PollsService, ChannelMembershipReader],
 })
 export class CommunityModule implements OnModuleInit {
   constructor(

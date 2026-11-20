@@ -204,4 +204,12 @@ export class ShiftsService {
       },
     ]);
   }
+
+  /** Start and end of shifts started in the window (estate reports). */
+  async shiftsBetween(tx: Tx, estateId: string, from: Date, to: Date) {
+    return tx.shiftSession.findMany({
+      where: { estateId, startedAt: { gte: from, lte: to } },
+      select: { startedAt: true, endedAt: true },
+    });
+  }
 }
