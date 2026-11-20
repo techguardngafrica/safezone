@@ -69,25 +69,25 @@ export function ReconciliationScreen() {
   const txCols: Column<TxRow>[] = [
     {
       key: 'time',
-      header: 'Date',
+      header: t('mw.reconciliation.date'),
       render: (r) => <span className="sz-num">{formatDateTime(r.paidAt)}</span>,
     },
     {
       key: 'ref',
-      header: 'Provider reference',
+      header: t('mw.reconciliation.providerReference'),
       render: (r) => <span className="sz-num">{r.reference}</span>,
     },
-    { key: 'provider', header: 'Provider', render: (r) => r.provider },
-    { key: 'channel', header: 'Channel', render: (r) => r.channel ?? '-' },
+    { key: 'provider', header: t('mw.reconciliation.provider'), render: (r) => r.provider },
+    { key: 'channel', header: t('mw.reconciliation.channel'), render: (r) => r.channel ?? '-' },
     {
       key: 'amount',
-      header: 'Amount',
+      header: t('mw.reconciliation.amount'),
       align: 'right',
       render: (r) => <span className="sz-num">{formatKobo(r.amount)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.reconciliation.status'),
       render: (r) => <StatusPill tone={TX_TONE[r.status] ?? 'neutral'} label={r.status} />,
     },
   ];
@@ -95,14 +95,14 @@ export function ReconciliationScreen() {
   const ledgerCols: Column<LedgerBalance>[] = [
     {
       key: 'code',
-      header: 'Account code',
+      header: t('mw.reconciliation.accountCode'),
       render: (r) => <span className="sz-num">{r.code}</span>,
     },
-    { key: 'name', header: 'Account', render: (r) => r.name },
-    { key: 'type', header: 'Type', render: (r) => r.type },
+    { key: 'name', header: t('mw.reconciliation.account'), render: (r) => r.name },
+    { key: 'type', header: t('mw.reconciliation.type'), render: (r) => r.type },
     {
       key: 'balance',
-      header: 'Balance',
+      header: t('mw.reconciliation.balance'),
       align: 'right',
       render: (r) => <span className="sz-num">{formatKobo(r.balance)}</span>,
     },

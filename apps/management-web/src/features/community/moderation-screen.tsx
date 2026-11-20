@@ -92,12 +92,12 @@ export function ModerationScreen() {
   });
 
   const queueCols: Column<ReportRow>[] = [
-    { key: 'target', header: 'Target', render: (r) => r.targetType },
-    { key: 'reason', header: 'Reason', render: (r) => r.reason },
-    { key: 'details', header: 'Details', render: (r) => r.details ?? '-' },
+    { key: 'target', header: t('mw.moderation.target'), render: (r) => r.targetType },
+    { key: 'reason', header: t('mw.moderation.reason'), render: (r) => r.reason },
+    { key: 'details', header: t('mw.moderation.details'), render: (r) => r.details ?? '-' },
     {
       key: 'created',
-      header: 'Reported',
+      header: t('mw.moderation.reported'),
       render: (r) => <span className="sz-num">{formatDateTime(r.createdAt)}</span>,
     },
     {
@@ -113,19 +113,23 @@ export function ModerationScreen() {
             setRemoving(r);
           }}
         >
-          Take action
+          {t('mw.moderation.takeAction')}
         </ActionButton>
       ),
     },
   ];
 
   const actionCols: Column<ActionRow>[] = [
-    { key: 'action', header: 'Action', render: (r) => r.action.replace(/_/g, ' ') },
-    { key: 'target', header: 'Target', render: (r) => r.targetType },
-    { key: 'reason', header: 'Reason', render: (r) => r.reason },
+    {
+      key: 'action',
+      header: t('mw.moderation.action'),
+      render: (r) => r.action.replace(/_/g, ' '),
+    },
+    { key: 'target', header: t('mw.moderation.target'), render: (r) => r.targetType },
+    { key: 'reason', header: t('mw.moderation.reason'), render: (r) => r.reason },
     {
       key: 'appeal',
-      header: 'Appeal',
+      header: t('mw.moderation.appeal'),
       render: (r) =>
         r.appealStatus ? (
           <StatusPill
@@ -148,14 +152,14 @@ export function ModerationScreen() {
               size="sm"
               onClick={() => setAppealTarget({ action: r, decision: 'upheld' })}
             >
-              Uphold
+              {t('mw.moderation.uphold')}
             </ActionButton>
             <ActionButton
               variant="secondary"
               size="sm"
               onClick={() => setAppealTarget({ action: r, decision: 'overturned' })}
             >
-              Overturn
+              {t('mw.moderation.overturn')}
             </ActionButton>
           </div>
         ) : null,
@@ -206,11 +210,11 @@ export function ModerationScreen() {
 
       {removing ? (
         <ConfirmDialog
-          title="Take moderation action"
-          body="Enforce moderation action on this reported item? The action is logged and appealable."
-          confirmLabel="Enforce"
+          title={t('mw.moderation.takeModerationAction')}
+          body={t('mw.moderation.enforceModerationActionOnThis')}
+          confirmLabel={t('mw.moderation.enforce')}
           destructive
-          reason={{ label: 'Moderation reason', required: true }}
+          reason={{ label: t('mw.moderation.moderationReason'), required: true }}
           busy={takeAction.isPending}
           error={takeAction.isError ? errorText(takeAction.error) : null}
           onClose={() => setRemoving(null)}
@@ -220,10 +224,12 @@ export function ModerationScreen() {
 
       {appealTarget ? (
         <ConfirmDialog
-          title={appealTarget.decision === 'upheld' ? 'Uphold action' : 'Overturn action'}
-          body="Record your decision on this moderation appeal?"
-          confirmLabel={appealTarget.decision === 'upheld' ? 'Uphold' : 'Overturn'}
-          reason={{ label: 'Note (optional)' }}
+          title={
+            appealTarget.decision === 'upheld' ? 'Uphold action' : t('mw.moderation.overturnAction')
+          }
+          body={t('mw.moderation.recordYourDecisionOnThis')}
+          confirmLabel={appealTarget.decision === 'upheld' ? 'Uphold' : t('mw.moderation.overturn')}
+          reason={{ label: t('mw.moderation.noteOptional') }}
           busy={decideAppeal.isPending}
           error={decideAppeal.isError ? errorText(decideAppeal.error) : null}
           onClose={() => setAppealTarget(null)}

@@ -69,7 +69,7 @@ export function RolesScreen() {
 
   const update = useMutation({
     mutationFn: () => {
-      if (!editing?.id) throw new Error('No role selected');
+      if (!editing?.id) throw new Error(t('mw.roles.errNoRoleSelected'));
       return unwrap(
         api.PATCH('/v1/estates/{estateId}/roles/{id}', {
           params: { path: { estateId, id: editing.id } },

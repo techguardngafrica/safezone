@@ -224,7 +224,7 @@ export function HouseholdsScreen() {
                       render: (r) => (
                         <StatusPill
                           tone={r.isMinor ? 'info' : 'success'}
-                          label={r.isMinor ? 'Minor' : 'Adult'}
+                          label={r.isMinor ? 'Minor' : t('mw.households.adult')}
                         />
                       ),
                     },

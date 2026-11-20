@@ -67,6 +67,31 @@ export function BulkImportScreen() {
       unwrap(api.GET('/v1/estates/{estateId}/imports', { params: { path: { estateId } } })),
   });
 
+  // A confirmed job runs in the worker: poll it until it completes or fails.
+  const previewId = preview?.id ?? null;
+  const pending = preview?.status === 'queued' || preview?.status === 'running';
+  const progress = useQuery({
+    queryKey: ['estate', estateId, 'imports', previewId],
+    enabled: pending && previewId !== null,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === 'queued' || status === 'running' ? 2_000 : false;
+    },
+    queryFn: async () => {
+      const job = await unwrap(
+        api.GET('/v1/estates/{estateId}/imports/{id}', {
+          params: { path: { estateId, id: previewId ?? '' } },
+        }),
+      );
+      if (job.status === 'completed' || job.status === 'failed') {
+        setPreview(job);
+        void queryClient.invalidateQueries({ queryKey: ['estate', estateId, 'imports'] });
+      }
+      return job;
+    },
+  });
+  const shown = pending && progress.data ? progress.data : preview;
+
   const downloadTemplate = useMutation({
     mutationFn: (selectedKind: ImportKind) =>
       unwrap(
@@ -125,7 +150,7 @@ export function BulkImportScreen() {
       header: t('import.col.result'),
       render: (row) => (
         <span className="sz-num">
-          {row.createdCount} / {row.updatedCount}
+          {row.createdCount} / {row.updatedCount} / {row.unchangedCount} / {row.failedCount}
         </span>
       ),
     },
@@ -133,7 +158,10 @@ export function BulkImportScreen() {
       key: 'status',
       header: t('import.col.status'),
       render: (row) => (
-        <StatusPill tone={STATUS_TONE[row.status]} label={row.status.replace('_', ' ')} />
+        <StatusPill
+          tone={STATUS_TONE[row.status]}
+          label={t(`import.status.${row.status}` as MessageKey)}
+        />
       ),
     },
     {
@@ -220,31 +248,57 @@ export function BulkImportScreen() {
             ) : null}
           </div>
 
-          {preview ? (
-            <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
-              <Banner tone={preview.errorRows > 0 ? 'warning' : 'success'}>
-                {preview.filename}: {preview.totalRows} total, {preview.validRows} valid,{' '}
-                {preview.errorRows} errors
-                {preview.status === 'completed'
-                  ? ` (${preview.createdCount} created, ${preview.updatedCount} updated)`
-                  : ''}
-              </Banner>
+          {kind === 'opening_balances' ? (
+            <Banner tone="info">{t('import.balancesHint')}</Banner>
+          ) : null}
 
-              {preview.errors.length > 0 ? (
+          {shown ? (
+            <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
+              <Banner tone={shown.errorRows > 0 || shown.failedCount > 0 ? 'warning' : 'success'}>
+                {t('import.summary', {
+                  filename: shown.filename,
+                  total: shown.totalRows,
+                  valid: shown.validRows,
+                  errors: shown.errorRows,
+                })}
+              </Banner>
+              {shown.status === 'queued' || shown.status === 'running' ? (
+                <Banner tone="info">{t('import.inProgress')}</Banner>
+              ) : null}
+              {shown.status === 'completed' || shown.status === 'failed' ? (
+                <Banner tone={shown.status === 'failed' ? 'danger' : 'success'}>
+                  {t('import.result', {
+                    created: shown.createdCount,
+                    updated: shown.updatedCount,
+                    unchanged: shown.unchangedCount,
+                    failed: shown.failedCount,
+                  })}
+                </Banner>
+              ) : null}
+
+              {shown.errors.length > 0 ? (
                 <DataTable
-                  caption={t('import.errors', { count: preview.errors.length })}
-                  rows={preview.errors.slice(0, 100)}
+                  caption={t('import.errors', { count: shown.errors.length })}
+                  rows={shown.errors.slice(0, 100)}
                   rowKey={(row) => `${row.row}-${row.field ?? 'row'}-${row.message}`}
                   columns={[
                     {
                       key: 'row',
-                      header: 'Row',
+                      header: t('import.error.row'),
                       render: (r) => <span className="sz-num">{r.row}</span>,
                     },
-                    { key: 'field', header: 'Field', render: (r) => r.field ?? '-' },
-                    { key: 'message', header: 'Error', render: (r) => r.message },
+                    {
+                      key: 'field',
+                      header: t('import.error.field'),
+                      render: (r) => r.field ?? '-',
+                    },
+                    {
+                      key: 'message',
+                      header: t('import.error.message'),
+                      render: (r) => r.message,
+                    },
                   ]}
-                  empty={{ icon: 'check', title: 'No errors', body: '' }}
+                  empty={{ icon: 'check', title: t('import.error.none'), body: '' }}
                 />
               ) : null}
             </div>

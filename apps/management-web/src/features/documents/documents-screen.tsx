@@ -113,7 +113,7 @@ export function DocumentsScreen() {
   const columns: Column<Doc>[] = [
     {
       key: 'title',
-      header: 'Document',
+      header: t('mw.documents.document'),
       render: (r) => (
         <button
           type="button"
@@ -125,21 +125,25 @@ export function DocumentsScreen() {
         </button>
       ),
     },
-    { key: 'cat', header: 'Category', render: (r) => r.category.replace(/_/g, ' ') },
+    {
+      key: 'cat',
+      header: t('mw.documents.category'),
+      render: (r) => r.category.replace(/_/g, ' '),
+    },
     {
       key: 'ver',
-      header: 'Version',
+      header: t('mw.documents.version'),
       align: 'right',
       render: (r) => <span className="sz-num">v{r.currentVersion}</span>,
     },
     {
       key: 'expires',
-      header: 'Expires',
+      header: t('mw.documents.expires'),
       render: (r) => (r.expiresOn ? <span className="sz-num">{r.expiresOn}</span> : '-'),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.documents.status'),
       render: (r) => (
         <StatusPill tone={r.status === 'active' ? 'success' : 'neutral'} label={r.status} />
       ),
@@ -201,16 +205,16 @@ export function DocumentsScreen() {
       <Toolbar>
         <InputField
           label={t('common.search')}
-          placeholder="Search document title"
+          placeholder={t('mw.documents.searchDocumentTitle')}
           value={search}
           onChange={setSearch}
         />
         <SelectField
-          label="Folder"
+          label={t('mw.documents.folder')}
           value={folderId}
           onChange={setFolderId}
           options={[
-            { value: '', label: 'All folders' },
+            { value: '', label: t('mw.documents.allFolders') },
             ...(folders.data ?? []).map((f) => ({ value: f.id, label: f.name })),
           ]}
         />
@@ -253,7 +257,12 @@ export function DocumentsScreen() {
         >
           <FormError message={createFolder.isError ? errorText(createFolder.error) : null} />
           <div className="sz-form">
-            <InputField label="Folder name" required value={folderName} onChange={setFolderName} />
+            <InputField
+              label={t('mw.documents.folderName')}
+              required
+              value={folderName}
+              onChange={setFolderName}
+            />
           </div>
         </Dialog>
       ) : null}
@@ -275,22 +284,30 @@ export function DocumentsScreen() {
             </div>
             {canManage ? (
               <div>
-                <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>Access log</h3>
+                <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>{t('mw.documents.accessLog')}</h3>
                 <DataTable
-                  caption="Document access log"
+                  caption={t('mw.documents.documentAccessLog')}
                   rows={accessLog.data ?? []}
                   rowKey={(r) => `${r.userId}-${r.at}-${r.action}`}
                   loading={accessLog.isPending}
                   columns={[
-                    { key: 'action', header: 'Action', render: (r) => r.action },
-                    { key: 'user', header: 'User', render: (r) => r.userId.slice(0, 8) },
+                    { key: 'action', header: t('mw.documents.action'), render: (r) => r.action },
+                    {
+                      key: 'user',
+                      header: t('mw.documents.user'),
+                      render: (r) => r.userId.slice(0, 8),
+                    },
                     {
                       key: 'at',
-                      header: 'Time',
+                      header: t('mw.documents.time'),
                       render: (r) => <span className="sz-num">{formatDateTime(r.at)}</span>,
                     },
                   ]}
-                  empty={{ icon: 'history', title: 'No access recorded yet', body: '' }}
+                  empty={{
+                    icon: 'history',
+                    title: t('mw.documents.noAccessRecordedYet'),
+                    body: '',
+                  }}
                 />
               </div>
             ) : null}
@@ -301,7 +318,7 @@ export function DocumentsScreen() {
       {archiving ? (
         <ConfirmDialog
           title={t('documents.archive')}
-          body="Archive this document? It will no longer appear to residents."
+          body={t('mw.documents.archiveThisDocumentItWill')}
           confirmLabel={t('documents.archive')}
           destructive
           busy={archive.isPending}

@@ -86,7 +86,7 @@ export function PollsScreen() {
   const columns: Column<Poll>[] = [
     {
       key: 'question',
-      header: 'Question',
+      header: t('mw.polls.question'),
       render: (r) => (
         <button
           type="button"
@@ -100,22 +100,22 @@ export function PollsScreen() {
     },
     {
       key: 'votes',
-      header: 'Votes',
+      header: t('mw.polls.votes'),
       align: 'right',
       render: (r) => <span className="sz-num">{r.totalVotes}</span>,
     },
     {
       key: 'closes',
-      header: 'Closes',
+      header: t('mw.polls.closes'),
       render: (r) => <span className="sz-num">{formatDateTime(r.closesAt)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.polls.status'),
       render: (r) => (
         <StatusPill
           tone={r.status === 'closed' ? 'neutral' : 'success'}
-          label={r.status === 'closed' ? 'Closed' : 'Open'}
+          label={r.status === 'closed' ? 'Closed' : t('mw.polls.open')}
         />
       ),
     },
@@ -170,9 +170,14 @@ export function PollsScreen() {
         >
           <FormError message={create.isError ? errorText(create.error) : null} />
           <div className="sz-form">
-            <InputField label="Question" required value={question} onChange={setQuestion} />
+            <InputField
+              label={t('mw.polls.question')}
+              required
+              value={question}
+              onChange={setQuestion}
+            />
             <div className="sz-field">
-              <label htmlFor="poll-options">Options (one per line)</label>
+              <label htmlFor="poll-options">{t('mw.polls.optionsOnePerLine')}</label>
               <textarea
                 id="poll-options"
                 className="sz-input"
@@ -183,23 +188,23 @@ export function PollsScreen() {
             </div>
             <div className="sz-form-2">
               <InputField
-                label="Close date"
+                label={t('mw.polls.closeDate')}
                 type="date"
                 value={closesDate}
                 onChange={setClosesDate}
               />
               <SelectField
-                label="Vote rule"
+                label={t('mw.polls.voteRule')}
                 value={votePer}
                 onChange={setVotePer}
                 options={[
-                  { value: 'household', label: 'One per household' },
-                  { value: 'user', label: 'One per resident' },
+                  { value: 'household', label: t('mw.polls.onePerHousehold') },
+                  { value: 'user', label: t('mw.polls.onePerResident') },
                 ]}
               />
             </div>
             <CheckboxField
-              label="Anonymous votes (hide voter names)"
+              label={t('mw.polls.anonymousVotesHideVoterNames')}
               checked={anonymous}
               onChange={setAnonymous}
             />
@@ -234,28 +239,32 @@ export function PollsScreen() {
             </div>
             {!selected.anonymous && canPublish ? (
               <div>
-                <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>Voters</h3>
+                <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>{t('mw.polls.voters')}</h3>
                 <DataTable
-                  caption="Voters"
+                  caption={t('mw.polls.voters')}
                   rows={voters.data ?? []}
                   rowKey={(r) => `${r.userId}-${r.votedAt}`}
                   loading={voters.isPending}
                   columns={[
-                    { key: 'name', header: 'Resident', render: (r) => r.userId.slice(0, 8) },
+                    {
+                      key: 'name',
+                      header: t('mw.polls.resident'),
+                      render: (r) => r.userId.slice(0, 8),
+                    },
                     {
                       key: 'opt',
-                      header: 'Choice',
+                      header: t('mw.polls.choice'),
                       render: (r) =>
                         selected.options.find((o) => o.id === r.optionId)?.label ??
                         r.optionId.slice(0, 8),
                     },
                     {
                       key: 'at',
-                      header: 'Voted at',
+                      header: t('mw.polls.votedAt'),
                       render: (r) => <span className="sz-num">{formatDateTime(r.votedAt)}</span>,
                     },
                   ]}
-                  empty={{ icon: 'users', title: 'No votes yet', body: '' }}
+                  empty={{ icon: 'users', title: t('mw.polls.noVotesYet'), body: '' }}
                 />
               </div>
             ) : null}

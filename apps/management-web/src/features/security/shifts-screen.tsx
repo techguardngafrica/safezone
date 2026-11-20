@@ -205,7 +205,10 @@ export function ShiftsScreen() {
           error={endShift.isError ? errorText(endShift.error) : null}
           onClose={() => setEnding(null)}
           onConfirm={(note) =>
-            endShift.mutate({ id: ending.id, handoverNote: note ?? 'Ended by supervisor' })
+            endShift.mutate({
+              id: ending.id,
+              handoverNote: note ?? t('mw.shifts.endedBySupervisor'),
+            })
           }
         />
       ) : null}

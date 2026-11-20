@@ -71,23 +71,23 @@ export function DataExportScreen() {
   const columns: Column<ExportRow>[] = [
     {
       key: 'created',
-      header: 'Requested',
+      header: t('mw.data_export.requested'),
       render: (r) => <span className="sz-num">{formatDateTime(r.createdAt)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.data_export.status'),
       render: (r) => <StatusPill tone={STATUS_TONE[r.status] ?? 'neutral'} label={r.status} />,
     },
     {
       key: 'size',
-      header: 'Size',
+      header: t('mw.data_export.size'),
       align: 'right',
       render: (r) => <span className="sz-num">{formatBytes(r.sizeBytes)}</span>,
     },
     {
       key: 'expires',
-      header: 'Expires',
+      header: t('mw.data_export.expires'),
       render: (r) =>
         r.expiresAt ? (
           <span className="sz-num">{formatDateTime(r.expiresAt)}</span>

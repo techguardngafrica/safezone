@@ -69,9 +69,9 @@ export function WorkOrdersScreen() {
 
   const addMaterial = useMutation({
     mutationFn: () => {
-      if (!matTarget) throw new Error('No work order selected');
+      if (!matTarget) throw new Error(t('mw.work_orders.errNoWorkOrderSelected'));
       const unitCost = parsePositiveNaira(matCost);
-      if (unitCost === null) throw new Error('Enter a valid positive amount in Naira');
+      if (unitCost === null) throw new Error(t('mw.work_orders.errEnterAValidPositiveAmount'));
       return unwrap(
         api.POST('/v1/estates/{estateId}/work-orders/{id}/materials', {
           params: { path: { estateId, id: matTarget.id } },
@@ -104,10 +104,10 @@ export function WorkOrdersScreen() {
   });
 
   const columns: Column<WorkOrder>[] = [
-    { key: 'title', header: 'Work order', render: (r) => r.title },
+    { key: 'title', header: t('mw.work_orders.workOrder'), render: (r) => r.title },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.work_orders.status'),
       render: (r) => (
         <StatusPill
           tone={r.status === 'verified' || r.status === 'completed' ? 'success' : 'info'}
@@ -117,13 +117,13 @@ export function WorkOrdersScreen() {
     },
     {
       key: 'cost',
-      header: 'Labour cost',
+      header: t('mw.work_orders.labourCost'),
       align: 'right',
       render: (r) => <span className="sz-num">{formatKobo(r.labourCost)}</span>,
     },
     {
       key: 'created',
-      header: 'Created',
+      header: t('mw.work_orders.created'),
       render: (r) => <span className="sz-num">{formatDateTime(r.createdAt)}</span>,
     },
     {
@@ -174,16 +174,16 @@ export function WorkOrdersScreen() {
 
       <Toolbar>
         <SelectField
-          label="Status"
+          label={t('mw.work_orders.status')}
           value={status}
           onChange={setStatus}
           options={[
-            { value: '', label: 'All statuses' },
-            { value: 'open', label: 'Open' },
-            { value: 'in_progress', label: 'In progress' },
-            { value: 'completed', label: 'Completed' },
-            { value: 'verified', label: 'Verified' },
-            { value: 'cancelled', label: 'Cancelled' },
+            { value: '', label: t('mw.work_orders.allStatuses') },
+            { value: 'open', label: t('mw.work_orders.open') },
+            { value: 'in_progress', label: t('mw.work_orders.inProgress') },
+            { value: 'completed', label: t('mw.work_orders.completed') },
+            { value: 'verified', label: t('mw.work_orders.verified') },
+            { value: 'cancelled', label: t('mw.work_orders.cancelled') },
           ]}
         />
       </Toolbar>
@@ -217,8 +217,18 @@ export function WorkOrdersScreen() {
         >
           <FormError message={create.isError ? errorText(create.error) : null} />
           <div className="sz-form">
-            <InputField label="Title" required value={title} onChange={setTitle} />
-            <TextAreaField label="Scope of work" rows={3} value={scope} onChange={setScope} />
+            <InputField
+              label={t('mw.work_orders.title')}
+              required
+              value={title}
+              onChange={setTitle}
+            />
+            <TextAreaField
+              label={t('mw.work_orders.scopeOfWork')}
+              rows={3}
+              value={scope}
+              onChange={setScope}
+            />
           </div>
         </Dialog>
       ) : null}
@@ -245,11 +255,21 @@ export function WorkOrdersScreen() {
         >
           <FormError message={addMaterial.isError ? errorText(addMaterial.error) : null} />
           <div className="sz-form">
-            <InputField label="Material item" required value={matItem} onChange={setMatItem} />
+            <InputField
+              label={t('mw.work_orders.materialItem')}
+              required
+              value={matItem}
+              onChange={setMatItem}
+            />
             <div className="sz-form-2">
-              <InputField label="Quantity" type="number" value={matQty} onChange={setMatQty} />
               <InputField
-                label="Unit cost (NGN)"
+                label={t('mw.work_orders.quantity')}
+                type="number"
+                value={matQty}
+                onChange={setMatQty}
+              />
+              <InputField
+                label={t('mw.work_orders.unitCostNgn')}
                 type="number"
                 required
                 value={matCost}

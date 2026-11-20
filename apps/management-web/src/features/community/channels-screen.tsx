@@ -115,7 +115,7 @@ export function ChannelsScreen() {
   const columns: Column<Channel>[] = [
     {
       key: 'name',
-      header: 'Channel',
+      header: t('mw.channels.channel'),
       render: (r) => (
         <div>
           <div style={{ fontWeight: 600 }}>{r.name}</div>
@@ -127,16 +127,16 @@ export function ChannelsScreen() {
         </div>
       ),
     },
-    { key: 'privacy', header: 'Privacy', render: (r) => r.privacy },
+    { key: 'privacy', header: t('mw.channels.privacy'), render: (r) => r.privacy },
     {
       key: 'members',
-      header: 'Members',
+      header: t('mw.channels.members'),
       align: 'right',
       render: (r) => <span className="sz-num">{r.memberCount}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.channels.status'),
       render: (r) => (
         <StatusPill
           tone={CHANNEL_TONE[r.status] ?? 'neutral'}
@@ -241,21 +241,21 @@ export function ChannelsScreen() {
         >
           <FormError message={create.isError ? errorText(create.error) : null} />
           <div className="sz-form">
-            <InputField label="Name" required value={name} onChange={setName} />
+            <InputField label={t('mw.channels.name')} required value={name} onChange={setName} />
             <TextAreaField
-              label="Description"
+              label={t('mw.channels.description')}
               rows={3}
               value={description}
               onChange={setDescription}
             />
             <SelectField
-              label="Privacy"
+              label={t('mw.channels.privacy')}
               value={privacy}
               onChange={setPrivacy}
               options={[
-                { value: 'public', label: 'Public' },
-                { value: 'restricted', label: 'Restricted (approval required)' },
-                { value: 'invite_only', label: 'Invite only' },
+                { value: 'public', label: t('mw.channels.public') },
+                { value: 'restricted', label: t('mw.channels.restrictedApprovalRequired') },
+                { value: 'invite_only', label: t('mw.channels.inviteOnly') },
               ]}
             />
           </div>
@@ -267,14 +267,14 @@ export function ChannelsScreen() {
           title={actionTarget.kind === 'suspend' ? t('channels.suspend') : t('channels.archive')}
           body={
             actionTarget.kind === 'suspend'
-              ? 'Suspend this channel? Members will not be able to post messages.'
-              : 'Archive this channel? It will become read-only.'
+              ? t('mw.channels.suspendThisChannelMembersWill')
+              : t('mw.channels.archiveThisChannelItWill')
           }
           confirmLabel={
             actionTarget.kind === 'suspend' ? t('channels.suspend') : t('channels.archive')
           }
           destructive={actionTarget.kind === 'suspend'}
-          reason={{ label: 'Reason', required: true }}
+          reason={{ label: t('mw.channels.reason'), required: true }}
           busy={suspendOrArchive.isPending}
           error={suspendOrArchive.isError ? errorText(suspendOrArchive.error) : null}
           onClose={() => setActionTarget(null)}

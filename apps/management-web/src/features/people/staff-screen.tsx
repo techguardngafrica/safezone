@@ -107,7 +107,7 @@ export function StaffScreen() {
 
   const assignRole = useMutation({
     mutationFn: () => {
-      if (!managing) throw new Error('No staff selected');
+      if (!managing) throw new Error(t('mw.staff.errNoStaffSelected'));
       return unwrap(
         api.POST('/v1/estates/{estateId}/staff/{userId}/roles', {
           params: { path: { estateId, userId: managing.userId } },
@@ -404,8 +404,8 @@ export function StaffScreen() {
                     <div style={{ fontWeight: 600 }}>{assignment.roleName}</div>
                     <div className="sz-muted" style={{ fontSize: 13 }}>
                       {assignment.validTo
-                        ? `Expires ${formatDateTime(assignment.validTo)}`
-                        : 'Permanent'}
+                        ? t('mw.staff.expiresAt', { date: formatDateTime(assignment.validTo) })
+                        : t('mw.staff.permanent')}
                     </div>
                   </div>
                   <ActionButton

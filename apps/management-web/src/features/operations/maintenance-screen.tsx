@@ -148,7 +148,7 @@ export function MaintenanceScreen() {
         return unwrap(
           api.POST('/v1/estates/{estateId}/maintenance-requests/{id}/reject', {
             params: { path: { estateId, id } },
-            body: { reason: reason ?? 'Rejected by estate management' },
+            body: { reason: reason ?? t('mw.maintenance.rejectedByEstateManagement') },
           }),
         );
       }
@@ -204,7 +204,7 @@ export function MaintenanceScreen() {
   const reqCols: Column<MaintenanceReq>[] = [
     {
       key: 'title',
-      header: 'Request',
+      header: t('mw.maintenance.request'),
       render: (r) => (
         <button
           type="button"
@@ -219,34 +219,34 @@ export function MaintenanceScreen() {
         </button>
       ),
     },
-    { key: 'kind', header: 'Kind', render: (r) => r.kind },
+    { key: 'kind', header: t('mw.maintenance.kind'), render: (r) => r.kind },
     {
       key: 'priority',
-      header: 'Priority',
+      header: t('mw.maintenance.priority'),
       render: (r) => (
         <StatusPill tone={PRIORITY_TONE[r.priority] ?? 'neutral'} label={r.priority} />
       ),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.maintenance.status'),
       render: (r) => (
         <StatusPill tone={STATUS_TONE[r.status] ?? 'neutral'} label={r.status.replace(/_/g, ' ')} />
       ),
     },
     {
       key: 'created',
-      header: 'Submitted',
+      header: t('mw.maintenance.submitted'),
       render: (r) => <span className="sz-num">{formatDateTime(r.createdAt)}</span>,
     },
   ];
 
   const catCols: Column<Category>[] = [
-    { key: 'name', header: 'Category', render: (r) => r.name },
-    { key: 'kind', header: 'Kind', render: (r) => r.kind },
+    { key: 'name', header: t('mw.maintenance.category'), render: (r) => r.name },
+    { key: 'kind', header: t('mw.maintenance.kind'), render: (r) => r.kind },
     {
       key: 'priority',
-      header: 'Default priority',
+      header: t('mw.maintenance.defaultPriority'),
       render: (r) => (
         <StatusPill
           tone={PRIORITY_TONE[r.defaultPriority] ?? 'neutral'}
@@ -256,31 +256,31 @@ export function MaintenanceScreen() {
     },
     {
       key: 'active',
-      header: 'Status',
+      header: t('mw.maintenance.status'),
       render: (r) => (
         <StatusPill
           tone={r.active ? 'success' : 'neutral'}
-          label={r.active ? 'Active' : 'Inactive'}
+          label={r.active ? 'Active' : t('mw.maintenance.inactive')}
         />
       ),
     },
   ];
 
   const recCols: Column<Recurring>[] = [
-    { key: 'title', header: 'Schedule', render: (r) => r.title },
-    { key: 'interval', header: 'Frequency', render: (r) => r.frequency },
+    { key: 'title', header: t('mw.maintenance.schedule'), render: (r) => r.title },
+    { key: 'interval', header: t('mw.maintenance.frequency'), render: (r) => r.frequency },
     {
       key: 'next',
-      header: 'Next due',
+      header: t('mw.maintenance.nextDue'),
       render: (r) => <span className="sz-num">{r.nextRunOn}</span>,
     },
     {
       key: 'active',
-      header: 'Status',
+      header: t('mw.maintenance.status'),
       render: (r) => (
         <StatusPill
           tone={r.active ? 'success' : 'neutral'}
-          label={r.active ? 'Active' : 'Paused'}
+          label={r.active ? 'Active' : t('mw.maintenance.paused')}
         />
       ),
     },
@@ -325,17 +325,17 @@ export function MaintenanceScreen() {
         <>
           <Toolbar>
             <SelectField
-              label="Status"
+              label={t('mw.maintenance.status')}
               value={statusFilter}
               onChange={setStatusFilter}
               options={[
-                { value: '', label: 'All statuses' },
-                { value: 'submitted', label: 'Submitted' },
-                { value: 'under_review', label: 'Under review' },
-                { value: 'approved', label: 'Approved' },
-                { value: 'in_progress', label: 'In progress' },
-                { value: 'resolved', label: 'Resolved' },
-                { value: 'closed', label: 'Closed' },
+                { value: '', label: t('mw.maintenance.allStatuses') },
+                { value: 'submitted', label: t('mw.maintenance.submitted') },
+                { value: 'under_review', label: t('mw.maintenance.underReview') },
+                { value: 'approved', label: t('mw.maintenance.approved') },
+                { value: 'in_progress', label: t('mw.maintenance.inProgress') },
+                { value: 'resolved', label: t('mw.maintenance.resolved') },
+                { value: 'closed', label: t('mw.maintenance.closed') },
               ]}
             />
           </Toolbar>
@@ -408,7 +408,7 @@ export function MaintenanceScreen() {
                       busy={transition.isPending}
                       onClick={() => transition.mutate({ id: current.id, action: 'review' })}
                     >
-                      Review
+                      {t('mw.maintenance.review')}
                     </ActionButton>
                   ) : null}
                   {current.status === 'submitted' || current.status === 'under_review' ? (
@@ -418,7 +418,7 @@ export function MaintenanceScreen() {
                         busy={transition.isPending}
                         onClick={() => transition.mutate({ id: current.id, action: 'approve' })}
                       >
-                        Approve
+                        {t('mw.maintenance.approve')}
                       </ActionButton>
                       <ActionButton
                         size="sm"
@@ -428,11 +428,11 @@ export function MaintenanceScreen() {
                           transition.mutate({
                             id: current.id,
                             action: 'reject',
-                            reason: 'Rejected by estate management',
+                            reason: t('mw.maintenance.rejectedByEstateManagement'),
                           })
                         }
                       >
-                        Reject
+                        {t('mw.maintenance.reject')}
                       </ActionButton>
                     </>
                   ) : null}
@@ -442,7 +442,7 @@ export function MaintenanceScreen() {
                       busy={transition.isPending}
                       onClick={() => transition.mutate({ id: current.id, action: 'resolve' })}
                     >
-                      Resolve
+                      {t('mw.maintenance.resolve')}
                     </ActionButton>
                   ) : null}
                   {current.status === 'resolved' ? (
@@ -452,15 +452,18 @@ export function MaintenanceScreen() {
                       busy={transition.isPending}
                       onClick={() => transition.mutate({ id: current.id, action: 'close' })}
                     >
-                      Close
+                      {t('mw.maintenance.close')}
                     </ActionButton>
                   ) : null}
                 </div>
               ) : null}
               <DetailList
                 items={[
-                  { label: 'Kind', value: current.kind },
-                  { label: 'Submitted', value: formatDateTime(current.createdAt) },
+                  { label: t('mw.maintenance.kind'), value: current.kind },
+                  {
+                    label: t('mw.maintenance.submitted'),
+                    value: formatDateTime(current.createdAt),
+                  },
                 ]}
               />
               <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{current.description}</p>
@@ -472,7 +475,7 @@ export function MaintenanceScreen() {
                 }}
               >
                 <TextAreaField
-                  label="Add comment"
+                  label={t('mw.maintenance.addComment')}
                   rows={3}
                   value={commentBody}
                   onChange={setCommentBody}
@@ -484,7 +487,7 @@ export function MaintenanceScreen() {
                     disabled={!commentBody.trim()}
                     busy={postComment.isPending}
                   >
-                    Post comment
+                    {t('mw.maintenance.postComment')}
                   </ActionButton>
                 </div>
               </form>
@@ -515,26 +518,31 @@ export function MaintenanceScreen() {
         >
           <FormError message={addCategory.isError ? errorText(addCategory.error) : null} />
           <div className="sz-form">
-            <InputField label="Name" required value={catName} onChange={setCatName} />
+            <InputField
+              label={t('mw.maintenance.name')}
+              required
+              value={catName}
+              onChange={setCatName}
+            />
             <div className="sz-form-2">
               <SelectField
-                label="Kind"
+                label={t('mw.maintenance.kind')}
                 value={catKind}
                 onChange={setCatKind}
                 options={[
-                  { value: 'maintenance', label: 'Maintenance' },
-                  { value: 'complaint', label: 'Complaint' },
+                  { value: 'maintenance', label: t('mw.maintenance.maintenance') },
+                  { value: 'complaint', label: t('mw.maintenance.complaint') },
                 ]}
               />
               <SelectField
-                label="Default priority"
+                label={t('mw.maintenance.defaultPriority')}
                 value={catPriority}
                 onChange={setCatPriority}
                 options={[
-                  { value: 'low', label: 'Low' },
-                  { value: 'normal', label: 'Normal' },
-                  { value: 'high', label: 'High' },
-                  { value: 'urgent', label: 'Urgent' },
+                  { value: 'low', label: t('mw.maintenance.low') },
+                  { value: 'normal', label: t('mw.maintenance.normal') },
+                  { value: 'high', label: t('mw.maintenance.high') },
+                  { value: 'urgent', label: t('mw.maintenance.urgent') },
                 ]}
               />
             </div>

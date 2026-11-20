@@ -105,7 +105,7 @@ export function FacilitiesScreen() {
 
   const addBlackout = useMutation({
     mutationFn: () => {
-      if (!blackoutTarget) throw new Error('No facility selected');
+      if (!blackoutTarget) throw new Error(t('mw.facilities.errNoFacilitySelected'));
       return unwrap(
         api.POST('/v1/estates/{estateId}/facilities/{id}/blackouts', {
           params: { path: { estateId, id: blackoutTarget.id } },
@@ -168,17 +168,17 @@ export function FacilitiesScreen() {
   });
 
   const facCols: Column<Facility>[] = [
-    { key: 'name', header: 'Facility', render: (r) => r.name },
-    { key: 'type', header: 'Type', render: (r) => r.type.replace(/_/g, ' ') },
+    { key: 'name', header: t('mw.facilities.facility'), render: (r) => r.name },
+    { key: 'type', header: t('mw.facilities.type'), render: (r) => r.type.replace(/_/g, ' ') },
     {
       key: 'cap',
-      header: 'Capacity',
+      header: t('mw.facilities.capacity'),
       align: 'right',
       render: (r) => (r.capacity ? <span className="sz-num">{r.capacity}</span> : '-'),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.facilities.status'),
       render: (r) => (
         <StatusPill tone={r.status === 'active' ? 'success' : 'neutral'} label={r.status} />
       ),
@@ -207,20 +207,20 @@ export function FacilitiesScreen() {
   ];
 
   const bookCols: Column<Booking>[] = [
-    { key: 'fac', header: 'Facility', render: (r) => r.facilityName },
+    { key: 'fac', header: t('mw.facilities.facility'), render: (r) => r.facilityName },
     {
       key: 'when',
-      header: 'Window',
+      header: t('mw.facilities.window'),
       render: (r) => (
         <span className="sz-num">
           {formatDateTime(r.startsAt)} - {formatDateTime(r.endsAt)}
         </span>
       ),
     },
-    { key: 'purpose', header: 'Purpose', render: (r) => r.purpose ?? '-' },
+    { key: 'purpose', header: t('mw.facilities.purpose'), render: (r) => r.purpose ?? '-' },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.facilities.status'),
       render: (r) => (
         <StatusPill
           tone={BOOKING_TONE[r.status] ?? 'neutral'}
@@ -243,7 +243,7 @@ export function FacilitiesScreen() {
                       busy={bookingAction.isPending}
                       onClick={() => bookingAction.mutate({ id: r.id, action: 'approve' })}
                     >
-                      Approve
+                      {t('mw.facilities.approve')}
                     </ActionButton>
                     <ActionButton
                       variant="danger"
@@ -253,7 +253,7 @@ export function FacilitiesScreen() {
                         setRejecting(r);
                       }}
                     >
-                      Reject
+                      {t('mw.facilities.reject')}
                     </ActionButton>
                   </>
                 ) : null}
@@ -265,7 +265,7 @@ export function FacilitiesScreen() {
                       busy={bookingAction.isPending}
                       onClick={() => bookingAction.mutate({ id: r.id, action: 'check-in' })}
                     >
-                      Check in
+                      {t('mw.facilities.checkIn')}
                     </ActionButton>
                     <ActionButton
                       variant="outline"
@@ -273,7 +273,7 @@ export function FacilitiesScreen() {
                       busy={bookingAction.isPending}
                       onClick={() => bookingAction.mutate({ id: r.id, action: 'no-show' })}
                     >
-                      No-show
+                      {t('mw.facilities.noShow')}
                     </ActionButton>
                   </>
                 ) : null}
@@ -368,31 +368,36 @@ export function FacilitiesScreen() {
         >
           <FormError message={createFacility.isError ? errorText(createFacility.error) : null} />
           <div className="sz-form">
-            <InputField label="Name" required value={facName} onChange={setFacName} />
+            <InputField
+              label={t('mw.facilities.name')}
+              required
+              value={facName}
+              onChange={setFacName}
+            />
             <div className="sz-form-2">
               <SelectField
-                label="Type"
+                label={t('mw.facilities.type')}
                 value={facType}
                 onChange={setFacType}
                 options={[
-                  { value: 'event_hall', label: 'Event hall' },
-                  { value: 'pool', label: 'Swimming pool' },
-                  { value: 'gym', label: 'Gym' },
-                  { value: 'court', label: 'Sports court' },
-                  { value: 'guest_house', label: 'Guest house' },
-                  { value: 'parking', label: 'Parking' },
-                  { value: 'other', label: 'Other' },
+                  { value: 'event_hall', label: t('mw.facilities.eventHall') },
+                  { value: 'pool', label: t('mw.facilities.swimmingPool') },
+                  { value: 'gym', label: t('mw.facilities.gym') },
+                  { value: 'court', label: t('mw.facilities.sportsCourt') },
+                  { value: 'guest_house', label: t('mw.facilities.guestHouse') },
+                  { value: 'parking', label: t('mw.facilities.parking') },
+                  { value: 'other', label: t('mw.facilities.other') },
                 ]}
               />
               <InputField
-                label="Capacity (optional)"
+                label={t('mw.facilities.capacityOptional')}
                 type="number"
                 value={facCapacity}
                 onChange={setFacCapacity}
               />
             </div>
             <TextAreaField
-              label="Rules (optional)"
+              label={t('mw.facilities.rulesOptional')}
               rows={3}
               value={facRules}
               onChange={setFacRules}
@@ -425,14 +430,14 @@ export function FacilitiesScreen() {
           <div className="sz-form">
             <div className="sz-form-2">
               <InputField
-                label="Start date"
+                label={t('mw.facilities.startDate')}
                 type="date"
                 required
                 value={blackoutStart}
                 onChange={setBlackoutStart}
               />
               <InputField
-                label="End date"
+                label={t('mw.facilities.endDate')}
                 type="date"
                 required
                 value={blackoutEnd}
@@ -440,7 +445,7 @@ export function FacilitiesScreen() {
               />
             </div>
             <InputField
-              label="Reason"
+              label={t('mw.facilities.reason')}
               required
               value={blackoutReason}
               onChange={setBlackoutReason}
@@ -451,11 +456,11 @@ export function FacilitiesScreen() {
 
       {rejecting ? (
         <ConfirmDialog
-          title="Reject booking"
-          body="Reject this facility booking request?"
-          confirmLabel="Reject"
+          title={t('mw.facilities.rejectBooking')}
+          body={t('mw.facilities.rejectThisFacilityBookingRequest')}
+          confirmLabel={t('mw.facilities.reject')}
           destructive
-          reason={{ label: 'Reason', required: true }}
+          reason={{ label: t('mw.facilities.reason'), required: true }}
           busy={bookingAction.isPending}
           error={bookingAction.isError ? errorText(bookingAction.error) : null}
           onClose={() => setRejecting(null)}

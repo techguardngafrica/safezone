@@ -53,7 +53,7 @@ export function UtilitiesScreen() {
 
   const recordReading = useMutation({
     mutationFn: () => {
-      if (!readingMeter) throw new Error('No meter selected');
+      if (!readingMeter) throw new Error(t('mw.utilities.errNoMeterSelected'));
       return unwrap(
         api.POST('/v1/estates/{estateId}/meter-readings', {
           params: { path: { estateId } },
@@ -114,14 +114,14 @@ export function UtilitiesScreen() {
   const meterCols: Column<Meter>[] = [
     {
       key: 'number',
-      header: 'Meter number',
+      header: t('mw.utilities.meterNumber'),
       render: (r) => <span className="sz-num">{r.meterNumber}</span>,
     },
-    { key: 'type', header: 'Type', render: (r) => r.type },
-    { key: 'provider', header: 'Provider', render: (r) => r.providerCode },
+    { key: 'type', header: t('mw.utilities.type'), render: (r) => r.type },
+    { key: 'provider', header: t('mw.utilities.provider'), render: (r) => r.providerCode },
     {
       key: 'last',
-      header: 'Last reading',
+      header: t('mw.utilities.lastReading'),
       render: (r) =>
         r.lastReading !== null ? (
           <span className="sz-num">
@@ -152,16 +152,16 @@ export function UtilitiesScreen() {
   ];
 
   const outageCols: Column<Outage>[] = [
-    { key: 'title', header: 'Outage', render: (r) => r.title },
-    { key: 'type', header: 'Utility', render: (r) => r.type },
+    { key: 'title', header: t('mw.utilities.outage'), render: (r) => r.title },
+    { key: 'type', header: t('mw.utilities.utility'), render: (r) => r.type },
     {
       key: 'starts',
-      header: 'Started',
+      header: t('mw.utilities.started'),
       render: (r) => <span className="sz-num">{formatDateTime(r.startsAt)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.utilities.status'),
       render: (r) => (
         <StatusPill tone={r.status === 'resolved' ? 'success' : 'warning'} label={r.status} />
       ),
@@ -269,7 +269,7 @@ export function UtilitiesScreen() {
           <FormError message={recordReading.isError ? errorText(recordReading.error) : null} />
           <div className="sz-form">
             <InputField
-              label="Current meter reading"
+              label={t('mw.utilities.currentMeterReading')}
               type="number"
               required
               value={readingValue}
@@ -302,20 +302,25 @@ export function UtilitiesScreen() {
           <FormError message={createOutage.isError ? errorText(createOutage.error) : null} />
           <div className="sz-form">
             <SelectField
-              label="Utility"
+              label={t('mw.utilities.utility')}
               value={outageType}
               onChange={setOutageType}
               options={[
-                { value: 'electricity', label: 'Electricity' },
-                { value: 'water', label: 'Water' },
-                { value: 'gas', label: 'Gas' },
-                { value: 'internet', label: 'Internet' },
-                { value: 'waste', label: 'Waste' },
+                { value: 'electricity', label: t('mw.utilities.electricity') },
+                { value: 'water', label: t('mw.utilities.water') },
+                { value: 'gas', label: t('mw.utilities.gas') },
+                { value: 'internet', label: t('mw.utilities.internet') },
+                { value: 'waste', label: t('mw.utilities.waste') },
               ]}
             />
-            <InputField label="Title" required value={outageTitle} onChange={setOutageTitle} />
+            <InputField
+              label={t('mw.utilities.title')}
+              required
+              value={outageTitle}
+              onChange={setOutageTitle}
+            />
             <TextAreaField
-              label="Details"
+              label={t('mw.utilities.details')}
               rows={3}
               value={outageDetails}
               onChange={setOutageDetails}

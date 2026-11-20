@@ -89,7 +89,7 @@ export function MovesScreen() {
   const columns: Column<Move>[] = [
     {
       key: 'unit',
-      header: 'Unit',
+      header: t('mw.moves.unit'),
       render: (r) => (
         <button
           type="button"
@@ -103,28 +103,28 @@ export function MovesScreen() {
     },
     {
       key: 'type',
-      header: 'Type',
+      header: t('mw.moves.type'),
       render: (r) => (
         <StatusPill
           tone={r.type === 'move_in' ? 'info' : 'warning'}
-          label={r.type === 'move_in' ? 'Move-in' : 'Move-out'}
+          label={r.type === 'move_in' ? 'Move-in' : t('mw.moves.moveOut')}
         />
       ),
     },
     {
       key: 'date',
-      header: 'Scheduled date',
+      header: t('mw.moves.scheduledDate'),
       render: (r) => <span className="sz-num">{r.scheduledOn}</span>,
     },
     {
       key: 'balance',
-      header: 'Balance at scheduling',
+      header: t('mw.moves.balanceAtScheduling'),
       align: 'right',
       render: (r) => <span className="sz-num">{formatKobo(r.outstandingBalance)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('mw.moves.status'),
       render: (r) => (
         <StatusPill
           tone={
@@ -142,14 +142,14 @@ export function MovesScreen() {
 
       <Toolbar>
         <SelectField
-          label="Status"
+          label={t('mw.moves.status')}
           value={status}
           onChange={setStatus}
           options={[
-            { value: '', label: 'All statuses' },
-            { value: 'scheduled', label: 'Scheduled' },
-            { value: 'completed', label: 'Completed' },
-            { value: 'cancelled', label: 'Cancelled' },
+            { value: '', label: t('mw.moves.allStatuses') },
+            { value: 'scheduled', label: t('mw.moves.scheduled') },
+            { value: 'completed', label: t('mw.moves.completed') },
+            { value: 'cancelled', label: t('mw.moves.cancelled') },
           ]}
         />
       </Toolbar>
@@ -167,7 +167,7 @@ export function MovesScreen() {
 
       {selected ? (
         <Drawer
-          title={`${selected.unitCode} (${selected.type === 'move_in' ? 'Move-in' : 'Move-out'})`}
+          title={`${selected.unitCode} (${selected.type === 'move_in' ? 'Move-in' : t('mw.moves.moveOut')})`}
           onClose={() => setSelected(null)}
         >
           <div style={{ display: 'grid', gap: 16 }}>
@@ -181,10 +181,10 @@ export function MovesScreen() {
             ) : null}
 
             <div>
-              <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>Checklist</h3>
+              <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>{t('mw.moves.checklist')}</h3>
               {selected.checklist.length === 0 ? (
                 <p className="sz-muted" style={{ margin: 0, fontSize: 14 }}>
-                  No checklist items.
+                  {t('mw.moves.noChecklistItems')}
                 </p>
               ) : (
                 <div style={{ display: 'grid', gap: 8 }}>
@@ -236,8 +236,8 @@ export function MovesScreen() {
           title={t('moves.complete')}
           body={
             completing.type === 'move_out'
-              ? 'Completing this move-out will end the occupancy and revoke household access.'
-              : 'Mark this move-in as completed?'
+              ? t('mw.moves.completingThisMoveOutWill')
+              : t('mw.moves.markThisMoveInAs')
           }
           confirmLabel={t('moves.complete')}
           destructive={completing.type === 'move_out'}
@@ -251,10 +251,10 @@ export function MovesScreen() {
       {cancelling ? (
         <ConfirmDialog
           title={t('moves.cancel')}
-          body="Cancel this scheduled move?"
+          body={t('mw.moves.cancelThisScheduledMove')}
           confirmLabel={t('moves.cancel')}
           destructive
-          reason={{ label: 'Reason', required: true }}
+          reason={{ label: t('mw.moves.reason'), required: true }}
           busy={cancel.isPending}
           error={cancel.isError ? errorText(cancel.error) : null}
           onClose={() => setCancelling(null)}

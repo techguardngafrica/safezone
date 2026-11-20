@@ -134,7 +134,7 @@ export function SetupWizardScreen() {
                       {t(`wizard.step.${step.step}` as MessageKey)}
                     </div>
                     <div className="sz-muted" style={{ fontSize: 13 }}>
-                      {step.required ? 'Required to go live' : 'Optional'}
+                      {step.required ? 'Required to go live' : t('mw.setup_wizard.optional')}
                     </div>
                   </div>
                 </div>

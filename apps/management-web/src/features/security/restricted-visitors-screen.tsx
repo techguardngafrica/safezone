@@ -84,7 +84,7 @@ export function RestrictedVisitorsScreen() {
 
   const update = useMutation({
     mutationFn: () => {
-      if (!editing) throw new Error('No entry selected');
+      if (!editing) throw new Error(t('mw.restricted_visitors.errNoEntrySelected'));
       return unwrap(
         api.PATCH('/v1/estates/{estateId}/restricted-visitors/{id}', {
           params: { path: { estateId, id: editing.id } },
@@ -303,7 +303,7 @@ export function RestrictedVisitorsScreen() {
               />
               <InputField
                 label={t('restricted.field.plate')}
-                placeholder="ABC-123-DE"
+                placeholder={t('mw.restricted_visitors.abc123De')}
                 value={plate}
                 onChange={setPlate}
                 error={addErr?.fields.plate}

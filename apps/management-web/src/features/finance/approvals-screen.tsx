@@ -142,10 +142,10 @@ export function FinancialApprovalsScreen() {
   });
 
   const runCols: Column<BillingRun>[] = [
-    { key: 'name', header: 'Run', render: (r) => r.label },
+    { key: 'name', header: t('mw.approvals.run'), render: (r) => r.label },
     {
       key: 'period',
-      header: 'Period',
+      header: t('mw.approvals.period'),
       render: (r) => (
         <span className="sz-num">
           {r.periodStart} to {r.periodEnd}
@@ -154,7 +154,7 @@ export function FinancialApprovalsScreen() {
     },
     {
       key: 'due',
-      header: 'Due date',
+      header: t('mw.approvals.dueDate'),
       render: (r) => <span className="sz-num">{r.dueDate}</span>,
     },
     {
@@ -178,13 +178,13 @@ export function FinancialApprovalsScreen() {
   const waiverCols: Column<Waiver>[] = [
     {
       key: 'amount',
-      header: 'Amount',
+      header: t('mw.approvals.amount'),
       render: (r) => <span className="sz-num">{formatKobo(r.amount)}</span>,
     },
     { key: 'reason', header: t('approvals.reason'), render: (r) => r.reason },
     {
       key: 'createdAt',
-      header: 'Requested',
+      header: t('mw.approvals.requested'),
       render: (r) => <span className="sz-num">{formatDateTime(r.createdAt)}</span>,
     },
     {
@@ -220,18 +220,18 @@ export function FinancialApprovalsScreen() {
   const manualCols: Column<ManualPayment>[] = [
     {
       key: 'amount',
-      header: 'Amount',
+      header: t('mw.approvals.amount'),
       render: (r) => <span className="sz-num">{formatKobo(r.amount)}</span>,
     },
     {
       key: 'method',
-      header: 'Method',
+      header: t('mw.approvals.method'),
       render: (r) => <StatusPill tone="neutral" label={r.method} />,
     },
-    { key: 'ref', header: 'Reference', render: (r) => r.reference ?? '-' },
+    { key: 'ref', header: t('mw.approvals.reference'), render: (r) => r.reference ?? '-' },
     {
       key: 'receivedOn',
-      header: 'Received',
+      header: t('mw.approvals.received'),
       render: (r) => <span className="sz-num">{r.receivedOn}</span>,
     },
     {
@@ -267,13 +267,13 @@ export function FinancialApprovalsScreen() {
   const refundCols: Column<Refund>[] = [
     {
       key: 'amount',
-      header: 'Amount',
+      header: t('mw.approvals.amount'),
       render: (r) => <span className="sz-num">{formatKobo(r.amount)}</span>,
     },
     { key: 'reason', header: t('approvals.reason'), render: (r) => r.reason },
     {
       key: 'createdAt',
-      header: 'Requested',
+      header: t('mw.approvals.requested'),
       render: (r) => <span className="sz-num">{formatDateTime(r.createdAt)}</span>,
     },
     {
@@ -388,8 +388,8 @@ export function FinancialApprovalsScreen() {
           title={decision.action === 'approve' ? t('approvals.approve') : t('approvals.reject')}
           body={
             decision.action === 'approve'
-              ? 'Confirm approval? Financial approvals are recorded in the immutable audit log.'
-              : 'Reject this financial request?'
+              ? t('mw.approvals.confirmApprovalFinancialApprovalsAre')
+              : t('mw.approvals.rejectThisFinancialRequest')
           }
           confirmLabel={
             decision.action === 'approve' ? t('approvals.approve') : t('approvals.reject')
