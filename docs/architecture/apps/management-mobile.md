@@ -153,3 +153,23 @@ Maestro flows: MFA sign-in, approve join request, acknowledge and resolve SOS, r
 - A manager can acknowledge an SOS from a locked phone in under 10 seconds of receiving the alert.
 - The approvals inbox shows every pending item the user can act on, and nothing they cannot.
 - Every action is reflected on the web app within 2 seconds.
+
+## 14. Implementation status (21 Nov 2026)
+
+Built:
+
+- **Sign-in and estate**: phone + OTP, then authenticator MFA (shared `SignInFlow`). The app opens only estates the user can manage, the same rule as management-web. The estate switcher lists the last-used estate first, and permissions and features are loaded per estate (`src/lib/manager.tsx`).
+- **Home**: active SOS cards, plus tiles for active SOS, waiting approvals, entries today and open incidents. "This month so far" (occupancy, collected against billed, outstanding) needs `report.read`. Also the latest announcements and a notification bell.
+- **Approvals**: one inbox for join requests, billing runs awaiting approval, pending waivers and facility bookings awaiting approval. Each source is fetched only with its permission and feature. Approve and reject use in-app confirms, and rejecting needs a reason. These use buttons, not swipes.
+- **Security**: live gate feed, expected visitors per gate (with pass revoke and a reason), pending walk-ins, and SOS (active and history). Name, plate or unit search on the gate lists. Incidents list and detail, with notes and review, resolve, reopen and close.
+- **SOS response** (§7.1): full-screen red alarm opened by a watcher that polls every 4 s while the app is open, plus Expo push (SOS Android channel at max importance) when an EAS project id is set. Vibration repeats until the alert is acknowledged. The screen offers acknowledge, responding, assign (guard list needs `security.staff.manage`), map, emergency contact calls, notes, resolve, false alarm and close.
+- **Estate**: resident lookup. Phone numbers are masked unless the role has `pii.view`, and only then can the resident be called.
+- **More**: announcements (list; compose to the whole estate; emergency broadcast with `broadcast.emergency` after a confirmation), notifications centre, estate, account and sign-out.
+
+Differences from this spec, until they are built:
+
+- No **Escalate** or **Call resident** on the SOS screen. Escalation runs on the server's timers, and the alert does not carry the resident's phone number.
+- No biometric or device-PIN unlock and no 5-minute background auto-lock (§10). These need `expo-local-authentication`, which is not in the stack yet.
+- No offline cache for the dashboard or last-viewed lists (§9). Lists show an offline banner. Approvals and SOS actions need a connection.
+- Not on mobile yet: the finance overview, maintenance queue, move approvals, moderation queue, overstaying-visitor flag and flag-visitor action, incident assignment, and announcement targeting by building or unit.
+- No Maestro flows yet (§12).

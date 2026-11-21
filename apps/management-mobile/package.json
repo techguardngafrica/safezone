@@ -31,6 +31,7 @@
     "clean": "rm -rf .expo .turbo"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
     "@safezone/api-client": "workspace:*",
     "@safezone/auth": "workspace:*",
     "@safezone/contracts": "workspace:*",
