@@ -2,6 +2,7 @@ import { colors } from '@safezone/design-tokens';
 import { t } from '@safezone/i18n';
 import {
   ActionButton,
+  Banner,
   ConfirmModal,
   ListRow,
   ScreenHeader,
@@ -13,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { EstateSwitcherModal } from '../../src/components/estate-switcher';
 import { Icon, type IconName } from '../../src/components/icon';
+import { useDeviceLockMissing } from '../../src/features/app-lock';
 import { config } from '../../src/lib/config';
 import { useManager } from '../../src/lib/manager';
 import { session } from '../../src/lib/session';
@@ -32,6 +34,7 @@ export default function MoreScreen() {
   const { estateName, memberships, roles, hasFeature } = useManager();
   const [switching, setSwitching] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const lockMissing = useDeviceLockMissing();
 
   return (
     <ScrollScreen>
@@ -62,6 +65,7 @@ export default function MoreScreen() {
       />
 
       <SectionHeader title={t('mm.more.account')} />
+      {lockMissing ? <Banner tone="warning">{t('mm.lock.noDeviceLock')}</Banner> : null}
       <ListRow
         title={state.user?.fullName ?? t('mm.approvals.unknownName')}
         subtitle={state.user?.phone}

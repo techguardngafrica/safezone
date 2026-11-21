@@ -16,7 +16,17 @@
       "package": "ng.gsssecurity.safezone.management",
       "permissions": ["POST_NOTIFICATIONS"]
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-notifications"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Safezone Management uses Face ID to unlock the app."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },

@@ -164,12 +164,12 @@ Built:
 - **Security**: live gate feed, expected visitors per gate (with pass revoke and a reason), pending walk-ins, and SOS (active and history). Name, plate or unit search on the gate lists. Incidents list and detail, with notes and review, resolve, reopen and close.
 - **SOS response** (§7.1): full-screen red alarm opened by a watcher that polls every 4 s while the app is open, plus Expo push (SOS Android channel at max importance) when an EAS project id is set. Vibration repeats until the alert is acknowledged. The screen offers acknowledge, responding, assign (guard list needs `security.staff.manage`), map, emergency contact calls, notes, resolve, false alarm and close.
 - **Estate**: resident lookup. Phone numbers are masked unless the role has `pii.view`, and only then can the resident be called.
+- **App lock** (§10, `src/features/app-lock.tsx`, `expo-local-authentication`): asks for biometrics or the phone PIN when a saved session reopens the app, and after 5 minutes in the background. A fresh sign-in does not ask again. The SOS screen is never covered, so an alert can be acknowledged from a locked app. A phone with no screen lock cannot be locked; More shows a notice asking the user to set one. Adding this native module needs a new development build.
 - **More**: announcements (list; compose to the whole estate; emergency broadcast with `broadcast.emergency` after a confirmation), notifications centre, estate, account and sign-out.
 
 Differences from this spec, until they are built:
 
 - No **Escalate** or **Call resident** on the SOS screen. Escalation runs on the server's timers, and the alert does not carry the resident's phone number.
-- No biometric or device-PIN unlock and no 5-minute background auto-lock (§10). These need `expo-local-authentication`, which is not in the stack yet.
 - No offline cache for the dashboard or last-viewed lists (§9). Lists show an offline banner. Approvals and SOS actions need a connection.
 - Not on mobile yet: the finance overview, maintenance queue, move approvals, moderation queue, overstaying-visitor flag and flag-visitor action, incident assignment, and announcement targeting by building or unit.
 - No Maestro flows yet (§12).

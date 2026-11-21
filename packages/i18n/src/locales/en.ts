@@ -3220,6 +3220,14 @@ export const en = {
   'mm.more.account': 'Account',
   'mm.more.version': 'Version {version}',
   'mm.more.signOutTitle': 'Sign out?',
+  'mm.lock.title': 'Safezone Management is locked',
+  'mm.lock.body':
+    'Use your fingerprint, face or phone PIN to continue. SOS alerts still open while the app is locked.',
+  'mm.lock.prompt': 'Unlock Safezone Management',
+  'mm.lock.unlock': 'Unlock',
+  'mm.lock.failed': 'That did not work. Try again, or use your phone PIN.',
+  'mm.lock.noDeviceLock':
+    'This phone has no screen lock, so the app cannot lock itself. Set a PIN, pattern or fingerprint in your phone settings.',
   'mm.more.signOutBody': 'You will stop getting SOS alerts on this phone until you sign in again.',
 } as const;
 

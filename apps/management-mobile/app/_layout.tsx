@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Icon } from '../src/components/icon';
+import { AppLock } from '../src/features/app-lock';
 import { SosWatcher } from '../src/features/sos-watcher';
 import { errorText } from '../src/lib/errors';
 import { ManagerProvider, manageableMemberships, useMemberships } from '../src/lib/manager';
@@ -82,9 +83,15 @@ function SignedInApp() {
 /** Restores the session on start; phone + OTP, then authenticator MFA for staff, until signed in. */
 function AuthGate() {
   const state = useSession(session);
+  // Only a session restored from the phone opens locked; a fresh sign-in has just proved who this is.
+  const [restored, setRestored] = useState(false);
   useEffect(() => {
-    if (session.getState().status === 'restoring') void session.restore();
+    if (session.getState().status !== 'restoring') return;
+    void session.restore().then(() => setRestored(session.getState().status === 'signed_in'));
   }, []);
+  useEffect(() => {
+    if (state.status !== 'signed_in' && state.status !== 'restoring') setRestored(false);
+  }, [state.status]);
   if (state.status === 'restoring') return <Splash />;
   if (state.status !== 'signed_in')
     return (
@@ -94,7 +101,12 @@ function AuthGate() {
         </View>
       </SafeAreaView>
     );
-  return <SignedInApp />;
+  return (
+    <View style={{ flex: 1 }}>
+      <SignedInApp />
+      <AppLock startLocked={restored} />
+    </View>
+  );
 }
 
 export default function RootLayout() {
