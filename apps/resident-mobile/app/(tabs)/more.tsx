@@ -202,6 +202,16 @@ export default function MoreScreen() {
           </Card>
         </>
       ) : null}
+      {can('payment.make') ? (
+        <Card>
+          <Row
+            title={t('res.more.wallet')}
+            subtitle={t('res.more.walletHint')}
+            icon="wallet-outline"
+            onPress={() => router.push('/wallet')}
+          />
+        </Card>
+      ) : null}
       <SectionHeader title={t('res.more.advertise')} />
       <Card>
         {(myAdvertisers.data?.length ?? 0) > 0 ? (

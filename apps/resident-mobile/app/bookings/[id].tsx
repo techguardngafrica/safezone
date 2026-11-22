@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { Icon } from '../../src/components/icon';
 import { BOOKING_TONE, bookingStatusLabel } from '../../src/features/facilities';
+import { usePayChoice } from '../../src/features/pay-choice';
 import { useStartPayment } from '../../src/features/use-start-payment';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
@@ -31,6 +32,7 @@ export default function BookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { estateId } = useResident();
   const start = useStartPayment();
+  const payChoice = usePayChoice();
   const [cancelling, setCancelling] = useState(false);
   const [reason, setReason] = useState('');
   const [now, setNow] = useState(() => Date.now());
@@ -129,11 +131,14 @@ export default function BookingScreen() {
               <Text style={{ color: colors.semantic.textMuted, fontSize: typography.size.sm }}>
                 {t('res.booking.payToConfirm')}
               </Text>
+              {payChoice.element}
               <ActionButton
                 label={t('res.bills.payThis', { amount: formatKobo(data.price) })}
                 busy={start.isPending}
                 disabled={secondsLeft === 0}
-                onPress={() => start.mutate([data.invoiceId ?? ''])}
+                onPress={() =>
+                  start.mutate({ invoiceIds: [data.invoiceId ?? ''], choice: payChoice.choice })
+                }
               />
               {start.isError ? (
                 <Text style={{ color: colors.status.danger }}>{errorText(start.error)}</Text>

@@ -7,6 +7,7 @@ import { Linking } from 'react-native';
 import { useResident } from '../lib/resident';
 import { api } from '../lib/session';
 import { rememberIntent } from './bills';
+import { type PayChoice, payFields } from './pay-choice';
 
 /** Expo Go cannot receive safezone:// links; installed builds return to the app after checkout. */
 const inExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
@@ -20,13 +21,14 @@ export function useStartPayment() {
   const { estateId } = useResident();
   const key = useRef(newIdempotencyKey());
   return useMutation({
-    mutationFn: (invoiceIds?: string[]) =>
+    mutationFn: ({ invoiceIds, choice }: { invoiceIds?: string[]; choice?: PayChoice }) =>
       unwrap(
         api.POST('/v1/estates/{estateId}/payment-intents', {
           params: { path: { estateId } },
           headers: { 'Idempotency-Key': key.current },
           body: {
             ...(invoiceIds ? { invoiceIds } : {}),
+            ...(choice ? payFields(choice) : {}),
             ...(inExpoGo ? {} : { callbackUrl: 'safezone://pay/return' }),
           },
         }),

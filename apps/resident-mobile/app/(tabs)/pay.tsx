@@ -21,6 +21,7 @@ import { SOS_CLEARANCE } from '../../src/components/sos-button';
 import { BankTransferCard } from '../../src/features/bank-transfer';
 import { type Invoice, isOpenInvoice } from '../../src/features/bills';
 import { InvoiceCard } from '../../src/features/invoice-card';
+import { usePayChoice } from '../../src/features/pay-choice';
 import { useStartPayment } from '../../src/features/use-start-payment';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
@@ -33,6 +34,7 @@ export default function PayScreen() {
   const { estateId, can, hasFeature } = useResident();
   const [view, setView] = useState<'open' | 'paid'>('open');
   const start = useStartPayment();
+  const payChoice = usePayChoice();
   const invoices = useInfiniteQuery({
     queryKey: ['estate', estateId, 'invoices', 'mine'],
     queryFn: ({ pageParam }) =>
@@ -74,11 +76,14 @@ export default function PayScreen() {
           </Text>
         )}
         {canPay && outstanding > 0 ? (
-          <ActionButton
-            label={t('res.bills.payAll', { amount: formatKobo(outstanding) })}
-            busy={start.isPending}
-            onPress={() => start.mutate(undefined)}
-          />
+          <>
+            {payChoice.element}
+            <ActionButton
+              label={t('res.bills.payAll', { amount: formatKobo(outstanding) })}
+              busy={start.isPending}
+              onPress={() => start.mutate({ choice: payChoice.choice })}
+            />
+          </>
         ) : null}
         {invoices.data && outstanding === 0 ? (
           <Text style={{ color: colors.status.success }}>{t('res.bills.allPaid')}</Text>

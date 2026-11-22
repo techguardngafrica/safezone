@@ -28,6 +28,7 @@ import {
   residentActions,
 } from '../../../src/features/marketplace';
 import { Body, marketStyles, MessageLine, Muted, Row } from '../../../src/features/market-text';
+import { payFields, usePayChoice } from '../../../src/features/pay-choice';
 import { errorText } from '../../../src/lib/errors';
 import { useResident } from '../../../src/lib/resident';
 import { api } from '../../../src/lib/session';
@@ -110,6 +111,7 @@ export default function OrderScreen() {
   const key = ['estate', estateId, 'marketplace', 'orders', id];
   const path = { estateId, id };
   const [modal, setModal] = useState<'cancel' | 'dispute' | null>(null);
+  const payChoice = usePayChoice();
   const [reason, setReason] = useState('');
   const [rating, setRating] = useState<'1' | '2' | '3' | '4' | '5' | null>(null);
   const [comment, setComment] = useState('');
@@ -148,12 +150,17 @@ export default function OrderScreen() {
       unwrap(
         api.POST('/v1/estates/{estateId}/marketplace/orders/{id}/pay', {
           params: { path },
-          body: inExpoGo ? {} : { callbackUrl: 'safezone://marketplace/return' },
+          body: {
+            ...(inExpoGo ? {} : { callbackUrl: 'safezone://marketplace/return' }),
+            ...payFields(payChoice.choice),
+          },
         }),
       ),
     onSuccess: (checkout) => {
       rememberOrder(id);
-      void Linking.openURL(checkout.authorizationUrl);
+      // A saved card is charged and verified by the API at once; checkout opens the provider's page.
+      if (checkout.authorizationUrl) void Linking.openURL(checkout.authorizationUrl);
+      else void order.refetch();
     },
   });
   const acceptQuote = useMutation({
@@ -258,12 +265,15 @@ export default function OrderScreen() {
             />
           ) : null}
           {actions.pay && data.amountKobo !== null ? (
-            <ActionButton
-              label={t('res.market.orders.payNow', { amount: nairaText(data.amountKobo) })}
-              icon={<Icon name="card-outline" color="#FFFFFF" size={20} />}
-              busy={pay.isPending}
-              onPress={() => pay.mutate()}
-            />
+            <>
+              {payChoice.element}
+              <ActionButton
+                label={t('res.market.orders.payNow', { amount: nairaText(data.amountKobo) })}
+                icon={<Icon name="card-outline" color="#FFFFFF" size={20} />}
+                busy={pay.isPending}
+                onPress={() => pay.mutate()}
+              />
+            </>
           ) : null}
           {actionError ? <Banner tone="danger">{errorText(actionError)}</Banner> : null}
 

@@ -17,6 +17,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 import { Icon } from '../../src/components/icon';
 import { invoiceState, isOpenInvoice } from '../../src/features/bills';
+import { usePayChoice } from '../../src/features/pay-choice';
 import { useStartPayment } from '../../src/features/use-start-payment';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
@@ -28,6 +29,7 @@ export default function BillScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { estateId, can, hasFeature } = useResident();
   const start = useStartPayment();
+  const payChoice = usePayChoice();
   const invoice = useQuery({
     queryKey: ['estate', estateId, 'invoice', id],
     queryFn: () =>
@@ -93,11 +95,14 @@ export default function BillScreen() {
           data.balance > 0 &&
           can('payment.make') &&
           hasFeature('payments') ? (
-            <ActionButton
-              label={t('res.bills.payThis', { amount: formatKobo(data.balance) })}
-              busy={start.isPending}
-              onPress={() => start.mutate([data.id])}
-            />
+            <>
+              {payChoice.element}
+              <ActionButton
+                label={t('res.bills.payThis', { amount: formatKobo(data.balance) })}
+                busy={start.isPending}
+                onPress={() => start.mutate({ invoiceIds: [data.id], choice: payChoice.choice })}
+              />
+            </>
           ) : null}
           {start.isError ? <Banner tone="danger">{errorText(start.error)}</Banner> : null}
           {data.allocations.length > 0 ? (
