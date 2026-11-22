@@ -82,9 +82,10 @@ export class ComplianceService {
     );
     const hasMore = rows.length > query.limit;
     const page = hasMore ? rows.slice(0, query.limit) : rows;
+    const last = page.at(-1);
     return {
       items: page.map(toDsrView),
-      nextCursor: hasMore ? encodeCursor({ id: page[page.length - 1]!.id }) : null,
+      nextCursor: hasMore && last ? encodeCursor({ id: last.id }) : null,
     };
   }
 
@@ -131,24 +132,28 @@ export class ComplianceService {
       const existing = await tx.dataSubjectRequest.findUnique({ where: { id } });
       if (!existing) throw new NotFoundError('Data subject request not found');
       const now = new Date();
+      // One place decides the next status, so an identity check never overrides an explicit status.
+      const nextStatus =
+        input.status ??
+        (input.markIdentityChecked && existing.status === 'received'
+          ? ('identity_verified' as const)
+          : undefined);
       const updated = await tx.dataSubjectRequest.update({
         where: { id },
         data: {
-          ...(input.status !== undefined
+          ...(nextStatus !== undefined
             ? {
-                status: input.status,
+                status: nextStatus,
                 completedAt:
-                  input.status === 'completed' || input.status === 'rejected'
+                  nextStatus === 'completed' || nextStatus === 'rejected'
                     ? (existing.completedAt ?? now)
                     : null,
               }
             : {}),
           ...(input.markIdentityChecked
             ? {
-                identityCheckedBy: actorId,
+                identityCheckedBy: existing.identityCheckedBy ?? actorId,
                 identityCheckedAt: existing.identityCheckedAt ?? now,
-                status:
-                  existing.status === 'received' && !input.status ? 'identity_verified' : undefined,
               }
             : {}),
           ...(input.notes !== undefined ? { notes: input.notes } : {}),

@@ -64,6 +64,8 @@ export const DB_CONTEXTS = [
   'outbox_relay',
   'emergency',
   'payments',
+  /** Read-only cross-estate payment monitoring for Platform Finance Officers (ADR-0022). */
+  'platform_finance',
 ] as const;
 export type DbContext = (typeof DB_CONTEXTS)[number];
 

@@ -2,6 +2,7 @@
 
 import { unwrap } from '@safezone/api-client';
 import { t } from '@safezone/i18n';
+import { type FeatureKey, featureKeySchema } from '@safezone/schemas';
 import {
   ActionButton,
   Banner,
@@ -41,7 +42,7 @@ export function EstateDetailScreen({ estateId }: { estateId: string }) {
     'estate_administrator',
   );
   const [entitlementEdit, setEntitlementEdit] = useState<{
-    module: string;
+    module: FeatureKey;
     enabled: boolean;
   } | null>(null);
   const [entitlementReason, setEntitlementReason] = useState('');
@@ -145,11 +146,11 @@ export function EstateDetailScreen({ estateId }: { estateId: string }) {
   });
 
   const saveEntitlement = useMutation({
-    mutationFn: () =>
+    mutationFn: (edit: { module: FeatureKey; enabled: boolean }) =>
       unwrap(
         api.PUT('/v1/platform/estates/{id}/entitlements/{module}', {
-          params: { path: { id: estateId, module: entitlementEdit!.module } },
-          body: { enabled: entitlementEdit!.enabled, reason: entitlementReason },
+          params: { path: { id: estateId, module: edit.module } },
+          body: { enabled: edit.enabled, reason: entitlementReason },
         }),
       ),
     onSuccess: () => {
@@ -328,20 +329,25 @@ export function EstateDetailScreen({ estateId }: { estateId: string }) {
               {
                 key: 'action',
                 header: '',
-                render: (row) =>
-                  canApprove ? (
+                render: (row) => {
+                  // Only catalogued feature keys can be overridden (the API rejects anything else).
+                  const parsed = featureKeySchema.safeParse(row.module);
+                  if (!canApprove || !parsed.success) return null;
+                  const featureKey = parsed.data;
+                  return (
                     <ActionButton
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setActionError(null);
                         setEntitlementReason('');
-                        setEntitlementEdit({ module: row.module, enabled: !row.enabled });
+                        setEntitlementEdit({ module: featureKey, enabled: !row.enabled });
                       }}
                     >
                       {row.enabled ? 'Disable' : 'Enable'}
                     </ActionButton>
-                  ) : null,
+                  );
+                },
               },
             ]}
           />
@@ -437,7 +443,7 @@ export function EstateDetailScreen({ estateId }: { estateId: string }) {
         <Dialog
           title={`${entitlementEdit.enabled ? 'Enable' : 'Disable'} ${entitlementEdit.module}`}
           onClose={() => setEntitlementEdit(null)}
-          onSubmit={() => saveEntitlement.mutate()}
+          onSubmit={() => saveEntitlement.mutate(entitlementEdit)}
           actions={
             <>
               <ActionButton variant="outline" onClick={() => setEntitlementEdit(null)}>

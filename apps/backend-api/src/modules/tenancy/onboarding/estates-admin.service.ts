@@ -3,6 +3,7 @@ import { maskPhone } from '@safezone/auth';
 import type {
   createEstateSchema,
   createInvitationSchema,
+  FeatureKey,
   leadListQuerySchema,
   OnboardingLead,
   platformEstateListQuerySchema,
@@ -677,7 +678,7 @@ export class EstatesAdminService {
   async upsertEstateEntitlement(
     staffId: string,
     estateId: string,
-    moduleKey: string,
+    moduleKey: FeatureKey,
     input: { enabled: boolean; reason: string },
   ) {
     return this.db.withContext(

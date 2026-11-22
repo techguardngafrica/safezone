@@ -6,6 +6,14 @@ import { DatabaseService } from '../../common/database/database.service';
 import { ConflictError, NotFoundError, ValidationError } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 
+/** Assignment validity window: started and not yet ended. */
+function activeAt(now: Date) {
+  return {
+    validFrom: { lte: now },
+    OR: [{ validTo: null }, { validTo: { gt: now } }],
+  };
+}
+
 /**
  * Platform staff role management (super-admin.md §6.3, ADR-0022).
  * Only grants `level === 'platform'` roles; never allows removing the last active `super_admin`.
@@ -16,13 +24,11 @@ export class PlatformStaffService {
 
   async listAssignments() {
     return this.db.withContext('authz', async (tx) => {
-      const now = new Date();
       return tx.roleAssignment.findMany({
         where: {
           estateId: null,
           revokedAt: null,
-          validFrom: { lte: now },
-          OR: [{ validTo: null }, { validTo: { gt: now } }],
+          ...activeAt(new Date()),
           role: { level: 'platform' },
         },
         include: { role: { select: { key: true, name: true } } },
@@ -44,8 +50,16 @@ export class PlatformStaffService {
       });
       if (!role) throw new NotFoundError('Platform role not found', 'ROLE_NOT_FOUND');
 
+      const now = new Date();
+      // Only a currently valid assignment blocks a new grant; an expired one can be granted again.
       const existing = await tx.roleAssignment.findFirst({
-        where: { userId: input.userId, roleId: role.id, estateId: null, revokedAt: null },
+        where: {
+          userId: input.userId,
+          roleId: role.id,
+          estateId: null,
+          revokedAt: null,
+          ...activeAt(now),
+        },
       });
       if (existing) {
         throw new ConflictError(
@@ -104,12 +118,23 @@ export class PlatformStaffService {
       }
 
       if (assignment.role.key === 'super_admin') {
+        // Serialize Super Admin revocations so two concurrent revokes cannot both see the other
+        // as "remaining" and leave the platform with none. Released at commit/rollback.
+        await tx.$executeRaw`select pg_advisory_xact_lock(hashtext('authz.super_admin.revoke'))`;
+        const stillActive = await tx.roleAssignment.findFirst({
+          where: { id: assignmentId, revokedAt: null },
+          select: { id: true },
+        });
+        if (!stillActive) {
+          throw new NotFoundError('Platform role assignment not found', 'ASSIGNMENT_NOT_FOUND');
+        }
         const remaining = await tx.roleAssignment.count({
           where: {
             roleId: assignment.role.id,
             estateId: null,
             revokedAt: null,
             id: { not: assignmentId },
+            ...activeAt(new Date()),
           },
         });
         if (remaining === 0) {

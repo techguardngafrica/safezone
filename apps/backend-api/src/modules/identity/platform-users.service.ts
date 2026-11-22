@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { platformUserListQuerySchema } from '@safezone/schemas';
 import { z } from 'zod';
 import { DatabaseService } from '../../common/database/database.service';
-import { ConflictError, NotFoundError } from '../../common/errors/domain-error';
+import { ConflictError, ForbiddenError, NotFoundError } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { AuthzService } from '../authz/authz.service';
@@ -50,29 +50,27 @@ export class PlatformUsersService {
     );
     const hasMore = rows.length > query.limit;
     const page = hasMore ? rows.slice(0, query.limit) : rows;
-    const items = await Promise.all(
-      page.map(async (user) => {
-        const [memberships, assignments] = await Promise.all([
-          this.tenancy.membershipsOf(user.id),
-          this.authz.activeAssignments(user.id),
-        ]);
-        const platformRoles = assignments.filter((a) => a.estateId === null).map((a) => a.roleKey);
-        return {
-          id: user.id,
-          fullName: user.fullName,
-          phone: user.phoneE164,
-          email: user.email,
-          status: user.status,
-          mfaEnabled: user.mfaEnabled,
-          estateCount: memberships.length,
-          platformRoles,
-          createdAt: user.createdAt.toISOString(),
-        };
-      }),
-    );
+    const userIds = page.map((user) => user.id);
+    // One batched query each for the whole page, not two per row (keeps the pool free for SOS).
+    const [estateCounts, platformRoles] = await Promise.all([
+      this.tenancy.membershipCountsOf(userIds),
+      this.authz.platformRolesOf(userIds),
+    ]);
+    const items = page.map((user) => ({
+      id: user.id,
+      fullName: user.fullName,
+      phone: user.phoneE164,
+      email: user.email,
+      status: user.status,
+      mfaEnabled: user.mfaEnabled,
+      estateCount: estateCounts.get(user.id) ?? 0,
+      platformRoles: platformRoles.get(user.id) ?? [],
+      createdAt: user.createdAt.toISOString(),
+    }));
+    const last = page.at(-1);
     return {
       items,
-      nextCursor: hasMore ? encodeCursor({ id: page[page.length - 1]!.id }) : null,
+      nextCursor: hasMore && last ? encodeCursor({ id: last.id }) : null,
     };
   }
 
@@ -112,16 +110,38 @@ export class PlatformUsersService {
     };
   }
 
+  /**
+   * Lock moves `active` to `locked`; unlock moves `locked` back to `active`. Any other status
+   * (e.g. `deactivated`) is left alone, so an unlock can never reactivate a closed account.
+   */
   async setLock(actorId: string, userId: string, lock: boolean, reason: string) {
     if (lock && actorId === userId) {
       throw new ConflictError('CANNOT_LOCK_SELF', 'You cannot lock your own account');
     }
+    await this.assertMayActOn(actorId, userId);
     const now = new Date();
     await this.db.withContext('identity', async (tx) => {
       const user = await tx.user.findUnique({ where: { id: userId } });
       if (!user) throw new NotFoundError('User not found', 'USER_NOT_FOUND');
+      const from = lock ? 'active' : 'locked';
       const nextStatus = lock ? 'locked' : 'active';
-      await tx.user.update({ where: { id: userId }, data: { status: nextStatus } });
+      if (user.status !== from) {
+        throw new ConflictError(
+          lock ? 'USER_NOT_ACTIVE' : 'USER_NOT_LOCKED',
+          lock ? 'Only an active account can be locked' : 'Only a locked account can be unlocked',
+        );
+      }
+      // Conditional update: a concurrent status change makes this match nothing instead of overwriting it.
+      const result = await tx.user.updateMany({
+        where: { id: userId, status: from },
+        data: { status: nextStatus },
+      });
+      if (result.count === 0) {
+        throw new ConflictError(
+          'USER_STATUS_CHANGED',
+          'The account status changed; reload and retry',
+        );
+      }
       if (lock) {
         await tx.session.updateMany({
           where: { userId, revokedAt: null },
@@ -152,6 +172,7 @@ export class PlatformUsersService {
   }
 
   async revokeAllSessions(actorId: string, userId: string, reason: string) {
+    await this.assertMayActOn(actorId, userId);
     const now = new Date();
     await this.db.withContext('identity', async (tx) => {
       const user = await tx.user.findUnique({ where: { id: userId }, select: { id: true } });
@@ -183,6 +204,7 @@ export class PlatformUsersService {
   }
 
   async resetMfa(actorId: string, userId: string, reason: string) {
+    await this.assertMayActOn(actorId, userId);
     const now = new Date();
     await this.db.withContext('identity', async (tx) => {
       const user = await tx.user.findUnique({ where: { id: userId }, select: { id: true } });
@@ -216,6 +238,24 @@ export class PlatformUsersService {
     return this.get(userId);
   }
 
+  /**
+   * Platform staff accounts (anyone holding a platform role) can only be locked, signed out or have
+   * MFA reset by someone who manages platform staff. Otherwise a support agent could lock out every
+   * Super Admin with `platform.user.manage` alone.
+   */
+  private async assertMayActOn(actorId: string, targetId: string) {
+    if (actorId === targetId) return;
+    const targetRoles = await this.authz.platformRolesOf([targetId]);
+    if ((targetRoles.get(targetId) ?? []).length === 0) return;
+    const actorGrant = this.authz.grantIn(await this.authz.activeAssignments(actorId), null);
+    if (!actorGrant.permissions.has('platform.staff.manage')) {
+      throw new ForbiddenError(
+        'Only staff managers can act on platform staff accounts',
+        'PLATFORM_STAFF_PROTECTED',
+      );
+    }
+  }
+
   async countSummary() {
     return this.db.withContext('identity', async (tx) => {
       const [total, locked] = await Promise.all([
@@ -227,8 +267,12 @@ export class PlatformUsersService {
   }
 
   async getStaffProfiles(userIds: readonly string[]) {
-    if (userIds.length === 0) return new Map();
-    const rows = await this.db.withContext('identity', (tx) =>
+    const rows = userIds.length === 0 ? [] : await this.fetchStaffProfiles(userIds);
+    return new Map(rows.map((u) => [u.id, u]));
+  }
+
+  private async fetchStaffProfiles(userIds: readonly string[]) {
+    return this.db.withContext('identity', (tx) =>
       tx.user.findMany({
         where: { id: { in: [...userIds] } },
         select: {
@@ -241,6 +285,5 @@ export class PlatformUsersService {
         },
       }),
     );
-    return new Map(rows.map((u) => [u.id, u]));
   }
 }

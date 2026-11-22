@@ -219,6 +219,22 @@ export class TenancyService {
     });
   }
 
+  /** Estate membership counts per user (same statuses as membershipsOf), in one query. */
+  async membershipCountsOf(userIds: readonly string[]): Promise<Map<string, number>> {
+    if (userIds.length === 0) return new Map();
+    const rows = await this.db.withContext('tenancy', (tx) =>
+      tx.estateMembership.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: [...userIds] },
+          status: { in: ['active', 'pending', 'suspended'] },
+        },
+        _count: { _all: true },
+      }),
+    );
+    return new Map(rows.map((row) => [row.userId, row._count._all]));
+  }
+
   async estateNamesByIds(ids: readonly string[]): Promise<Map<string, string>> {
     const unique = [...new Set(ids)];
     if (unique.length === 0) return new Map();

@@ -2,6 +2,7 @@
 
 import { unwrapPage } from '@safezone/api-client';
 import { t } from '@safezone/i18n';
+import type { PlatformTransactionStatus } from '@safezone/schemas';
 import {
   ActionButton,
   DataTable,
@@ -20,7 +21,7 @@ import { formatMoney, formatWat, humanizeStatus, statusTone } from '../../lib/fo
 
 export function TransactionsScreen() {
   const [provider, setProvider] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<PlatformTransactionStatus | ''>('');
   const [estateId, setEstateId] = useState('');
   const [cursor, setCursor] = useState<string | undefined>(undefined);
 

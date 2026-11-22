@@ -366,12 +366,13 @@ export class SupportAccessService {
     const hasMore = rows.length > query.limit;
     const page = hasMore ? rows.slice(0, query.limit) : rows;
     const estateNames = await this.tenancy.estateNamesByIds(page.map((row) => row.estateId));
+    const last = page.at(-1);
     return {
       items: page.map((row) => ({
         ...toView(row),
         estateName: estateNames.get(row.estateId) ?? null,
       })),
-      nextCursor: hasMore ? encodeCursor({ id: page[page.length - 1]!.id }) : null,
+      nextCursor: hasMore && last ? encodeCursor({ id: last.id }) : null,
     };
   }
 

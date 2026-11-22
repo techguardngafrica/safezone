@@ -173,6 +173,34 @@ export class AuthzService {
     return [...new Set(rows.map((row) => row.userId))];
   }
 
+  /** Active platform-level role keys per user, in one query (Super Admin user lists). */
+  async platformRolesOf(
+    userIds: readonly string[],
+    now: Date = new Date(),
+  ): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>();
+    if (userIds.length === 0) return result;
+    const rows = await this.db.withContext('authz', (tx) =>
+      tx.roleAssignment.findMany({
+        where: {
+          userId: { in: [...userIds] },
+          estateId: null,
+          revokedAt: null,
+          validFrom: { lte: now },
+          OR: [{ validTo: null }, { validTo: { gt: now } }],
+          role: { level: 'platform' },
+        },
+        select: { userId: true, role: { select: { key: true } } },
+      }),
+    );
+    for (const row of rows) {
+      const keys = result.get(row.userId) ?? [];
+      if (!keys.includes(row.role.key)) keys.push(row.role.key);
+      result.set(row.userId, keys);
+    }
+    return result;
+  }
+
   /** How many users currently hold a built-in role in an estate (setup checks). */
   async countHolders(estateId: string, roleKey: string, now: Date = new Date()): Promise<number> {
     return this.db.withContext('authz', (tx) =>

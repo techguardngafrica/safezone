@@ -78,9 +78,10 @@ export class SupportTicketsService {
     );
     const hasMore = rows.length > query.limit;
     const page = hasMore ? rows.slice(0, query.limit) : rows;
+    const last = page.at(-1);
     return {
       items: page.map(toView),
-      nextCursor: hasMore ? encodeCursor({ id: page[page.length - 1]!.id }) : null,
+      nextCursor: hasMore && last ? encodeCursor({ id: last.id }) : null,
     };
   }
 
@@ -202,9 +203,33 @@ export class SupportTicketsService {
       const created = await tx.supportTicketMessage.create({
         data: { ticketId, authorId: actorId, body: input.body, internal: input.internal },
       });
-      if (ticket.status === 'new') {
+      const reopened = ticket.status === 'new';
+      if (reopened) {
         await tx.supportTicket.update({ where: { id: ticketId }, data: { status: 'open' } });
       }
+      await appendOutboxEvents(tx, [
+        {
+          type: 'platform.support_ticket_message.created',
+          estateId: null,
+          aggregateType: 'support_ticket',
+          aggregateId: ticketId,
+          payload: { ticketId, messageId: created.id, internal: created.internal },
+          audit: {
+            actorType: 'platform_staff',
+            actorId,
+            action: 'platform.support_ticket.add_message',
+            resourceType: 'support_ticket',
+            resourceId: ticketId,
+            // The message body can hold personal data, so the audit keeps references only.
+            after: {
+              messageId: created.id,
+              internal: created.internal,
+              ...(reopened ? { status: 'open' } : {}),
+            },
+            ...(reopened ? { before: { status: ticket.status } } : {}),
+          },
+        },
+      ]);
       return created;
     });
     return toMessageView(msg);

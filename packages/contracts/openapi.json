@@ -73324,8 +73324,20 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 2,
-              "maxLength": 40
+              "enum": [
+                "visitors",
+                "security",
+                "emergency",
+                "announcements",
+                "property",
+                "occupancy",
+                "billing",
+                "payments",
+                "maintenance",
+                "community",
+                "facilities",
+                "documents"
+              ]
             }
           }
         ],
@@ -77625,7 +77637,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "maxLength": 30
+              "enum": [
+                "succeeded",
+                "partially_refunded",
+                "refunded"
+              ]
             }
           },
           {
@@ -77707,7 +77723,12 @@
                             ]
                           },
                           "status": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "partially_refunded",
+                              "refunded"
+                            ]
                           },
                           "amountKobo": {
                             "type": "integer",

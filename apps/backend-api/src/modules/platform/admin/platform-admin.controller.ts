@@ -10,6 +10,7 @@ import {
 import { z } from 'zod';
 import { type AuthContext, Can, CurrentAuth } from '../../../common/auth/auth.decorators';
 import { Contract, ValidBody, ValidParams } from '../../../common/contract/contract';
+import { NotFoundError } from '../../../common/errors/domain-error';
 import { PlatformStaffService } from '../../authz/platform-staff.service';
 import { PlatformUsersService } from '../../identity/platform-users.service';
 import { EstatesAdminService } from '../../tenancy/onboarding/estates-admin.service';
@@ -121,10 +122,13 @@ export class PlatformAdminController {
     status: 201,
     errors: [404, 409, 422],
   })
-  assignRole(
+  async assignRole(
     @CurrentAuth() auth: AuthContext,
     @ValidBody() body: z.infer<typeof assignPlatformRoleSchema>,
   ) {
+    // role_assignments has no FK to users (separate modules), so confirm the user exists first.
+    const profiles = await this.users.getStaffProfiles([body.userId]);
+    if (!profiles.has(body.userId)) throw new NotFoundError('User not found', 'USER_NOT_FOUND');
     return this.staff.assignRole(auth.userId, body);
   }
 

@@ -19,8 +19,9 @@ In addition, `tenant.support_sessions` currently has only a tenant RLS policy (`
 2. Add a read-only RLS policy on `tenant.support_sessions` (`FOR SELECT`) admitting `current_setting('app.context', true) = 'platform_config'` so `GET /v1/platform/support-sessions` can list sessions across estates without widening write access.
 3. Keep strict module ownership (`AGENTS.md §5.1`):
    - Platform user lookup and account recovery actions live in `identity` (`withContext('identity', ...)`), returning estate membership names only (never tenant data).
-   - Platform staff role grants live in `authz` (`withContext('authz', ...)`), restricted to `level === 'platform'` roles and guarding against removing the last `super_admin`.
-   - Cross-estate transaction monitoring lives in `payments` (`withContext('payments', ...)`), returning aggregate payment metadata without resident PII.
+   - Platform staff role grants live in `authz` (`withContext('authz', ...)`), restricted to `level === 'platform'` roles and guarding against removing the last `super_admin`. Only currently valid assignments count, and Super Admin revocations are serialized with a transaction-scoped advisory lock so two concurrent revokes cannot remove the last one.
+   - Accounts that hold any platform role can be locked, signed out or have MFA reset only by a holder of `platform.staff.manage`; `platform.user.manage` alone covers non-staff users. Lock moves `active` to `locked` and unlock moves `locked` to `active` only, so a `deactivated` account is never reactivated.
+   - Cross-estate transaction monitoring lives in `payments` under a dedicated read-only `platform_finance` DB context (`withContext('platform_finance', ...)`), admitted by a `FOR SELECT` policy on `tenant.payment_transactions` (migration `20261122090000_platform_finance_read`). It returns payment metadata without resident PII, and the derived status filter runs in SQL before paging.
    - Platform-wide audit reads live in `audit` (`withContext('audit', ...)`).
    - Plans and per-estate entitlement overrides live in `tenancy` (`withContext('tenancy', ...)`).
    - Overview KPIs compose exported read methods from `tenancy`, `identity`, and `platform`.
@@ -30,4 +31,4 @@ In addition, `tenant.support_sessions` currently has only a tenant RLS policy (`
 
 - Every `/v1/platform/*` route requires an explicit `@Can('platform.*')` permission and TOTP MFA (enforced by `requiresMfa()` for all platform roles).
 - No platform user can read estate personal data outside an approved support session or compliance task.
-- All mutations (ticket updates, DSR/breach changes, user locks, MFA resets, platform role grants, entitlement updates) emit append-only audit events via the transactional outbox.
+- All mutations (ticket updates and messages, DSR/breach changes, user locks, MFA resets, platform role grants, entitlement updates) emit append-only audit events via the transactional outbox.

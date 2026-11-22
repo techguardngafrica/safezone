@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { appVersionParamsSchema } from './platform';
+import { featureKeySchema } from './tenancy';
 
 /** Platform overview KPIs (super-admin.md §5). */
 export const platformOverviewSchema = z.object({
@@ -72,7 +73,8 @@ export const upsertEstateEntitlementSchema = z.object({
 
 export const estateEntitlementParamsSchema = z.object({
   id: z.uuid(),
-  module: z.string().min(2).max(40),
+  /** Only catalogued feature keys; a typo must never become a stored override. */
+  module: featureKeySchema,
 });
 
 /** Platform user lookup and account actions (super-admin.md §6.3). */
@@ -253,9 +255,17 @@ export const createSupportTicketMessageSchema = z.object({
 });
 
 /** Cross-estate transactions (super-admin.md §6.7). */
+/** Derived from amount_refunded vs amount; payment_transactions only holds settled payments. */
+export const platformTransactionStatusSchema = z.enum([
+  'succeeded',
+  'partially_refunded',
+  'refunded',
+]);
+export type PlatformTransactionStatus = z.infer<typeof platformTransactionStatusSchema>;
+
 export const platformTransactionListQuerySchema = z.object({
   estateId: z.uuid().optional(),
-  status: z.string().max(30).optional(),
+  status: platformTransactionStatusSchema.optional(),
   provider: z.string().max(40).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   cursor: z.string().min(1).optional(),
@@ -268,7 +278,7 @@ export const platformTransactionSchema = z.object({
   reference: z.string(),
   provider: z.string(),
   channel: z.string().nullable(),
-  status: z.string(),
+  status: platformTransactionStatusSchema,
   amountKobo: z.number().int(),
   currency: z.string(),
   paidAt: z.iso.datetime().nullable(),

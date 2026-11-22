@@ -28976,7 +28976,19 @@ export interface operations {
       header?: never;
       path: {
         id: string;
-        module: string;
+        module:
+          | 'visitors'
+          | 'security'
+          | 'emergency'
+          | 'announcements'
+          | 'property'
+          | 'occupancy'
+          | 'billing'
+          | 'payments'
+          | 'maintenance'
+          | 'community'
+          | 'facilities'
+          | 'documents';
       };
       cookie?: never;
     };
@@ -30327,7 +30339,7 @@ export interface operations {
     parameters: {
       query?: {
         estateId?: string;
-        status?: string;
+        status?: 'succeeded' | 'partially_refunded' | 'refunded';
         provider?: string;
         limit?: number;
         cursor?: string;
@@ -30356,7 +30368,8 @@ export interface operations {
               reference: string;
               provider: string;
               channel: string | null;
-              status: string;
+              /** @enum {string} */
+              status: 'succeeded' | 'partially_refunded' | 'refunded';
               amountKobo: number;
               currency: string;
               paidAt: string | null;
