@@ -33,6 +33,9 @@ export function statusTone(status: string): Tone {
     case 'resolved':
     case 'closed':
     case 'converted':
+    case 'converted_to_campaign':
+    case 'paid':
+    case 'verified':
     case 'accepted':
     case 'ok':
     case 'live':
@@ -49,6 +52,11 @@ export function statusTone(status: string): Tone {
     case 'contained':
     case 'notified':
     case 'sandbox':
+    case 'scheduled':
+    case 'issued':
+    case 'proposal_sent':
+    case 'negotiation':
+    case 'awaiting_information':
       return 'info';
     case 'info_requested':
     case 'pending_customer':
@@ -56,6 +64,10 @@ export function statusTone(status: string): Tone {
     case 'degraded':
     case 'high':
     case 'medium':
+    case 'awaiting_payment':
+    case 'paused':
+    case 'unverified':
+    case 'revision_requested':
       return 'warning';
     case 'rejected':
     case 'suspended':

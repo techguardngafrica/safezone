@@ -2,6 +2,7 @@
 
 import { unwrap } from '@safezone/api-client';
 import type { Permission } from '@safezone/permissions';
+import { useSession } from '@safezone/web-ui';
 import { useQuery } from '@tanstack/react-query';
 import {
   createContext,
@@ -31,8 +32,10 @@ export interface PlatformAccessValue {
 const PlatformContext = createContext<PlatformAccessValue | null>(null);
 
 export function PlatformProvider({ children }: { children: ReactNode }) {
+  // Keyed by user: after signing out and in as someone else, the previous user's roles are never reused.
+  const userId = useSession(session).user?.id ?? null;
   const query = useQuery({
-    queryKey: ['me', 'permissions', 'platform'],
+    queryKey: ['me', 'permissions', 'platform', userId],
     queryFn: () => unwrap(api.GET('/v1/me/permissions')),
     staleTime: 60_000,
   });

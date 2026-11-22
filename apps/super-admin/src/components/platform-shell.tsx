@@ -110,6 +110,35 @@ const NAV: { label?: MessageKey; items: NavSpec[] }[] = [
     ],
   },
   {
+    label: 'admin.nav.group.advertising',
+    items: [
+      {
+        href: '/ads/enquiries',
+        label: 'admin.nav.adEnquiries',
+        icon: 'inbox',
+        permission: 'ad.enquiry.manage',
+      },
+      {
+        href: '/ads/advertisers',
+        label: 'admin.nav.advertisers',
+        icon: 'megaphone',
+        permission: ['ad.enquiry.manage', 'ad.campaign.manage', 'ad.campaign.review'],
+      },
+      {
+        href: '/ads/campaigns',
+        label: 'admin.nav.adCampaigns',
+        icon: 'layers',
+        permission: ['ad.campaign.manage', 'ad.campaign.review'],
+      },
+      {
+        href: '/ads/placements',
+        label: 'admin.nav.adPlacements',
+        icon: 'sliders',
+        permission: ['ad.campaign.manage', 'ad.campaign.review'],
+      },
+    ],
+  },
+  {
     label: 'admin.nav.group.compliance',
     items: [
       {
