@@ -13,8 +13,10 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Linking } from 'react-native';
 import { Icon, type IconName } from '../../src/components/icon';
 import { SOS_CLEARANCE } from '../../src/components/sos-button';
+import { config } from '../../src/lib/config';
 import { useResident } from '../../src/lib/resident';
 import { api, session } from '../../src/lib/session';
 
@@ -44,7 +46,12 @@ function Row({
 export default function MoreScreen() {
   const router = useRouter();
   const user = useSession(session).user;
-  const { memberships, estateId, switchEstate, household, hasFeature } = useResident();
+  const { memberships, estateId, switchEstate, household, hasFeature, can } = useResident();
+  const myVendors = useQuery({
+    queryKey: ['me', 'vendors'],
+    queryFn: () => unwrap(api.GET('/v1/me/vendors')),
+  });
+  const showMarket = hasFeature('marketplace') && can('marketplace.use');
   const [signingOut, setSigningOut] = useState(false);
   const ownedUnits = useQuery({
     queryKey: ['estate', estateId, 'owned-units'],
@@ -152,6 +159,45 @@ export default function MoreScreen() {
           onPress={() => router.push('/notifications')}
         />
       </Card>
+      {showMarket || (myVendors.data?.length ?? 0) > 0 ? (
+        <>
+          <SectionHeader title={t('res.more.marketplace')} />
+          <Card>
+            {showMarket ? (
+              <Row
+                title={t('res.more.marketplace')}
+                subtitle={t('res.more.marketplaceHint')}
+                icon="storefront-outline"
+                onPress={() => router.push('/marketplace')}
+              />
+            ) : null}
+            {showMarket ? (
+              <Row
+                title={t('res.market.orders.title')}
+                icon="bag-handle-outline"
+                onPress={() => router.push('/marketplace/orders')}
+              />
+            ) : null}
+            {(myVendors.data?.length ?? 0) > 0 ? (
+              <Row
+                title={t('res.more.vendorMode')}
+                subtitle={t('res.more.vendorModeHint')}
+                icon="briefcase-outline"
+                onPress={() => router.push('/vendor-mode')}
+              />
+            ) : myVendors.data ? (
+              <Row
+                title={t('res.more.becomeVendor')}
+                subtitle={t('res.more.becomeVendorHint')}
+                icon="briefcase-outline"
+                onPress={() =>
+                  void Linking.openURL(`${config.publicWebUrl.replace(/\/$/, '')}/vendors`)
+                }
+              />
+            ) : null}
+          </Card>
+        </>
+      ) : null}
       {memberships.length > 1 ? (
         <>
           <SectionHeader title={t('res.more.estates')} />
