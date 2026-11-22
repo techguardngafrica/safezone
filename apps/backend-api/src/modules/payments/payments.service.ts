@@ -63,6 +63,13 @@ export type ProcessResult =
       amountKobo: number;
       providerTransactionId: string;
     }
+  | {
+      /** A verified ad invoice charge (ADR-0024): Safezone's own revenue, no estate. */
+      outcome: 'ad_paid';
+      reference: string;
+      amountKobo: number;
+      providerTransactionId: string;
+    }
   | { outcome: 'duplicate' | 'pending' | 'failed' | 'unknown_reference' | 'ignored' };
 
 function last4(accountNumber: string): string {
@@ -454,7 +461,12 @@ export class PaymentsService {
       });
       return { outcome: 'unknown_reference' };
     }
+    if (route.kind === 'ad_invoice') return this.processRoutedCharge('ad', null, charge);
     const estateId = route.estateId;
+    if (!estateId) {
+      this.logger.error({ msg: 'payment route without an estate', kind: route.kind });
+      return { outcome: 'ignored' };
+    }
 
     if (route.kind === 'platform_purchase')
       return this.processRoutedCharge('platform', estateId, charge);
@@ -1083,10 +1095,11 @@ export class PaymentsService {
         },
       }),
     );
-    if (!route) return 'unknown_reference';
-    return this.db.withTenant({ estateId: route.estateId, userId: null }, async (tx) => {
+    if (!route?.estateId) return 'unknown_reference';
+    const routeEstateId = route.estateId;
+    return this.db.withTenant({ estateId: routeEstateId, userId: null }, async (tx) => {
       const transaction = await tx.paymentTransaction.findFirst({
-        where: { estateId: route.estateId, reference: transactionReference },
+        where: { estateId: routeEstateId, reference: transactionReference },
       });
       if (!transaction) return 'unknown_reference';
       const refund = await tx.refund.findFirst({
@@ -1101,7 +1114,7 @@ export class PaymentsService {
         });
         return 'processed';
       }
-      await this.ledger.post(tx, route.estateId, [
+      await this.ledger.post(tx, routeEstateId, [
         {
           type: 'refund',
           description: 'Refund failed: returned to payer credit',
@@ -1292,6 +1305,46 @@ export class PaymentsService {
     }
   }
 
+  // ---- Ad invoices (ADR-0024) -------------------------------------------------------------------
+
+  /** Checkout for an advertising invoice on Safezone's own account (all ad revenue is Safezone's). */
+  async startAdCharge(input: {
+    payerUserId: string;
+    reference: string;
+    amountKobo: number;
+    callbackUrl?: string;
+    metadata: Record<string, string>;
+  }): Promise<{ authorizationUrl: string }> {
+    const callbackUrl = this.callbackUrl(input.callbackUrl);
+    await this.db.withContext('payments', (tx) =>
+      tx.paymentRoute.upsert({
+        where: {
+          provider_routeKey: { provider: this.gateway.provider, routeKey: input.reference },
+        },
+        create: {
+          provider: this.gateway.provider,
+          routeKey: input.reference,
+          kind: 'ad_invoice',
+          estateId: null,
+        },
+        update: {},
+      }),
+    );
+    try {
+      const checkout = await this.gateway.initialize({
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        email: `${input.payerUserId}@payers.safezone.ng`,
+        subaccountCode: null,
+        callbackUrl,
+        metadata: input.metadata,
+      });
+      return { authorizationUrl: checkout.authorizationUrl };
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
   /**
    * Links a vendor's bank account through a provider subaccount (marketplace.md §2.4). The account
    * number goes to the provider only; the caller keeps its last 4 digits.
@@ -1314,8 +1367,8 @@ export class PaymentsService {
 
   /** Verification result of a platform or marketplace charge, announced as an event for its owner. */
   private async processRoutedCharge(
-    kind: 'platform' | 'marketplace',
-    estateId: string,
+    kind: 'platform' | 'marketplace' | 'ad',
+    estateId: string | null,
     charge: VerifiedCharge,
   ): Promise<ProcessResult> {
     if (charge.status === 'pending') return { outcome: 'pending' };
@@ -1324,7 +1377,11 @@ export class PaymentsService {
       charge.currency === 'NGN' &&
       Number.isSafeInteger(charge.amountKobo) &&
       charge.amountKobo > 0;
-    await this.db.withTenant({ estateId, userId: null }, (tx) =>
+    const write = (fn: (tx: Tx) => Promise<void>) =>
+      estateId
+        ? this.db.withTenant({ estateId, userId: null }, fn)
+        : this.db.withContext('payments', fn);
+    await write((tx) =>
       appendOutboxEvents(tx, [
         {
           type: `payments.${kind}_charge.${succeeded ? 'succeeded' : 'failed'}`,
@@ -1340,6 +1397,13 @@ export class PaymentsService {
       ]),
     );
     if (!succeeded) return { outcome: 'failed' };
+    if (kind === 'ad' || !estateId)
+      return {
+        outcome: 'ad_paid',
+        reference: charge.reference,
+        amountKobo: charge.amountKobo,
+        providerTransactionId: charge.providerTransactionId,
+      };
     return {
       outcome: kind === 'platform' ? 'platform_paid' : 'marketplace_paid',
       estateId,

@@ -103,10 +103,21 @@ export interface VendorAccess {
   permissions: ReadonlySet<string>;
 }
 
+/** Set by AuthorizationGuard on advertiser routes (`:advertiserId` with an advertiser permission, ADR-0024). */
+export interface AdvertiserAccess {
+  advertiserId: string;
+  userId: string;
+  memberId: string;
+  role: string;
+  advertiserStatus: string;
+  permissions: ReadonlySet<string>;
+}
+
 export interface AuthenticatedRequest {
   auth?: AuthContext;
   estateAccess?: EstateAccess;
   vendorAccess?: VendorAccess;
+  advertiserAccess?: AdvertiserAccess;
 }
 
 export const CurrentAuth = createParamDecorator(
@@ -132,5 +143,14 @@ export const CurrentVendor = createParamDecorator(
     if (!request.vendorAccess)
       throw new Error('@CurrentVendor used on a route without vendor access');
     return request.vendorAccess;
+  },
+);
+
+export const CurrentAdvertiser = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): AdvertiserAccess => {
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    if (!request.advertiserAccess)
+      throw new Error('@CurrentAdvertiser used on a route without advertiser access');
+    return request.advertiserAccess;
   },
 );

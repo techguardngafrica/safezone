@@ -84,6 +84,14 @@ export class OccupancyService {
   // ---- Public interface for other modules ----------------------------------------------------
 
   /** The user's active households in an estate, with their permissions there. */
+  /** True when the user is flagged as a minor in any active household of the estate (no ads for minors). */
+  async isMinorIn(estateId: string, userId: string): Promise<boolean> {
+    const count = await this.db.withTenant({ estateId, userId }, (tx) =>
+      tx.householdMember.count({ where: { estateId, userId, status: 'active', isMinor: true } }),
+    );
+    return count > 0;
+  }
+
   async householdsOf(estateId: string, userId: string) {
     const rows = await this.db.withTenant({ estateId, userId }, (tx) =>
       tx.householdMember.findMany({

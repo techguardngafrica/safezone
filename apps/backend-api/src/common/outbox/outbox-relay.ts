@@ -58,6 +58,7 @@ export function routeEvent(event: Pick<RelayedEvent, 'type' | 'audit'>): QueueNa
   if (event.type === 'emergency.alert.triggered') queues.push(QUEUES.sos);
   if (event.type === 'payments.webhook.received') queues.push(QUEUES.payments);
   if (event.type.startsWith('payments.platform_charge.')) queues.push(QUEUES.utilities);
+  if (event.type.startsWith('payments.ad_charge.')) queues.push(QUEUES.ads);
   if (
     event.type.startsWith('payments.marketplace_charge.') ||
     event.type === 'marketplace.order.refund_requested'

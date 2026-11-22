@@ -244,6 +244,14 @@ export class TenancyService {
     return new Map(rows.map((row) => [row.id, row.name]));
   }
 
+  /** State and LGA of an estate, for area targeting (advertising) without a full profile read. */
+  async estateLocation(estateId: string): Promise<{ state: string | null; lga: string | null }> {
+    const row = await this.db.withContext('tenancy', (tx) =>
+      tx.estate.findUnique({ where: { id: estateId }, select: { state: true, lga: true } }),
+    );
+    return { state: row?.state ?? null, lga: row?.lga ?? null };
+  }
+
   async findByJoinCode(code: string): Promise<{ id: string; name: string } | null> {
     return this.db.withContext('tenancy', async (tx) => {
       const estate = await tx.estate.findUnique({

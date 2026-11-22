@@ -2,6 +2,7 @@ import { type CanActivate, type ExecutionContext, Injectable, Logger } from '@ne
 import { Reflector } from '@nestjs/core';
 import {
   GATE_SESSION_PERMISSIONS,
+  isAdvertiserPermission,
   isVendorPermission,
   permissionsForRoles,
   requiresMfa,
@@ -21,6 +22,7 @@ import {
 import { PUBLIC_KEY } from '../../common/auth/public.decorator';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../common/errors/domain-error';
 import { requestContext } from '../../common/http/request-context';
+import { AdvertiserAccessService } from '../advertising/access/advertiser-access.service';
 import { VendorAccessService } from '../marketplace/access/vendor-access.service';
 import { SupportAccessService } from '../platform/support-access.service';
 import { blockedBySuspension } from '../tenancy/domain/estate-lifecycle';
@@ -40,7 +42,8 @@ const estateIdSchema = z.uuid();
  * Gate shift sessions (ADR-0017) reach only their own estate, within GATE_SESSION_PERMISSIONS, plus
  * signed-in routes marked @AllowGateSession.
  * Vendor permissions (ADR-0023) are checked against the caller's active membership of the `:vendorId`
- * vendor; non-members get 404, like estates.
+ * vendor; non-members get 404, like estates. Advertiser permissions (ADR-0024) work the same way with
+ * `:advertiserId`.
  * A Techguard agent who is not a member reaches an estate only through an approved, unexpired support
  * session (platform.md §4): GET requests only, within SUPPORT_SESSION_PERMISSIONS, each one audited.
  */
@@ -54,6 +57,7 @@ export class AuthorizationGuard implements CanActivate {
     private readonly tenancy: TenancyService,
     private readonly support: SupportAccessService,
     private readonly vendorAccess: VendorAccessService,
+    private readonly advertiserAccess: AdvertiserAccessService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -90,6 +94,9 @@ export class AuthorizationGuard implements CanActivate {
 
     if (rule.kind === 'permission' && rulePermissions(rule).some(isVendorPermission)) {
       return this.admitVendorMember(request, rule, auth.userId, Boolean(gateScope));
+    }
+    if (rule.kind === 'permission' && rulePermissions(rule).some(isAdvertiserPermission)) {
+      return this.admitAdvertiserMember(request, rule, auth.userId, Boolean(gateScope));
     }
 
     const rawEstateId = request.params?.estateId;
@@ -200,6 +207,37 @@ export class AuthorizationGuard implements CanActivate {
       memberId: membership.memberId,
       role: membership.role,
       vendorStatus: membership.vendorStatus,
+      permissions,
+    };
+    return true;
+  }
+
+  /** Advertiser routes: the caller's role in the `:advertiserId` advertiser must grant the permission. */
+  private async admitAdvertiserMember(
+    request: AuthenticatedRequest & { params?: Record<string, string> },
+    rule: Extract<AccessRule, { kind: 'permission' }>,
+    userId: string,
+    gateSession: boolean,
+  ): Promise<boolean> {
+    if (!rulePermissions(rule).every(isAdvertiserPermission))
+      throw new Error('Advertiser and other permissions cannot be alternatives on one route');
+    if (gateSession)
+      throw new ForbiddenError('Not available on a gate device', 'GATE_SESSION_SCOPE');
+    const raw = request.params?.advertiserId;
+    if (raw === undefined)
+      throw new Error('Advertiser permissions require an :advertiserId parameter');
+    if (!estateIdSchema.safeParse(raw).success)
+      throw new NotFoundError('Advertiser not found', 'ADVERTISER_NOT_FOUND');
+    const membership = await this.advertiserAccess.activeMembership(userId, raw);
+    if (!membership) throw new NotFoundError('Advertiser not found', 'ADVERTISER_NOT_FOUND');
+    const permissions = permissionsForRoles([membership.role]);
+    if (!permits(rule, permissions)) throw new ForbiddenError();
+    request.advertiserAccess = {
+      advertiserId: raw,
+      userId,
+      memberId: membership.memberId,
+      role: membership.role,
+      advertiserStatus: membership.advertiserStatus,
       permissions,
     };
     return true;

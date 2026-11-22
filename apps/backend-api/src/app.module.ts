@@ -15,6 +15,7 @@ import { MovesModule } from './modules/occupancy/moves/moves.module';
 import { ExportsModule } from './modules/platform/exports/exports.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { ImportsModule } from './modules/imports/imports.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -79,6 +80,7 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     ExportsModule,
     FacilitiesModule,
     MarketplaceModule,
+    AdvertisingModule,
     DocumentsModule,
     ImportsModule,
     ReportsModule,

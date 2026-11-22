@@ -15,6 +15,7 @@ The root [`.env.example`](../../.env.example) is the single list. Every variable
 - Secrets: `JWT_ACCESS_SECRET` (access JWTs), `JWT_REFRESH_SECRET` (refresh and recovery code hashes), `OTP_HMAC_SECRET` (OTP hashes, rate-limit keys and estate invitation link tokens, ADR-0008; rotating it invalidates open invitations), `MFA_ENCRYPTION_KEY` (TOTP secrets at rest).
 - `PUBLIC_WEB_URL`: base URL of public-web; visitor pass links open `<url>/p/<token>`.
 - `PASS_KEY_ENCRYPTION_KEY`: 32 bytes base64; wraps estate pass-signing keys and pass PINs (ADR-0010). Must differ from `MFA_ENCRYPTION_KEY`.
+- `ADS_TRACKING_SECRET`: at least 32 characters; signs ad impression and click tokens and salts the daily user hash (ADR-0024). Required in staging and production.
 - `MANAGEMENT_WEB_URL`: base URL of management-web; invitation links open `<url>/invite/<token>`.
 - `OUTBOX_RELAY_DISABLED=true` stops the worker's relay loop (tests and maintenance only).
 - `MAIL_TRANSPORT`: `smtp` (default; Zoho in staging/production, Mailpit locally) or `file` (development only). With `file`, every email and fake SMS, including OTP codes, is written to `DEV_OUTBOX_DIR` (default `.dev-outbox`, relative to `apps/backend-api`). Read a code with `pnpm dev:otp <phone>`. Refused in staging and production.

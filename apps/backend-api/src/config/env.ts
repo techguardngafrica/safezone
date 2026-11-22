@@ -51,6 +51,7 @@ const LOCAL = {
   otp: 'local-only-otp-secret-change-me-00000000000000',
   mfaKey: Buffer.alloc(32, 7).toString('base64'),
   passKey: Buffer.alloc(32, 9).toString('base64'),
+  adsTracking: 'local-only-ads-tracking-secret-change-me-0000',
 } as const;
 
 const envSchema = z.object({
@@ -106,6 +107,8 @@ const envSchema = z.object({
   MFA_ENCRYPTION_KEY: key32.default(LOCAL.mfaKey),
   /** Encrypts each estate's Ed25519 visitor-pass signing key and stored pass PINs (ADR-0010). */
   PASS_KEY_ENCRYPTION_KEY: key32.default(LOCAL.passKey),
+  /** HMAC key for ad impression and click tokens and the rotating user hash (ADR-0024). */
+  ADS_TRACKING_SECRET: z.string().min(32).default(LOCAL.adsTracking),
 
   STORAGE_BUCKET: z.string().min(3).default('safezone-local'),
   STORAGE_REGION: z.string().min(1).default('us-east-1'),
@@ -178,6 +181,7 @@ function deployedIssues(env: ParsedEnv, source: NodeJS.ProcessEnv): string[] {
     'OTP_HMAC_SECRET',
     'MFA_ENCRYPTION_KEY',
     'PASS_KEY_ENCRYPTION_KEY',
+    'ADS_TRACKING_SECRET',
     'STORAGE_BUCKET',
     'STORAGE_ACCESS_KEY_ID',
     'STORAGE_SECRET_ACCESS_KEY',

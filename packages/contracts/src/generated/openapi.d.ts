@@ -44,6 +44,290 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/ads/c/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Click redirect to the reviewed destination
+     * @description Public.
+     */
+    get: operations['advertising_click'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/ads/decision': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * An ad for a placement, or 204 when none may or can be shown
+     * @description Any signed-in user.
+     */
+    get: operations['advertising_decision'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/ads/i/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Impression beacon
+     * @description Public.
+     */
+    get: operations['advertising_impression'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Advertiser account
+     * @description Requires `advertiser.campaign.read`.
+     */
+    get: operations['advertising_advertiser'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/campaigns': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My campaigns
+     * @description Requires `advertiser.campaign.read`.
+     */
+    get: operations['advertising_myCampaigns'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/campaigns/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A campaign with its placements and creatives
+     * @description Requires `advertiser.campaign.read`.
+     */
+    get: operations['advertising_myCampaign'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/campaigns/{id}/creatives': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Submit a creative for review
+     * @description Requires `advertiser.creative.manage`.
+     */
+    post: operations['advertising_addCreative'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/campaigns/{id}/creatives/{creativeId}/revise': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Change a creative (a new version goes back to review)
+     * @description Requires `advertiser.creative.manage`.
+     */
+    post: operations['advertising_revise'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/campaigns/{id}/invoices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Invoices for a campaign
+     * @description Requires `advertiser.invoice.pay` or `advertiser.campaign.read`.
+     */
+    get: operations['advertising_invoices'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/campaigns/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Aggregate report (estates under 200 users are grouped)
+     * @description Requires `advertiser.campaign.read`.
+     */
+    get: operations['advertising_report'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/invoices/{id}/pay': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Pay an invoice (to Safezone)
+     * @description Requires `advertiser.invoice.pay`.
+     */
+    post: operations['advertising_pay'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/invoices/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check an invoice payment with the provider
+     * @description Requires `advertiser.invoice.pay`.
+     */
+    post: operations['advertising_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/members': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Advertiser team
+     * @description Requires `advertiser.team.manage`.
+     */
+    get: operations['advertising_members'];
+    put?: never;
+    /**
+     * Add someone to the advertiser team
+     * @description Requires `advertiser.team.manage`.
+     */
+    post: operations['advertising_addMember'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/advertisers/{advertiserId}/members/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove someone from the advertiser team
+     * @description Requires `advertiser.team.manage`.
+     */
+    delete: operations['advertising_removeMember'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/gate/guards': {
     parameters: {
       query?: never;
@@ -206,6 +490,30 @@ export interface paths {
      * @description Requires `estate.configure`.
      */
     patch: operations['estate_updateProfile'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/ad-settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ad categories this estate blocks, and the dashboard card setting
+     * @description Any active member of the estate.
+     */
+    get: operations['advertising_adSettings'];
+    /**
+     * Block ad categories for this estate (rule 6)
+     * @description Requires `estate.configure`.
+     */
+    put: operations['advertising_setAdSettings'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/estates/{estateId}/announcements': {
@@ -5536,6 +5844,50 @@ export interface paths {
     patch: operations['me_updateProfile'];
     trace?: never;
   };
+  '/v1/me/ad-enquiries': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My advertising enquiries
+     * @description Any signed-in user.
+     */
+    get: operations['advertising_myEnquiries'];
+    put?: never;
+    /**
+     * Ask Techguard about advertising (Resident App)
+     * @description Any signed-in user.
+     */
+    post: operations['advertising_myEnquiry'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/advertisers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Advertiser accounts I belong to
+     * @description Any signed-in user.
+     */
+    get: operations['advertising_myAdvertisers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/me/emergency-contacts': {
     parameters: {
       query?: never;
@@ -6090,6 +6442,346 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Campaigns
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_campaignList'];
+    put?: never;
+    /**
+     * Create a campaign (draft) with its placements and agreed price
+     * @description Requires `ad.campaign.manage`.
+     */
+    post: operations['platformAdvertising_createCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A campaign
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_campaign'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change a campaign before approval, or add the ARCON reference
+     * @description Requires `ad.campaign.manage`.
+     */
+    patch: operations['platformAdvertising_updateCampaign'];
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}/{action}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Submit for review, reject, pause, resume or cancel a campaign
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    post: operations['platformAdvertising_action'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a campaign (ARCON reference, verified advertiser, approved creatives)
+     * @description Requires `ad.campaign.review`.
+     */
+    post: operations['platformAdvertising_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}/creatives': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a creative on the advertiser’s behalf
+     * @description Requires `ad.campaign.manage`.
+     */
+    post: operations['platformAdvertising_addCreative'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}/credit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record an approved credit arrangement instead of prepayment
+     * @description Requires `ad.campaign.review`.
+     */
+    post: operations['platformAdvertising_credit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}/invoices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Invoices of a campaign
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review` or `platform.finance`.
+     */
+    get: operations['platformAdvertising_invoices'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-campaigns/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Campaign report
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_report'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-creatives/{id}/review': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve, reject or ask for changes to a creative
+     * @description Requires `ad.campaign.review`.
+     */
+    post: operations['platformAdvertising_review'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-enquiries': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Advertising enquiries
+     * @description Requires `ad.enquiry.manage`.
+     */
+    get: operations['platformAdvertising_enquiries'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-enquiries/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * An enquiry
+     * @description Requires `ad.enquiry.manage`.
+     */
+    get: operations['platformAdvertising_enquiry'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Move an enquiry along, add notes or assign it
+     * @description Requires `ad.enquiry.manage`.
+     */
+    patch: operations['platformAdvertising_updateEnquiry'];
+    trace?: never;
+  };
+  '/v1/platform/ad-invoices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Invoice a campaign (agreed price plus 7.5% VAT)
+     * @description Requires `ad.campaign.manage`.
+     */
+    post: operations['platformAdvertising_invoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-placements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Placements inventory
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_placements'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-placements/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Switch a placement on or off, or change its daily cap
+     * @description Requires `ad.campaign.manage`.
+     */
+    patch: operations['platformAdvertising_updatePlacement'];
+    trace?: never;
+  };
+  '/v1/platform/advertisers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Advertisers
+     * @description Requires `ad.enquiry.manage` or `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_list'];
+    put?: never;
+    /**
+     * Create an advertiser with its owner
+     * @description Requires `ad.enquiry.manage`.
+     */
+    post: operations['platformAdvertising_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/advertisers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * An advertiser
+     * @description Requires `ad.enquiry.manage` or `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_advertiser'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Verify, suspend or change an advertiser
+     * @description Requires `ad.campaign.review` or `ad.enquiry.manage`.
+     */
+    patch: operations['platformAdvertising_updateAdvertiser'];
     trace?: never;
   };
   '/v1/platform/app-versions': {
@@ -7248,6 +7940,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/public/ad-enquiries': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask Techguard about advertising (web)
+     * @description Public.
+     */
+    post: operations['advertising_publicEnquiry'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/public/app-config': {
     parameters: {
       query?: never;
@@ -7980,6 +8692,825 @@ export interface operations {
       503: components['responses']['Error503'];
     };
   };
+  advertising_click: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: null;
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_decision: {
+    parameters: {
+      query: {
+        placement:
+          | 'resident.home.banner'
+          | 'resident.feed.sponsored'
+          | 'resident.marketplace.banner'
+          | 'resident.discovery.sponsored'
+          | 'management.dashboard.info';
+        estateId: string;
+        context: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @constant */
+              label: 'Sponsored';
+              /** @enum {string} */
+              placement:
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info';
+              /** @enum {string} */
+              type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+              imageFileId: string | null;
+              headline: string;
+              body: string | null;
+              cta: string;
+              advertiserName: string;
+              impressionUrl: string;
+              clickUrl: string;
+            } | null;
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_impression: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_advertiser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'individual' | 'organisation';
+              name: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              verificationStatus: 'unverified' | 'verified' | 'rejected';
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              myRole:
+                | (
+                    | 'advertiser'
+                    | 'advertiser_organisation_owner'
+                    | 'advertiser_account_manager'
+                    | 'advertising_agency_representative'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_myCampaigns: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_myCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_addCreative: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+          /** Format: uuid */
+          imageFileId?: string;
+          headline: string;
+          body?: string;
+          cta: string;
+          /** Format: uri */
+          destinationUrl: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              /** @enum {string} */
+              type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+              imageFileId: string | null;
+              headline: string;
+              body: string | null;
+              cta: string;
+              destinationUrl: string;
+              version: number;
+              /** @enum {string} */
+              reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+              reviewNotes: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_revise: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+        creativeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+          /** Format: uuid */
+          imageFileId?: string;
+          headline: string;
+          body?: string;
+          cta: string;
+          /** Format: uri */
+          destinationUrl: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              /** @enum {string} */
+              type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+              imageFileId: string | null;
+              headline: string;
+              body: string | null;
+              cta: string;
+              destinationUrl: string;
+              version: number;
+              /** @enum {string} */
+              reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+              reviewNotes: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_invoices: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              number: string;
+              amountKobo: number;
+              vatKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status: 'issued' | 'paid' | 'void';
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              campaignId: string;
+              /** Format: date-time */
+              from: string;
+              /** Format: date-time */
+              to: string;
+              impressions: number;
+              clicks: number;
+              ctr: number;
+              uniqueReachEstimate: number;
+              daily: {
+                day: string;
+                impressions: number;
+                clicks: number;
+              }[];
+              byEstate: {
+                estateName: string;
+                impressions: number;
+                clicks: number;
+              }[];
+              minimumAudience: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_pay: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uri */
+          callbackUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              invoiceId: string;
+              totalKobo: number;
+              authorizationUrl: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  advertising_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              number: string;
+              amountKobo: number;
+              vatKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status: 'issued' | 'paid' | 'void';
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_members: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'advertiser'
+                | 'advertiser_organisation_owner'
+                | 'advertiser_account_manager'
+                | 'advertising_agency_representative';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_addMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          phone: string;
+          /** @enum {string} */
+          role:
+            | 'advertiser'
+            | 'advertiser_organisation_owner'
+            | 'advertiser_account_manager'
+            | 'advertising_agency_representative';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'advertiser'
+                | 'advertiser_organisation_owner'
+                | 'advertiser_account_manager'
+                | 'advertising_agency_representative';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_removeMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        advertiserId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'advertiser'
+                | 'advertiser_organisation_owner'
+                | 'advertiser_account_manager'
+                | 'advertising_agency_representative';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   gateAuth_guards: {
     parameters: {
       query?: never;
@@ -8441,6 +9972,132 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       412: components['responses']['Error412'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_adSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              blockedCategories: (
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other'
+              )[];
+              dashboardInfoEnabled: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_setAdSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          blockedCategories?: (
+            | 'home_services'
+            | 'retail'
+            | 'food_and_drink'
+            | 'real_estate'
+            | 'finance'
+            | 'education'
+            | 'health'
+            | 'automotive'
+            | 'telecoms'
+            | 'events'
+            | 'public_service'
+            | 'alcohol'
+            | 'gambling'
+            | 'political'
+            | 'tobacco'
+            | 'other'
+          )[];
+          dashboardInfoEnabled?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              blockedCategories: (
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other'
+              )[];
+              dashboardInfoEnabled: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -24139,6 +25796,8 @@ export interface operations {
               /** @default [] */
               'ads.blocked_categories': string[];
               /** @default false */
+              'ads.dashboard_info_enabled': boolean;
+              /** @default false */
               'guards.can_see_resident_phone': boolean;
               /** @default true */
               'billing.two_level_approval': boolean;
@@ -24205,6 +25864,7 @@ export interface operations {
           'marketplace.allow_all_verified_vendors'?: boolean;
           'marketplace.classifieds_enabled'?: boolean;
           'ads.blocked_categories'?: string[];
+          'ads.dashboard_info_enabled'?: boolean;
           'guards.can_see_resident_phone'?: boolean;
           'billing.two_level_approval'?: boolean;
           'billing.approval_threshold_kobo'?: number;
@@ -24278,6 +25938,8 @@ export interface operations {
               'marketplace.classifieds_enabled': boolean;
               /** @default [] */
               'ads.blocked_categories': string[];
+              /** @default false */
+              'ads.dashboard_info_enabled': boolean;
               /** @default false */
               'guards.can_see_resident_phone': boolean;
               /** @default true */
@@ -29193,6 +30855,219 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  advertising_myEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              source: 'web' | 'resident_app';
+              /** @enum {string} */
+              advertiserType: 'individual' | 'organisation';
+              contactName: string;
+              orgName: string | null;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              objectives: string;
+              description: string;
+              /** @enum {string} */
+              budgetRange:
+                'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+              durationWeeks: number | null;
+              audience: string | null;
+              placements: (
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info'
+              )[];
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+              advertiserId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_myEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          advertiserType: 'individual' | 'organisation';
+          contactName: string;
+          orgName?: string;
+          phone: string;
+          /** Format: email */
+          email: string;
+          /** @enum {string} */
+          category:
+            | 'home_services'
+            | 'retail'
+            | 'food_and_drink'
+            | 'real_estate'
+            | 'finance'
+            | 'education'
+            | 'health'
+            | 'automotive'
+            | 'telecoms'
+            | 'events'
+            | 'public_service'
+            | 'alcohol'
+            | 'gambling'
+            | 'political'
+            | 'tobacco'
+            | 'other';
+          objectives: string;
+          description: string;
+          /** @enum {string} */
+          budgetRange: 'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+          durationWeeks?: number;
+          audience?: string;
+          /** @default [] */
+          placements?: (
+            | 'resident.home.banner'
+            | 'resident.feed.sponsored'
+            | 'resident.marketplace.banner'
+            | 'resident.discovery.sponsored'
+            | 'management.dashboard.info'
+          )[];
+          /** @constant */
+          consent: true;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      422: components['responses']['Error422'];
+      429: components['responses']['Error429'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_myAdvertisers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              /** @enum {string} */
+              role:
+                | 'advertiser'
+                | 'advertiser_organisation_owner'
+                | 'advertiser_account_manager'
+                | 'advertising_agency_representative';
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   myOccupancy_contacts: {
     parameters: {
       query?: never;
@@ -30600,6 +32475,1818 @@ export interface operations {
       400: components['responses']['Error400'];
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_campaignList: {
+    parameters: {
+      query?: {
+        status?:
+          | 'draft'
+          | 'submitted'
+          | 'under_review'
+          | 'awaiting_payment'
+          | 'approved'
+          | 'scheduled'
+          | 'active'
+          | 'paused'
+          | 'completed'
+          | 'rejected'
+          | 'cancelled';
+        advertiserId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_createCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          advertiserId: string;
+          title: string;
+          objective: string;
+          /** Format: date-time */
+          startsAt: string;
+          /** Format: date-time */
+          endsAt: string;
+          budgetKobo: number;
+          lineItems: {
+            /** @enum {string} */
+            placementKey:
+              | 'resident.home.banner'
+              | 'resident.feed.sponsored'
+              | 'resident.marketplace.banner'
+              | 'resident.discovery.sponsored'
+              | 'management.dashboard.info';
+            targeting: {
+              /** @enum {string} */
+              scope: 'all' | 'estates' | 'states';
+              /** @default [] */
+              estateIds?: string[];
+              /** @default [] */
+              states?: string[];
+            };
+            /** @default 10 */
+            weight?: number;
+            frequencyCapPerDay?: number;
+          }[];
+          /** Format: uuid */
+          enquiryId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_campaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_updateCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title?: string;
+          objective?: string;
+          /** Format: date-time */
+          startsAt?: string;
+          /** Format: date-time */
+          endsAt?: string;
+          budgetKobo?: number;
+          lineItems?: {
+            /** @enum {string} */
+            placementKey:
+              | 'resident.home.banner'
+              | 'resident.feed.sponsored'
+              | 'resident.marketplace.banner'
+              | 'resident.discovery.sponsored'
+              | 'management.dashboard.info';
+            targeting: {
+              /** @enum {string} */
+              scope: 'all' | 'estates' | 'states';
+              /** @default [] */
+              estateIds?: string[];
+              /** @default [] */
+              states?: string[];
+            };
+            /** @default 10 */
+            weight?: number;
+            frequencyCapPerDay?: number;
+          }[];
+          arconApprovalRef?: string;
+          /** Format: uuid */
+          arconApprovalFileId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_action: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        action: 'submit' | 'reject' | 'pause' | 'resume' | 'cancel';
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          restrictedNote?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_addCreative: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+          /** Format: uuid */
+          imageFileId?: string;
+          headline: string;
+          body?: string;
+          cta: string;
+          /** Format: uri */
+          destinationUrl: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              /** @enum {string} */
+              type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+              imageFileId: string | null;
+              headline: string;
+              body: string | null;
+              cta: string;
+              destinationUrl: string;
+              version: number;
+              /** @enum {string} */
+              reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+              reviewNotes: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_credit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              title: string;
+              objective: string;
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              budgetKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              arconApprovalRef: string | null;
+              paid: boolean;
+              creditApproved: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              lineItems: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                targeting: {
+                  /** @enum {string} */
+                  scope: 'all' | 'estates' | 'states';
+                  estateIds: string[];
+                  states: string[];
+                };
+                weight: number;
+                frequencyCapPerDay: number | null;
+              }[];
+              creatives: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                campaignId: string;
+                /** @enum {string} */
+                type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+                imageFileId: string | null;
+                headline: string;
+                body: string | null;
+                cta: string;
+                destinationUrl: string;
+                version: number;
+                /** @enum {string} */
+                reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+                reviewNotes: string | null;
+                active: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              restrictedNote: string | null;
+              rejectionReason: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_invoices: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              number: string;
+              amountKobo: number;
+              vatKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status: 'issued' | 'paid' | 'void';
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              campaignId: string;
+              /** Format: date-time */
+              from: string;
+              /** Format: date-time */
+              to: string;
+              impressions: number;
+              clicks: number;
+              ctr: number;
+              uniqueReachEstimate: number;
+              daily: {
+                day: string;
+                impressions: number;
+                clicks: number;
+              }[];
+              byEstate: {
+                estateName: string;
+                impressions: number;
+                clicks: number;
+              }[];
+              minimumAudience: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_review: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          decision: 'approved' | 'rejected' | 'revision_requested';
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              /** @enum {string} */
+              type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+              imageFileId: string | null;
+              headline: string;
+              body: string | null;
+              cta: string;
+              destinationUrl: string;
+              version: number;
+              /** @enum {string} */
+              reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+              reviewNotes: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_enquiries: {
+    parameters: {
+      query?: {
+        status?:
+          | 'submitted'
+          | 'under_review'
+          | 'awaiting_information'
+          | 'proposal_sent'
+          | 'negotiation'
+          | 'approved'
+          | 'rejected'
+          | 'converted_to_campaign';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              source: 'web' | 'resident_app';
+              /** @enum {string} */
+              advertiserType: 'individual' | 'organisation';
+              contactName: string;
+              orgName: string | null;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              objectives: string;
+              description: string;
+              /** @enum {string} */
+              budgetRange:
+                'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+              durationWeeks: number | null;
+              audience: string | null;
+              placements: (
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info'
+              )[];
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+              advertiserId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              phone: string;
+              email: string;
+              notes: string | null;
+              assigneeId: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_enquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              source: 'web' | 'resident_app';
+              /** @enum {string} */
+              advertiserType: 'individual' | 'organisation';
+              contactName: string;
+              orgName: string | null;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              objectives: string;
+              description: string;
+              /** @enum {string} */
+              budgetRange:
+                'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+              durationWeeks: number | null;
+              audience: string | null;
+              placements: (
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info'
+              )[];
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+              advertiserId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              phone: string;
+              email: string;
+              notes: string | null;
+              assigneeId: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_updateEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status?:
+            | 'submitted'
+            | 'under_review'
+            | 'awaiting_information'
+            | 'proposal_sent'
+            | 'negotiation'
+            | 'approved'
+            | 'rejected'
+            | 'converted_to_campaign';
+          notes?: string;
+          assigneeId?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              source: 'web' | 'resident_app';
+              /** @enum {string} */
+              advertiserType: 'individual' | 'organisation';
+              contactName: string;
+              orgName: string | null;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              objectives: string;
+              description: string;
+              /** @enum {string} */
+              budgetRange:
+                'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+              durationWeeks: number | null;
+              audience: string | null;
+              placements: (
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info'
+              )[];
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+              advertiserId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              phone: string;
+              email: string;
+              notes: string | null;
+              assigneeId: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_invoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          campaignId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              number: string;
+              amountKobo: number;
+              vatKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status: 'issued' | 'paid' | 'void';
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_placements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              key:
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info';
+              surface: string;
+              formats: string[];
+              width: number | null;
+              height: number | null;
+              maxFileKb: number;
+              frequencyCapPerDay: number;
+              active: boolean;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_updatePlacement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key:
+          | 'resident.home.banner'
+          | 'resident.feed.sponsored'
+          | 'resident.marketplace.banner'
+          | 'resident.discovery.sponsored'
+          | 'management.dashboard.info';
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          active?: boolean;
+          frequencyCapPerDay?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              key:
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info';
+              surface: string;
+              formats: string[];
+              width: number | null;
+              height: number | null;
+              maxFileKb: number;
+              frequencyCapPerDay: number;
+              active: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_list: {
+    parameters: {
+      query?: {
+        status?: 'active' | 'suspended';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'individual' | 'organisation';
+              name: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              verificationStatus: 'unverified' | 'verified' | 'rejected';
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              myRole:
+                | (
+                    | 'advertiser'
+                    | 'advertiser_organisation_owner'
+                    | 'advertiser_account_manager'
+                    | 'advertising_agency_representative'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type: 'individual' | 'organisation';
+          name: string;
+          /** @enum {string} */
+          category:
+            | 'home_services'
+            | 'retail'
+            | 'food_and_drink'
+            | 'real_estate'
+            | 'finance'
+            | 'education'
+            | 'health'
+            | 'automotive'
+            | 'telecoms'
+            | 'events'
+            | 'public_service'
+            | 'alcohol'
+            | 'gambling'
+            | 'political'
+            | 'tobacco'
+            | 'other';
+          ownerPhone: string;
+          /** Format: uuid */
+          enquiryId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'individual' | 'organisation';
+              name: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              verificationStatus: 'unverified' | 'verified' | 'rejected';
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              myRole:
+                | (
+                    | 'advertiser'
+                    | 'advertiser_organisation_owner'
+                    | 'advertiser_account_manager'
+                    | 'advertising_agency_representative'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_advertiser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'individual' | 'organisation';
+              name: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              verificationStatus: 'unverified' | 'verified' | 'rejected';
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              myRole:
+                | (
+                    | 'advertiser'
+                    | 'advertiser_organisation_owner'
+                    | 'advertiser_account_manager'
+                    | 'advertising_agency_representative'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_updateAdvertiser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          /** @enum {string} */
+          category?:
+            | 'home_services'
+            | 'retail'
+            | 'food_and_drink'
+            | 'real_estate'
+            | 'finance'
+            | 'education'
+            | 'health'
+            | 'automotive'
+            | 'telecoms'
+            | 'events'
+            | 'public_service'
+            | 'alcohol'
+            | 'gambling'
+            | 'political'
+            | 'tobacco'
+            | 'other';
+          /** @enum {string} */
+          verificationStatus?: 'unverified' | 'verified' | 'rejected';
+          /** @enum {string} */
+          status?: 'active' | 'suspended';
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'individual' | 'organisation';
+              name: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              verificationStatus: 'unverified' | 'verified' | 'rejected';
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              myRole:
+                | (
+                    | 'advertiser'
+                    | 'advertiser_organisation_owner'
+                    | 'advertiser_account_manager'
+                    | 'advertising_agency_representative'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -34349,6 +38036,93 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_publicEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          advertiserType: 'individual' | 'organisation';
+          contactName: string;
+          orgName?: string;
+          phone: string;
+          /** Format: email */
+          email: string;
+          /** @enum {string} */
+          category:
+            | 'home_services'
+            | 'retail'
+            | 'food_and_drink'
+            | 'real_estate'
+            | 'finance'
+            | 'education'
+            | 'health'
+            | 'automotive'
+            | 'telecoms'
+            | 'events'
+            | 'public_service'
+            | 'alcohol'
+            | 'gambling'
+            | 'political'
+            | 'tobacco'
+            | 'other';
+          objectives: string;
+          description: string;
+          /** @enum {string} */
+          budgetRange: 'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+          durationWeeks?: number;
+          audience?: string;
+          /** @default [] */
+          placements?: (
+            | 'resident.home.banner'
+            | 'resident.feed.sponsored'
+            | 'resident.marketplace.banner'
+            | 'resident.discovery.sponsored'
+            | 'management.dashboard.info'
+          )[];
+          /** @constant */
+          consent: true;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      422: components['responses']['Error422'];
+      429: components['responses']['Error429'];
       500: components['responses']['Error500'];
     };
   };

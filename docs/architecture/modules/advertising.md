@@ -129,3 +129,12 @@ Jobs: `ads.schedule.transition` (every minute), `ads.rollup.hourly`, `ads.ivt.fi
 - A campaign without an ARCON approval reference cannot be approved.
 - An estate that blocks a category never shows ads from advertisers in that category.
 - Advertiser reports never include personal data or breakdowns below the audience threshold.
+
+## 11. Implementation notes (Phase 4, ADR-0024)
+
+- Built: enquiries (`POST /v1/public/ad-enquiries`, `POST/GET /v1/me/ad-enquiries`), advertisers and teams, placements inventory (seeded), campaigns with line items and creatives, creative review with versions, approval gates, ad invoices (agreed price plus 7.5% VAT) paid on Safezone's account, credit arrangements, the minute schedule job, the decision service, impression and click tracking, aggregate reports and estate category opt-outs.
+- Not built yet: `ad_proposals` (price is recorded on the campaign), `ad_agreements`, conversions, hourly rollups and partitioning, invalid-traffic filtering, PDF reports.
+- Campaign actions as built: `POST /v1/platform/ad-campaigns/:id/submit|reject|pause|resume|cancel`, `/approve` (with `restrictedNote` for restricted categories), `/credit`, `/creatives`; `POST /v1/platform/ad-creatives/:id/review`; `POST /v1/platform/ad-invoices`; `PATCH /v1/platform/ad-placements/:key`.
+- Advertiser area: `/v1/advertisers/:advertiserId` (profile, members, campaigns, report, creatives and `/revise`, invoices, `/invoices/:id/pay|verify`), checked against `advertiser_members`.
+- Decision: `GET /v1/ads/decision` answers 204 for contexts not listed for the placement, the Security App, minors, estates that turned the dashboard card off, blocked categories, frequency caps and when nothing qualifies. Approve needs `ad.campaign.review`; campaign management needs `ad.campaign.manage`.
+- Estate opt-outs live in estate settings (`ads.blocked_categories`, `ads.dashboard_info_enabled`) behind `GET/PUT /v1/estates/:estateId/ad-settings` (`estate.configure` to change).

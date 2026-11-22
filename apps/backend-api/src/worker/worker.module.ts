@@ -37,6 +37,8 @@ import { ExportsModule } from '../modules/platform/exports/exports.module';
 import { FacilitiesConsumer } from '../modules/facilities/facilities.consumer';
 import { MarketplaceConsumer } from '../modules/marketplace/marketplace.consumer';
 import { MarketplaceModule } from '../modules/marketplace/marketplace.module';
+import { AdvertisingConsumer } from '../modules/advertising/advertising.consumer';
+import { AdvertisingModule } from '../modules/advertising/advertising.module';
 import { CommunityConsumer } from '../modules/community/community.consumer';
 import { FacilitiesModule } from '../modules/facilities/facilities.module';
 import { DocumentsModule } from '../modules/documents/documents.module';
@@ -71,6 +73,7 @@ import { ImportsModule } from '../modules/imports/imports.module';
     EmergencyModule,
     FacilitiesModule,
     MarketplaceModule,
+    AdvertisingModule,
     DocumentsModule,
     ImportsModule,
   ],
@@ -99,6 +102,7 @@ import { ImportsModule } from '../modules/imports/imports.module';
     ExportsConsumer,
     FacilitiesConsumer,
     MarketplaceConsumer,
+    AdvertisingConsumer,
     CommunityConsumer,
     ImportsConsumer,
   ],

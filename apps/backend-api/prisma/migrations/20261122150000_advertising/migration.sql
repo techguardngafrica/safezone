@@ -310,3 +310,8 @@ INSERT INTO "platform"."ad_placements" ("key", "surface", "formats", "width", "h
   ('resident.marketplace.banner', 'Marketplace home', ARRAY['image_banner'], 1200, 400, 300, 3, true),
   ('resident.discovery.sponsored', 'Service discovery', ARRAY['promo_card','sponsored_text'], 600, 600, 200, 3, true),
   ('management.dashboard.info', 'Management web dashboard', ARRAY['sponsored_text','promo_card'], 600, 300, 200, 2, true);
+
+-- Ad invoices are paid on Safezone's own account and belong to no estate (ADR-0024).
+ALTER TABLE "platform"."payment_routes" ALTER COLUMN "estate_id" DROP NOT NULL;
+ALTER TABLE "platform"."payment_routes" ADD CONSTRAINT payment_routes_estate_check
+  CHECK (estate_id IS NOT NULL OR kind = 'ad_invoice');

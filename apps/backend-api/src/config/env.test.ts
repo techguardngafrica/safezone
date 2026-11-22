@@ -13,6 +13,7 @@ const productionEnv = {
   OTP_HMAC_SECRET: 'c'.repeat(40),
   MFA_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString('base64'),
   PASS_KEY_ENCRYPTION_KEY: Buffer.alloc(32, 2).toString('base64'),
+  ADS_TRACKING_SECRET: 'd'.repeat(40),
   STORAGE_BUCKET: 'safezone-prod',
   STORAGE_ACCESS_KEY_ID: 'id',
   STORAGE_SECRET_ACCESS_KEY: 'secret',
@@ -57,6 +58,7 @@ describe('loadEnv', () => {
 
   it.each([
     ['JWT_ACCESS_SECRET', undefined, /JWT_ACCESS_SECRET: required/],
+    ['ADS_TRACKING_SECRET', undefined, /ADS_TRACKING_SECRET: required/],
     ['SMS_PROVIDER', 'fake', /SMS_PROVIDER: fake/],
     ['PAYMENTS_PROVIDER', 'fake', /PAYMENTS_PROVIDER: fake/],
     ['MAIL_TRANSPORT', 'file', /MAIL_TRANSPORT: file/],

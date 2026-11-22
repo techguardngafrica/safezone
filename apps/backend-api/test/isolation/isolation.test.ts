@@ -442,4 +442,29 @@ describe('cross-tenant isolation', () => {
       .expect(200);
     expect(approvals.body.data).toEqual([]);
   });
+
+  it('every advertiser route refuses a signed-in user who is not on that advertiser (404)', async () => {
+    const advertiserId = '0193a1b2-0000-7000-8000-00000000ad01';
+    await stack.db.owner.query(
+      `insert into platform.advertisers (id, type, name, category, verification_status, created_by, updated_at)
+       values ($1, 'organisation', 'Isolation Advertiser', 'retail', 'verified', $1, now())`,
+      [advertiserId],
+    );
+    const failures: string[] = [];
+    for (const route of routes.filter((r) => r.expressPath.includes(':advertiserId'))) {
+      const response = await call(route, { advertiserId })
+        .set('Authorization', `Bearer ${adminA}`)
+        .send({});
+      if (response.status !== 404)
+        failures.push(`${route.method} ${route.expressPath} → ${response.status}`);
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it("an ad decision for Estate A is refused to Estate B's administrator", async () => {
+    await stack.http
+      .get(`/v1/ads/decision?placement=resident.home.banner&estateId=${estateA}&context=home`)
+      .set('Authorization', `Bearer ${adminB}`)
+      .expect(404);
+  });
 });
