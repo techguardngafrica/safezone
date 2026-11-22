@@ -86,6 +86,8 @@ Short form: name, phone, email, estate name, location, size, preferred contact t
 - Signed-in advertiser area (`/advertiser/*`): campaigns, status, reports (own campaigns only), invoices and receipts.
 - Advertisers can do the same in Advertiser mode inside the Resident App.
 
+Built (Phase 4, ADR-0024): `/advertise` (where ads show and never show, how review and payment work, enquiry form to `POST /v1/public/ad-enquiries`, tobacco not offered) and `/advertiser` (campaign list; campaign page with plan, creatives to add or change for review, results with estates under 200 people grouped, invoices paid to Safezone through the provider and verified on return; team for owners). `noindex`, disallowed in robots. Not built yet: enquiry status tracking by link, PDF reports, creative image upload (a file ID is typed for now).
+
 ## 8. Vendor Portal (`/vendor/*`, Phase 4)
 
 Mobile-responsive, signed in with phone + OTP, vendor roles from [authz.md](../modules/authz.md).

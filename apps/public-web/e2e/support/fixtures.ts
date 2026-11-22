@@ -20,8 +20,8 @@ interface Fixtures {
   apiAs(user: SeededUser, device?: DeviceKind): Promise<ApiSession>;
   /** Signs a user without MFA in through the real sign-in screen on the current page. */
   signIn(page: Page, user: SeededUser): Promise<void>;
-  /** A Techguard platform administrator (vendor.approve) with MFA, signed in through the API. */
-  techguard(): Promise<ApiSession>;
+  /** Techguard staff with MFA, signed in through the API (platform_administrator unless a role is given). */
+  techguard(roleKey?: string): Promise<ApiSession>;
 }
 
 export const test = base.extend<Fixtures, { stack: Stack }>({
@@ -53,12 +53,12 @@ export const test = base.extend<Fixtures, { stack: Stack }>({
     }),
 
   techguard: async ({ stack }, use) =>
-    use(async () => {
+    use(async (roleKey = 'platform_administrator') => {
       const user = await stack.seed.user('Tobi Techguard', { mfa: true });
       await stack.seed.query(
         `insert into platform.role_assignments (id, user_id, role_id, estate_id, reason)
          values ($1, $2, $3, null, 'e2e seed')`,
-        [uuidv7(), user.id, builtInRoleId('platform_administrator')],
+        [uuidv7(), user.id, builtInRoleId(roleKey)],
       );
       return apiSignIn(stack.state.redisUrl, user, 'web');
     }),

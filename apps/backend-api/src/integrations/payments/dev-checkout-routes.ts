@@ -25,9 +25,12 @@ form{margin:0}
 </style></head><body><main>${body}</main></body></html>`;
 }
 
-/** A button back into the app when it gave its own link (development builds); Expo Go users switch back. */
+/**
+ * A button back to where the payer came from: the app's own link (development builds) or a web page such as
+ * the advertiser area. Expo Go users without a link switch back by hand.
+ */
 function returnLink(callbackUrl: string): string {
-  return /^safezone:/i.test(callbackUrl)
+  return /^(safezone:|https?:\/\/)/i.test(callbackUrl)
     ? `<a class="button pay" href="${escapeHtml(callbackUrl)}">Return to Safezone</a>`
     : '';
 }

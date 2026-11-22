@@ -6,6 +6,7 @@ const PAGES = [
   '/',
   '/estates',
   '/vendors',
+  '/advertise',
   '/register',
   '/contact',
   '/download',
