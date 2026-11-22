@@ -160,3 +160,67 @@ export const utilityPurchaseLimitsSchema = z.object({
   maxKobo: z.number().int(),
   feeKobo: z.number().int(),
 });
+
+// ---- Airtime and data (ADR-0025) ----------------------------------------------------------------
+
+export const topupNetworkSchema = z.enum(['mtn', 'glo', 'airtel', '9mobile']);
+export const topupKindSchema = z.enum(['airtime', 'data']);
+export const topupStatusSchema = z.enum([
+  'created',
+  'paid',
+  'delivering',
+  'delivered',
+  'failed',
+  'refund_pending',
+  'refunded',
+]);
+export const createTopupSchema = z
+  .object({
+    kind: topupKindSchema,
+    network: topupNetworkSchema,
+    /** The number that receives the airtime or data. */
+    phone: z.string().trim().min(7).max(20),
+    /** Airtime only: whole naira in kobo. */
+    amountKobo: z.number().int().positive().optional(),
+    /** Data only: the plan code from the plan list; its price is used, never the client's. */
+    planCode: z.string().trim().min(2).max(80).optional(),
+    paymentMethodId: z.uuid().optional(),
+    saveCard: z.boolean().optional(),
+    callbackUrl: z.url().max(500).optional(),
+  })
+  .refine((t) => (t.kind === 'airtime' ? t.amountKobo !== undefined : t.planCode !== undefined), {
+    message: 'Give an amount for airtime or a plan for data',
+    path: ['amountKobo'],
+  });
+export const topupSchema = z.object({
+  id: z.uuid(),
+  kind: topupKindSchema,
+  network: topupNetworkSchema,
+  phone: z.string(),
+  planName: z.string().nullable(),
+  amountKobo: z.number().int(),
+  feeKobo: z.number().int(),
+  totalKobo: z.number().int(),
+  status: topupStatusSchema,
+  authorizationUrl: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  paidAt: z.iso.datetime().nullable(),
+  deliveredAt: z.iso.datetime().nullable(),
+  refundedAt: z.iso.datetime().nullable(),
+});
+export const topupListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+  cursor: z.string().min(1).optional(),
+});
+export const dataPlanQuerySchema = z.object({ network: topupNetworkSchema });
+export const dataPlanSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  amountKobo: z.number().int(),
+});
+export const topupLimitsSchema = z.object({
+  available: z.boolean(),
+  airtimeMinKobo: z.number().int(),
+  airtimeMaxKobo: z.number().int(),
+  feeKobo: z.number().int(),
+});

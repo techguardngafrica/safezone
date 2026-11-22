@@ -12,6 +12,12 @@ import {
   FakeBillsProvider,
   UnconfiguredBillsProvider,
 } from './bills/bills-provider';
+import {
+  FakeTopUpProvider,
+  TopUpProvider,
+  UnconfiguredTopUpProvider,
+  VtpassTopUpProvider,
+} from './bills/topup-provider';
 import { FakePaymentGateway } from './payments/fake-payment.gateway';
 import { PaymentGateway } from './payments/payment-gateway';
 import { PaystackPaymentGateway } from './payments/paystack-payment.gateway';
@@ -90,6 +96,31 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
           : new FakeBillsProvider(),
     },
     {
+      // Airtime and data (ADR-0025): VTpass when configured; the fake only in development and test.
+      provide: TopUpProvider,
+      inject: [ENV],
+      useFactory: (env: Env): TopUpProvider => {
+        const provider =
+          env.TOPUP_PROVIDER ??
+          (env.NODE_ENV === 'development' || env.NODE_ENV === 'test' ? 'fake' : undefined);
+        if (provider === 'vtpass') {
+          if (!env.VTPASS_API_KEY || !env.VTPASS_SECRET_KEY || !env.VTPASS_PUBLIC_KEY)
+            throw new Error(
+              'VTPASS_API_KEY, VTPASS_SECRET_KEY and VTPASS_PUBLIC_KEY are required for vtpass',
+            );
+          return new VtpassTopUpProvider({
+            baseUrl: env.VTPASS_BASE_URL,
+            apiKey: env.VTPASS_API_KEY,
+            secretKey: env.VTPASS_SECRET_KEY,
+            publicKey: env.VTPASS_PUBLIC_KEY,
+          });
+        }
+        if (provider === 'fake' && env.NODE_ENV !== 'staging' && env.NODE_ENV !== 'production')
+          return new FakeTopUpProvider();
+        return new UnconfiguredTopUpProvider();
+      },
+    },
+    {
       provide: PaymentGateway,
       inject: [ENV],
       useFactory: (env: Env): PaymentGateway => {
@@ -117,6 +148,7 @@ import { TermiiSmsSender } from './sms/termii-sms.sender';
     MalwareScanner,
     PaymentGateway,
     BillsProvider,
+    TopUpProvider,
   ],
 })
 export class IntegrationsModule {}

@@ -12,6 +12,7 @@ import { QUEUE_PREFIX, QUEUES } from '../../../common/queues/queues';
 import { createWorkerConnection } from '../../../common/queues/worker-connection';
 import { TenancyService } from '../../tenancy/tenancy.service';
 import { PurchasesService } from './purchases.service';
+import { TopupsService } from '../topups/topups.service';
 
 const chargeEvent = z.object({
   reference: z.string().min(1),
@@ -31,6 +32,7 @@ export class PurchasesConsumer implements OnApplicationBootstrap, OnApplicationS
 
   constructor(
     private readonly purchases: PurchasesService,
+    private readonly topups: TopupsService,
     private readonly tenancy: TenancyService,
     private readonly queues: QueueService,
   ) {}
@@ -43,8 +45,21 @@ export class PurchasesConsumer implements OnApplicationBootstrap, OnApplicationS
       QUEUES.utilities,
       async (job) => {
         if (job.name === 'utilities.sweep') {
-          for (const estateId of await this.tenancy.estateIdsWithFeature('billing'))
+          for (const estateId of await this.tenancy.estateIdsWithFeature('billing')) {
             await this.purchases.sweep(estateId);
+            await this.topups.sweep(estateId);
+          }
+          return;
+        }
+        if (
+          job.name === 'topups.deliver' ||
+          job.name === 'topups.requery' ||
+          job.name === 'topups.refund'
+        ) {
+          const { estateId, purchaseId } = purchaseJob.parse(job.data);
+          if (job.name === 'topups.deliver') await this.topups.deliver(estateId, purchaseId);
+          else if (job.name === 'topups.requery') await this.topups.requery(estateId, purchaseId);
+          else await this.topups.refund(estateId, purchaseId);
           return;
         }
         if (job.name === 'utilities.vend') {
@@ -68,6 +83,10 @@ export class PurchasesConsumer implements OnApplicationBootstrap, OnApplicationS
         if (!event.estateId) return;
         if (event.type === 'payments.platform_charge.succeeded') {
           const charge = chargeEvent.parse(event.payload);
+          if (charge.reference.startsWith('sz_top_')) {
+            await this.topups.handlePaid(event.estateId, charge.reference, charge.amountKobo);
+            return;
+          }
           await this.purchases.handlePaid(
             event.estateId,
             charge.reference,
@@ -75,6 +94,11 @@ export class PurchasesConsumer implements OnApplicationBootstrap, OnApplicationS
             charge.providerTransactionId,
           );
         } else if (event.type === 'payments.platform_charge.failed') {
+          const failed = chargeEvent.parse(event.payload).reference;
+          if (failed.startsWith('sz_top_')) {
+            await this.topups.handleChargeFailed(event.estateId, failed);
+            return;
+          }
           await this.purchases.handleChargeFailed(
             event.estateId,
             chargeEvent.parse(event.payload).reference,

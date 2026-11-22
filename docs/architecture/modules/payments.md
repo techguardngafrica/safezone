@@ -123,3 +123,9 @@ Built in `src/modules/payments` and `src/integrations/payments` ([ADR-0013](../a
 - A verified charge that matches no order, or whose amount differs, is refunded in full.
 - Vendor payout accounts are linked with `linkVendorPayout`: the provider holds the account number; the marketplace keeps the subaccount code, bank name and last 4 digits.
 - Safezone Pay (saved methods, transfers to residents) builds on these routes; see ADR-0023.
+
+## 12. Safezone Pay (ADR-0025)
+
+- Saved cards: `platform.payment_methods` (authorization wrapped by KeyVault, display fields only); saved after a verified charge when the payer chose `saveCard`. `GET /v1/me/payment-methods`, `DELETE /v1/me/payment-methods/:id`.
+- Payment intents, marketplace orders, prepaid tokens and airtime/data accept `paymentMethodId`; the saved card is charged and the reference is verified like checkout.
+- Resident payout accounts: `GET/PUT/PATCH /v1/me/payout-account`. Transfers: `GET /v1/estates/:estateId/transfers/status|recipients?unit=`, `POST/GET …/transfers`, `POST …/transfers/:id/verify`. Each transfer settles 100% to the recipient's subaccount (route kind `transfer`).

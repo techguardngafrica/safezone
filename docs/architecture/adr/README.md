@@ -28,3 +28,4 @@ Copy [0000-template.md](0000-template.md) to `NNNN-short-title.md`. One decision
 | [0022](0022-platform-control-plane.md)                           | Super Admin platform control plane                                                      | Accepted                             |
 | [0023](0023-phase-4-marketplace-and-safezone-pay.md)             | Phase 4 marketplace, resident classifieds, Safezone Pay without a stored balance        | Accepted                             |
 | [0024](0024-managed-advertising.md)                              | Managed advertising: scope, gates, decision service, tracking, reports                  | Accepted                             |
+| [0025](0025-safezone-pay.md)                                     | Safezone Pay: saved cards, transfers between residents, airtime and data (VTpass)       | Accepted                             |

@@ -3411,6 +3411,9 @@ model TopupPurchase {
   idempotencyKey   String    @map("idempotency_key")
   provider         String
   providerRef      String?   @map("provider_ref")
+  /// Aggregator request id (VTpass: Lagos date and time prefix), reused for every requery.
+  requestId        String?   @map("request_id")
+  alertedAt        DateTime? @map("alerted_at") @db.Timestamptz(3)
   /// created | paid | delivering | delivered | failed | refund_pending | refunded
   status           String    @default("created")
   authorizationUrl String?   @map("authorization_url")

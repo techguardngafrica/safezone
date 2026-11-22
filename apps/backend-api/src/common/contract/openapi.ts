@@ -16,6 +16,7 @@ function toJsonSchema(schema: z.ZodType, io: 'input' | 'output'): JsonSchema {
 const ERROR_STATUS_TEXT: Record<number, string> = {
   400: 'Validation failed',
   401: 'Not signed in or session ended',
+  402: 'Payment declined (for example a saved card)',
   403: 'Not permitted (or two-step verification required)',
   404: 'Not found in your scope',
   409: 'Conflict with the current state',

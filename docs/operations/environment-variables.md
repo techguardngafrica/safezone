@@ -30,3 +30,9 @@ The root [`.env.example`](../../.env.example) is the single list. Every variable
 ## Mobile apps (`EXPO_PUBLIC_*`)
 
 - `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_REALTIME_URL` — override `app.json` `extra` defaults (read in `src/lib/config.ts`).
+
+## Safezone Pay (ADR-0025)
+
+- `PAY_TRANSFERS_ENABLED`: `true` or `false`. Transfers between residents are on in development and test; in staging and production they are on only when this is `true` (after the Paystack and legal review).
+- `TOPUP_PROVIDER`: `vtpass` or `fake`. Unset outside development and test means airtime and data are unavailable (503). `fake` is refused in staging and production.
+- `VTPASS_BASE_URL` (default sandbox `https://sandbox.vtpass.com/api`; live `https://vtpass.com/api`), `VTPASS_API_KEY`, `VTPASS_SECRET_KEY`, `VTPASS_PUBLIC_KEY`: from the VTpass API Keys tab. Secret keys are shown once; store them in the vault.

@@ -5092,6 +5092,110 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/topups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My airtime and data purchases
+     * @description Requires `payment.make`.
+     */
+    get: operations['topups_list'];
+    put?: never;
+    /**
+     * Buy airtime or data (Idempotency-Key required)
+     * @description Requires `payment.make`.
+     */
+    post: operations['topups_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/topups/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * One purchase
+     * @description Requires `payment.make`.
+     */
+    get: operations['topups_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/topups/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check the payment with the provider after checkout
+     * @description Requires `payment.make`.
+     */
+    post: operations['topups_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/topups/data-plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Data plans for a network (prices from the aggregator)
+     * @description Requires `payment.make`.
+     */
+    get: operations['topups_plans'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/topups/limits': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Whether airtime and data can be bought, and the airtime limits
+     * @description Requires `payment.make`.
+     */
+    get: operations['topups_limits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/transactions': {
     parameters: {
       query?: never;
@@ -5104,6 +5208,90 @@ export interface paths {
      * @description Any active member of the estate. Needs the `payments` feature.
      */
     get: operations['payments_transactions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/transfers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Money I sent and received
+     * @description Requires `payment.make`.
+     */
+    get: operations['wallet_list'];
+    put?: never;
+    /**
+     * Send money to a neighbour (Idempotency-Key required); it settles to their bank account
+     * @description Requires `payment.make`.
+     */
+    post: operations['wallet_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/transfers/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check a transfer payment with the provider after checkout
+     * @description Requires `payment.make`.
+     */
+    post: operations['wallet_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/transfers/recipients': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * People in a unit who accept transfers (first names only)
+     * @description Requires `payment.make`.
+     */
+    get: operations['wallet_recipients'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/transfers/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Whether transfers between residents are available
+     * @description Requires `payment.make`.
+     */
+    get: operations['wallet_status'];
     put?: never;
     post?: never;
     delete?: never;
@@ -6282,6 +6470,74 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/me/payment-methods': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My saved cards
+     * @description Any signed-in user.
+     */
+    get: operations['wallet_methods'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/payment-methods/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a saved card
+     * @description Any signed-in user.
+     */
+    delete: operations['wallet_removeMethod'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/payout-account': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Where I receive money from neighbours (null when not set up)
+     * @description Any signed-in user.
+     */
+    get: operations['wallet_payout'];
+    /**
+     * Link the bank account I receive money into (held by the payment provider)
+     * @description Any signed-in user.
+     */
+    put: operations['wallet_linkPayout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Turn receiving money from neighbours on or off
+     * @description Any signed-in user.
+     */
+    patch: operations['wallet_setAccept'];
     trace?: never;
   };
   '/v1/me/permissions': {
@@ -8534,6 +8790,15 @@ export interface components {
     };
     /** @description Not signed in or session ended */
     Error401: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ApiError'];
+      };
+    };
+    /** @description Payment declined (for example a saved card) */
+    Error402: {
       headers: {
         [name: string]: unknown;
       };
@@ -21780,6 +22045,9 @@ export interface operations {
         'application/json': {
           /** Format: uri */
           callbackUrl?: string;
+          /** Format: uuid */
+          paymentMethodId?: string;
+          saveCard?: boolean;
         };
       };
     };
@@ -21797,7 +22065,7 @@ export interface operations {
               /** Format: uuid */
               orderId: string;
               amountKobo: number;
-              authorizationUrl: string;
+              authorizationUrl: string | null;
             };
           };
         };
@@ -24179,6 +24447,9 @@ export interface operations {
           invoiceIds?: string[];
           /** Format: uri */
           callbackUrl?: string;
+          /** Format: uuid */
+          paymentMethodId?: string;
+          saveCard?: boolean;
         };
       };
     };
@@ -28313,6 +28584,340 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  topups_list: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'airtime' | 'data';
+              /** @enum {string} */
+              network: 'mtn' | 'glo' | 'airtel' | '9mobile';
+              phone: string;
+              planName: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'delivering'
+                | 'delivered'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              deliveredAt: string | null;
+              refundedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  topups_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          kind: 'airtime' | 'data';
+          /** @enum {string} */
+          network: 'mtn' | 'glo' | 'airtel' | '9mobile';
+          phone: string;
+          amountKobo?: number;
+          planCode?: string;
+          /** Format: uuid */
+          paymentMethodId?: string;
+          saveCard?: boolean;
+          /** Format: uri */
+          callbackUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'airtime' | 'data';
+              /** @enum {string} */
+              network: 'mtn' | 'glo' | 'airtel' | '9mobile';
+              phone: string;
+              planName: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'delivering'
+                | 'delivered'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              deliveredAt: string | null;
+              refundedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      402: components['responses']['Error402'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+      503: components['responses']['Error503'];
+    };
+  };
+  topups_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'airtime' | 'data';
+              /** @enum {string} */
+              network: 'mtn' | 'glo' | 'airtel' | '9mobile';
+              phone: string;
+              planName: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'delivering'
+                | 'delivered'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              deliveredAt: string | null;
+              refundedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  topups_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'airtime' | 'data';
+              /** @enum {string} */
+              network: 'mtn' | 'glo' | 'airtel' | '9mobile';
+              phone: string;
+              planName: string | null;
+              amountKobo: number;
+              feeKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'created'
+                | 'paid'
+                | 'delivering'
+                | 'delivered'
+                | 'failed'
+                | 'refund_pending'
+                | 'refunded';
+              authorizationUrl: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              paidAt: string | null;
+              deliveredAt: string | null;
+              refundedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  topups_plans: {
+    parameters: {
+      query: {
+        network: 'mtn' | 'glo' | 'airtel' | '9mobile';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              code: string;
+              name: string;
+              amountKobo: number;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+      503: components['responses']['Error503'];
+    };
+  };
+  topups_limits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              available: boolean;
+              airtimeMinKobo: number;
+              airtimeMaxKobo: number;
+              feeKobo: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   payments_transactions: {
     parameters: {
       query?: {
@@ -28355,6 +28960,237 @@ export interface operations {
               paidAt: string;
             }[];
             meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_list: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              direction: 'sent' | 'received';
+              counterpartyFirstName: string;
+              amountKobo: number;
+              note: string | null;
+              /** @enum {string} */
+              status: 'created' | 'paid' | 'failed';
+              authorizationUrl: string | null;
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          recipientUserId: string;
+          amountKobo: number;
+          note?: string;
+          /** Format: uuid */
+          classifiedId?: string;
+          /** Format: uuid */
+          paymentMethodId?: string;
+          saveCard?: boolean;
+          /** Format: uri */
+          callbackUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              direction: 'sent' | 'received';
+              counterpartyFirstName: string;
+              amountKobo: number;
+              note: string | null;
+              /** @enum {string} */
+              status: 'created' | 'paid' | 'failed';
+              authorizationUrl: string | null;
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      402: components['responses']['Error402'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+      503: components['responses']['Error503'];
+    };
+  };
+  wallet_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              direction: 'sent' | 'received';
+              counterpartyFirstName: string;
+              amountKobo: number;
+              note: string | null;
+              /** @enum {string} */
+              status: 'created' | 'paid' | 'failed';
+              authorizationUrl: string | null;
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_recipients: {
+    parameters: {
+      query: {
+        unit: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              firstName: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+      503: components['responses']['Error503'];
+    };
+  };
+  wallet_status: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              enabled: boolean;
+            };
           };
         };
       };
@@ -28840,6 +29676,9 @@ export interface operations {
           amountKobo: number;
           /** Format: uri */
           callbackUrl?: string;
+          /** Format: uuid */
+          paymentMethodId?: string;
+          saveCard?: boolean;
         };
       };
     };
@@ -32210,6 +33049,205 @@ export interface operations {
       400: components['responses']['Error400'];
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_methods: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              brand: string;
+              last4: string;
+              expMonth: string;
+              expYear: string;
+              bank: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              lastUsedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_removeMethod: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              brand: string;
+              last4: string;
+              expMonth: string;
+              expYear: string;
+              bank: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              lastUsedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_payout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              bankName: string;
+              accountLast4: string;
+              acceptTransfers: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            } | null;
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  wallet_linkPayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          bankCode: string;
+          accountNumber: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              bankName: string;
+              accountLast4: string;
+              acceptTransfers: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  wallet_setAccept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          acceptTransfers: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              bankName: string;
+              accountLast4: string;
+              acceptTransfers: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
