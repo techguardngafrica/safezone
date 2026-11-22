@@ -155,4 +155,53 @@ export class AuditService {
       nextCursor: rows.length > limit && last ? encodeCursor({ seq: last.seq.toString() }) : null,
     };
   }
+
+  /** Platform-wide audit log, newest first, cursor-paginated (ADR-0022). */
+  async listForPlatform(query: {
+    estateId?: string;
+    actorId?: string;
+    action?: string;
+    resourceType?: string;
+    limit: number;
+    cursor?: string;
+  }) {
+    const after = query.cursor
+      ? decodeCursor(
+          query.cursor,
+          (value): value is { seq: string } => cursorSchema.safeParse(value).success,
+        )
+      : undefined;
+    const rows = await this.db.withContext('audit', (tx) =>
+      tx.auditEvent.findMany({
+        where: {
+          ...(query.estateId ? { estateId: query.estateId } : {}),
+          ...(query.actorId ? { actorId: query.actorId } : {}),
+          ...(query.action ? { action: { contains: query.action, mode: 'insensitive' } } : {}),
+          ...(query.resourceType ? { resourceType: query.resourceType } : {}),
+          ...(after ? { seq: { lt: BigInt(after.seq) } } : {}),
+        },
+        orderBy: { seq: 'desc' },
+        take: query.limit + 1,
+      }),
+    );
+    const page = rows.slice(0, query.limit);
+    const last = page.at(-1);
+    return {
+      items: page.map((row) => ({
+        id: row.id,
+        estateId: row.estateId,
+        occurredAt: row.occurredAt.toISOString(),
+        actorType: row.actorType,
+        actorId: row.actorId,
+        actingRole: row.actingRole,
+        action: row.action,
+        resourceType: row.resourceType,
+        resourceId: row.resourceId,
+        reason: row.reason,
+        app: row.app,
+      })),
+      nextCursor:
+        rows.length > query.limit && last ? encodeCursor({ seq: last.seq.toString() }) : null,
+    };
+  }
 }

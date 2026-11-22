@@ -3229,6 +3229,164 @@ export const en = {
   'mm.lock.noDeviceLock':
     'This phone has no screen lock, so the app cannot lock itself. Set a PIN, pattern or fingerprint in your phone settings.',
   'mm.more.signOutBody': 'You will stop getting SOS alerts on this phone until you sign in again.',
+
+  // Super Admin Portal (apps/super-admin)
+  'admin.nav.overview': 'Overview',
+  'admin.nav.group.estates': 'Estates & Onboarding',
+  'admin.nav.applications': 'Applications',
+  'admin.nav.leads': 'Onboarding leads',
+  'admin.nav.estates': 'All estates',
+  'admin.nav.createEstate': 'Create estate',
+  'admin.nav.group.users': 'People & Access',
+  'admin.nav.users': 'User lookup',
+  'admin.nav.staff': 'Platform staff',
+  'admin.nav.group.support': 'Support',
+  'admin.nav.tickets': 'Support tickets',
+  'admin.nav.supportSessions': 'Support sessions',
+  'admin.nav.group.operations': 'Operations',
+  'admin.nav.transactions': 'Transactions',
+  'admin.nav.group.compliance': 'Compliance',
+  'admin.nav.dsr': 'Data subject requests',
+  'admin.nav.breaches': 'Breach log',
+  'admin.nav.retention': 'Retention schedule',
+  'admin.nav.group.platform': 'Platform',
+  'admin.nav.flags': 'Feature flags',
+  'admin.nav.versions': 'App versions',
+  'admin.nav.plans': 'Plans',
+  'admin.nav.providers': 'Providers',
+  'admin.nav.audit': 'Audit log',
+  'admin.nav.health': 'System health',
+
+  'admin.idle.signedOut': 'You were signed out after 15 minutes of inactivity.',
+  'admin.overview.description': 'Platform-wide status, onboarding queues and operational health.',
+  'admin.overview.estatesActive': 'Active estates',
+  'admin.overview.estatesTotal': '{total} total ({approved} approved, {suspended} suspended)',
+  'admin.overview.pendingApps': 'Pending applications',
+  'admin.overview.pendingAppsHint': '{review} in review, {info} awaiting info',
+  'admin.overview.openLeads': 'Open onboarding leads',
+  'admin.overview.openLeadsHint': '{contacted} contacted',
+  'admin.overview.users': 'Platform users',
+  'admin.overview.usersLocked': '{locked} locked accounts',
+  'admin.overview.support': 'Open support tickets',
+  'admin.overview.supportSessions': '{active} active sessions, {pending} pending',
+  'admin.overview.compliance': 'Open compliance items',
+  'admin.overview.complianceHint': '{dsrs} DSRs, {breaches} open breaches',
+
+  'admin.applications.title': 'Estate applications',
+  'admin.applications.description': 'Self-service estate onboarding queue, oldest first.',
+  'admin.applications.empty': 'No estate applications match this filter.',
+  'admin.applications.reviewTitle': 'Application review',
+  'admin.applications.duplicateWarning': 'Potential duplicate estate or application detected.',
+  'admin.applications.startReview': 'Start review',
+  'admin.applications.requestInfo': 'Request more info',
+  'admin.applications.approve': 'Approve estate',
+  'admin.applications.reject': 'Reject application',
+  'admin.applications.approveConfirm':
+    'Approving creates the estate workspace on the free core plan and makes the applicant the Estate Administrator.',
+  'admin.applications.reasonLabel': 'Reason',
+  'admin.applications.documents': 'Supporting documents',
+  'admin.applications.downloadDoc': 'Download',
+
+  'admin.leads.title': 'Assisted onboarding leads',
+  'admin.leads.description': 'Estates that requested Techguard-assisted setup.',
+  'admin.leads.empty': 'No onboarding leads yet.',
+  'admin.leads.createFromLead': 'Create estate',
+
+  'admin.estates.title': 'All estates',
+  'admin.estates.description': 'Search and manage estates across the Safezone platform.',
+  'admin.estates.empty': 'No estates match this filter.',
+  'admin.estates.createTitle': 'Create estate (assisted onboarding)',
+  'admin.estates.createDescription':
+    'Create an estate workspace on the free core plan, then invite the estate administrator.',
+  'admin.estates.suspend': 'Suspend estate',
+  'admin.estates.suspendWarning':
+    'Safety features (SOS and gate verification) keep working while an estate is suspended.',
+  'admin.estates.reactivate': 'Reactivate estate',
+  'admin.estates.deactivate': 'Deactivate estate',
+  'admin.estates.deactivateWarning':
+    'Deactivating starts offboarding and blocks new invitations and management changes.',
+  'admin.estates.invitations': 'Administrator invitations',
+  'admin.estates.inviteAdmin': 'Invite administrator',
+  'admin.estates.entitlements': 'Module entitlements',
+  'admin.estates.entitlementReason': 'Reason for entitlement change',
+
+  'admin.users.title': 'User lookup',
+  'admin.users.description':
+    'Find accounts by phone, email, name or user ID. Estate personal data is never shown here.',
+  'admin.users.empty': 'No users match your search.',
+  'admin.users.lock': 'Lock account',
+  'admin.users.unlock': 'Unlock account',
+  'admin.users.revokeSessions': 'Force sign-out all devices',
+  'admin.users.resetMfa': 'Reset MFA',
+
+  'admin.staff.title': 'Platform staff',
+  'admin.staff.description': 'Techguard staff members and their platform role assignments.',
+  'admin.staff.assign': 'Assign platform role',
+  'admin.staff.revoke': 'Revoke role',
+  'admin.staff.empty': 'No platform staff assignments found.',
+
+  'admin.tickets.title': 'Support tickets',
+  'admin.tickets.description': 'Estate and user support queue with SLA tracking.',
+  'admin.tickets.new': 'New ticket',
+  'admin.tickets.empty': 'No support tickets match this filter.',
+  'admin.tickets.reply': 'Add reply or internal note',
+  'admin.tickets.internalNote': 'Internal note (Techguard staff only)',
+
+  'admin.sessions.title': 'Support access sessions',
+  'admin.sessions.description':
+    'Time-limited, read-only estate access approved by estate administrators.',
+  'admin.sessions.request': 'Request support access',
+  'admin.sessions.empty': 'No support access sessions found.',
+
+  'admin.transactions.title': 'Platform transactions',
+  'admin.transactions.description':
+    'Cross-estate payment monitoring. All estate dues settle directly to estate subaccounts.',
+  'admin.transactions.empty': 'No transactions match this filter.',
+
+  'admin.dsr.title': 'Data subject requests',
+  'admin.dsr.description':
+    'NDPA 2023 / GAID 2025 requests tracked against the 30-day statutory deadline.',
+  'admin.dsr.new': 'Log request',
+  'admin.dsr.empty': 'No data subject requests logged.',
+
+  'admin.breaches.title': 'Breach log',
+  'admin.breaches.description':
+    'Security and privacy incidents tracked against the 72-hour NDPC window.',
+  'admin.breaches.new': 'Log breach',
+  'admin.breaches.empty': 'No breach records logged.',
+
+  'admin.retention.title': 'Retention schedule',
+  'admin.retention.description': 'Data retention periods and legal basis per data category.',
+  'admin.retention.new': 'Add or update rule',
+  'admin.retention.empty': 'No retention rules configured yet.',
+
+  'admin.flags.title': 'Feature flags',
+  'admin.flags.description': 'Global, per-estate and percentage rollout flags (cached 30 seconds).',
+  'admin.flags.new': 'Create or edit flag',
+  'admin.flags.empty': 'No feature flags configured.',
+
+  'admin.versions.title': 'App versions',
+  'admin.versions.description':
+    'Minimum (forced update) and recommended (soft update) versions per app.',
+  'admin.versions.new': 'Set app version policy',
+  'admin.versions.empty': 'No app version policies configured yet.',
+
+  'admin.plans.title': 'Plans and entitlements',
+  'admin.plans.description':
+    'Every estate starts on the free core plan with all core features enabled.',
+
+  'admin.providers.title': 'External providers',
+  'admin.providers.description':
+    'Active runtime adapters. Credentials live in the secrets vault and are never displayed.',
+
+  'admin.audit.title': 'Platform audit log',
+  'admin.audit.description':
+    'Append-only, hash-chained audit trail across platform and estate actions.',
+  'admin.audit.empty': 'No audit events match this filter.',
+
+  'admin.health.title': 'System health',
+  'admin.health.description':
+    'Live database, Redis and BullMQ queue status (auto-refreshes every 30 seconds).',
 } as const;
 
 export type MessageKey = keyof typeof en;

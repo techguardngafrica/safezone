@@ -32,6 +32,7 @@ import { IdentityModule } from './modules/identity/identity.module';
 import { FilesModule } from './modules/files/files.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PlatformModule } from './modules/platform/platform.module';
+import { PlatformAdminModule } from './modules/platform/admin/platform-admin.module';
 import { OccupancyModule } from './modules/occupancy/occupancy.module';
 import { PropertyModule } from './modules/property/property.module';
 import { SecurityModule } from './modules/security/security.module';
@@ -81,6 +82,7 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     ReportsModule,
     SearchModule,
     StaffModule,
+    PlatformAdminModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -2,6 +2,8 @@ import { Controller, Get, HttpCode, Post } from '@nestjs/common';
 import {
   estateItemParamsSchema,
   estateParamSchema,
+  platformSupportSessionListQuerySchema,
+  platformSupportSessionSchema,
   requestSupportSessionSchema,
   supportSessionDecisionSchema,
   supportSessionSchema,
@@ -14,7 +16,7 @@ import {
   CurrentEstate,
   type EstateAccess,
 } from '../../common/auth/auth.decorators';
-import { Contract, ValidBody, ValidParams } from '../../common/contract/contract';
+import { Contract, ValidBody, ValidParams, ValidQuery } from '../../common/contract/contract';
 import { SupportAccessService } from './support-access.service';
 
 @Controller('v1/estates/:estateId/support-sessions')
@@ -98,6 +100,19 @@ export class EstateSupportAccessController {
 @Controller('v1/platform/support-sessions')
 export class PlatformSupportAccessController {
   constructor(private readonly support: SupportAccessService) {}
+
+  @Get()
+  @Can('platform.support_access')
+  @Contract({
+    summary: 'List platform support-access sessions across estates (newest first)',
+    tags: ['platform'],
+    query: platformSupportSessionListQuerySchema,
+    response: platformSupportSessionSchema,
+    paginated: true,
+  })
+  list(@ValidQuery() query: z.infer<typeof platformSupportSessionListQuerySchema>) {
+    return this.support.listForPlatform(query);
+  }
 
   @Post()
   @Can('platform.support_access')

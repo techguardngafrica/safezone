@@ -1,13 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import type { requestSupportSessionSchema, supportSessionDecisionSchema } from '@safezone/schemas';
-import type { z } from 'zod';
+import type {
+  platformSupportSessionListQuerySchema,
+  requestSupportSessionSchema,
+  supportSessionDecisionSchema,
+} from '@safezone/schemas';
+import { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
 import type { Tx } from '../../common/database/tenant-context';
 import type { AuthContext, EstateAccess } from '../../common/auth/auth.decorators';
 import { DatabaseService } from '../../common/database/database.service';
 import { ConflictError, ForbiddenError, NotFoundError } from '../../common/errors/domain-error';
+import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
+
+const sessionCursorSchema = z.object({ id: z.uuid() });
+const isSessionCursor = (value: unknown): value is { id: string } =>
+  sessionCursorSchema.safeParse(value).success;
 
 function toView(row: Prisma.SupportSessionGetPayload<object>) {
   return {
@@ -337,6 +346,45 @@ export class SupportAccessService {
         },
       ]);
       return toView(updated);
+    });
+  }
+
+  /** Cross-estate list of support sessions for platform support staff (ADR-0022). */
+  async listForPlatform(query: z.infer<typeof platformSupportSessionListQuerySchema>) {
+    const after = query.cursor ? decodeCursor(query.cursor, isSessionCursor) : null;
+    const rows = await this.db.withContext('platform_config', (tx) =>
+      tx.supportSession.findMany({
+        where: {
+          ...(query.status ? { status: query.status } : {}),
+          ...(query.estateId ? { estateId: query.estateId } : {}),
+          ...(after ? { id: { lt: after.id } } : {}),
+        },
+        orderBy: { id: 'desc' },
+        take: query.limit + 1,
+      }),
+    );
+    const hasMore = rows.length > query.limit;
+    const page = hasMore ? rows.slice(0, query.limit) : rows;
+    const estateNames = await this.tenancy.estateNamesByIds(page.map((row) => row.estateId));
+    return {
+      items: page.map((row) => ({
+        ...toView(row),
+        estateName: estateNames.get(row.estateId) ?? null,
+      })),
+      nextCursor: hasMore ? encodeCursor({ id: page[page.length - 1]!.id }) : null,
+    };
+  }
+
+  async countSummary() {
+    const now = new Date();
+    return this.db.withContext('platform_config', async (tx) => {
+      const [activeSessions, pendingSessions] = await Promise.all([
+        tx.supportSession.count({
+          where: { status: 'approved', revokedAt: null, expiresAt: { gt: now } },
+        }),
+        tx.supportSession.count({ where: { status: 'pending' } }),
+      ]);
+      return { activeSessions, pendingSessions };
     });
   }
 }

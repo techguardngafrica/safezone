@@ -5688,6 +5688,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/app-versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List all configured app version policies
+     * @description Requires `platform.config`.
+     */
+    get: operations['platform_listAppVersions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/app-versions/{app}/{platform}': {
     parameters: {
       query?: never;
@@ -5706,6 +5726,114 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/audit-events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Platform-wide audit log (newest first, filterable)
+     * @description Requires `platform.compliance` or `platform.staff.manage` or `platform.config`.
+     */
+    get: operations['platformAudit_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/breaches': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List security and privacy breach records
+     * @description Requires `platform.compliance`.
+     */
+    get: operations['compliance_listBreaches'];
+    put?: never;
+    /**
+     * Log a breach (72-hour NDPC notification tracking)
+     * @description Requires `platform.compliance`.
+     */
+    post: operations['compliance_createBreach'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/breaches/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update breach status or mark NDPC / subjects notified
+     * @description Requires `platform.compliance`.
+     */
+    patch: operations['compliance_updateBreach'];
+    trace?: never;
+  };
+  '/v1/platform/dsr': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List data subject requests (newest first)
+     * @description Requires `platform.compliance`.
+     */
+    get: operations['compliance_listDsrs'];
+    put?: never;
+    /**
+     * Log a new data subject request (30-day NDPA clock)
+     * @description Requires `platform.compliance`.
+     */
+    post: operations['compliance_createDsr'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/dsr/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update DSR status, identity check or notes
+     * @description Requires `platform.compliance`.
+     */
+    patch: operations['compliance_updateDsr'];
     trace?: never;
   };
   '/v1/platform/estate-applications': {
@@ -5912,6 +6040,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/estates/{id}/entitlements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Effective module entitlements for an estate
+     * @description Requires `platform.estate.create`.
+     */
+    get: operations['platformOnboarding_entitlements'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/estates/{id}/entitlements/{module}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Override a module entitlement for an estate
+     * @description Requires `platform.estate.approve`.
+     */
+    put: operations['platformOnboarding_upsertEntitlement'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/estates/{id}/invitations': {
     parameters: {
       query?: never;
@@ -6036,6 +6204,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Platform infrastructure and BullMQ queue health
+     * @description Requires `platform.config`.
+     */
+    get: operations['platform_platformHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/onboarding-leads': {
     parameters: {
       query?: never;
@@ -6076,7 +6264,111 @@ export interface paths {
     patch: operations['platformOnboarding_updateLead'];
     trace?: never;
   };
-  '/v1/platform/support-sessions': {
+  '/v1/platform/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Platform overview KPIs (any platform staff role)
+     * @description Requires `platform.estate.approve` or `platform.estate.create` or `platform.user.manage` or `platform.support_access` or `platform.staff.manage` or `platform.config` or `platform.compliance` or `platform.finance`.
+     */
+    get: operations['platformAdmin_overview'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List platform plans (all estates start on the free core plan)
+     * @description Requires `platform.config`.
+     */
+    get: operations['platformOnboarding_plans'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/providers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Read-only runtime status of configured external providers
+     * @description Requires `platform.config`.
+     */
+    get: operations['platform_listProviders'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/retention-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List data retention schedule rules
+     * @description Requires `platform.compliance`.
+     */
+    get: operations['compliance_listRetentionRules'];
+    /**
+     * Create or update a data retention rule
+     * @description Requires `platform.compliance`.
+     */
+    put: operations['compliance_upsertRetentionRule'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/staff': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Techguard platform staff and their platform role assignments
+     * @description Requires `platform.staff.manage`.
+     */
+    get: operations['platformAdmin_listStaff'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/staff/roles': {
     parameters: {
       query?: never;
       header?: never;
@@ -6086,10 +6378,262 @@ export interface paths {
     get?: never;
     put?: never;
     /**
+     * Assign a platform role to a user
+     * @description Requires `platform.staff.manage`.
+     */
+    post: operations['platformAdmin_assignRole'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/staff/roles/{assignmentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Revoke a platform role assignment
+     * @description Requires `platform.staff.manage`.
+     */
+    delete: operations['platformAdmin_revokeRole'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/support-sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List platform support-access sessions across estates (newest first)
+     * @description Requires `platform.support_access`.
+     */
+    get: operations['platformSupportAccess_list'];
+    put?: never;
+    /**
      * Request time-bounded, read-only support access to an estate (needs estate consent)
      * @description Requires `platform.support_access`.
      */
     post: operations['platformSupportAccess_request'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/support-tickets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List platform support tickets (newest first)
+     * @description Requires `platform.support_access`.
+     */
+    get: operations['supportTickets_list'];
+    put?: never;
+    /**
+     * Create a platform support ticket
+     * @description Requires `platform.support_access`.
+     */
+    post: operations['supportTickets_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/support-tickets/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Support ticket detail with message thread
+     * @description Requires `platform.support_access`.
+     */
+    get: operations['supportTickets_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update ticket status, priority or assignee
+     * @description Requires `platform.support_access`.
+     */
+    patch: operations['supportTickets_update'];
+    trace?: never;
+  };
+  '/v1/platform/support-tickets/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a public reply or internal note to a support ticket
+     * @description Requires `platform.support_access`.
+     */
+    post: operations['supportTickets_addMessage'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/transactions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Cross-estate payment transactions (newest first, no resident PII)
+     * @description Requires `platform.finance`.
+     */
+    get: operations['platformTransactions_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Platform-wide user lookup by phone, email, name or user id
+     * @description Requires `platform.user.manage`.
+     */
+    get: operations['platformUsers_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/users/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * User profile and estate membership names (no tenant data)
+     * @description Requires `platform.user.manage`.
+     */
+    get: operations['platformUsers_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/users/{id}/lock': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Lock a user account and revoke active sessions
+     * @description Requires `platform.user.manage`.
+     */
+    post: operations['platformUsers_lock'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/users/{id}/reset-mfa': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset TOTP MFA and revoke active sessions (requires re-enrolment)
+     * @description Requires `platform.user.manage`.
+     */
+    post: operations['platformUsers_resetMfa'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/users/{id}/revoke-sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Force sign-out of all devices for a user
+     * @description Requires `platform.user.manage`.
+     */
+    post: operations['platformUsers_revokeSessions'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/users/{id}/unlock': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Unlock a locked user account
+     * @description Requires `platform.user.manage`.
+     */
+    post: operations['platformUsers_unlock'];
     delete?: never;
     options?: never;
     head?: never;
@@ -27124,6 +27668,50 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platform_listAppVersions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              app:
+                | 'resident-mobile'
+                | 'management-web'
+                | 'management-mobile'
+                | 'security-mobile'
+                | 'super-admin'
+                | 'public-web';
+              /** @enum {string} */
+              platform: 'android' | 'ios' | 'web';
+              minVersion: string;
+              recommendedVersion: string;
+              message: string | null;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   platform_setAppVersion: {
     parameters: {
       query?: never;
@@ -27181,6 +27769,387 @@ export interface operations {
       400: components['responses']['Error400'];
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAudit_list: {
+    parameters: {
+      query?: {
+        estateId?: string;
+        actorId?: string;
+        action?: string;
+        resourceType?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              estateId: string | null;
+              /** Format: date-time */
+              occurredAt: string;
+              actorType: string;
+              actorId: string | null;
+              actingRole: string | null;
+              action: string;
+              resourceType: string;
+              resourceId: string | null;
+              reason: string | null;
+              app: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_listBreaches: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: date-time */
+              detectedAt: string;
+              title: string;
+              description: string;
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              affectedEstates: number;
+              affectedCount: number;
+              ndpcNotifiedAt: string | null;
+              subjectsNotifiedAt: string | null;
+              /** @enum {string} */
+              status: 'investigating' | 'contained' | 'notified' | 'closed';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_createBreach: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          detectedAt?: string;
+          title: string;
+          description: string;
+          /** @enum {string} */
+          severity: 'low' | 'medium' | 'high' | 'critical';
+          /** @default 0 */
+          affectedEstates?: number;
+          /** @default 0 */
+          affectedCount?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: date-time */
+              detectedAt: string;
+              title: string;
+              description: string;
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              affectedEstates: number;
+              affectedCount: number;
+              ndpcNotifiedAt: string | null;
+              subjectsNotifiedAt: string | null;
+              /** @enum {string} */
+              status: 'investigating' | 'contained' | 'notified' | 'closed';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_updateBreach: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status?: 'investigating' | 'contained' | 'notified' | 'closed';
+          markNdpcNotified?: boolean;
+          markSubjectsNotified?: boolean;
+          affectedEstates?: number;
+          affectedCount?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: date-time */
+              detectedAt: string;
+              title: string;
+              description: string;
+              /** @enum {string} */
+              severity: 'low' | 'medium' | 'high' | 'critical';
+              affectedEstates: number;
+              affectedCount: number;
+              ndpcNotifiedAt: string | null;
+              subjectsNotifiedAt: string | null;
+              /** @enum {string} */
+              status: 'investigating' | 'contained' | 'notified' | 'closed';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_listDsrs: {
+    parameters: {
+      query?: {
+        status?: 'received' | 'identity_verified' | 'in_progress' | 'completed' | 'rejected';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              userId: string | null;
+              subjectName: string;
+              subjectContact: string;
+              /** @enum {string} */
+              type: 'access' | 'correction' | 'deletion' | 'export' | 'objection';
+              /** @enum {string} */
+              status: 'received' | 'identity_verified' | 'in_progress' | 'completed' | 'rejected';
+              notes: string | null;
+              /** Format: date-time */
+              receivedAt: string;
+              /** Format: date-time */
+              dueAt: string;
+              identityCheckedBy: string | null;
+              identityCheckedAt: string | null;
+              completedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_createDsr: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId?: string;
+          subjectName: string;
+          subjectContact: string;
+          /** @enum {string} */
+          type: 'access' | 'correction' | 'deletion' | 'export' | 'objection';
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              userId: string | null;
+              subjectName: string;
+              subjectContact: string;
+              /** @enum {string} */
+              type: 'access' | 'correction' | 'deletion' | 'export' | 'objection';
+              /** @enum {string} */
+              status: 'received' | 'identity_verified' | 'in_progress' | 'completed' | 'rejected';
+              notes: string | null;
+              /** Format: date-time */
+              receivedAt: string;
+              /** Format: date-time */
+              dueAt: string;
+              identityCheckedBy: string | null;
+              identityCheckedAt: string | null;
+              completedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_updateDsr: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status?: 'received' | 'identity_verified' | 'in_progress' | 'completed' | 'rejected';
+          markIdentityChecked?: boolean;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              userId: string | null;
+              subjectName: string;
+              subjectContact: string;
+              /** @enum {string} */
+              type: 'access' | 'correction' | 'deletion' | 'export' | 'objection';
+              /** @enum {string} */
+              status: 'received' | 'identity_verified' | 'in_progress' | 'completed' | 'rejected';
+              notes: string | null;
+              /** Format: date-time */
+              receivedAt: string;
+              /** Format: date-time */
+              dueAt: string;
+              identityCheckedBy: string | null;
+              identityCheckedAt: string | null;
+              completedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -27965,6 +28934,86 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformOnboarding_entitlements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              module: string;
+              enabled: boolean;
+              /** @enum {string} */
+              source: 'plan' | 'override';
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_upsertEntitlement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        module: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          enabled: boolean;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              module: string;
+              enabled: boolean;
+              /** @enum {string} */
+              source: 'plan' | 'override';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   platformOnboarding_invitations: {
     parameters: {
       query?: never;
@@ -28358,6 +29407,52 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platform_platformHealth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              status: 'ok' | 'degraded';
+              /** Format: date-time */
+              checkedAt: string;
+              checks: {
+                /** @enum {string} */
+                database: 'ok' | 'fail';
+                /** @enum {string} */
+                redis: 'ok' | 'fail';
+              };
+              queues: {
+                name: string;
+                waiting: number;
+                active: number;
+                delayed: number;
+                failed: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   platformOnboarding_listLeads: {
     parameters: {
       query?: {
@@ -28449,6 +29544,402 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformAdmin_overview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              estates: {
+                total: number;
+                active: number;
+                approved: number;
+                suspended: number;
+                deactivated: number;
+              };
+              applications: {
+                submitted: number;
+                underReview: number;
+                infoRequested: number;
+              };
+              leads: {
+                newCount: number;
+                contactedCount: number;
+              };
+              users: {
+                total: number;
+                locked: number;
+              };
+              support: {
+                openTickets: number;
+                activeSessions: number;
+                pendingSessions: number;
+              };
+              compliance: {
+                openDsrs: number;
+                openBreaches: number;
+              };
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformOnboarding_plans: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              key: string;
+              name: string;
+              features: string[];
+              isDefault: boolean;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platform_listProviders: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              category: 'sms' | 'email' | 'push' | 'payments' | 'storage' | 'utilities';
+              provider: string;
+              configured: boolean;
+              /** @enum {string} */
+              mode: 'live' | 'sandbox' | 'fake';
+              notes: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_listRetentionRules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              dataType: string;
+              retentionDays: number;
+              basis: string;
+              /** @enum {string} */
+              action: 'delete' | 'anonymise' | 'archive';
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_upsertRetentionRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          dataType: string;
+          retentionDays: number;
+          basis: string;
+          /** @enum {string} */
+          action: 'delete' | 'anonymise' | 'archive';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              dataType: string;
+              retentionDays: number;
+              basis: string;
+              /** @enum {string} */
+              action: 'delete' | 'anonymise' | 'archive';
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdmin_listStaff: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              userId: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              roles: {
+                /** Format: uuid */
+                assignmentId: string;
+                roleKey: string;
+                roleName: string;
+                /** Format: date-time */
+                grantedAt: string;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdmin_assignRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+          roleKey: string;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              assignmentId: string;
+              roleKey: string;
+              roleName: string;
+              /** Format: date-time */
+              grantedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdmin_revokeRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        assignmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              assignmentId: string;
+              revoked: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSupportAccess_list: {
+    parameters: {
+      query?: {
+        status?: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+        estateId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              estateName: string | null;
+              /** Format: uuid */
+              platformUserId: string;
+              platformUserName: string | null;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'denied' | 'revoked' | 'expired';
+              durationMinutes: number;
+              /** Format: date-time */
+              requestedAt: string;
+              decidedBy: string | null;
+              decidedAt: string | null;
+              decisionReason: string | null;
+              expiresAt: string | null;
+              revokedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   platformSupportAccess_request: {
     parameters: {
       query?: never;
@@ -28496,6 +29987,707 @@ export interface operations {
               decisionReason: string | null;
               expiresAt: string | null;
               revokedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  supportTickets_list: {
+    parameters: {
+      query?: {
+        status?: 'new' | 'open' | 'pending_customer' | 'resolved' | 'closed';
+        priority?: 'critical' | 'high' | 'normal' | 'low';
+        estateId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              estateId: string | null;
+              requesterUserId: string | null;
+              requesterName: string | null;
+              requesterContact: string | null;
+              /** @enum {string} */
+              channel: 'in_app' | 'email' | 'whatsapp' | 'phone' | 'internal';
+              /** @enum {string} */
+              category: 'gate_sos' | 'onboarding' | 'billing' | 'technical' | 'account' | 'other';
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'low';
+              subject: string;
+              description: string;
+              /** @enum {string} */
+              status: 'new' | 'open' | 'pending_customer' | 'resolved' | 'closed';
+              assigneeId: string | null;
+              /** Format: date-time */
+              slaDueAt: string;
+              resolvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  supportTickets_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          estateId?: string;
+          /** Format: uuid */
+          requesterUserId?: string;
+          requesterName?: string;
+          requesterContact?: string;
+          /**
+           * @default internal
+           * @enum {string}
+           */
+          channel?: 'in_app' | 'email' | 'whatsapp' | 'phone' | 'internal';
+          /**
+           * @default technical
+           * @enum {string}
+           */
+          category?: 'gate_sos' | 'onboarding' | 'billing' | 'technical' | 'account' | 'other';
+          /**
+           * @default normal
+           * @enum {string}
+           */
+          priority?: 'critical' | 'high' | 'normal' | 'low';
+          subject: string;
+          description: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              estateId: string | null;
+              requesterUserId: string | null;
+              requesterName: string | null;
+              requesterContact: string | null;
+              /** @enum {string} */
+              channel: 'in_app' | 'email' | 'whatsapp' | 'phone' | 'internal';
+              /** @enum {string} */
+              category: 'gate_sos' | 'onboarding' | 'billing' | 'technical' | 'account' | 'other';
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'low';
+              subject: string;
+              description: string;
+              /** @enum {string} */
+              status: 'new' | 'open' | 'pending_customer' | 'resolved' | 'closed';
+              assigneeId: string | null;
+              /** Format: date-time */
+              slaDueAt: string;
+              resolvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  supportTickets_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              estateId: string | null;
+              requesterUserId: string | null;
+              requesterName: string | null;
+              requesterContact: string | null;
+              /** @enum {string} */
+              channel: 'in_app' | 'email' | 'whatsapp' | 'phone' | 'internal';
+              /** @enum {string} */
+              category: 'gate_sos' | 'onboarding' | 'billing' | 'technical' | 'account' | 'other';
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'low';
+              subject: string;
+              description: string;
+              /** @enum {string} */
+              status: 'new' | 'open' | 'pending_customer' | 'resolved' | 'closed';
+              assigneeId: string | null;
+              /** Format: date-time */
+              slaDueAt: string;
+              resolvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              messages: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                ticketId: string;
+                /** Format: uuid */
+                authorId: string;
+                body: string;
+                internal: boolean;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  supportTickets_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status?: 'new' | 'open' | 'pending_customer' | 'resolved' | 'closed';
+          /** @enum {string} */
+          priority?: 'critical' | 'high' | 'normal' | 'low';
+          assigneeId?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              estateId: string | null;
+              requesterUserId: string | null;
+              requesterName: string | null;
+              requesterContact: string | null;
+              /** @enum {string} */
+              channel: 'in_app' | 'email' | 'whatsapp' | 'phone' | 'internal';
+              /** @enum {string} */
+              category: 'gate_sos' | 'onboarding' | 'billing' | 'technical' | 'account' | 'other';
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'low';
+              subject: string;
+              description: string;
+              /** @enum {string} */
+              status: 'new' | 'open' | 'pending_customer' | 'resolved' | 'closed';
+              assigneeId: string | null;
+              /** Format: date-time */
+              slaDueAt: string;
+              resolvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  supportTickets_addMessage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+          /** @default false */
+          internal?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              ticketId: string;
+              /** Format: uuid */
+              authorId: string;
+              body: string;
+              internal: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformTransactions_list: {
+    parameters: {
+      query?: {
+        estateId?: string;
+        status?: string;
+        provider?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              estateName: string | null;
+              reference: string;
+              provider: string;
+              channel: string | null;
+              status: string;
+              amountKobo: number;
+              currency: string;
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformUsers_list: {
+    parameters: {
+      query?: {
+        q?: string;
+        status?: 'active' | 'locked' | 'deactivated';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              estateCount: number;
+              platformRoles: string[];
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformUsers_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              estateCount: number;
+              platformRoles: string[];
+              /** Format: date-time */
+              createdAt: string;
+              activeSessionCount: number;
+              memberships: {
+                /** Format: uuid */
+                estateId: string;
+                estateName: string;
+                status: string;
+                roles: string[];
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformUsers_lock: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              estateCount: number;
+              platformRoles: string[];
+              /** Format: date-time */
+              createdAt: string;
+              activeSessionCount: number;
+              memberships: {
+                /** Format: uuid */
+                estateId: string;
+                estateName: string;
+                status: string;
+                roles: string[];
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformUsers_resetMfa: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              estateCount: number;
+              platformRoles: string[];
+              /** Format: date-time */
+              createdAt: string;
+              activeSessionCount: number;
+              memberships: {
+                /** Format: uuid */
+                estateId: string;
+                estateName: string;
+                status: string;
+                roles: string[];
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformUsers_revokeSessions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              estateCount: number;
+              platformRoles: string[];
+              /** Format: date-time */
+              createdAt: string;
+              activeSessionCount: number;
+              memberships: {
+                /** Format: uuid */
+                estateId: string;
+                estateName: string;
+                status: string;
+                roles: string[];
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformUsers_unlock: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              fullName: string | null;
+              phone: string;
+              email: string | null;
+              status: string;
+              mfaEnabled: boolean;
+              estateCount: number;
+              platformRoles: string[];
+              /** Format: date-time */
+              createdAt: string;
+              activeSessionCount: number;
+              memberships: {
+                /** Format: uuid */
+                estateId: string;
+                estateName: string;
+                status: string;
+                roles: string[];
+              }[];
             };
           };
         };

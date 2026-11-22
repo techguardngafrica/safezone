@@ -1,5 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { estateParamSchema, paginationQuerySchema } from '@safezone/schemas';
+import {
+  estateParamSchema,
+  paginationQuerySchema,
+  platformAuditEventSchema,
+  platformAuditQuerySchema,
+} from '@safezone/schemas';
 import { z } from 'zod';
 import { Can, CurrentEstate, type EstateAccess } from '../../common/auth/auth.decorators';
 import { Contract, ValidQuery } from '../../common/contract/contract';
@@ -37,5 +42,23 @@ export class AuditController {
     @ValidQuery() query: z.infer<typeof paginationQuerySchema>,
   ) {
     return this.audit.listForEstate(estate, query.limit, query.cursor);
+  }
+}
+
+@Controller('v1/platform/audit-events')
+export class PlatformAuditController {
+  constructor(private readonly audit: AuditService) {}
+
+  @Get()
+  @Can('platform.compliance', 'platform.staff.manage', 'platform.config')
+  @Contract({
+    summary: 'Platform-wide audit log (newest first, filterable)',
+    tags: ['platform'],
+    query: platformAuditQuerySchema,
+    response: platformAuditEventSchema,
+    paginated: true,
+  })
+  list(@ValidQuery() query: z.infer<typeof platformAuditQuerySchema>) {
+    return this.audit.listForPlatform(query);
   }
 }

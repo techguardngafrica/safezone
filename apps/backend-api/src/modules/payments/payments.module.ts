@@ -9,11 +9,12 @@ import { OccupancyModule } from '../occupancy/occupancy.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { PaymentsController, PaymentsPublicController } from './payments.controller';
 import { PaymentsService } from './payments.service';
+import { PlatformTransactionsController } from './platform-transactions.controller';
 
 /** Payments (payments.md). PaymentsConsumer runs in the worker process (worker.module.ts). */
 @Module({
   imports: [TenancyModule, BillingModule, IdentityModule, NotificationsModule, OccupancyModule],
-  controllers: [PaymentsPublicController, PaymentsController],
+  controllers: [PaymentsPublicController, PaymentsController, PlatformTransactionsController],
   providers: [PaymentsService],
   exports: [PaymentsService],
 })

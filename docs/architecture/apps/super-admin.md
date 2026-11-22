@@ -178,3 +178,17 @@ Playwright: approve and reject an application, assisted estate creation and admi
 - An estate application can be reviewed and approved in under 10 minutes when documents are complete.
 - A Techguard-assisted estate can be created and its administrator invited in under 15 minutes.
 - No platform user can see estate personal data without a support session or compliance task, and every such view appears in the estate's audit log.
+
+## 11. Implementation status (21 Nov 2026)
+
+Built (Phases 0–3): permission-gated `PlatformShell` with 15-minute idle auto-sign-out, TOTP MFA enforcement via `SessionGate`, `robots.ts` (`Disallow: /`) and `X-Robots-Tag: noindex, nofollow` / `X-Frame-Options: DENY` headers, plus all Phase 0–3 sections:
+
+- **Overview** (`/overview`): platform KPIs and live API/DB/Redis status.
+- **Estates & Onboarding** (`/estates/applications`, `/estates/applications/[id]`, `/estates/leads`, `/estates/new`, `/estates`, `/estates/[id]`): self-service application review queue with duplicate check, audited document downloads, start review, request info, approve and reject; assisted onboarding leads and estate creation; admin invitations (create/revoke); suspend/reactivate/deactivate with audit reasons; per-estate module entitlement overrides.
+- **Users & Platform Staff** (`/users`, `/users/staff`): platform-wide user lookup (estate membership names only, no tenant data), lock/unlock, force sign-out, MFA reset; platform staff role grants/revocations (restricted to `level === 'platform'` roles, last `super_admin` protected).
+- **Support** (`/support`, `/support/sessions`): support tickets with SLA tracking and public/internal replies, plus cross-estate support access session listing and access request modal.
+- **Transactions** (`/transactions`): cross-estate payment transaction monitoring (no resident PII).
+- **Compliance** (`/compliance`, `/compliance/breaches`, `/compliance/retention`): DSRs with 30-day statutory deadline, breach register with NDPC notification tracking, and retention schedule editor.
+- **Platform Config, Audit & Health** (`/platform/flags`, `/platform/versions`, `/platform/plans`, `/platform/providers`, `/audit`, `/health`): feature flags, app versions, free core plan overview, read-only runtime provider status, platform-wide audit log, and live DB/Redis/BullMQ queue health.
+
+Backed by [ADR-0022](../adr/0022-platform-control-plane.md) and migration `20261121120000_platform_control_plane`. Phase 4+ sections (`Vendors`, `Advertising`) wait for their backend modules.

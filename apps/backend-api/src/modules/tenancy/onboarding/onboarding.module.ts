@@ -34,6 +34,6 @@ import { SetupService, SetupVerifiers } from './setup.service';
     SetupVerifiers,
     { provide: RateLimiter, useClass: RedisRateLimiter },
   ],
-  exports: [SetupVerifiers],
+  exports: [SetupVerifiers, EstatesAdminService],
 })
 export class OnboardingModule {}

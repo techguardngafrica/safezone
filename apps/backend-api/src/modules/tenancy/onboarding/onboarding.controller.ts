@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Patch, Post, Req } from '@nestjs/common';
+import { Controller, Get, HttpCode, Patch, Post, Put, Req } from '@nestjs/common';
 import {
   acceptedInvitationSchema,
   applicationDecisionSchema,
@@ -9,6 +9,8 @@ import {
   createInvitationSchema,
   downloadUrlSchema,
   estateApplicationSchema,
+  estateEntitlementParamsSchema,
+  estateEntitlementSchema,
   estateLifecycleSchema,
   estateParamSchema,
   idParamSchema,
@@ -20,10 +22,12 @@ import {
   onboardingLeadViewSchema,
   platformEstateListQuerySchema,
   platformEstateSchema,
+  platformPlanSchema,
   resubmitApplicationSchema,
   setupProgressSchema,
   setupStepParamSchema,
   updateLeadSchema,
+  upsertEstateEntitlementSchema,
 } from '@safezone/schemas';
 import type { Request } from 'express';
 import { z } from 'zod';
@@ -463,6 +467,48 @@ export class PlatformOnboardingController {
     @ValidParams() params: z.infer<typeof estateInvitationParamsSchema>,
   ) {
     return this.estates.revokeInvitation(auth.userId, params.id, params.invitationId);
+  }
+
+  @Get('plans')
+  @Can('platform.config')
+  @Contract({
+    summary: 'List platform plans (all estates start on the free core plan)',
+    tags: ['platform'],
+    response: z.array(platformPlanSchema),
+  })
+  plans() {
+    return this.estates.listPlans();
+  }
+
+  @Get('estates/:id/entitlements')
+  @Can('platform.estate.create')
+  @Contract({
+    summary: 'Effective module entitlements for an estate',
+    tags: ['platform'],
+    params: idParamSchema,
+    response: z.array(estateEntitlementSchema),
+    errors: [404],
+  })
+  entitlements(@ValidParams() params: z.infer<typeof idParamSchema>) {
+    return this.estates.listEstateEntitlements(params.id);
+  }
+
+  @Put('estates/:id/entitlements/:module')
+  @Can('platform.estate.approve')
+  @Contract({
+    summary: 'Override a module entitlement for an estate',
+    tags: ['platform'],
+    params: estateEntitlementParamsSchema,
+    body: upsertEstateEntitlementSchema,
+    response: estateEntitlementSchema,
+    errors: [404],
+  })
+  upsertEntitlement(
+    @CurrentAuth() auth: AuthContext,
+    @ValidParams() params: z.infer<typeof estateEntitlementParamsSchema>,
+    @ValidBody() body: z.infer<typeof upsertEstateEntitlementSchema>,
+  ) {
+    return this.estates.upsertEstateEntitlement(auth.userId, params.id, params.module, body);
   }
 }
 

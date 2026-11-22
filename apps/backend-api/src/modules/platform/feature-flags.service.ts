@@ -129,6 +129,105 @@ export class FeatureFlagsService {
     } as const;
   }
 
+  async listAppVersions() {
+    const rows = await this.db.withContext('platform_config', (tx) =>
+      tx.appVersion.findMany({ orderBy: [{ app: 'asc' }, { platform: 'asc' }] }),
+    );
+    return rows.map((row) => ({
+      app: row.app as
+        | 'resident-mobile'
+        | 'management-web'
+        | 'management-mobile'
+        | 'security-mobile'
+        | 'super-admin'
+        | 'public-web',
+      platform: row.platform as 'android' | 'ios' | 'web',
+      minVersion: row.minVersion,
+      recommendedVersion: row.recommendedVersion,
+      message: row.message,
+      updatedAt: row.updatedAt.toISOString(),
+    }));
+  }
+
+  /** Read-only runtime provider summary (secrets never leave the vault/env). */
+  listProviders() {
+    const isProd = this.env.NODE_ENV === 'production';
+    return [
+      {
+        category: 'sms' as const,
+        provider: this.env.SMS_PROVIDER === 'termii' ? 'Termii' : 'Fake SMS (dev)',
+        configured: this.env.SMS_PROVIDER === 'termii' ? Boolean(this.env.SMS_API_KEY) : true,
+        mode:
+          this.env.SMS_PROVIDER === 'fake'
+            ? ('fake' as const)
+            : isProd
+              ? ('live' as const)
+              : ('sandbox' as const),
+        notes: `Sender ID: ${this.env.SMS_SENDER_ID}`,
+      },
+      {
+        category: 'email' as const,
+        provider: this.env.MAIL_TRANSPORT === 'smtp' ? 'Zoho SMTP' : 'File outbox (dev)',
+        configured: this.env.MAIL_TRANSPORT === 'smtp' ? Boolean(this.env.MAIL_SMTP_HOST) : true,
+        mode:
+          this.env.MAIL_TRANSPORT === 'file'
+            ? ('fake' as const)
+            : isProd
+              ? ('live' as const)
+              : ('sandbox' as const),
+        notes: `From: ${this.env.MAIL_SMTP_FROM}`,
+      },
+      {
+        category: 'push' as const,
+        provider: 'Expo Push Notifications',
+        configured: true,
+        mode: this.env.EXPO_ACCESS_TOKEN
+          ? isProd
+            ? ('live' as const)
+            : ('sandbox' as const)
+          : ('sandbox' as const),
+        notes: this.env.EXPO_ACCESS_TOKEN ? 'Access token configured' : 'Default Expo push mode',
+      },
+      {
+        category: 'payments' as const,
+        provider: this.env.PAYMENTS_PROVIDER === 'paystack' ? 'Paystack' : 'Fake Payments (dev)',
+        configured:
+          this.env.PAYMENTS_PROVIDER === 'paystack' ? Boolean(this.env.PAYSTACK_SECRET_KEY) : true,
+        mode:
+          this.env.PAYMENTS_PROVIDER === 'fake'
+            ? ('fake' as const)
+            : isProd
+              ? ('live' as const)
+              : ('sandbox' as const),
+        notes: 'Direct split settlement to estate subaccounts',
+      },
+      {
+        category: 'storage' as const,
+        provider:
+          this.env.STORAGE_DRIVER === 's3' ? 'S3-compatible object storage' : 'Local disk (dev)',
+        configured: this.env.STORAGE_DRIVER === 's3' ? Boolean(this.env.STORAGE_BUCKET) : true,
+        mode:
+          this.env.STORAGE_DRIVER === 'local'
+            ? ('fake' as const)
+            : isProd
+              ? ('live' as const)
+              : ('sandbox' as const),
+        notes: `Bucket: ${this.env.STORAGE_BUCKET}`,
+      },
+      {
+        category: 'utilities' as const,
+        provider: this.env.BILLS_PROVIDER ?? 'Not configured',
+        configured: Boolean(this.env.BILLS_PROVIDER && this.env.BILLS_API_KEY),
+        mode: this.env.BILLS_PROVIDER
+          ? isProd
+            ? ('live' as const)
+            : ('sandbox' as const)
+          : ('fake' as const),
+        notes: 'Prepaid electricity token aggregator',
+      },
+    ];
+  }
+
   async setAppVersion(
     app: string,
     platform: string,

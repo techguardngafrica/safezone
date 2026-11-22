@@ -219,6 +219,15 @@ export class TenancyService {
     });
   }
 
+  async estateNamesByIds(ids: readonly string[]): Promise<Map<string, string>> {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) return new Map();
+    const rows = await this.db.withContext('tenancy', (tx) =>
+      tx.estate.findMany({ where: { id: { in: unique } }, select: { id: true, name: true } }),
+    );
+    return new Map(rows.map((row) => [row.id, row.name]));
+  }
+
   async findByJoinCode(code: string): Promise<{ id: string; name: string } | null> {
     return this.db.withContext('tenancy', async (tx) => {
       const estate = await tx.estate.findUnique({

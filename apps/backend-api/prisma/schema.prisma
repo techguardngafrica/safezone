@@ -2677,3 +2677,111 @@ model SupportSession {
   @@map("support_sessions")
   @@schema("tenant")
 }
+
+/// Platform support tickets (platform.md §3, ADR-0022).
+model SupportTicket {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String?   @map("estate_id") @db.Uuid
+  requesterUserId String?   @map("requester_user_id") @db.Uuid
+  requesterName   String?   @map("requester_name")
+  requesterContact String?  @map("requester_contact")
+  /// in_app | email | whatsapp | phone | internal
+  channel         String    @default("in_app")
+  /// gate_sos | onboarding | billing | technical | account | other
+  category        String    @default("technical")
+  /// critical | high | normal | low
+  priority        String    @default("normal")
+  subject         String
+  description     String
+  /// new | open | pending_customer | resolved | closed
+  status          String    @default("new")
+  assigneeId      String?   @map("assignee_id") @db.Uuid
+  slaDueAt        DateTime  @map("sla_due_at") @db.Timestamptz(3)
+  resolvedAt      DateTime? @map("resolved_at") @db.Timestamptz(3)
+  createdBy       String    @map("created_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  messages SupportTicketMessage[]
+
+  @@index([status, priority, createdAt])
+  @@index([estateId, createdAt])
+  @@map("support_tickets")
+  @@schema("platform")
+}
+
+model SupportTicketMessage {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  ticketId  String   @map("ticket_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  body      String
+  internal  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_messages")
+  @@schema("platform")
+}
+
+/// Data subject requests under NDPA 2023 / GAID 2025 (platform.md §5, ADR-0022).
+model DataSubjectRequest {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  userId            String?   @map("user_id") @db.Uuid
+  subjectName       String    @map("subject_name")
+  subjectContact    String    @map("subject_contact")
+  /// access | correction | deletion | export | objection
+  type              String
+  /// received | identity_verified | in_progress | completed | rejected
+  status            String    @default("received")
+  notes             String?
+  receivedAt        DateTime  @default(now()) @map("received_at") @db.Timestamptz(3)
+  dueAt             DateTime  @map("due_at") @db.Timestamptz(3)
+  identityCheckedBy String?   @map("identity_checked_by") @db.Uuid
+  identityCheckedAt DateTime? @map("identity_checked_at") @db.Timestamptz(3)
+  completedAt       DateTime? @map("completed_at") @db.Timestamptz(3)
+  createdBy         String    @map("created_by") @db.Uuid
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, dueAt])
+  @@map("data_subject_requests")
+  @@schema("platform")
+}
+
+/// Security / privacy breach register with 72-hour NDPC notification tracking (platform.md §3, ADR-0022).
+model BreachLog {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  detectedAt         DateTime  @map("detected_at") @db.Timestamptz(3)
+  title              String
+  description        String
+  /// low | medium | high | critical
+  severity           String
+  affectedEstates    Int       @default(0) @map("affected_estates")
+  affectedCount      Int       @default(0) @map("affected_count")
+  ndpcNotifiedAt     DateTime? @map("ndpc_notified_at") @db.Timestamptz(3)
+  subjectsNotifiedAt DateTime? @map("subjects_notified_at") @db.Timestamptz(3)
+  /// investigating | contained | notified | closed
+  status             String    @default("investigating")
+  createdBy          String    @map("created_by") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, detectedAt])
+  @@map("breach_log")
+  @@schema("platform")
+}
+
+/// Data retention schedule rules (platform.md §3, ADR-0022).
+model RetentionRule {
+  dataType      String   @id @map("data_type")
+  retentionDays Int      @map("retention_days")
+  basis         String
+  /// delete | anonymise | archive
+  action        String
+  updatedBy     String?  @map("updated_by") @db.Uuid
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@map("retention_rules")
+  @@schema("platform")
+}

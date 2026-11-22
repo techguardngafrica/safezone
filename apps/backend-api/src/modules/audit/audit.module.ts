@@ -2,11 +2,15 @@ import { Module, type OnModuleInit } from '@nestjs/common';
 import { EstateExportRegistry } from '../../common/export/export-registry';
 import { tenantDataset } from '../../common/export/tenant-dataset';
 import { DatabaseService } from '../../common/database/database.service';
-import { AuditController } from './audit.controller';
+import { AuditController, PlatformAuditController } from './audit.controller';
 import { AuditService } from './audit.service';
 
-/** API side: estate audit log. The worker adds AuditConsumer (see worker.module.ts). */
-@Module({ controllers: [AuditController], providers: [AuditService], exports: [AuditService] })
+/** API side: estate and platform audit log. The worker adds AuditConsumer (see worker.module.ts). */
+@Module({
+  controllers: [AuditController, PlatformAuditController],
+  providers: [AuditService],
+  exports: [AuditService],
+})
 export class AuditModule implements OnModuleInit {
   constructor(
     private readonly exportRegistry: EstateExportRegistry,

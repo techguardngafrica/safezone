@@ -635,6 +635,121 @@ export class EstatesAdminService {
     );
   }
 
+  async listPlans() {
+    const rows = await this.db.withContext('tenancy', (tx) =>
+      tx.plan.findMany({ orderBy: { key: 'asc' } }),
+    );
+    return rows.map((row) => ({
+      key: row.key,
+      name: row.name,
+      features: row.features,
+      isDefault: row.key === 'core',
+    }));
+  }
+
+  async listEstateEntitlements(estateId: string) {
+    return this.db.withContext(
+      'tenancy',
+      async (tx) => {
+        const estate = await tx.estate.findUnique({
+          where: { id: estateId },
+          select: { id: true, planKey: true },
+        });
+        if (!estate) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+        const [plan, overrides] = await Promise.all([
+          tx.plan.findUnique({ where: { key: estate.planKey } }),
+          tx.entitlement.findMany({ where: { estateId } }),
+        ]);
+        const planFeatures = new Set(plan?.features ?? []);
+        const overrideMap = new Map(overrides.map((o) => [o.featureKey, o]));
+        const allKeys = [...new Set([...planFeatures, ...overrideMap.keys()])].sort();
+        return allKeys.map((module) => {
+          const override = overrideMap.get(module);
+          return override
+            ? { module, enabled: override.enabled, source: 'override' as const }
+            : { module, enabled: planFeatures.has(module), source: 'plan' as const };
+        });
+      },
+      { estateId },
+    );
+  }
+
+  async upsertEstateEntitlement(
+    staffId: string,
+    estateId: string,
+    moduleKey: string,
+    input: { enabled: boolean; reason: string },
+  ) {
+    return this.db.withContext(
+      'tenancy',
+      async (tx) => {
+        const estate = await tx.estate.findUnique({
+          where: { id: estateId },
+          select: { id: true },
+        });
+        if (!estate) throw new NotFoundError('Estate not found', 'ESTATE_NOT_FOUND');
+        const row = await tx.entitlement.upsert({
+          where: { estateId_featureKey: { estateId, featureKey: moduleKey } },
+          create: { estateId, featureKey: moduleKey, enabled: input.enabled, source: 'override' },
+          update: { enabled: input.enabled, source: 'override', updatedAt: new Date() },
+        });
+        await appendOutboxEvents(tx, [
+          {
+            type: 'tenancy.entitlement.updated',
+            estateId,
+            aggregateType: 'entitlement',
+            aggregateId: `${estateId}:${moduleKey}`,
+            payload: { estateId, module: moduleKey, enabled: input.enabled },
+            audit: {
+              actorType: 'platform_staff',
+              actorId: staffId,
+              action: 'tenancy.entitlement.update',
+              resourceType: 'entitlement',
+              resourceId: `${estateId}:${moduleKey}`,
+              after: { enabled: input.enabled },
+              reason: input.reason,
+            },
+          },
+        ]);
+        return { module: row.featureKey, enabled: row.enabled, source: 'override' as const };
+      },
+      { estateId, userId: staffId },
+    );
+  }
+
+  async platformCounts() {
+    return this.db.withContext('tenancy', async (tx) => {
+      const [estatesByStatus, appsByStatus, leadsByStatus] = await Promise.all([
+        tx.estate.groupBy({ by: ['status'], _count: { _all: true } }),
+        tx.estateApplication.groupBy({ by: ['status'], _count: { _all: true } }),
+        tx.onboardingLead.groupBy({ by: ['status'], _count: { _all: true } }),
+      ]);
+      const eMap = new Map(estatesByStatus.map((r) => [r.status, r._count._all]));
+      const aMap = new Map(appsByStatus.map((r) => [r.status, r._count._all]));
+      const lMap = new Map(leadsByStatus.map((r) => [r.status, r._count._all]));
+      let totalEstates = 0;
+      for (const n of eMap.values()) totalEstates += n;
+      return {
+        estates: {
+          total: totalEstates,
+          active: eMap.get('active') ?? 0,
+          approved: eMap.get('approved') ?? 0,
+          suspended: eMap.get('suspended') ?? 0,
+          deactivated: eMap.get('deactivated') ?? 0,
+        },
+        applications: {
+          submitted: aMap.get('submitted') ?? 0,
+          underReview: aMap.get('under_review') ?? 0,
+          infoRequested: aMap.get('info_requested') ?? 0,
+        },
+        leads: {
+          newCount: lMap.get('new') ?? 0,
+          contactedCount: lMap.get('contacted') ?? 0,
+        },
+      };
+    });
+  }
+
   private async findByToken(tx: Tx, token: string): Promise<InvitationRow> {
     const row = await tx.estateInvitation.findUnique({
       where: { tokenHash: hashInvitationToken(token) },
