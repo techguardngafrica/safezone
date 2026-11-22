@@ -3091,3 +3091,233 @@ model ClassifiedMessage {
   @@map("classified_messages")
   @@schema("tenant")
 }
+
+// ---------------------------------------------------------------------------
+// Managed advertising (advertising.md, Phase 4; ADR-0024). Platform-level, `advertising` context.
+// Impressions and clicks carry a rotating salted user hash, never a user id.
+// ---------------------------------------------------------------------------
+
+model AdEnquiry {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  /// web | resident_app
+  source         String
+  userId         String?  @map("user_id") @db.Uuid
+  advertiserType String   @map("advertiser_type")
+  contactName    String   @map("contact_name")
+  orgName        String?  @map("org_name")
+  phone          String
+  email          String
+  category       String
+  objectives     String
+  description    String
+  budgetRange    String   @map("budget_range")
+  durationWeeks  Int?     @map("duration_weeks")
+  audience       String?
+  placements     String[]
+  status         String   @default("submitted")
+  notes          String?
+  assigneeId     String?  @map("assignee_id") @db.Uuid
+  advertiserId   String?  @map("advertiser_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@map("ad_enquiries")
+  @@schema("platform")
+}
+
+model Advertiser {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  /// individual | organisation
+  type               String
+  name               String
+  category           String
+  /// unverified | verified | rejected
+  verificationStatus String    @default("unverified") @map("verification_status")
+  verifiedAt         DateTime? @map("verified_at") @db.Timestamptz(3)
+  verifiedBy         String?   @map("verified_by") @db.Uuid
+  /// active | suspended
+  status             String    @default("active")
+  suspendedReason    String?   @map("suspended_reason")
+  createdBy          String    @map("created_by") @db.Uuid
+  version            Int       @default(1)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@map("advertisers")
+  @@schema("platform")
+}
+
+model AdvertiserMember {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  advertiserId String    @map("advertiser_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  role         String
+  addedBy      String    @map("added_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  removedAt    DateTime? @map("removed_at") @db.Timestamptz(3)
+
+  @@index([userId, removedAt])
+  @@index([advertiserId, removedAt])
+  @@map("advertiser_members")
+  @@schema("platform")
+}
+
+model AdPlacement {
+  key                String   @id
+  surface            String
+  formats            String[]
+  width              Int?
+  height             Int?
+  maxFileKb          Int      @map("max_file_kb")
+  frequencyCapPerDay Int      @map("frequency_cap_per_day")
+  active             Boolean  @default(true)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("ad_placements")
+  @@schema("platform")
+}
+
+model AdCampaign {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  advertiserId        String    @map("advertiser_id") @db.Uuid
+  enquiryId           String?   @map("enquiry_id") @db.Uuid
+  title               String
+  objective           String
+  startsAt            DateTime  @map("starts_at") @db.Timestamptz(3)
+  endsAt              DateTime  @map("ends_at") @db.Timestamptz(3)
+  budget              BigInt
+  status              String    @default("draft")
+  arconApprovalRef    String?   @map("arcon_approval_ref")
+  arconApprovalFileId String?   @map("arcon_approval_file_id") @db.Uuid
+  restrictedNote      String?   @map("restricted_note")
+  rejectionReason     String?   @map("rejection_reason")
+  approvedBy          String?   @map("approved_by") @db.Uuid
+  approvedAt          DateTime? @map("approved_at") @db.Timestamptz(3)
+  creditApprovedBy    String?   @map("credit_approved_by") @db.Uuid
+  creditApprovedAt    DateTime? @map("credit_approved_at") @db.Timestamptz(3)
+  creditNote          String?   @map("credit_note")
+  createdBy           String    @map("created_by") @db.Uuid
+  version             Int       @default(1)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, startsAt])
+  @@index([advertiserId, createdAt])
+  @@map("ad_campaigns")
+  @@schema("platform")
+}
+
+/// Append-only campaign history.
+model AdCampaignEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  campaignId String   @map("campaign_id") @db.Uuid
+  fromStatus String?  @map("from_status")
+  toStatus   String   @map("to_status")
+  actorId    String?  @map("actor_id") @db.Uuid
+  note       String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([campaignId, createdAt])
+  @@map("ad_campaign_events")
+  @@schema("platform")
+}
+
+model AdLineItem {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  campaignId         String   @map("campaign_id") @db.Uuid
+  placementKey       String   @map("placement_key")
+  /// { scope: all | estates | states, estateIds, states }
+  targeting          Json     @db.JsonB
+  weight             Int      @default(10)
+  frequencyCapPerDay Int?     @map("frequency_cap_per_day")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([placementKey])
+  @@index([campaignId])
+  @@map("ad_line_items")
+  @@schema("platform")
+}
+
+model AdCreative {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  campaignId     String    @map("campaign_id") @db.Uuid
+  type           String
+  imageFileId    String?   @map("image_file_id") @db.Uuid
+  headline       String
+  body           String?
+  cta            String
+  destinationUrl String    @map("destination_url")
+  version        Int       @default(1)
+  /// pending | approved | rejected | revision_requested
+  reviewStatus   String    @default("pending") @map("review_status")
+  reviewNotes    String?   @map("review_notes")
+  reviewedBy     String?   @map("reviewed_by") @db.Uuid
+  reviewedAt     DateTime? @map("reviewed_at") @db.Timestamptz(3)
+  /// Only the latest version of a creative is active; older versions are kept for audit.
+  active         Boolean   @default(true)
+  supersedesId   String?   @map("supersedes_id") @db.Uuid
+  createdBy      String    @map("created_by") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([campaignId, active])
+  @@map("ad_creatives")
+  @@schema("platform")
+}
+
+model AdInvoice {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  advertiserId     String    @map("advertiser_id") @db.Uuid
+  campaignId       String    @map("campaign_id") @db.Uuid
+  number           String    @unique
+  amount           BigInt
+  vat              BigInt
+  total            BigInt
+  /// issued | paid | void
+  status           String    @default("issued")
+  paymentReference String?   @unique @map("payment_reference")
+  paidAt           DateTime? @map("paid_at") @db.Timestamptz(3)
+  createdBy        String    @map("created_by") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([campaignId])
+  @@index([advertiserId, createdAt])
+  @@map("ad_invoices")
+  @@schema("platform")
+}
+
+model AdImpression {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tokenId      String   @unique @map("token_id")
+  campaignId   String   @map("campaign_id") @db.Uuid
+  lineItemId   String   @map("line_item_id") @db.Uuid
+  creativeId   String   @map("creative_id") @db.Uuid
+  placementKey String   @map("placement_key")
+  estateId     String   @map("estate_id") @db.Uuid
+  userHash     String   @map("user_hash")
+  app          String
+  at           DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([campaignId, at])
+  @@map("ad_impressions")
+  @@schema("platform")
+}
+
+model AdClick {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tokenId      String   @map("token_id")
+  campaignId   String   @map("campaign_id") @db.Uuid
+  lineItemId   String   @map("line_item_id") @db.Uuid
+  creativeId   String   @map("creative_id") @db.Uuid
+  placementKey String   @map("placement_key")
+  estateId     String   @map("estate_id") @db.Uuid
+  userHash     String   @map("user_hash")
+  at           DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([campaignId, at])
+  @@index([tokenId])
+  @@map("ad_clicks")
+  @@schema("platform")
+}

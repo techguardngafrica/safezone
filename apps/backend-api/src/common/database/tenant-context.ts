@@ -70,6 +70,8 @@ export const DB_CONTEXTS = [
   'marketplace',
   /** Techguard dispute desk: marketplace disputes and their orders across estates (ADR-0023). */
   'marketplace_admin',
+  /** Advertising: enquiries, advertisers, campaigns, decisions and tracking (ADR-0024). */
+  'advertising',
 ] as const;
 export type DbContext = (typeof DB_CONTEXTS)[number];
 

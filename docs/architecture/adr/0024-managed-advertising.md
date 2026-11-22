@@ -23,7 +23,7 @@ advertising.md describes Techguard-managed advertising: enquiries, advertisers, 
 
 ## Consequences
 
-- New `advertising` module, migration, `advertising` and `advertising_admin` database contexts, an `ads` consumer for the schedule job and invoice payments.
+- New `advertising` module, migration, one `advertising` database context (platform permissions gate the Techguard routes), an `ads` consumer for the schedule job and invoice payments.
 - The authorization guard generalises vendor scoping to advertiser scoping.
 - Super Admin gets advertising screens; public-web gets `/advertise` and `/advertiser/*`; the Resident App gets sponsored slots and Advertiser mode.
 - Open with the product owner: rate card, whether VAT is charged on all invoices, and the restricted-category policy text.
