@@ -318,6 +318,24 @@ export class FilesService {
   }
 
   /**
+   * Short-lived signed URL for the image of an approved ad creative (ADR-0024), shown to residents inside
+   * the ad. Only clean personal images qualify; the advertising module checks the creative is approved.
+   */
+  async adImageUrl(fileId: string): Promise<string | null> {
+    const file = await this.db.withContext('files', (tx) =>
+      tx.storedFile.findUnique({ where: { id: fileId } }),
+    );
+    if (
+      !file ||
+      file.estateId !== null ||
+      file.scanStatus !== 'clean' ||
+      !file.mimeType.startsWith('image/')
+    )
+      return null;
+    return this.storage.presignGet(file.storageKey, DOWNLOAD_URL_TTL_SECONDS, `ad-${file.id}`);
+  }
+
+  /**
    * Signed download for Techguard staff reviewing a file another module has linked (the caller checks
    * that link and the permission). Always audited.
    */

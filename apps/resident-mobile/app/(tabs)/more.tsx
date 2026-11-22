@@ -52,6 +52,10 @@ export default function MoreScreen() {
     queryFn: () => unwrap(api.GET('/v1/me/vendors')),
   });
   const showMarket = hasFeature('marketplace') && can('marketplace.use');
+  const myAdvertisers = useQuery({
+    queryKey: ['me', 'advertisers'],
+    queryFn: () => unwrap(api.GET('/v1/me/advertisers')),
+  });
   const [signingOut, setSigningOut] = useState(false);
   const ownedUnits = useQuery({
     queryKey: ['estate', estateId, 'owned-units'],
@@ -198,6 +202,23 @@ export default function MoreScreen() {
           </Card>
         </>
       ) : null}
+      <SectionHeader title={t('res.more.advertise')} />
+      <Card>
+        {(myAdvertisers.data?.length ?? 0) > 0 ? (
+          <Row
+            title={t('res.more.advertiserMode')}
+            subtitle={t('res.more.advertiserModeHint')}
+            icon="stats-chart-outline"
+            onPress={() => router.push('/advertiser-mode')}
+          />
+        ) : null}
+        <Row
+          title={t('res.more.advertise')}
+          subtitle={t('res.more.advertiseHint')}
+          icon="megaphone-outline"
+          onPress={() => router.push('/advertise')}
+        />
+      </Card>
       {memberships.length > 1 ? (
         <>
           <SectionHeader title={t('res.more.estates')} />

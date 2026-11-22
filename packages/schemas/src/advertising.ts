@@ -391,6 +391,8 @@ export const adDecisionSchema = z.object({
   placement: adPlacementKeySchema,
   type: adCreativeTypeSchema,
   imageFileId: z.uuid().nullable(),
+  /** Signed image link for a few minutes; null when the creative has no ready image. */
+  imageUrl: z.string().nullable(),
   headline: z.string(),
   body: z.string().nullable(),
   cta: z.string(),

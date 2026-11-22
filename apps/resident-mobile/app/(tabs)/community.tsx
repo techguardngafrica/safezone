@@ -23,6 +23,7 @@ import { SOS_CLEARANCE } from '../../src/components/sos-button';
 import type { Channel } from '../../src/features/community';
 import { useGuidelines } from '../../src/features/use-guidelines';
 import { PollCard } from '../../src/features/poll-card';
+import { SponsoredSlot } from '../../src/features/sponsored-slot';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
 import { api } from '../../src/lib/session';
@@ -196,6 +197,8 @@ export default function CommunityScreen() {
               </Card>
             </>
           ) : null}
+          {/* Channels list only: never in private messages (AGENTS.md §6.2). */}
+          <SponsoredSlot placement="resident.feed.sponsored" context="community_feed" />
           {join.isError ? <Banner tone="danger">{errorText(join.error)}</Banner> : null}
           {channels.data && all.length === 0 ? (
             <EmptyState

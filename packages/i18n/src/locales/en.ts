@@ -4130,6 +4130,36 @@ export const en = {
   'api.error.INVOICE_NOT_PAYABLE': 'This invoice is not open for payment.',
   'api.error.ADVERTISER_SUSPENDED': 'This advertiser account is suspended.',
   'api.error.CANNOT_REMOVE_SELF': 'You cannot remove yourself.',
+  // Resident App: advertising (Phase 4)
+  'res.more.advertise': 'Advertise with Safezone',
+  'res.more.advertiseHint': 'Ask Techguard about ads for your business',
+  'res.more.advertiserMode': 'Advertiser mode',
+  'res.more.advertiserModeHint': 'Your campaigns, results and invoices',
+  'res.advertise.title': 'Advertise with Safezone',
+  'res.advertise.intro':
+    'Techguard runs a small number of reviewed, clearly labelled ads. Ads never appear on SOS, visitor passes, payments, private messages or the Security App, and advertisers never receive residents’ personal data.',
+  'res.advertise.mine': 'My enquiries',
+  'res.advertise.none': 'You have not sent an enquiry yet.',
+  'res.advertise.new': 'New enquiry',
+  'res.advertise.sent': 'Sent. Techguard will contact you within two working days.',
+  'res.advertise.status.submitted': 'Received',
+  'res.advertise.status.under_review': 'Being reviewed',
+  'res.advertise.status.awaiting_information': 'Techguard needs more information',
+  'res.advertise.status.proposal_sent': 'Proposal sent',
+  'res.advertise.status.negotiation': 'Agreeing terms',
+  'res.advertise.status.approved': 'Agreed',
+  'res.advertise.status.rejected': 'Not taken forward',
+  'res.advertise.status.converted_to_campaign': 'Campaign created',
+  'res.advertiserMode.title': 'Advertiser mode',
+  'res.advertiserMode.subtitle': 'Campaigns for {name}',
+  'res.advertiserMode.empty': 'No campaigns yet.',
+  'res.advertiserMode.webNote':
+    'Add or change creatives and manage your team in the advertiser area on the web.',
+  'res.advertiserMode.openWeb': 'Open the advertiser area',
+  'res.advertiserMode.results': 'Results',
+  'res.advertiserMode.creatives': 'Creatives',
+  'res.advertiserMode.invoices': 'Invoices',
+  'res.advertiserMode.paying': 'Checking your payment…',
 } as const;
 
 export type MessageKey = keyof typeof en;

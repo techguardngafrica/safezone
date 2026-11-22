@@ -309,6 +309,12 @@
                                 }
                               ]
                             },
+                            "imageUrl": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
                             "headline": {
                               "type": "string"
                             },
@@ -336,6 +342,7 @@
                             "placement",
                             "type",
                             "imageFileId",
+                            "imageUrl",
                             "headline",
                             "body",
                             "cta",

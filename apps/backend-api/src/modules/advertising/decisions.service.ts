@@ -8,6 +8,7 @@ import { uuidv7 } from '../../common/ids/uuidv7';
 import { RedisService } from '../../common/redis/redis.module';
 import { ENV } from '../../config/config.module';
 import type { Env } from '../../config/env';
+import { FilesService } from '../files/files.service';
 import { OccupancyService } from '../occupancy/occupancy.service';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { AdCache } from './ad-cache';
@@ -69,6 +70,7 @@ export class DecisionsService {
     private readonly redis: RedisService,
     private readonly tenancy: TenancyService,
     private readonly occupancy: OccupancyService,
+    private readonly files: FilesService,
     private readonly cache: AdCache,
   ) {}
 
@@ -120,6 +122,7 @@ export class DecisionsService {
       placement: query.placement,
       type: creative.type,
       imageFileId: creative.imageFileId,
+      imageUrl: creative.imageFileId ? await this.files.adImageUrl(creative.imageFileId) : null,
       headline: creative.headline,
       body: creative.body,
       cta: creative.cta,

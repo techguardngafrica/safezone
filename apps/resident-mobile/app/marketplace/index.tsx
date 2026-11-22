@@ -21,6 +21,7 @@ import { Text, View } from 'react-native';
 import { Icon } from '../../src/components/icon';
 import { classifiedPriceText, priceText } from '../../src/features/marketplace';
 import { marketStyles, Muted, Row } from '../../src/features/market-text';
+import { SponsoredSlot } from '../../src/features/sponsored-slot';
 import { errorText } from '../../src/lib/errors';
 import { useResident } from '../../src/lib/resident';
 import { api } from '../../src/lib/session';
@@ -82,6 +83,7 @@ function Services() {
           ]}
         />
       ) : null}
+      <SponsoredSlot placement="resident.marketplace.banner" context="marketplace" />
       {listings.isPending ? <Skeleton height={96} /> : null}
       {listings.isError ? (
         <ErrorState message={errorText(listings.error)} onRetry={() => void listings.refetch()} />

@@ -8761,6 +8761,7 @@ export interface operations {
               /** @enum {string} */
               type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
               imageFileId: string | null;
+              imageUrl: string | null;
               headline: string;
               body: string | null;
               cta: string;

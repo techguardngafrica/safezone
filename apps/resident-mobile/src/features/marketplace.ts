@@ -143,3 +143,21 @@ const OPEN: readonly OrderStatus[] = [
 export function isOpenOrder(status: OrderStatus): boolean {
   return OPEN.includes(status);
 }
+
+let lastCampaign: { advertiserId: string; campaignId: string } | null = null;
+/** Remembered across the trip to the invoice checkout and back (safezone://advertiser-mode/return). */
+export function rememberCampaign(value: { advertiserId: string; campaignId: string }): void {
+  lastCampaign = value;
+}
+export function rememberedCampaign(): { advertiserId: string; campaignId: string } | null {
+  return lastCampaign;
+}
+
+/** Tone of an advertising campaign status in Advertiser mode. */
+export function campaignTone(status: string): Tone {
+  if (status === 'active') return 'success';
+  if (status === 'awaiting_payment' || status === 'rejected' || status === 'paused')
+    return 'warning';
+  if (status === 'cancelled' || status === 'completed') return 'neutral';
+  return 'info';
+}

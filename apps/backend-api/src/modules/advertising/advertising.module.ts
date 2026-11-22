@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RateLimiter, RedisRateLimiter } from '../../common/rate-limit/rate-limiter';
+import { FilesModule } from '../files/files.module';
 import { IdentityModule } from '../identity/identity.module';
 import { OccupancyModule } from '../occupancy/occupancy.module';
 import { PaymentsModule } from '../payments/payments.module';
@@ -16,7 +17,7 @@ import { PlatformAdvertisingController } from './platform-advertising.controller
  * module (access/) is used by the authorization guard.
  */
 @Module({
-  imports: [IdentityModule, OccupancyModule, PaymentsModule, TenancyModule],
+  imports: [FilesModule, IdentityModule, OccupancyModule, PaymentsModule, TenancyModule],
   controllers: [AdvertisingController, PlatformAdvertisingController],
   providers: [
     AdCache,

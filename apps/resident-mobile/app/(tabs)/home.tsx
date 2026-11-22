@@ -18,6 +18,7 @@ import { Icon, type IconName } from '../../src/components/icon';
 import { SOS_CLEARANCE } from '../../src/components/sos-button';
 import { AnnouncementCard } from '../../src/features/announcement-card';
 import { PassCard } from '../../src/features/pass-card';
+import { SponsoredSlot } from '../../src/features/sponsored-slot';
 import { isUpcoming } from '../../src/features/passes';
 import { errorText } from '../../src/lib/errors';
 import { useUnreadNotifications } from '../../src/lib/notifications';
@@ -177,6 +178,8 @@ export default function HomeScreen() {
           />
         ) : null}
       </View>
+
+      <SponsoredSlot placement="resident.home.banner" context="home" />
 
       {hasFeature('visitors') ? (
         <>
