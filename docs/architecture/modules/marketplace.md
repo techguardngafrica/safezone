@@ -89,7 +89,10 @@ Implementation (ADR-0023): `accepted` means the price is agreed and payment is d
 
 | Method         | Path                                                                                                     | Purpose          |
 | -------------- | -------------------------------------------------------------------------------------------------------- | ---------------- |
-| POST           | `/v1/public/vendor-applications`                                                                         | Apply            |
+| GET            | `/v1/marketplace/categories` (public)                                                                    | Categories       |
+| POST           | `/v1/vendor-applications` (signed in; the applicant becomes Vendor Owner)                                | Apply            |
+| GET            | `/v1/me/vendors`                                                                                         | My vendors       |
+| PUT            | `/v1/vendors/:vendorId/payout-account`                                                                   | Payout account   |
 | GET/PATCH      | `/v1/vendors/:vendorId`                                                                                  | Vendor profile   |
 | GET/POST/PATCH | `/v1/vendors/:vendorId/listings[/:id]`                                                                   | Listings         |
 | GET/POST       | `/v1/vendors/:vendorId/members`                                                                          | Team             |
@@ -113,3 +116,12 @@ Implementation (ADR-0023): `accepted` means the price is agreed and payment is d
 - A resident in Estate A cannot see a vendor that Estate A has blocked.
 - Commission and vendor share are split by the provider at payment, matching the rule in force.
 - A vendor can run their full order flow from either the Vendor Portal or Vendor mode in the Resident App.
+
+## 9. Implementation notes (Phase 4, ADR-0023)
+
+- Resident order actions also include `POST …/marketplace/orders/:id/pay`, `/verify-payment` and `GET/POST …/orders/:id/messages`; vendors have `/assign`, `/messages`, `/review-response`, `GET /reviews` and `GET /payouts` (earnings).
+- Platform routes as built: `GET /v1/platform/vendors`, `POST /v1/platform/vendors/:id/approve|reject|suspend|reinstate`, `GET/POST /v1/platform/commission-rules` (append-only), `GET /v1/platform/order-disputes[/:id]`, `POST /v1/platform/order-disputes/:id/resolve`.
+- Classifieds: `GET/POST /v1/estates/:estateId/classifieds`, `GET/PATCH …/:id`, `POST …/:id/hide|restore` (moderators), `GET/POST …/:id/messages`.
+- Estate settings: `marketplace.allow_all_verified_vendors` (default off) and `marketplace.classifieds_enabled` (default on). Feature key `marketplace` is on the free core plan.
+- Commission is 0% until Techguard sets a rule; rules are append-only and the rule in force at checkout is fixed on the order.
+- Not built yet: contractor visitor pass for in-estate jobs (capability 13), document expiry reminders (rule 7), and notifying residents with open orders when a vendor is suspended (rule 8; they can already cancel).

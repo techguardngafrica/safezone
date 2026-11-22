@@ -93,9 +93,20 @@ export interface EstateAccess {
   supportSessionId?: string;
 }
 
+/** Set by AuthorizationGuard on vendor routes (`:vendorId` with a vendor permission, ADR-0023). */
+export interface VendorAccess {
+  vendorId: string;
+  userId: string;
+  memberId: string;
+  role: string;
+  vendorStatus: string;
+  permissions: ReadonlySet<string>;
+}
+
 export interface AuthenticatedRequest {
   auth?: AuthContext;
   estateAccess?: EstateAccess;
+  vendorAccess?: VendorAccess;
 }
 
 export const CurrentAuth = createParamDecorator(
@@ -112,5 +123,14 @@ export const CurrentEstate = createParamDecorator(
     if (!request.estateAccess)
       throw new Error('@CurrentEstate used on a route without estate access');
     return request.estateAccess;
+  },
+);
+
+export const CurrentVendor = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): VendorAccess => {
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    if (!request.vendorAccess)
+      throw new Error('@CurrentVendor used on a route without vendor access');
+    return request.vendorAccess;
   },
 );

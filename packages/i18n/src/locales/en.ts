@@ -162,6 +162,18 @@ export const en = {
   'notifications.facilities.booking_updated.body': 'Starts {startsAt}.',
   'notifications.facilities.booking_reminder.title': 'Reminder: {facility}',
   'notifications.facilities.booking_reminder.body': 'Your booking starts {startsAt}.',
+  'notifications.marketplace.order_updated.title': 'Order update: {listing}',
+  'notifications.marketplace.order_updated.body':
+    'There is an update on the order with {vendor}. Open it for details.',
+  'notifications.marketplace.order_placed.title': 'New order: {listing}',
+  'notifications.marketplace.order_placed.body':
+    'A resident placed an order. Accept, quote or decline it.',
+  'notifications.marketplace.order_message.title': 'New message on {listing}',
+  'notifications.marketplace.order_message.body': 'Open the order to read and reply.',
+  'notifications.marketplace.vendor_decided.title': 'Vendor account update: {vendor}',
+  'notifications.marketplace.vendor_decided.body': 'Open the Vendor Portal for details.',
+  'notifications.marketplace.classified_message.title': 'New message about {listing}',
+  'notifications.marketplace.classified_message.body': 'Open the listing to read and reply.',
   'notifications.documents.expiring.title': '{title} expires on {expiresOn}',
   'notifications.documents.expiring.body': 'Upload a renewed version before it lapses.',
   'notifications.community.message.title': '{channel}',

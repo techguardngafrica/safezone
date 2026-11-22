@@ -876,6 +876,118 @@ export interface paths {
     patch: operations['billing_updateCharge'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/classifieds': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Active classifieds in the estate (or mine, or by status for moderators)
+     * @description Requires `marketplace.use` or `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    get: operations['classifieds_list'];
+    put?: never;
+    /**
+     * Post an item or service for sale in the estate
+     * @description Requires `marketplace.sell`. Needs the `marketplace` feature.
+     */
+    post: operations['classifieds_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/classifieds/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A classified listing
+     * @description Requires `marketplace.use` or `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    get: operations['classifieds_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change my listing, mark it sold, withdraw or renew it
+     * @description Requires `marketplace.sell`. Needs the `marketplace` feature.
+     */
+    patch: operations['classifieds_update'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/classifieds/{id}/hide': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Hide a listing that breaks the estate rules
+     * @description Requires `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    post: operations['classifieds_hide'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/classifieds/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Enquiries on a listing (the seller sees every buyer; a buyer sees their own)
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    get: operations['classifieds_threads'];
+    put?: never;
+    /**
+     * Ask the seller, or reply to a buyer
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['classifieds_postMessage'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/classifieds/{id}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore a hidden listing
+     * @description Requires `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    post: operations['classifieds_restore'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/community/guidelines': {
     parameters: {
       query?: never;
@@ -2698,6 +2810,258 @@ export interface paths {
      * @description Requires `billing.run.approve`. Needs the `payments` feature.
      */
     post: operations['payments_rejectManual'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/listings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Browse listings from vendors this estate allows
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_browse'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My marketplace orders
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_mine'];
+    put?: never;
+    /**
+     * Place an order or request a quote
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_place'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My order with its history
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/accept-quote': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept the vendor’s quote (payment is then due)
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_acceptQuote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel my order (a paid order is refunded in full)
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/dispute': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Open a dispute on a paid order
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_dispute'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Messages with the vendor
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_messages'];
+    put?: never;
+    /**
+     * Message the vendor
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_postMessage'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/pay': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start checkout for an accepted order
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_pay'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/review': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Review a completed order (once)
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_review'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/orders/{id}/verify-payment': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check the payment with the provider after checkout
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    post: operations['marketplace_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/vendor-approvals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendors approved or blocked here, and verified vendors serving the estate
+     * @description Requires `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_approvals'];
+    /**
+     * Approve or block a vendor for this estate
+     * @description Requires `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    put: operations['marketplace_setApproval'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/vendors/{vendorId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A vendor’s profile, listings and reviews from this estate
+     * @description Requires `marketplace.use`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_vendor'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -5128,6 +5492,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/marketplace/categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Marketplace service categories
+     * @description Public.
+     */
+    get: operations['vendors_categories'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/me': {
     parameters: {
       query?: never;
@@ -5648,6 +6032,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/vendors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendors I belong to, with my role
+     * @description Any signed-in user.
+     */
+    get: operations['vendors_mine'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/payments/banks': {
     parameters: {
       query?: never;
@@ -5790,6 +6194,30 @@ export interface paths {
      * @description Requires `platform.compliance`.
      */
     patch: operations['compliance_updateBreach'];
+    trace?: never;
+  };
+  '/v1/platform/commission-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Marketplace commission rules (newest first)
+     * @description Requires `platform.config` or `platform.finance`.
+     */
+    get: operations['platformMarketplace_commission'];
+    put?: never;
+    /**
+     * Set a commission rule from now on (default, category or vendor)
+     * @description Requires `platform.config`.
+     */
+    post: operations['platformMarketplace_setCommission'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/platform/dsr': {
@@ -6264,6 +6692,66 @@ export interface paths {
     patch: operations['platformOnboarding_updateLead'];
     trace?: never;
   };
+  '/v1/platform/order-disputes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Marketplace disputes across estates
+     * @description Requires `vendor.approve`.
+     */
+    get: operations['platformMarketplace_disputes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/order-disputes/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A marketplace dispute
+     * @description Requires `vendor.approve`.
+     */
+    get: operations['platformMarketplace_dispute'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/order-disputes/{id}/resolve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resolve a dispute: full refund, partial refund or no action
+     * @description Requires `vendor.approve`.
+     */
+    post: operations['platformMarketplace_resolve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/overview': {
     parameters: {
       query?: never;
@@ -6640,6 +7128,126 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/vendors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendor applications and accounts
+     * @description Requires `vendor.approve`.
+     */
+    get: operations['platformMarketplace_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/vendors/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A vendor with its documents and service areas
+     * @description Requires `vendor.approve`.
+     */
+    get: operations['platformMarketplace_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/vendors/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a verified vendor
+     * @description Requires `vendor.approve`.
+     */
+    post: operations['platformMarketplace_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/vendors/{id}/reinstate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reinstate a suspended vendor
+     * @description Requires `vendor.approve`.
+     */
+    post: operations['platformMarketplace_reinstate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/vendors/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a vendor application
+     * @description Requires `vendor.approve`.
+     */
+    post: operations['platformMarketplace_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/vendors/{id}/suspend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Suspend a vendor (their listings disappear; open orders can be cancelled)
+     * @description Requires `vendor.approve`.
+     */
+    post: operations['platformMarketplace_suspend'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/public/app-config': {
     parameters: {
       query?: never;
@@ -6712,6 +7320,446 @@ export interface paths {
      * @description Public.
      */
     get: operations['publicPass_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendor-applications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Apply to sell as a vendor (the applicant becomes the Vendor Owner)
+     * @description Any signed-in user.
+     */
+    post: operations['vendors_apply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendor profile, status and payout state
+     * @description Requires `vendor.order.work`.
+     */
+    get: operations['vendors_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change the vendor profile or service areas
+     * @description Requires `vendor.profile.manage`.
+     */
+    patch: operations['vendors_update'];
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/listings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendor listings
+     * @description Requires `vendor.listing.manage`.
+     */
+    get: operations['vendors_listings'];
+    put?: never;
+    /**
+     * Create a listing (live once the vendor is approved)
+     * @description Requires `vendor.listing.manage`.
+     */
+    post: operations['vendors_createListing'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/listings/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change, pause or archive a listing
+     * @description Requires `vendor.listing.manage`.
+     */
+    patch: operations['vendors_updateListing'];
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/members': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendor team
+     * @description Requires `vendor.team.manage` or `vendor.order.manage`.
+     */
+    get: operations['vendors_members'];
+    put?: never;
+    /**
+     * Add a team member by phone number
+     * @description Requires `vendor.team.manage`.
+     */
+    post: operations['vendors_addMember'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/members/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a team member
+     * @description Requires `vendor.team.manage`.
+     */
+    delete: operations['vendors_removeMember'];
+    options?: never;
+    head?: never;
+    /**
+     * Change a team member’s role
+     * @description Requires `vendor.team.manage`.
+     */
+    patch: operations['vendors_updateMember'];
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Vendor orders (service personnel see orders assigned to them)
+     * @description Requires `vendor.order.work`.
+     */
+    get: operations['vendors_orderList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Order detail with history
+     * @description Requires `vendor.order.work`.
+     */
+    get: operations['vendors_order'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept a fixed-price order (payment is then due)
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_accept'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/assign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Assign an order to a team member
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_assign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel an order (a paid order is refunded in full)
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark an order complete
+     * @description Requires `vendor.order.work`.
+     */
+    post: operations['vendors_complete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/decline': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decline an order
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_decline'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Messages with the customer
+     * @description Requires `vendor.order.work`.
+     */
+    get: operations['vendors_messages'];
+    put?: never;
+    /**
+     * Message the customer
+     * @description Requires `vendor.order.work`.
+     */
+    post: operations['vendors_postMessage'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/quote': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send or revise a quote
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_quote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/review-response': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Respond once to the customer’s review
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_respond'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/schedule': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Schedule a paid order
+     * @description Requires `vendor.order.manage`.
+     */
+    post: operations['vendors_schedule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/orders/{id}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start work on a paid order
+     * @description Requires `vendor.order.work`.
+     */
+    post: operations['vendors_start'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/payout-account': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Link the payout bank account (held by the payment provider)
+     * @description Requires `vendor.profile.manage`.
+     */
+    put: operations['vendors_payout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/payouts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Earnings: paid orders, commission and vendor share
+     * @description Requires `vendor.payout.read`.
+     */
+    get: operations['vendors_payouts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/reviews': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reviews of this vendor
+     * @description Requires `vendor.order.work`.
+     */
+    get: operations['vendors_reviews'];
     put?: never;
     post?: never;
     delete?: never;
@@ -10070,6 +11118,492 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       412: components['responses']['Error412'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_list: {
+    parameters: {
+      query?: {
+        kind?: 'item' | 'service';
+        q?: string;
+        mine?: boolean;
+        status?: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'item' | 'service';
+              title: string;
+              description: string;
+              priceKobo: number | null;
+              negotiable: boolean;
+              condition: ('new' | 'like_new' | 'good' | 'fair') | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+              seller: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string | null;
+              };
+              mine: boolean;
+              hiddenReason: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          kind: 'item' | 'service';
+          title: string;
+          description: string;
+          priceKobo?: number;
+          /** @default false */
+          negotiable?: boolean;
+          /** @enum {string} */
+          condition?: 'new' | 'like_new' | 'good' | 'fair';
+          /** @default [] */
+          photoFileIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'item' | 'service';
+              title: string;
+              description: string;
+              priceKobo: number | null;
+              negotiable: boolean;
+              condition: ('new' | 'like_new' | 'good' | 'fair') | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+              seller: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string | null;
+              };
+              mine: boolean;
+              hiddenReason: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'item' | 'service';
+              title: string;
+              description: string;
+              priceKobo: number | null;
+              negotiable: boolean;
+              condition: ('new' | 'like_new' | 'good' | 'fair') | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+              seller: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string | null;
+              };
+              mine: boolean;
+              hiddenReason: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title?: string;
+          description?: string;
+          priceKobo?: number | null;
+          negotiable?: boolean;
+          condition?: ('new' | 'like_new' | 'good' | 'fair') | null;
+          photoFileIds?: string[];
+          /** @enum {string} */
+          status?: 'active' | 'sold' | 'withdrawn';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'item' | 'service';
+              title: string;
+              description: string;
+              priceKobo: number | null;
+              negotiable: boolean;
+              condition: ('new' | 'like_new' | 'good' | 'fair') | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+              seller: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string | null;
+              };
+              mine: boolean;
+              hiddenReason: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_hide: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'item' | 'service';
+              title: string;
+              description: string;
+              priceKobo: number | null;
+              negotiable: boolean;
+              condition: ('new' | 'like_new' | 'good' | 'fair') | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+              seller: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string | null;
+              };
+              mine: boolean;
+              hiddenReason: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_threads: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              buyerUserId: string;
+              buyerName: string | null;
+              /** Format: date-time */
+              lastMessageAt: string;
+              messages: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                buyerUserId: string;
+                fromSeller: boolean;
+                body: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_postMessage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+          /** Format: uuid */
+          buyerUserId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              buyerUserId: string;
+              buyerName: string | null;
+              /** Format: date-time */
+              lastMessageAt: string;
+              messages: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                buyerUserId: string;
+                fromSeller: boolean;
+                body: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  classifieds_restore: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              kind: 'item' | 'service';
+              title: string;
+              description: string;
+              priceKobo: number | null;
+              negotiable: boolean;
+              condition: ('new' | 'like_new' | 'good' | 'fair') | null;
+              photoFileIds: string[];
+              /** @enum {string} */
+              status: 'active' | 'sold' | 'withdrawn' | 'hidden' | 'expired';
+              seller: {
+                /** Format: uuid */
+                userId: string;
+                displayName: string | null;
+              };
+              mine: boolean;
+              hiddenReason: string | null;
+              /** Format: date-time */
+              expiresAt: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
       500: components['responses']['Error500'];
     };
   };
@@ -17727,6 +19261,1323 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  marketplace_browse: {
+    parameters: {
+      query?: {
+        category?: string;
+        q?: string;
+        vendorId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              vendorId: string;
+              /** Format: uuid */
+              categoryId: string;
+              /** @enum {string} */
+              kind: 'service' | 'goods';
+              title: string;
+              description: string;
+              photoFileIds: string[];
+              /** @enum {string} */
+              priceType: 'fixed' | 'from' | 'quote';
+              priceKobo: number | null;
+              durationMinutes: number | null;
+              /** Format: date-time */
+              updatedAt: string;
+              vendor: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                /** @enum {string} */
+                type: 'individual' | 'company';
+                description: string;
+                logoFileId: string | null;
+                ratingAvg: number | null;
+                ratingCount: number;
+                verified: boolean;
+              };
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_mine: {
+    parameters: {
+      query?: {
+        status?:
+          | 'requested'
+          | 'quoted'
+          | 'accepted'
+          | 'scheduled'
+          | 'in_progress'
+          | 'completed'
+          | 'reviewed'
+          | 'declined'
+          | 'cancelled_by_resident'
+          | 'cancelled_by_vendor'
+          | 'disputed'
+          | 'refunded';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_place: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          listingId: string;
+          /** Format: uuid */
+          spaceId?: string;
+          /** Format: date-time */
+          preferredAt?: string;
+          details: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_acceptQuote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_dispute: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+          /** @default [] */
+          evidenceFileIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_messages: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              authorKind: 'resident' | 'vendor';
+              body: string;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_postMessage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              authorKind: 'resident' | 'vendor';
+              body: string;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_pay: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uri */
+          callbackUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              orderId: string;
+              amountKobo: number;
+              authorizationUrl: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  marketplace_review: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          rating: number;
+          comment?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_approvals: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              vendor: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                /** @enum {string} */
+                type: 'individual' | 'company';
+                description: string;
+                logoFileId: string | null;
+                ratingAvg: number | null;
+                ratingCount: number;
+                verified: boolean;
+              };
+              status: ('approved' | 'blocked') | null;
+              decidedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_setApproval: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          vendorId: string;
+          /** @enum {string} */
+          status: 'approved' | 'blocked';
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              vendor: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                /** @enum {string} */
+                type: 'individual' | 'company';
+                description: string;
+                logoFileId: string | null;
+                ratingAvg: number | null;
+                ratingCount: number;
+                verified: boolean;
+              };
+              status: ('approved' | 'blocked') | null;
+              decidedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_vendor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              vendor: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                /** @enum {string} */
+                type: 'individual' | 'company';
+                description: string;
+                logoFileId: string | null;
+                ratingAvg: number | null;
+                ratingCount: number;
+                verified: boolean;
+              };
+              listings: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                vendorId: string;
+                /** Format: uuid */
+                categoryId: string;
+                /** @enum {string} */
+                kind: 'service' | 'goods';
+                title: string;
+                description: string;
+                photoFileIds: string[];
+                /** @enum {string} */
+                priceType: 'fixed' | 'from' | 'quote';
+                priceKobo: number | null;
+                durationMinutes: number | null;
+                /** Format: date-time */
+                updatedAt: string;
+                vendor: {
+                  /** Format: uuid */
+                  id: string;
+                  name: string;
+                  /** @enum {string} */
+                  type: 'individual' | 'company';
+                  description: string;
+                  logoFileId: string | null;
+                  ratingAvg: number | null;
+                  ratingCount: number;
+                  verified: boolean;
+                };
+              }[];
+              reviews: {
+                /** Format: uuid */
+                id: string;
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   gateDevices_pinStatus: {
     parameters: {
       query?: never;
@@ -21281,6 +24132,10 @@ export interface operations {
               'community.guidelines': string;
               /** @default false */
               'community.owners_in_building_channels': boolean;
+              /** @default false */
+              'marketplace.allow_all_verified_vendors': boolean;
+              /** @default true */
+              'marketplace.classifieds_enabled': boolean;
               /** @default [] */
               'ads.blocked_categories': string[];
               /** @default false */
@@ -21347,6 +24202,8 @@ export interface operations {
           'community.channel_approval'?: boolean;
           'community.guidelines'?: string;
           'community.owners_in_building_channels'?: boolean;
+          'marketplace.allow_all_verified_vendors'?: boolean;
+          'marketplace.classifieds_enabled'?: boolean;
           'ads.blocked_categories'?: string[];
           'guards.can_see_resident_phone'?: boolean;
           'billing.two_level_approval'?: boolean;
@@ -21415,6 +24272,10 @@ export interface operations {
               'community.guidelines': string;
               /** @default false */
               'community.owners_in_building_channels': boolean;
+              /** @default false */
+              'marketplace.allow_all_verified_vendors': boolean;
+              /** @default true */
+              'marketplace.classifieds_enabled': boolean;
               /** @default [] */
               'ads.blocked_categories': string[];
               /** @default false */
@@ -26214,6 +29075,40 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  vendors_categories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              parentId: string | null;
+              slug: string;
+              name: string;
+              /** @enum {string} */
+              kind: 'service' | 'goods';
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      500: components['responses']['Error500'];
+    };
+  };
   me_profile: {
     parameters: {
       query?: never;
@@ -27605,6 +30500,46 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  vendors_mine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              role:
+                | 'vendor_owner'
+                | 'vendor_administrator'
+                | 'vendor_employee'
+                | 'vendor_service_personnel';
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   paymentsPublic_banks: {
     parameters: {
       query?: never;
@@ -27975,6 +30910,91 @@ export interface operations {
               status: 'investigating' | 'contained' | 'notified' | 'closed';
               /** Format: date-time */
               createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_commission: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              scope: 'default' | 'category' | 'vendor';
+              scopeId: string | null;
+              bps: number;
+              /** Format: date-time */
+              validFrom: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_setCommission: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          scope: 'default' | 'category' | 'vendor';
+          /** Format: uuid */
+          scopeId?: string;
+          bps: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              scope: 'default' | 'category' | 'vendor';
+              scopeId: string | null;
+              bps: number;
+              /** Format: date-time */
+              validFrom: string;
             };
           };
         };
@@ -28988,7 +32008,8 @@ export interface operations {
           | 'maintenance'
           | 'community'
           | 'facilities'
-          | 'documents';
+          | 'documents'
+          | 'marketplace';
       };
       cookie?: never;
     };
@@ -29553,6 +32574,169 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_disputes: {
+    parameters: {
+      query?: {
+        status?: 'open' | 'resolved';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              orderId: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              reason: string;
+              evidenceFileIds: string[];
+              /** @enum {string} */
+              status: 'open' | 'resolved';
+              resolution: ('refund' | 'partial_refund' | 'no_action') | null;
+              refundKobo: number | null;
+              note: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_dispute: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              orderId: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              reason: string;
+              evidenceFileIds: string[];
+              /** @enum {string} */
+              status: 'open' | 'resolved';
+              resolution: ('refund' | 'partial_refund' | 'no_action') | null;
+              refundKobo: number | null;
+              note: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_resolve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          resolution: 'refund' | 'partial_refund' | 'no_action';
+          refundKobo?: number;
+          note: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              orderId: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              reason: string;
+              evidenceFileIds: string[];
+              /** @enum {string} */
+              status: 'open' | 'resolved';
+              resolution: ('refund' | 'partial_refund' | 'no_action') | null;
+              refundKobo: number | null;
+              note: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
   };
@@ -30712,6 +33896,462 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformMarketplace_list: {
+    parameters: {
+      query?: {
+        status?: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_reinstate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformMarketplace_suspend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   platform_appConfig: {
     parameters: {
       query: {
@@ -30882,6 +34522,2172 @@ export interface operations {
       400: components['responses']['Error400'];
       404: components['responses']['Error404'];
       429: components['responses']['Error429'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_apply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** @enum {string} */
+          type: 'individual' | 'company';
+          description: string;
+          cacNumber?: string;
+          /** Format: email */
+          contactEmail: string;
+          categoryIds: string[];
+          serviceAreas: {
+            state?: string;
+            lga?: string;
+            /** Format: uuid */
+            estateId?: string;
+          }[];
+          /** @default [] */
+          documentFileIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          description?: string;
+          /** Format: email */
+          contactEmail?: string;
+          logoFileId?: string | null;
+          serviceAreas?: {
+            state?: string;
+            lga?: string;
+            /** Format: uuid */
+            estateId?: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_listings: {
+    parameters: {
+      query?: {
+        status?: 'draft' | 'active' | 'paused' | 'archived';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              vendorId: string;
+              /** Format: uuid */
+              categoryId: string;
+              /** @enum {string} */
+              kind: 'service' | 'goods';
+              title: string;
+              description: string;
+              photoFileIds: string[];
+              /** @enum {string} */
+              priceType: 'fixed' | 'from' | 'quote';
+              priceKobo: number | null;
+              durationMinutes: number | null;
+              /** @enum {string} */
+              status: 'draft' | 'active' | 'paused' | 'archived';
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_createListing: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          categoryId: string;
+          title: string;
+          description: string;
+          /** @default [] */
+          photoFileIds?: string[];
+          /** @enum {string} */
+          priceType: 'fixed' | 'from' | 'quote';
+          priceKobo?: number;
+          durationMinutes?: number;
+          /**
+           * @default draft
+           * @enum {string}
+           */
+          status?: 'draft' | 'active';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              vendorId: string;
+              /** Format: uuid */
+              categoryId: string;
+              /** @enum {string} */
+              kind: 'service' | 'goods';
+              title: string;
+              description: string;
+              photoFileIds: string[];
+              /** @enum {string} */
+              priceType: 'fixed' | 'from' | 'quote';
+              priceKobo: number | null;
+              durationMinutes: number | null;
+              /** @enum {string} */
+              status: 'draft' | 'active' | 'paused' | 'archived';
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_updateListing: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          categoryId?: string;
+          title?: string;
+          description?: string;
+          photoFileIds?: string[];
+          /** @enum {string} */
+          priceType?: 'fixed' | 'from' | 'quote';
+          priceKobo?: number | null;
+          durationMinutes?: number | null;
+          /** @enum {string} */
+          status?: 'draft' | 'active' | 'paused' | 'archived';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              vendorId: string;
+              /** Format: uuid */
+              categoryId: string;
+              /** @enum {string} */
+              kind: 'service' | 'goods';
+              title: string;
+              description: string;
+              photoFileIds: string[];
+              /** @enum {string} */
+              priceType: 'fixed' | 'from' | 'quote';
+              priceKobo: number | null;
+              durationMinutes: number | null;
+              /** @enum {string} */
+              status: 'draft' | 'active' | 'paused' | 'archived';
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_members: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'vendor_owner'
+                | 'vendor_administrator'
+                | 'vendor_employee'
+                | 'vendor_service_personnel';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_addMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          phone: string;
+          /** @enum {string} */
+          role: 'vendor_administrator' | 'vendor_employee' | 'vendor_service_personnel';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'vendor_owner'
+                | 'vendor_administrator'
+                | 'vendor_employee'
+                | 'vendor_service_personnel';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_removeMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'vendor_owner'
+                | 'vendor_administrator'
+                | 'vendor_employee'
+                | 'vendor_service_personnel';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_updateMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          role: 'vendor_administrator' | 'vendor_employee' | 'vendor_service_personnel';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              displayName: string | null;
+              /** @enum {string} */
+              role:
+                | 'vendor_owner'
+                | 'vendor_administrator'
+                | 'vendor_employee'
+                | 'vendor_service_personnel';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_orderList: {
+    parameters: {
+      query?: {
+        status?:
+          | 'requested'
+          | 'quoted'
+          | 'accepted'
+          | 'scheduled'
+          | 'in_progress'
+          | 'completed'
+          | 'reviewed'
+          | 'declined'
+          | 'cancelled_by_resident'
+          | 'cancelled_by_vendor'
+          | 'disputed'
+          | 'refunded';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_order: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_accept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_assign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          memberId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_complete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_decline: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_messages: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              authorKind: 'resident' | 'vendor';
+              body: string;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_postMessage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              authorKind: 'resident' | 'vendor';
+              body: string;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_quote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          amountKobo: number;
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_respond: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          response: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          scheduledAt: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_start: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              /** Format: uuid */
+              listingId: string;
+              listingTitle: string;
+              spaceId: string | null;
+              details: string;
+              /** @enum {string} */
+              status:
+                | 'requested'
+                | 'quoted'
+                | 'accepted'
+                | 'scheduled'
+                | 'in_progress'
+                | 'completed'
+                | 'reviewed'
+                | 'declined'
+                | 'cancelled_by_resident'
+                | 'cancelled_by_vendor'
+                | 'disputed'
+                | 'refunded';
+              preferredAt: string | null;
+              scheduledAt: string | null;
+              quoteKobo: number | null;
+              amountKobo: number | null;
+              commissionKobo: number | null;
+              vendorAmountKobo: number | null;
+              paid: boolean;
+              paidAt: string | null;
+              assignedMemberId: string | null;
+              cancelReason: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+              events: {
+                fromStatus:
+                  | (
+                      | 'requested'
+                      | 'quoted'
+                      | 'accepted'
+                      | 'scheduled'
+                      | 'in_progress'
+                      | 'completed'
+                      | 'reviewed'
+                      | 'declined'
+                      | 'cancelled_by_resident'
+                      | 'cancelled_by_vendor'
+                      | 'disputed'
+                      | 'refunded'
+                    )
+                  | null;
+                /** @enum {string} */
+                toStatus:
+                  | 'requested'
+                  | 'quoted'
+                  | 'accepted'
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed'
+                  | 'reviewed'
+                  | 'declined'
+                  | 'cancelled_by_resident'
+                  | 'cancelled_by_vendor'
+                  | 'disputed'
+                  | 'refunded';
+                /** @enum {string} */
+                actorKind: 'resident' | 'vendor' | 'platform' | 'system';
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              review: {
+                rating: number;
+                comment: string | null;
+                vendorResponse: string | null;
+              } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_payout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          bankCode: string;
+          accountNumber: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** @enum {string} */
+              type: 'individual' | 'company';
+              description: string;
+              logoFileId: string | null;
+              ratingAvg: number | null;
+              ratingCount: number;
+              verified: boolean;
+              /** @enum {string} */
+              status: 'applied' | 'under_review' | 'approved' | 'rejected' | 'suspended';
+              /** @enum {string} */
+              verificationTier: 'individual' | 'business';
+              cacNumber: string | null;
+              contactEmail: string;
+              serviceAreas: {
+                state: string | null;
+                lga: string | null;
+                estateId: string | null;
+              }[];
+              categoryIds: string[];
+              payout: {
+                ready: boolean;
+                bankName: string | null;
+                accountLast4: string | null;
+              };
+              rejectionReason: string | null;
+              suspendedReason: string | null;
+              myRole:
+                | (
+                    | 'vendor_owner'
+                    | 'vendor_administrator'
+                    | 'vendor_employee'
+                    | 'vendor_service_personnel'
+                  )
+                | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+      502: components['responses']['Error502'];
+    };
+  };
+  vendors_payouts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              paidOrders: number;
+              grossKobo: number;
+              commissionKobo: number;
+              vendorKobo: number;
+              refundedKobo: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_reviews: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              rating: number;
+              comment: string | null;
+              vendorResponse: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
       500: components['responses']['Error500'];
     };
   };

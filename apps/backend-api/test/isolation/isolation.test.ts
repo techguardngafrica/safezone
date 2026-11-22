@@ -347,4 +347,99 @@ describe('cross-tenant isolation', () => {
       .expect(200);
     expect(guards.body.data.estate.id).toBe(estateA);
   });
+
+  it('every vendor route refuses a signed-in user who is not on that vendor (404)', async () => {
+    const vendorId = '0193a1b2-0000-7000-8000-00000000ab01';
+    await stack.db.owner.query(
+      `insert into platform.vendors (id, name, type, verification_tier, description, contact_email,
+         owner_user_id, category_ids, status, updated_at)
+       values ($1, 'Isolation Vendor', 'individual', 'individual', 'Isolation test vendor', 'v@example.ng',
+         $1, '{}', 'approved', now())`,
+      [vendorId],
+    );
+    const failures: string[] = [];
+    for (const route of routes.filter(
+      (r) => r.expressPath.includes(':vendorId') && !r.expressPath.includes(':estateId'),
+    )) {
+      const response = await call(route, { vendorId })
+        .set('Authorization', `Bearer ${adminA}`)
+        .send({});
+      if (response.status !== 404)
+        failures.push(`${route.method} ${route.expressPath} → ${response.status}`);
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it("Estate A's marketplace orders and classifieds cannot be reached through Estate B", async () => {
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const residentId = await stack.createUser('+2348036000020');
+    await stack.addMember(estateB, residentId, 'resident');
+    await stack.resetRateLimits();
+    const residentB = (await signIn(stack, '+2348036000020')).accessToken;
+    const vendorId = '0193a1b2-0000-7000-8000-00000000ab02';
+    const orderId = '0193a1b2-0000-7000-8000-00000000ab03';
+    const classifiedId = '0193a1b2-0000-7000-8000-00000000ab04';
+    await stack.db.owner.query(
+      `insert into platform.vendors (id, name, type, verification_tier, description, contact_email,
+         owner_user_id, category_ids, status, updated_at)
+       values ($1, 'Isolation Vendor B', 'individual', 'individual', 'Isolation test vendor', 'v@example.ng',
+         $1, '{}', 'approved', now())`,
+      [vendorId],
+    );
+    await stack.db.owner.query(
+      `insert into tenant.marketplace_orders (id, estate_id, vendor_id, listing_id, resident_user_id, details,
+         status, updated_at)
+       values ($1, $2, $3, $3, $3, 'Isolation order', 'requested', now())`,
+      [orderId, estateA, vendorId],
+    );
+    await stack.db.owner.query(
+      `insert into tenant.classified_listings (id, estate_id, seller_user_id, kind, title, description,
+         photo_file_ids, expires_at, updated_at)
+       values ($1, $2, $1, 'item', 'Isolation fan', 'Isolation listing', '{}', now() + interval '1 day', now())`,
+      [classifiedId, estateA],
+    );
+    await stack.db.owner.query(
+      `insert into tenant.estate_vendor_approvals (estate_id, vendor_id, status, decided_by)
+       values ($1, $2, 'approved', $2)`,
+      [estateA, vendorId],
+    );
+    await stack.http
+      .get(`/v1/estates/${estateB}/marketplace/orders/${orderId}`)
+      .set(auth(residentB))
+      .expect(404);
+    await stack.http
+      .post(`/v1/estates/${estateB}/marketplace/orders/${orderId}/cancel`)
+      .set(auth(residentB))
+      .send({ reason: 'Not mine' })
+      .expect(404);
+    const orders = await stack.http
+      .get(`/v1/estates/${estateB}/marketplace/orders`)
+      .set(auth(residentB))
+      .expect(200);
+    expect(orders.body.data).toEqual([]);
+    await stack.http
+      .get(`/v1/estates/${estateB}/classifieds/${classifiedId}`)
+      .set(auth(residentB))
+      .expect(404);
+    const classifieds = await stack.http
+      .get(`/v1/estates/${estateB}/classifieds`)
+      .set(auth(residentB))
+      .expect(200);
+    expect(classifieds.body.data).toEqual([]);
+    await stack.http
+      .post(`/v1/estates/${estateB}/classifieds/${classifiedId}/hide`)
+      .set(auth(adminB))
+      .send({ reason: 'Not ours' })
+      .expect(404);
+    // Estate A's approval does not make the vendor visible in Estate B.
+    await stack.http
+      .get(`/v1/estates/${estateB}/marketplace/vendors/${vendorId}`)
+      .set(auth(residentB))
+      .expect(404);
+    const approvals = await stack.http
+      .get(`/v1/estates/${estateB}/marketplace/vendor-approvals`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(approvals.body.data).toEqual([]);
+  });
 });

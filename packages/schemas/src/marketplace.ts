@@ -483,3 +483,12 @@ export const classifiedThreadSchema = z.object({
   lastMessageAt: z.iso.datetime(),
   messages: z.array(classifiedMessageSchema),
 });
+
+/** A vendor's page for residents: public profile, live listings and this estate's reviews. */
+export const marketplaceVendorProfileSchema = z.object({
+  vendor: vendorPublicSchema,
+  listings: z.array(marketplaceListingSchema),
+  reviews: z.array(vendorReviewSchema),
+});
+export const estateOrderItemParamsSchema = z.object({ estateId: z.uuid(), id: z.uuid() });
+export const estateVendorParamsSchema = z.object({ estateId: z.uuid(), vendorId: z.uuid() });

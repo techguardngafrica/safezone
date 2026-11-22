@@ -2,6 +2,8 @@ import { type CanActivate, type ExecutionContext, Injectable, Logger } from '@ne
 import { Reflector } from '@nestjs/core';
 import {
   GATE_SESSION_PERMISSIONS,
+  isVendorPermission,
+  permissionsForRoles,
   requiresMfa,
   SUPPORT_SESSION_PERMISSIONS,
 } from '@safezone/permissions';
@@ -19,6 +21,7 @@ import {
 import { PUBLIC_KEY } from '../../common/auth/public.decorator';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../common/errors/domain-error';
 import { requestContext } from '../../common/http/request-context';
+import { VendorAccessService } from '../marketplace/access/vendor-access.service';
 import { SupportAccessService } from '../platform/support-access.service';
 import { blockedBySuspension } from '../tenancy/domain/estate-lifecycle';
 import { TenancyService } from '../tenancy/tenancy.service';
@@ -36,6 +39,8 @@ const estateIdSchema = z.uuid();
  * 6. suspension: only reads and safety actions in a suspended estate (tenancy.md §7.5).
  * Gate shift sessions (ADR-0017) reach only their own estate, within GATE_SESSION_PERMISSIONS, plus
  * signed-in routes marked @AllowGateSession.
+ * Vendor permissions (ADR-0023) are checked against the caller's active membership of the `:vendorId`
+ * vendor; non-members get 404, like estates.
  * A Techguard agent who is not a member reaches an estate only through an approved, unexpired support
  * session (platform.md §4): GET requests only, within SUPPORT_SESSION_PERMISSIONS, each one audited.
  */
@@ -48,6 +53,7 @@ export class AuthorizationGuard implements CanActivate {
     private readonly authz: AuthzService,
     private readonly tenancy: TenancyService,
     private readonly support: SupportAccessService,
+    private readonly vendorAccess: VendorAccessService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -80,6 +86,10 @@ export class AuthorizationGuard implements CanActivate {
       if (gateScope && !this.reflector.getAllAndOverride<boolean>(ALLOW_GATE_SESSION_KEY, targets))
         throw new ForbiddenError('Not available on a gate device', 'GATE_SESSION_SCOPE');
       return true;
+    }
+
+    if (rule.kind === 'permission' && rulePermissions(rule).some(isVendorPermission)) {
+      return this.admitVendorMember(request, rule, auth.userId, Boolean(gateScope));
     }
 
     const rawEstateId = request.params?.estateId;
@@ -161,6 +171,37 @@ export class AuthorizationGuard implements CanActivate {
       staffPermissions: grant.staffPermissions,
     };
     requestContext.assign({ estateId: rawEstateId });
+    return true;
+  }
+
+  /** Vendor routes: the caller's role in the `:vendorId` vendor must grant the permission. */
+  private async admitVendorMember(
+    request: AuthenticatedRequest & { params?: Record<string, string> },
+    rule: Extract<AccessRule, { kind: 'permission' }>,
+    userId: string,
+    gateSession: boolean,
+  ): Promise<boolean> {
+    if (!rulePermissions(rule).every(isVendorPermission))
+      throw new Error('Vendor and non-vendor permissions cannot be alternatives on one route');
+    if (gateSession)
+      throw new ForbiddenError('Not available on a gate device', 'GATE_SESSION_SCOPE');
+    const rawVendorId = request.params?.vendorId;
+    if (rawVendorId === undefined)
+      throw new Error('Vendor permissions require a :vendorId parameter');
+    if (!estateIdSchema.safeParse(rawVendorId).success)
+      throw new NotFoundError('Vendor not found', 'VENDOR_NOT_FOUND');
+    const membership = await this.vendorAccess.activeMembership(userId, rawVendorId);
+    if (!membership) throw new NotFoundError('Vendor not found', 'VENDOR_NOT_FOUND');
+    const permissions = permissionsForRoles([membership.role]);
+    if (!permits(rule, permissions)) throw new ForbiddenError();
+    request.vendorAccess = {
+      vendorId: rawVendorId,
+      userId,
+      memberId: membership.memberId,
+      role: membership.role,
+      vendorStatus: membership.vendorStatus,
+      permissions,
+    };
     return true;
   }
 

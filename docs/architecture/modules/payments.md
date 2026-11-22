@@ -114,3 +114,12 @@ Built in `src/modules/payments` and `src/integrations/payments` ([ADR-0013](../a
 - `PaymentGateway` with Paystack (fetch) and an in-memory fake; `PAYMENTS_PROVIDER=fake|paystack`.
 - Payout account setup (subaccount; last 4 digits only), payment intents with `Idempotency-Key` and server-computed amounts, signed and de-duplicated webhooks processed on the `payments` queue, `…/payment-intents/:id/verify`, dedicated virtual accounts per payer and unit, office (manual) payments with a second approver, refunds from unallocated credit with a second approver and ledger reversal if the provider fails.
 - **Not yet built:** Flutterwave adapter and failover, daily reconciliation and settlement import, disputes, intent expiry job, receipts.
+
+## 11. Marketplace split charges (Phase 4, ADR-0023)
+
+- `startMarketplaceCharge` initialises a charge on the vendor's subaccount with Safezone's commission as the provider `transaction_charge` (bearer: subaccount). Route kind `marketplace_order`, so verification never touches estate ledgers or invoices.
+- Verification emits `payments.marketplace_charge.succeeded` / `.failed` for the `marketplace` queue; the marketplace module checks the amount against the order and marks it paid.
+- Refunds of marketplace charges (cancellation after payment, dispute decisions) run in the worker through `refundMarketplaceCharge`, capped at the captured amount less earlier refunds.
+- A verified charge that matches no order, or whose amount differs, is refunded in full.
+- Vendor payout accounts are linked with `linkVendorPayout`: the provider holds the account number; the marketplace keeps the subaccount code, bank name and last 4 digits.
+- Safezone Pay (saved methods, transfers to residents) builds on these routes; see ADR-0023.
