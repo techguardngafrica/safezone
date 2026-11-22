@@ -66,12 +66,17 @@ export const DB_CONTEXTS = [
   'payments',
   /** Read-only cross-estate payment monitoring for Platform Finance Officers (ADR-0022). */
   'platform_finance',
+  /** Vendors, listings and commission; with vendorId, that vendor's own orders across estates (ADR-0023). */
+  'marketplace',
+  /** Techguard dispute desk: marketplace disputes and their orders across estates (ADR-0023). */
+  'marketplace_admin',
 ] as const;
 export type DbContext = (typeof DB_CONTEXTS)[number];
 
 const contextOptionsSchema = z.object({
   userId: z.uuid().nullable().optional(),
   estateId: z.uuid().nullable().optional(),
+  vendorId: z.uuid().nullable().optional(),
 });
 
 export interface ContextOptions extends TransactionOptions {
@@ -79,6 +84,8 @@ export interface ContextOptions extends TransactionOptions {
   userId?: string | null;
   /** Sets app.estate_id too (e.g. tenancy creating an estate's first rows). */
   estateId?: string | null;
+  /** Sets app.vendor_id too: the marketplace context then admits that vendor's order rows. */
+  vendorId?: string | null;
 }
 
 /** Runs `fn` in a transaction with `app.context` set to a module context (and optionally user/estate). */
@@ -92,16 +99,18 @@ export async function withContext<T>(
   const parsed = contextOptionsSchema.safeParse({
     userId: options.userId,
     estateId: options.estateId,
+    vendorId: options.vendorId,
   });
-  if (!parsed.success) throw new TypeError('withContext requires UUID userId/estateId');
-  const { userId, estateId } = parsed.data;
-  const { userId: _u, estateId: _e, ...transactionOptions } = options;
+  if (!parsed.success) throw new TypeError('withContext requires UUID userId/estateId/vendorId');
+  const { userId, estateId, vendorId } = parsed.data;
+  const { userId: _u, estateId: _e, vendorId: _v, ...transactionOptions } = options;
 
   return client.$transaction(async (tx) => {
     await tx.$queryRaw`
       select set_config('app.context', ${context}, true),
              set_config('app.user_id', ${userId ?? ''}, true),
-             set_config('app.estate_id', ${estateId ?? ''}, true)`;
+             set_config('app.estate_id', ${estateId ?? ''}, true),
+             set_config('app.vendor_id', ${vendorId ?? ''}, true)`;
     return fn(tx);
   }, transactionOptions);
 }

@@ -2680,27 +2680,27 @@ model SupportSession {
 
 /// Platform support tickets (platform.md §3, ADR-0022).
 model SupportTicket {
-  id              String    @id @default(uuid(7)) @db.Uuid
-  estateId        String?   @map("estate_id") @db.Uuid
-  requesterUserId String?   @map("requester_user_id") @db.Uuid
-  requesterName   String?   @map("requester_name")
-  requesterContact String?  @map("requester_contact")
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String?   @map("estate_id") @db.Uuid
+  requesterUserId  String?   @map("requester_user_id") @db.Uuid
+  requesterName    String?   @map("requester_name")
+  requesterContact String?   @map("requester_contact")
   /// in_app | email | whatsapp | phone | internal
-  channel         String    @default("in_app")
+  channel          String    @default("in_app")
   /// gate_sos | onboarding | billing | technical | account | other
-  category        String    @default("technical")
+  category         String    @default("technical")
   /// critical | high | normal | low
-  priority        String    @default("normal")
-  subject         String
-  description     String
+  priority         String    @default("normal")
+  subject          String
+  description      String
   /// new | open | pending_customer | resolved | closed
-  status          String    @default("new")
-  assigneeId      String?   @map("assignee_id") @db.Uuid
-  slaDueAt        DateTime  @map("sla_due_at") @db.Timestamptz(3)
-  resolvedAt      DateTime? @map("resolved_at") @db.Timestamptz(3)
-  createdBy       String    @map("created_by") @db.Uuid
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status           String    @default("new")
+  assigneeId       String?   @map("assignee_id") @db.Uuid
+  slaDueAt         DateTime  @map("sla_due_at") @db.Timestamptz(3)
+  resolvedAt       DateTime? @map("resolved_at") @db.Timestamptz(3)
+  createdBy        String    @map("created_by") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   messages SupportTicketMessage[]
 
@@ -2784,4 +2784,310 @@ model RetentionRule {
 
   @@map("retention_rules")
   @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// Marketplace (marketplace.md, Phase 4; ADR-0023). Vendors and listings are platform-level
+// (`marketplace` context); approvals, orders, reviews, disputes and classifieds are tenant tables.
+// ---------------------------------------------------------------------------
+
+model ServiceCategory {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  parentId  String?  @map("parent_id") @db.Uuid
+  slug      String   @unique
+  name      String
+  /// service | goods
+  kind      String
+  /// active | retired
+  status    String   @default("active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("service_categories")
+  @@schema("platform")
+}
+
+model Vendor {
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  name                 String
+  /// individual | company
+  type                 String
+  /// individual | business
+  verificationTier     String    @map("verification_tier")
+  cacNumber            String?   @map("cac_number")
+  description          String
+  contactEmail         String    @map("contact_email")
+  logoFileId           String?   @map("logo_file_id") @db.Uuid
+  ownerUserId          String    @map("owner_user_id") @db.Uuid
+  categoryIds          String[]  @map("category_ids") @db.Uuid
+  /// applied | under_review | approved | rejected | suspended
+  status               String    @default("applied")
+  rejectionReason      String?   @map("rejection_reason")
+  suspendedReason      String?   @map("suspended_reason")
+  verifiedAt           DateTime? @map("verified_at") @db.Timestamptz(3)
+  verifiedBy           String?   @map("verified_by") @db.Uuid
+  ratingSum            Int       @default(0) @map("rating_sum")
+  ratingCount          Int       @default(0) @map("rating_count")
+  /// Provider subaccount; the bank account number itself is held by the provider (marketplace.md §2.4).
+  payoutProvider       String?   @map("payout_provider")
+  payoutSubaccountCode String?   @map("payout_subaccount_code")
+  payoutBankName       String?   @map("payout_bank_name")
+  payoutAccountLast4   String?   @map("payout_account_last4")
+  version              Int       @default(1)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@index([ownerUserId])
+  @@map("vendors")
+  @@schema("platform")
+}
+
+model VendorMember {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  vendorId  String    @map("vendor_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  /// vendor_owner | vendor_administrator | vendor_employee | vendor_service_personnel
+  role      String
+  addedBy   String    @map("added_by") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  removedAt DateTime? @map("removed_at") @db.Timestamptz(3)
+  removedBy String?   @map("removed_by") @db.Uuid
+
+  @@index([userId, removedAt])
+  @@index([vendorId, removedAt])
+  @@map("vendor_members")
+  @@schema("platform")
+}
+
+model VendorDocument {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  vendorId  String    @map("vendor_id") @db.Uuid
+  fileId    String    @map("file_id") @db.Uuid
+  docType   String    @map("doc_type")
+  expiresOn DateTime? @map("expires_on") @db.Date
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([vendorId])
+  @@map("vendor_documents")
+  @@schema("platform")
+}
+
+model VendorServiceArea {
+  id       String  @id @default(uuid(7)) @db.Uuid
+  vendorId String  @map("vendor_id") @db.Uuid
+  state    String?
+  lga      String?
+  estateId String? @map("estate_id") @db.Uuid
+
+  @@index([vendorId])
+  @@index([estateId])
+  @@index([state])
+  @@map("vendor_service_areas")
+  @@schema("platform")
+}
+
+model Listing {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  vendorId        String   @map("vendor_id") @db.Uuid
+  categoryId      String   @map("category_id") @db.Uuid
+  /// service | goods (from the category)
+  kind            String
+  title           String
+  description     String
+  photoFileIds    String[] @map("photo_file_ids") @db.Uuid
+  /// fixed | from | quote
+  priceType       String   @map("price_type")
+  price           BigInt?
+  durationMinutes Int?     @map("duration_minutes")
+  /// draft | active | paused | archived
+  status          String   @default("draft")
+  version         Int      @default(1)
+  createdBy       String   @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([vendorId, status])
+  @@index([categoryId, status])
+  @@map("listings")
+  @@schema("platform")
+}
+
+/// Append-only: the rule in force is the latest valid_from at or before the payment time.
+model CommissionRule {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  /// default | category | vendor
+  scope     String
+  scopeId   String?  @map("scope_id") @db.Uuid
+  bps       Int
+  validFrom DateTime @default(now()) @map("valid_from") @db.Timestamptz(3)
+  /// Null for the seeded default rule.
+  createdBy String?  @map("created_by") @db.Uuid
+
+  @@index([scope, scopeId, validFrom])
+  @@map("commission_rules")
+  @@schema("platform")
+}
+
+model EstateVendorApproval {
+  estateId  String   @map("estate_id") @db.Uuid
+  vendorId  String   @map("vendor_id") @db.Uuid
+  /// approved | blocked
+  status    String
+  reason    String?
+  decidedBy String   @map("decided_by") @db.Uuid
+  decidedAt DateTime @default(now()) @map("decided_at") @db.Timestamptz(3)
+
+  @@id([estateId, vendorId])
+  @@map("estate_vendor_approvals")
+  @@schema("tenant")
+}
+
+model MarketplaceOrder {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  vendorId         String    @map("vendor_id") @db.Uuid
+  listingId        String    @map("listing_id") @db.Uuid
+  residentUserId   String    @map("resident_user_id") @db.Uuid
+  spaceId          String?   @map("space_id") @db.Uuid
+  details          String
+  preferredAt      DateTime? @map("preferred_at") @db.Timestamptz(3)
+  scheduledAt      DateTime? @map("scheduled_at") @db.Timestamptz(3)
+  quoteAmount      BigInt?   @map("quote_amount")
+  amount           BigInt?
+  commissionBps    Int?      @map("commission_bps")
+  commissionAmount BigInt?   @map("commission_amount")
+  vendorAmount     BigInt?   @map("vendor_amount")
+  paymentReference String?   @unique @map("payment_reference")
+  paidAt           DateTime? @map("paid_at") @db.Timestamptz(3)
+  refundedAmount   BigInt    @default(0) @map("refunded_amount")
+  status           String
+  assignedMemberId String?   @map("assigned_member_id") @db.Uuid
+  cancelReason     String?   @map("cancel_reason")
+  version          Int       @default(1)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([estateId, residentUserId, createdAt])
+  @@index([vendorId, status, createdAt])
+  @@map("marketplace_orders")
+  @@schema("tenant")
+}
+
+/// Append-only order history.
+model MarketplaceOrderEvent {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  vendorId    String   @map("vendor_id") @db.Uuid
+  orderId     String   @map("order_id") @db.Uuid
+  fromStatus  String?  @map("from_status")
+  toStatus    String   @map("to_status")
+  /// resident | vendor | platform | system
+  actorKind   String   @map("actor_kind")
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  note        String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([orderId, createdAt])
+  @@map("marketplace_order_events")
+  @@schema("tenant")
+}
+
+model MarketplaceOrderMessage {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  vendorId   String   @map("vendor_id") @db.Uuid
+  orderId    String   @map("order_id") @db.Uuid
+  /// resident | vendor
+  authorKind String   @map("author_kind")
+  authorId   String   @map("author_id") @db.Uuid
+  body       String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([orderId, createdAt])
+  @@map("marketplace_order_messages")
+  @@schema("tenant")
+}
+
+model MarketplaceReview {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  estateId       String    @map("estate_id") @db.Uuid
+  vendorId       String    @map("vendor_id") @db.Uuid
+  orderId        String    @unique @map("order_id") @db.Uuid
+  authorUserId   String    @map("author_user_id") @db.Uuid
+  rating         Int
+  comment        String?
+  vendorResponse String?   @map("vendor_response")
+  respondedAt    DateTime? @map("responded_at") @db.Timestamptz(3)
+  /// visible | hidden_by_moderation
+  status         String    @default("visible")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([vendorId, createdAt])
+  @@map("marketplace_reviews")
+  @@schema("tenant")
+}
+
+model MarketplaceDispute {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  estateId        String    @map("estate_id") @db.Uuid
+  vendorId        String    @map("vendor_id") @db.Uuid
+  orderId         String    @unique @map("order_id") @db.Uuid
+  openedBy        String    @map("opened_by") @db.Uuid
+  reason          String
+  evidenceFileIds String[]  @map("evidence_file_ids") @db.Uuid
+  /// open | resolved
+  status          String    @default("open")
+  /// refund | partial_refund | no_action
+  resolution      String?
+  refundAmount    BigInt?   @map("refund_amount")
+  note            String?
+  handledBy       String?   @map("handled_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  resolvedAt      DateTime? @map("resolved_at") @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@map("marketplace_disputes")
+  @@schema("tenant")
+}
+
+model ClassifiedListing {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  estateId     String   @map("estate_id") @db.Uuid
+  sellerUserId String   @map("seller_user_id") @db.Uuid
+  /// item | service
+  kind         String
+  title        String
+  description  String
+  price        BigInt?
+  negotiable   Boolean  @default(false)
+  condition    String?
+  photoFileIds String[] @map("photo_file_ids") @db.Uuid
+  /// active | sold | withdrawn | hidden | expired
+  status       String   @default("active")
+  hiddenReason String?  @map("hidden_reason")
+  hiddenBy     String?  @map("hidden_by") @db.Uuid
+  expiresAt    DateTime @map("expires_at") @db.Timestamptz(3)
+  version      Int      @default(1)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([estateId, status, createdAt])
+  @@index([estateId, sellerUserId, status])
+  @@map("classified_listings")
+  @@schema("tenant")
+}
+
+model ClassifiedMessage {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  listingId   String   @map("listing_id") @db.Uuid
+  buyerUserId String   @map("buyer_user_id") @db.Uuid
+  authorId    String   @map("author_id") @db.Uuid
+  body        String
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([listingId, buyerUserId, createdAt])
+  @@map("classified_messages")
+  @@schema("tenant")
 }
