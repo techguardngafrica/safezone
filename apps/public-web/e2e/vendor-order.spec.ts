@@ -93,6 +93,8 @@ test('vendor order: accept, payment, work and earnings from the portal', async (
   await drawer.getByRole('button', { name: t('vendor.orders.complete') }).click();
   await expect(drawer.getByText(t('vendor.orderStatus.completed')).first()).toBeVisible();
 
+  await drawer.getByRole('button', { name: t('ui.close') }).click();
+  await expect(drawer).toBeHidden();
   await page.getByRole('link', { name: t('vendor.nav.earnings') }).click();
   await expect(page.getByText('₦15,000.00').first()).toBeVisible();
 });
