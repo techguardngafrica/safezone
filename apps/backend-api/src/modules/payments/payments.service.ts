@@ -55,6 +55,14 @@ export type ProcessResult =
       amountKobo: number;
       providerTransactionId: string;
     }
+  | {
+      /** A verified marketplace order charge (ADR-0023): split between the vendor and Safezone. */
+      outcome: 'marketplace_paid';
+      estateId: string;
+      reference: string;
+      amountKobo: number;
+      providerTransactionId: string;
+    }
   | { outcome: 'duplicate' | 'pending' | 'failed' | 'unknown_reference' | 'ignored' };
 
 function last4(accountNumber: string): string {
@@ -448,7 +456,10 @@ export class PaymentsService {
     }
     const estateId = route.estateId;
 
-    if (route.kind === 'platform_purchase') return this.processPlatformCharge(estateId, charge);
+    if (route.kind === 'platform_purchase')
+      return this.processRoutedCharge('platform', estateId, charge);
+    if (route.kind === 'marketplace_order')
+      return this.processRoutedCharge('marketplace', estateId, charge);
 
     if (charge.status !== 'success') {
       if (
@@ -1218,8 +1229,92 @@ export class PaymentsService {
     return this.gateway.provider;
   }
 
-  /** Verification result of a platform charge, announced as an event for its owning module. */
-  private async processPlatformCharge(
+  // ---- Marketplace charges (ADR-0023) -----------------------------------------------------------
+
+  /**
+   * Starts a split checkout for a marketplace order: the vendor's subaccount receives the payment less
+   * Safezone's commission, which the provider settles to Safezone as the transaction charge. Nothing is
+   * pooled: the route kind keeps it away from estate ledgers and invoices.
+   */
+  async startMarketplaceCharge(input: {
+    estateId: string;
+    payerUserId: string;
+    reference: string;
+    amountKobo: number;
+    commissionKobo: number;
+    vendorSubaccountCode: string;
+    callbackUrl?: string;
+    metadata: Record<string, string>;
+  }): Promise<{ authorizationUrl: string }> {
+    if (
+      !Number.isSafeInteger(input.commissionKobo) ||
+      input.commissionKobo < 0 ||
+      input.commissionKobo >= input.amountKobo
+    )
+      throw new DomainError('INVALID_COMMISSION', 'Commission must be less than the amount', 422);
+    const callbackUrl = this.callbackUrl(input.callbackUrl);
+    await this.db.withContext('payments', (tx) =>
+      tx.paymentRoute.upsert({
+        where: {
+          provider_routeKey: { provider: this.gateway.provider, routeKey: input.reference },
+        },
+        create: {
+          provider: this.gateway.provider,
+          routeKey: input.reference,
+          kind: 'marketplace_order',
+          estateId: input.estateId,
+        },
+        update: {},
+      }),
+    );
+    try {
+      const checkout = await this.gateway.initialize({
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        email: `${input.payerUserId}@payers.safezone.ng`,
+        subaccountCode: input.vendorSubaccountCode,
+        transactionChargeKobo: input.commissionKobo,
+        callbackUrl,
+        metadata: input.metadata,
+      });
+      return { authorizationUrl: checkout.authorizationUrl };
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
+  /** Refund of (part of) a marketplace charge: cancellation after payment or a dispute decision. */
+  async refundMarketplaceCharge(reference: string, amountKobo: number) {
+    try {
+      return await this.gateway.refund({ transactionReference: reference, amountKobo });
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
+  /**
+   * Links a vendor's bank account through a provider subaccount (marketplace.md §2.4). The account
+   * number goes to the provider only; the caller keeps its last 4 digits.
+   */
+  async linkVendorPayout(input: { businessName: string; bankCode: string; accountNumber: string }) {
+    try {
+      const resolved = await this.gateway.resolveAccount(input.bankCode, input.accountNumber);
+      const subaccount = await this.gateway.createSubaccount(input);
+      return {
+        provider: this.gateway.provider,
+        subaccountCode: subaccount.subaccountCode,
+        bankName: resolved.bankName,
+        accountName: resolved.accountName,
+        accountLast4: last4(input.accountNumber),
+      };
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
+  /** Verification result of a platform or marketplace charge, announced as an event for its owner. */
+  private async processRoutedCharge(
+    kind: 'platform' | 'marketplace',
     estateId: string,
     charge: VerifiedCharge,
   ): Promise<ProcessResult> {
@@ -1232,11 +1327,9 @@ export class PaymentsService {
     await this.db.withTenant({ estateId, userId: null }, (tx) =>
       appendOutboxEvents(tx, [
         {
-          type: succeeded
-            ? 'payments.platform_charge.succeeded'
-            : 'payments.platform_charge.failed',
+          type: `payments.${kind}_charge.${succeeded ? 'succeeded' : 'failed'}`,
           estateId,
-          aggregateType: 'platform_charge',
+          aggregateType: `${kind}_charge`,
           aggregateId: charge.reference,
           payload: {
             reference: charge.reference,
@@ -1248,7 +1341,7 @@ export class PaymentsService {
     );
     if (!succeeded) return { outcome: 'failed' };
     return {
-      outcome: 'platform_paid',
+      outcome: kind === 'platform' ? 'platform_paid' : 'marketplace_paid',
       estateId,
       reference: charge.reference,
       amountKobo: charge.amountKobo,

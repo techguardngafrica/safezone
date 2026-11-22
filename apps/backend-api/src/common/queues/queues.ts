@@ -27,6 +27,8 @@ export const QUEUES = {
   onboarding: 'onboarding',
   /** Prepaid token purchases: paid, vend with retries, refunds, stuck sweep (ADR-0018). */
   utilities: 'utilities',
+  /** Marketplace order payments confirmed and refunds (ADR-0023). */
+  marketplace: 'marketplace',
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 

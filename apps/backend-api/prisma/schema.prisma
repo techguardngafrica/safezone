@@ -1793,7 +1793,7 @@ model Refund {
 model PaymentRoute {
   provider  String
   routeKey  String   @map("route_key")
-  /// intent | virtual_account | refund | platform_purchase (ADR-0018)
+  /// intent | virtual_account | refund | platform_purchase (ADR-0018) | marketplace_order (ADR-0023)
   kind      String
   estateId  String   @map("estate_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)

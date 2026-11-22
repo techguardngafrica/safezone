@@ -14,6 +14,11 @@ export interface InitializeInput {
    * a platform charge, where Safezone sells its own service on its own account (ADR-0018).
    */
   subaccountCode: string | null;
+  /**
+   * Marketplace split (ADR-0023): the part of the charge that settles to Safezone's own account as its
+   * commission; the rest settles to `subaccountCode` (the vendor or recipient). Zero or absent otherwise.
+   */
+  transactionChargeKobo?: number;
   callbackUrl: string;
   metadata: Record<string, string>;
 }

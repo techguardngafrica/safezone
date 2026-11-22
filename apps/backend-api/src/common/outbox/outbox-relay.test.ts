@@ -24,6 +24,15 @@ describe('routeEvent', () => {
     ]);
   });
 
+  it('keeps marketplace and platform charges on their own queues', () => {
+    expect(routeEvent({ type: 'payments.marketplace_charge.succeeded', audit: null })).toEqual([
+      'marketplace',
+    ]);
+    expect(routeEvent({ type: 'payments.platform_charge.succeeded', audit: null })).toEqual([
+      'utilities',
+    ]);
+  });
+
   it('drops events nobody consumes', () => {
     expect(routeEvent({ type: 'tenancy.estate.viewed', audit: null })).toEqual([]);
   });

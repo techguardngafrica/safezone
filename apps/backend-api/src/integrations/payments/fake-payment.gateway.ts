@@ -54,6 +54,14 @@ export class FakePaymentGateway extends PaymentGateway {
   async initialize(input: InitializeInput) {
     if (input.subaccountCode !== null && !input.subaccountCode.startsWith('ACCT_fake_'))
       throw new PaymentProviderError('fake', false, 'Unknown subaccount');
+    const charge = input.transactionChargeKobo ?? 0;
+    if (
+      !Number.isSafeInteger(charge) ||
+      charge < 0 ||
+      charge >= input.amountKobo ||
+      (charge > 0 && input.subaccountCode === null)
+    )
+      throw new PaymentProviderError('fake', false, 'Invalid transaction charge');
     this.charges.set(input.reference, {
       input,
       status: 'pending',
