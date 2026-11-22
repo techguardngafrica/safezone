@@ -101,6 +101,8 @@ Mobile-responsive, signed in with phone + OTP, vendor roles from [authz.md](../m
 | Reviews  | Ratings and reviews, responses                                           |
 | Disputes | Open disputes and outcomes                                               |
 
+Built (Phase 4, ADR-0023): `/vendors` (information, indexed) and `/vendor` (Overview, Orders, Listings, Profile and payout, Team, Earnings and reviews; `noindex`, disallowed in robots). Navigation and pages follow the caller's vendor role; service personnel see only Overview and Orders assigned to them. A signed-in person without a vendor account sees the application form at `/vendor`. Not built yet: document and photo uploads, the Estates and Disputes areas, and availability calendars.
+
 Vendor application (`/vendors`): business details, owner identity, documents, categories, areas, bank details (captured by the payment provider for subaccount creation, never stored raw by Safezone).
 
 ## 9. SEO and content

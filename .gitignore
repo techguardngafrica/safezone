@@ -64,3 +64,6 @@ apps/backend-api/prisma/migrations/*.sql.bak
 # management-web e2e harness output
 .next-e2e/
 apps/management-web/e2e/.run/
+
+# public-web e2e harness output
+apps/public-web/e2e/.run/

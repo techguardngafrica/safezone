@@ -84,3 +84,16 @@ Run one flow with `pnpm --filter @safezone/management-web e2e bulk-import`, or t
 
 Selectors use roles and the English strings from `@safezone/i18n` (`t('import.runDryRun')`), so copy
 changes in the catalogue do not break the flows, while renamed or removed controls do.
+
+## Public Web (Vendor Portal)
+
+`apps/public-web` has the same harness, adapted (`apps/public-web/e2e/`):
+
+```bash
+pnpm --filter @safezone/public-web e2e
+```
+
+- Ports 4200 (API) and 3200 (web) by default (`E2E_PUBLIC_API_PORT`, `E2E_PUBLIC_WEB_PORT`), so it can run beside `pnpm dev` and the management-web harness.
+- Throwaway databases are named `safezone_e2e_pw_<random>`; the sweep touches only those names.
+- No realtime process: the portal does not use it.
+- Flows: `vendor-apply` (sign in, application with client-side checks, overview) and `vendor-order` (accept, fake-provider payment, start, message, complete, earnings).

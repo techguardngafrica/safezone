@@ -6,6 +6,7 @@ import { site } from '../site';
 
 const NAV = [
   { href: '/estates', label: 'public.nav.estates' },
+  { href: '/vendors', label: 'public.nav.vendors' },
   { href: '/download', label: 'public.nav.download' },
   { href: '/help', label: 'public.nav.help' },
   { href: '/contact', label: 'public.nav.contact' },

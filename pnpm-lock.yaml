@@ -347,6 +347,9 @@ importers:
       '@safezone/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@safezone/permissions':
+        specifier: workspace:*
+        version: link:../../packages/permissions
       '@safezone/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
@@ -369,12 +372,18 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.65.1
+        version: 1.65.1
       '@safezone/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.5
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
@@ -384,6 +393,9 @@ importers:
       eslint:
         specifier: ^10.14.0
         version: 10.14.0(jiti@2.7.0)
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
       vitest:
         specifier: ^5.1.0
         version: 5.1.0(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))

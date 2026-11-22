@@ -5,6 +5,7 @@ import { absoluteUrl } from '../src/site';
 const PAGES = [
   '/',
   '/estates',
+  '/vendors',
   '/register',
   '/contact',
   '/download',
