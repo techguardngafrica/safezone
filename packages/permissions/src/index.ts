@@ -80,6 +80,12 @@ export const PERMISSIONS = {
   'vendor.order.manage': 'Accept, decline, quote, schedule and assign orders',
   'vendor.order.work': 'Start and complete assigned orders and message the customer',
   'vendor.payout.read': 'View earnings and payouts',
+
+  // Advertiser account (evaluated against the caller's advertiser membership, ADR-0024)
+  'advertiser.campaign.read': 'View the advertiser’s campaigns and their aggregate reports',
+  'advertiser.creative.manage': 'Submit and change creatives for review',
+  'advertiser.invoice.pay': 'View and pay advertising invoices',
+  'advertiser.team.manage': 'Add and remove people on the advertiser account',
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;
@@ -141,6 +147,18 @@ export const VENDOR_PERMISSIONS = [
 
 export function isVendorPermission(permission: string): boolean {
   return (VENDOR_PERMISSIONS as readonly string[]).includes(permission);
+}
+
+/** Advertiser-level permissions: checked against advertiser_members only (ADR-0024). */
+export const ADVERTISER_PERMISSIONS = [
+  'advertiser.campaign.read',
+  'advertiser.creative.manage',
+  'advertiser.invoice.pay',
+  'advertiser.team.manage',
+] as const satisfies readonly Permission[];
+
+export function isAdvertiserPermission(permission: string): boolean {
+  return (ADVERTISER_PERMISSIONS as readonly string[]).includes(permission);
 }
 
 export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
@@ -335,25 +353,34 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
     level: 'vendor',
     permissions: ['vendor.order.work'],
   },
-  // Advertiser levels: permissions are added when the advertising module lands (Phase 4).
-  { key: 'advertiser', name: 'Advertiser', level: 'advertiser', permissions: [] },
+  // Advertiser level (advertising.md, ADR-0024). Held through advertiser_members, one role per member.
+  {
+    key: 'advertiser',
+    name: 'Advertiser',
+    level: 'advertiser',
+    permissions: ADVERTISER_PERMISSIONS,
+  },
   {
     key: 'advertiser_organisation_owner',
     name: 'Advertiser Organisation Owner',
     level: 'advertiser',
-    permissions: [],
+    permissions: ADVERTISER_PERMISSIONS,
   },
   {
     key: 'advertiser_account_manager',
     name: 'Advertiser Account Manager',
     level: 'advertiser',
-    permissions: [],
+    permissions: [
+      'advertiser.campaign.read',
+      'advertiser.creative.manage',
+      'advertiser.invoice.pay',
+    ],
   },
   {
     key: 'advertising_agency_representative',
     name: 'Advertising Agency Representative',
     level: 'advertiser',
-    permissions: [],
+    permissions: ['advertiser.campaign.read', 'advertiser.creative.manage'],
   },
 ];
 

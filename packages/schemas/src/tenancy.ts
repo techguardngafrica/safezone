@@ -143,6 +143,8 @@ export const estateSettingsSchema = z.object({
   /** Residents can post estate classifieds (ADR-0023). */
   'marketplace.classifieds_enabled': z.boolean().default(true),
   'ads.blocked_categories': z.array(z.string().max(60)).max(50).default([]),
+  /** Techguard informational card on the management dashboard (advertising.md §3); off unless the estate enables it. */
+  'ads.dashboard_info_enabled': z.boolean().default(false),
   'guards.can_see_resident_phone': z.boolean().default(false),
   /** Every billing run needs a second person to approve it (billing.md rule 3). */
   'billing.two_level_approval': z.boolean().default(true),

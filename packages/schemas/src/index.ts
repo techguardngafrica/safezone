@@ -26,3 +26,4 @@ export * from './security';
 export * from './management-extras';
 export * from './platform-admin';
 export * from './marketplace';
+export * from './advertising';

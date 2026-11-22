@@ -3,6 +3,7 @@ import {
   ALL_PERMISSIONS,
   BUILT_IN_ROLES,
   hasPermission,
+  isAdvertiserPermission,
   isVendorPermission,
   VENDOR_PERMISSIONS,
   PERMISSIONS,
@@ -58,6 +59,26 @@ describe('vendor permissions', () => {
     expect(hasPermission(['tenant'], 'marketplace.sell')).toBe(true);
     expect(hasPermission(['tenant'], 'marketplace.moderate')).toBe(false);
     expect(hasPermission(['estate_manager'], 'marketplace.moderate')).toBe(true);
+  });
+});
+
+describe('advertiser permissions', () => {
+  it('are held only by advertiser roles, and advertiser roles hold nothing else', () => {
+    for (const role of BUILT_IN_ROLES) {
+      const held = role.permissions.filter((p) => isAdvertiserPermission(p));
+      if (role.level === 'advertiser') expect(held).toEqual(role.permissions);
+      else expect(held).toEqual([]);
+    }
+  });
+
+  it('lets agency representatives manage creatives but not pay', () => {
+    expect(hasPermission(['advertising_agency_representative'], 'advertiser.creative.manage')).toBe(
+      true,
+    );
+    expect(hasPermission(['advertising_agency_representative'], 'advertiser.invoice.pay')).toBe(
+      false,
+    );
+    expect(isAdvertiserPermission('ad.campaign.manage')).toBe(false);
   });
 });
 
