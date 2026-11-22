@@ -25,3 +25,4 @@ export * from './channels';
 export * from './security';
 export * from './management-extras';
 export * from './platform-admin';
+export * from './marketplace';

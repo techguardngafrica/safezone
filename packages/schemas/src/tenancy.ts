@@ -51,6 +51,7 @@ export const FEATURE_KEYS = [
   'community',
   'facilities',
   'documents',
+  'marketplace',
 ] as const;
 export const featureKeySchema = z.enum(FEATURE_KEYS);
 export type FeatureKey = z.infer<typeof featureKeySchema>;
@@ -137,6 +138,10 @@ export const estateSettingsSchema = z.object({
     ),
   /** Owners who do not live in the estate also join building channels of units they own (rule 1). */
   'community.owners_in_building_channels': z.boolean().default(false),
+  /** Show every Techguard-verified vendor serving the estate's area without a per-vendor approval (marketplace.md rule 2). */
+  'marketplace.allow_all_verified_vendors': z.boolean().default(false),
+  /** Residents can post estate classifieds (ADR-0023). */
+  'marketplace.classifieds_enabled': z.boolean().default(true),
   'ads.blocked_categories': z.array(z.string().max(60)).max(50).default([]),
   'guards.can_see_resident_phone': z.boolean().default(false),
   /** Every billing run needs a second person to approve it (billing.md rule 3). */
