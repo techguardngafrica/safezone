@@ -54,6 +54,11 @@ export const PERMISSIONS = {
   'report.read': 'View estate reports',
   'audit.read': 'View the estate audit log',
 
+  // Marketplace inside an estate (marketplace.md, ADR-0023)
+  'marketplace.use': 'Browse the marketplace, order from vendors and review orders',
+  'marketplace.sell': 'Post items and services in the estate classifieds',
+  'marketplace.moderate': 'Approve or block vendors for the estate and moderate classifieds',
+
   // Platform (Techguard)
   'platform.estate.approve': 'Approve, reject, suspend or deactivate estates',
   'platform.estate.create': 'Create estates on behalf of customers (assisted onboarding)',
@@ -66,7 +71,15 @@ export const PERMISSIONS = {
   'ad.enquiry.manage': 'Manage advertising enquiries and advertisers',
   'ad.campaign.manage': 'Create and schedule campaigns',
   'ad.campaign.review': 'Review and approve campaigns and creatives',
-  'vendor.approve': 'Verify, approve and suspend vendors',
+  'vendor.approve': 'Verify, approve and suspend vendors; handle order disputes',
+
+  // Vendor organisation (evaluated against the caller's vendor membership, ADR-0023)
+  'vendor.profile.manage': 'Edit the vendor profile, documents, service areas and payout account',
+  'vendor.team.manage': 'Add, change and remove vendor team members',
+  'vendor.listing.manage': 'Create and edit vendor listings',
+  'vendor.order.manage': 'Accept, decline, quote, schedule and assign orders',
+  'vendor.order.work': 'Start and complete assigned orders and message the customer',
+  'vendor.payout.read': 'View earnings and payouts',
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;
@@ -91,6 +104,8 @@ const residentBase: Permission[] = [
   'maintenance.request',
   'facility.book',
   'community.channel.create',
+  'marketplace.use',
+  'marketplace.sell',
 ];
 
 const managerBase: Permission[] = [
@@ -111,7 +126,22 @@ const managerBase: Permission[] = [
   'facility.manage',
   'document.manage',
   'report.read',
+  'marketplace.moderate',
 ];
+
+/** Vendor-level permissions: checked against vendor_members, never against estate or platform roles. */
+export const VENDOR_PERMISSIONS = [
+  'vendor.profile.manage',
+  'vendor.team.manage',
+  'vendor.listing.manage',
+  'vendor.order.manage',
+  'vendor.order.work',
+  'vendor.payout.read',
+] as const satisfies readonly Permission[];
+
+export function isVendorPermission(permission: string): boolean {
+  return (VENDOR_PERMISSIONS as readonly string[]).includes(permission);
+}
 
 export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
   // Estate level
@@ -279,16 +309,33 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
     permissions: ['ad.campaign.review'],
   },
 
-  // Vendor and advertiser levels: permissions are added when the marketplace and advertising modules land (Phase 4).
-  { key: 'vendor_owner', name: 'Vendor Owner', level: 'vendor', permissions: [] },
-  { key: 'vendor_administrator', name: 'Vendor Administrator', level: 'vendor', permissions: [] },
-  { key: 'vendor_employee', name: 'Vendor Employee', level: 'vendor', permissions: [] },
+  // Vendor level (marketplace.md §2.3). Held through vendor_members, one role per member.
+  { key: 'vendor_owner', name: 'Vendor Owner', level: 'vendor', permissions: VENDOR_PERMISSIONS },
+  {
+    key: 'vendor_administrator',
+    name: 'Vendor Administrator',
+    level: 'vendor',
+    permissions: [
+      'vendor.team.manage',
+      'vendor.listing.manage',
+      'vendor.order.manage',
+      'vendor.order.work',
+      'vendor.payout.read',
+    ],
+  },
+  {
+    key: 'vendor_employee',
+    name: 'Vendor Employee',
+    level: 'vendor',
+    permissions: ['vendor.listing.manage', 'vendor.order.manage', 'vendor.order.work'],
+  },
   {
     key: 'vendor_service_personnel',
     name: 'Vendor Service Personnel',
     level: 'vendor',
-    permissions: [],
+    permissions: ['vendor.order.work'],
   },
+  // Advertiser levels: permissions are added when the advertising module lands (Phase 4).
   { key: 'advertiser', name: 'Advertiser', level: 'advertiser', permissions: [] },
   {
     key: 'advertiser_organisation_owner',

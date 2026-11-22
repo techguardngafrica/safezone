@@ -25,3 +25,5 @@ Copy [0000-template.md](0000-template.md) to `NNNN-short-title.md`. One decision
 | [0019](0019-bulk-imports-and-support-sessions.md)                | Bulk import jobs and support-access consent tables                                      | Accepted                             |
 | [0020](0020-import-execution-support-enforcement-role-grants.md) | Import execution through owning modules, support-session enforcement, role-grant levels | Accepted                             |
 | [0021](0021-composition-modules-for-cross-module-reads.md)       | Staff and search composition modules; reports and realtime read through owning modules  | Accepted                             |
+| [0022](0022-platform-control-plane.md)                           | Super Admin platform control plane                                                      | Accepted                             |
+| [0023](0023-phase-4-marketplace-and-safezone-pay.md)             | Phase 4 marketplace, resident classifieds, Safezone Pay without a stored balance        | Accepted                             |

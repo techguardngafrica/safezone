@@ -3,6 +3,8 @@ import {
   ALL_PERMISSIONS,
   BUILT_IN_ROLES,
   hasPermission,
+  isVendorPermission,
+  VENDOR_PERMISSIONS,
   PERMISSIONS,
   permissionsForRoles,
   requiresMfa,
@@ -29,6 +31,33 @@ describe('permission catalogue', () => {
         false,
       );
     }
+  });
+});
+
+describe('vendor permissions', () => {
+  it('are held only by vendor roles, and vendor roles hold nothing else', () => {
+    for (const role of BUILT_IN_ROLES) {
+      const vendorHeld = role.permissions.filter((p) => isVendorPermission(p));
+      if (role.level === 'vendor') expect(vendorHeld).toEqual(role.permissions);
+      else expect(vendorHeld).toEqual([]);
+    }
+  });
+
+  it('gives the owner every vendor permission and service personnel only order work', () => {
+    expect(permissionsForRoles(['vendor_owner'])).toEqual(new Set(VENDOR_PERMISSIONS));
+    expect([...permissionsForRoles(['vendor_service_personnel'])]).toEqual(['vendor.order.work']);
+  });
+
+  it('keeps vendor approval a platform permission', () => {
+    expect(isVendorPermission('vendor.approve')).toBe(false);
+    expect(hasPermission(['platform_administrator'], 'vendor.approve')).toBe(true);
+  });
+
+  it('lets residents shop and sell, and managers moderate', () => {
+    expect(hasPermission(['tenant'], 'marketplace.use')).toBe(true);
+    expect(hasPermission(['tenant'], 'marketplace.sell')).toBe(true);
+    expect(hasPermission(['tenant'], 'marketplace.moderate')).toBe(false);
+    expect(hasPermission(['estate_manager'], 'marketplace.moderate')).toBe(true);
   });
 });
 

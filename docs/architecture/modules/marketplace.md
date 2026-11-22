@@ -9,6 +9,8 @@ Marketplace connects residents with **verified service providers**: vendor regis
 
 **There is no dedicated vendor app.** Vendors manage their business on the web (Vendor Portal in public-web) and/or through Vendor mode in the Resident App.
 
+Residents can also sell: **estate classifieds** for neighbour-to-neighbour items and services, and an **individual vendor** tier for anyone selling across estates or taking bookings ([ADR-0023](../adr/0023-phase-4-marketplace-and-safezone-pay.md)).
+
 ## 2. Capabilities
 
 1. Vendor application (business details, owner identity, documents, categories, service areas).
@@ -28,11 +30,32 @@ Marketplace connects residents with **verified service providers**: vendor regis
 15. Disputes: open, evidence, resolution (refund/partial refund/no action).
 16. Vendor performance reports (completion rate, response time, rating, disputes).
 
+### 2.1 Estate classifieds (ADR-0023)
+
+1. Any active resident with `marketplace.sell` posts an item or service (title, description, optional price in kobo or "negotiable", condition for items, up to 6 photos). Listings expire after 30 days unless renewed.
+2. Visible only to members of the same estate. Statuses: `active`, `sold`, `withdrawn`, `hidden` (by staff with `marketplace.moderate`, with a reason), `expired`.
+3. Buyers contact the seller through in-app enquiry messages on the listing; phone numbers are never shown.
+4. No commission. Paying a seller uses the Safezone Pay transfer route (no stored balance).
+5. A resident may have at most 20 active classifieds.
+
+### 2.2 Vendor tiers
+
+`vendors.type` is `individual` or `company`; `verification_tier` is `individual` (phone and NIN check) or `business` (adds CAC number and documents). Both reach the same marketplace once approved by Techguard.
+
+### 2.3 Where the data lives and who reads it
+
+- Platform schema (`marketplace` database context): `vendors`, `vendor_members`, `vendor_documents`, `vendor_service_areas`, `service_categories`, `listings`, `commission_rules`.
+- Tenant schema (RLS on `estate_id`): `estate_vendor_approvals`, `marketplace_orders`, `marketplace_order_events` (append-only), `marketplace_order_messages`, `marketplace_reviews`, `marketplace_disputes`, `classified_listings`, `classified_messages`.
+- A vendor reads its own orders through the `marketplace` context with `app.vendor_id` set; the RLS policy on order tables admits exactly that vendor's rows.
+- Vendor routes (`/v1/vendors/:vendorId/...`) declare vendor permissions (`vendor.profile.manage`, `vendor.team.manage`, `vendor.listing.manage`, `vendor.order.manage`, `vendor.order.work`, `vendor.payout.read`), checked against the caller's active vendor membership; non-members get 404.
+
 ## 3. Order states
 
 `requested → quoted (optional) → accepted → scheduled → in_progress → completed → reviewed`; also `declined`, `cancelled_by_resident`, `cancelled_by_vendor`, `disputed`, `refunded`.
 
 Payment timing: at acceptance (fixed price) or after quote acceptance; held until completion where the provider supports delayed settlement, otherwise paid at acceptance with refund on cancellation.
+
+Implementation (ADR-0023): `accepted` means the price is agreed and payment is due; `schedule` and `start` require a verified payment (`paid_at`). The charge is a split: the vendor's provider subaccount receives the vendor share and Safezone's commission is the provider transaction charge. Every transition is appended to `marketplace_order_events`.
 
 ## 4. Data model
 
