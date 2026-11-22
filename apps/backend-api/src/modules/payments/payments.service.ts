@@ -37,6 +37,7 @@ import { UserDirectory } from '../identity/user-directory.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { isStaffWith, OccupancyService } from '../occupancy/occupancy.service';
 import { TenancyService } from '../tenancy/tenancy.service';
+import { checkoutMetadata, WalletStore } from './wallet-store.service';
 
 const INTENT_TTL_MS = 60 * 60 * 1000;
 const txCursorSchema = z.object({ paidAt: z.iso.datetime(), id: z.uuid() });
@@ -70,6 +71,7 @@ export type ProcessResult =
       amountKobo: number;
       providerTransactionId: string;
     }
+  | { outcome: 'transfer_paid'; estateId: string; reference: string }
   | { outcome: 'duplicate' | 'pending' | 'failed' | 'unknown_reference' | 'ignored' };
 
 function last4(accountNumber: string): string {
@@ -95,6 +97,7 @@ export class PaymentsService {
     private readonly users: UserDirectory,
     private readonly notifications: NotificationsService,
     @Inject(ENV) private readonly env: Env,
+    private readonly wallet: WalletStore,
   ) {}
 
   // ---- Estate payout account -----------------------------------------------------------------
@@ -283,6 +286,36 @@ export class PaymentsService {
     if (!prepared.fresh) return this.intentView(prepared.row);
 
     const row = prepared.row;
+    const metadata = checkoutMetadata(access.userId, input.saveCard, {
+      estateId: access.estateId,
+      intentId: row.id,
+    });
+    if (input.paymentMethodId) {
+      // Saved card (ADR-0025): charge now, then verify exactly as after checkout.
+      try {
+        await this.chargeSaved({
+          payerUserId: access.userId,
+          paymentMethodId: input.paymentMethodId,
+          reference: row.reference,
+          amountKobo: toKobo(row.amount),
+          subaccountCode: row.subaccountCode,
+          metadata,
+        });
+      } catch (error) {
+        await this.db.withTenant(access, (tx) =>
+          tx.paymentIntent.update({
+            where: { id: row.id },
+            data: { status: 'failed', failureReason: 'saved_card_refused' },
+          }),
+        );
+        throw error;
+      }
+      await this.db.withTenant(access, (tx) =>
+        tx.paymentIntent.update({ where: { id: row.id }, data: { status: 'pending' } }),
+      );
+      await this.processReference(row.reference);
+      return this.intent(access, row.id);
+    }
     try {
       const checkout = await this.gateway.initialize({
         reference: row.reference,
@@ -291,7 +324,7 @@ export class PaymentsService {
         email: `${access.userId}@payers.safezone.ng`,
         subaccountCode: row.subaccountCode,
         callbackUrl,
-        metadata: { estateId: access.estateId, intentId: row.id },
+        metadata,
       });
       const updated = await this.db.withTenant(access, (tx) =>
         tx.paymentIntent.update({
@@ -447,6 +480,8 @@ export class PaymentsService {
         return { outcome: 'unknown_reference' };
       throw error;
     }
+    // Saves the card when the payer opted in; never blocks the payment (ADR-0025).
+    if (charge.status === 'success') await this.wallet.capture(charge);
     const routeKey =
       charge.customerCode && !reference.startsWith('sz_') ? charge.customerCode : reference;
     const route = await this.db.withContext('payments', (tx) =>
@@ -472,6 +507,21 @@ export class PaymentsService {
       return this.processRoutedCharge('platform', estateId, charge);
     if (route.kind === 'marketplace_order')
       return this.processRoutedCharge('marketplace', estateId, charge);
+    if (route.kind === 'transfer') {
+      const outcome = await this.wallet.settleTransfer(estateId, charge);
+      if (outcome === 'mismatch') {
+        this.logger.error({ msg: 'transfer charge amount mismatch; refunded', estateId });
+        await this.gateway.refund({
+          transactionReference: reference,
+          amountKobo: charge.amountKobo,
+        });
+      }
+      return outcome === 'paid'
+        ? { outcome: 'transfer_paid', estateId, reference }
+        : outcome === 'pending'
+          ? { outcome: 'pending' }
+          : { outcome: 'failed' };
+    }
 
     if (charge.status !== 'success') {
       if (
@@ -1202,7 +1252,10 @@ export class PaymentsService {
     /** Same allowlist as estate payments: the public site or the app's own scheme. */
     callbackUrl?: string;
     metadata: Record<string, string>;
-  }): Promise<{ authorizationUrl: string }> {
+    saveCard?: boolean;
+    /** Pay with a saved card instead of checkout (ADR-0025); the caller then verifies the reference. */
+    paymentMethodId?: string;
+  }): Promise<{ authorizationUrl: string | null }> {
     const callbackUrl = this.callbackUrl(input.callbackUrl);
     await this.db.withContext('payments', (tx) =>
       tx.paymentRoute.upsert({
@@ -1218,6 +1271,18 @@ export class PaymentsService {
         update: {},
       }),
     );
+    const metadata = checkoutMetadata(input.payerUserId, input.saveCard, input.metadata);
+    if (input.paymentMethodId) {
+      await this.chargeSaved({
+        payerUserId: input.payerUserId,
+        paymentMethodId: input.paymentMethodId,
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        subaccountCode: null,
+        metadata,
+      });
+      return { authorizationUrl: null };
+    }
     try {
       const checkout = await this.gateway.initialize({
         reference: input.reference,
@@ -1225,7 +1290,7 @@ export class PaymentsService {
         email: `${input.payerUserId}@payers.safezone.ng`,
         subaccountCode: null,
         callbackUrl,
-        metadata: input.metadata,
+        metadata,
       });
       return { authorizationUrl: checkout.authorizationUrl };
     } catch (error) {
@@ -1258,7 +1323,9 @@ export class PaymentsService {
     vendorSubaccountCode: string;
     callbackUrl?: string;
     metadata: Record<string, string>;
-  }): Promise<{ authorizationUrl: string }> {
+    saveCard?: boolean;
+    paymentMethodId?: string;
+  }): Promise<{ authorizationUrl: string | null }> {
     if (
       !Number.isSafeInteger(input.commissionKobo) ||
       input.commissionKobo < 0 ||
@@ -1280,6 +1347,19 @@ export class PaymentsService {
         update: {},
       }),
     );
+    const metadata = checkoutMetadata(input.payerUserId, input.saveCard, input.metadata);
+    if (input.paymentMethodId) {
+      await this.chargeSaved({
+        payerUserId: input.payerUserId,
+        paymentMethodId: input.paymentMethodId,
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        subaccountCode: input.vendorSubaccountCode,
+        transactionChargeKobo: input.commissionKobo,
+        metadata,
+      });
+      return { authorizationUrl: null };
+    }
     try {
       const checkout = await this.gateway.initialize({
         reference: input.reference,
@@ -1288,7 +1368,104 @@ export class PaymentsService {
         subaccountCode: input.vendorSubaccountCode,
         transactionChargeKobo: input.commissionKobo,
         callbackUrl,
+        metadata,
+      });
+      return { authorizationUrl: checkout.authorizationUrl };
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
+  // ---- Saved cards and transfers (ADR-0025) ----------------------------------------------------
+
+  /**
+   * Charges the payer's own saved card for a reference that already has its route. The result is never
+   * trusted on its own: callers verify the reference (processReference) like any other payment.
+   */
+  async chargeSaved(input: {
+    payerUserId: string;
+    paymentMethodId: string;
+    reference: string;
+    amountKobo: number;
+    subaccountCode: string | null;
+    transactionChargeKobo?: number;
+    metadata: Record<string, string>;
+  }): Promise<'success' | 'failed' | 'pending'> {
+    const authorizationCode = await this.wallet.authorizationFor(
+      input.payerUserId,
+      input.paymentMethodId,
+    );
+    try {
+      const result = await this.gateway.chargeAuthorization({
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        email: `${input.payerUserId}@payers.safezone.ng`,
+        authorizationCode,
+        subaccountCode: input.subaccountCode,
+        ...(input.transactionChargeKobo
+          ? { transactionChargeKobo: input.transactionChargeKobo }
+          : {}),
         metadata: input.metadata,
+      });
+      if (result.status === 'failed')
+        throw new DomainError(
+          'SAVED_CARD_DECLINED',
+          'Your bank declined this card. Try another way to pay.',
+          402,
+        );
+      return result.status;
+    } catch (error) {
+      throw this.providerError(error);
+    }
+  }
+
+  /** Checkout (or saved card) for a transfer: settles in full to the recipient's subaccount, no commission. */
+  async startTransferCharge(input: {
+    estateId: string;
+    payerUserId: string;
+    reference: string;
+    amountKobo: number;
+    recipientSubaccountCode: string;
+    callbackUrl?: string;
+    metadata: Record<string, string>;
+    saveCard?: boolean;
+    paymentMethodId?: string;
+  }): Promise<{ authorizationUrl: string | null }> {
+    const callbackUrl = this.callbackUrl(input.callbackUrl);
+    await this.db.withContext('payments', (tx) =>
+      tx.paymentRoute.upsert({
+        where: {
+          provider_routeKey: { provider: this.gateway.provider, routeKey: input.reference },
+        },
+        create: {
+          provider: this.gateway.provider,
+          routeKey: input.reference,
+          kind: 'transfer',
+          estateId: input.estateId,
+        },
+        update: {},
+      }),
+    );
+    const metadata = checkoutMetadata(input.payerUserId, input.saveCard, input.metadata);
+    if (input.paymentMethodId) {
+      await this.chargeSaved({
+        payerUserId: input.payerUserId,
+        paymentMethodId: input.paymentMethodId,
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        subaccountCode: input.recipientSubaccountCode,
+        metadata,
+      });
+      return { authorizationUrl: null };
+    }
+    try {
+      const checkout = await this.gateway.initialize({
+        reference: input.reference,
+        amountKobo: input.amountKobo,
+        email: `${input.payerUserId}@payers.safezone.ng`,
+        subaccountCode: input.recipientSubaccountCode,
+        callbackUrl,
+        metadata,
       });
       return { authorizationUrl: checkout.authorizationUrl };
     } catch (error) {

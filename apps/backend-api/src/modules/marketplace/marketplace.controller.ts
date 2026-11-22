@@ -156,7 +156,7 @@ export class MarketplaceController {
     @ValidParams() params: ItemParams,
     @ValidBody() body: z.infer<typeof orderPaySchema>,
   ) {
-    return this.orders.pay(estate, params.id, body.callbackUrl);
+    return this.orders.pay(estate, params.id, body);
   }
 
   @Post('orders/:id/verify-payment')

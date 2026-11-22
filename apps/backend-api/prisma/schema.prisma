@@ -1793,7 +1793,7 @@ model Refund {
 model PaymentRoute {
   provider  String
   routeKey  String   @map("route_key")
-  /// intent | virtual_account | refund | platform_purchase (ADR-0018) | marketplace_order (ADR-0023) | ad_invoice (ADR-0024)
+  /// intent | virtual_account | refund | platform_purchase (ADR-0018) | marketplace_order (ADR-0023) | ad_invoice (ADR-0024) | transfer (ADR-0025)
   kind      String
   /// Null only for ad invoices, which belong to no estate.
   estateId  String?  @map("estate_id") @db.Uuid
@@ -3321,4 +3321,110 @@ model AdClick {
   @@index([tokenId])
   @@map("ad_clicks")
   @@schema("platform")
+}
+
+// ---------------------------------------------------------------------------
+// Safezone Pay (ADR-0025): saved cards, payout accounts for residents, transfers, airtime and data.
+// No stored balance anywhere: every payment is a provider charge that settles to whoever is owed.
+// ---------------------------------------------------------------------------
+
+/// A saved card: the provider authorization (wrapped), never the card number.
+model PaymentMethod {
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  userId               String    @map("user_id") @db.Uuid
+  provider             String
+  authorizationWrapped String    @map("authorization_wrapped")
+  signature            String
+  brand                String
+  last4                String
+  expMonth             String    @map("exp_month")
+  expYear              String    @map("exp_year")
+  bank                 String?
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastUsedAt           DateTime? @map("last_used_at") @db.Timestamptz(3)
+  removedAt            DateTime? @map("removed_at") @db.Timestamptz(3)
+
+  @@index([userId, removedAt])
+  @@map("payment_methods")
+  @@schema("platform")
+}
+
+/// Where a resident receives transfers: a provider subaccount; the account number stays with the provider.
+model UserPayoutAccount {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  provider        String
+  subaccountCode  String    @map("subaccount_code")
+  bankName        String    @map("bank_name")
+  accountLast4    String    @map("account_last4")
+  acceptTransfers Boolean   @default(true) @map("accept_transfers")
+  /// active | disabled
+  status          String    @default("active")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  disabledAt      DateTime? @map("disabled_at") @db.Timestamptz(3)
+
+  @@index([userId, status])
+  @@map("user_payout_accounts")
+  @@schema("platform")
+}
+
+model Transfer {
+  id                      String    @id @default(uuid(7)) @db.Uuid
+  estateId                String    @map("estate_id") @db.Uuid
+  senderUserId            String    @map("sender_user_id") @db.Uuid
+  recipientUserId         String    @map("recipient_user_id") @db.Uuid
+  recipientSubaccountCode String    @map("recipient_subaccount_code")
+  amount                  BigInt
+  note                    String?
+  classifiedId            String?   @map("classified_id") @db.Uuid
+  reference               String    @unique
+  idempotencyKey          String    @map("idempotency_key")
+  /// created | paid | failed
+  status                  String    @default("created")
+  authorizationUrl        String?   @map("authorization_url")
+  paidAt                  DateTime? @map("paid_at") @db.Timestamptz(3)
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, senderUserId, idempotencyKey])
+  @@index([estateId, senderUserId, createdAt])
+  @@index([estateId, recipientUserId, createdAt])
+  @@map("transfers")
+  @@schema("tenant")
+}
+
+model TopupPurchase {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  /// airtime | data
+  kind             String
+  /// mtn | glo | airtel | 9mobile
+  network          String
+  phone            String
+  variationCode    String?   @map("variation_code")
+  planName         String?   @map("plan_name")
+  amount           BigInt
+  fee              BigInt    @default(0)
+  total            BigInt
+  paymentReference String    @unique @map("payment_reference")
+  idempotencyKey   String    @map("idempotency_key")
+  provider         String
+  providerRef      String?   @map("provider_ref")
+  /// created | paid | delivering | delivered | failed | refund_pending | refunded
+  status           String    @default("created")
+  authorizationUrl String?   @map("authorization_url")
+  attempts         Int       @default(0)
+  failureReason    String?   @map("failure_reason")
+  paidAt           DateTime? @map("paid_at") @db.Timestamptz(3)
+  deliveredAt      DateTime? @map("delivered_at") @db.Timestamptz(3)
+  refundedAt       DateTime? @map("refunded_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, userId, idempotencyKey])
+  @@index([estateId, userId, createdAt])
+  @@index([status, paidAt])
+  @@map("topup_purchases")
+  @@schema("tenant")
 }

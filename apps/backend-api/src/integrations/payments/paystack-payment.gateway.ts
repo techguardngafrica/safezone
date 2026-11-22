@@ -5,6 +5,7 @@ import {
   PaymentProviderError,
   type VerifiedCharge,
   type WebhookEvent,
+  type ChargeAuthorizationInput,
 } from './payment-gateway';
 
 interface PaystackOptions {
@@ -102,6 +103,18 @@ export class PaystackPaymentGateway extends PaymentGateway {
       paid_at: string | null;
       metadata: Record<string, unknown> | string | null;
       customer?: { customer_code?: string };
+      authorization?: {
+        authorization_code?: string;
+        reusable?: boolean;
+        signature?: string;
+        brand?: string;
+        card_type?: string;
+        last4?: string;
+        exp_month?: string;
+        exp_year?: string;
+        bank?: string | null;
+        channel?: string;
+      };
     }>('GET', `/transaction/verify/${encodeURIComponent(reference)}`);
     const metadata =
       data.metadata && typeof data.metadata === 'object'
@@ -125,7 +138,41 @@ export class PaystackPaymentGateway extends PaymentGateway {
       paidAt: data.paid_at ? new Date(data.paid_at) : null,
       metadata,
       customerCode: data.customer?.customer_code ?? null,
+      authorization:
+        data.authorization?.authorization_code && data.authorization.channel === 'card'
+          ? {
+              code: data.authorization.authorization_code,
+              reusable: Boolean(data.authorization.reusable),
+              signature: data.authorization.signature ?? data.authorization.authorization_code,
+              brand: (data.authorization.brand ?? data.authorization.card_type ?? 'card').trim(),
+              last4: data.authorization.last4 ?? '',
+              expMonth: data.authorization.exp_month ?? '',
+              expYear: data.authorization.exp_year ?? '',
+              bank: data.authorization.bank ?? null,
+            }
+          : null,
     };
+  }
+
+  async chargeAuthorization(input: ChargeAuthorizationInput) {
+    const data = await this.call<{ status: string }>('POST', '/transaction/charge_authorization', {
+      reference: input.reference,
+      amount: input.amountKobo,
+      currency: 'NGN',
+      email: input.email,
+      authorization_code: input.authorizationCode,
+      ...(input.subaccountCode
+        ? {
+            subaccount: input.subaccountCode,
+            bearer: 'subaccount',
+            transaction_charge: input.transactionChargeKobo ?? 0,
+          }
+        : {}),
+      metadata: input.metadata,
+    });
+    const status: 'success' | 'failed' | 'pending' =
+      data.status === 'success' ? 'success' : data.status === 'failed' ? 'failed' : 'pending';
+    return { status };
   }
 
   verifySignature(

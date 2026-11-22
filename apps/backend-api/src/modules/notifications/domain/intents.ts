@@ -376,6 +376,15 @@ export const INTENTS = {
     title: 'notifications.marketplace.classified_message.title',
     body: 'notifications.marketplace.classified_message.body',
   },
+  'payments.transfer_received': {
+    category: 'payments',
+    priority: 'high',
+    mandatory: true,
+    channels: ['push'],
+    smsOnlyWithoutPush: false,
+    title: 'notifications.payments.transfer_received.title',
+    body: 'notifications.payments.transfer_received.body',
+  },
   'documents.expiring': {
     category: 'account',
     priority: 'normal',

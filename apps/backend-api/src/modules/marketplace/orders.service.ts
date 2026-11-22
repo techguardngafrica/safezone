@@ -471,7 +471,11 @@ export class OrdersService {
    * Starts (or restarts) checkout for an accepted order. The commission rule in force now is fixed on the
    * order with the split; a fresh reference is issued each time, and an earlier unpaid one is checked first.
    */
-  async pay(access: EstateAccess, orderId: string, callbackUrl: string | undefined) {
+  async pay(
+    access: EstateAccess,
+    orderId: string,
+    options: { callbackUrl?: string; paymentMethodId?: string; saveCard?: boolean },
+  ) {
     const current = await this.asResident(access, (tx) =>
       this.loadResidentOrder(tx, access, orderId),
     );
@@ -531,9 +535,13 @@ export class OrdersService {
       amountKobo: prepared.amountKobo,
       commissionKobo: prepared.commissionKobo,
       vendorSubaccountCode: prepared.subaccount,
-      callbackUrl,
+      ...(options.callbackUrl ? { callbackUrl: options.callbackUrl } : {}),
       metadata: { purpose: 'marketplace_order', orderId },
+      ...(options.saveCard ? { saveCard: true } : {}),
+      ...(options.paymentMethodId ? { paymentMethodId: options.paymentMethodId } : {}),
     });
+    // Saved card (ADR-0025): verify now, exactly as after checkout.
+    if (!checkout.authorizationUrl) await this.verifyPayment(access, orderId);
     return {
       orderId,
       amountKobo: prepared.amountKobo,

@@ -35,6 +35,33 @@ export interface VerifiedCharge {
   metadata: Record<string, string>;
   /** Dedicated virtual account transfers: the provider's customer code. */
   customerCode: string | null;
+  /**
+   * Card authorization of a successful card charge (ADR-0025). The code is a secret: wrap before storing,
+   * never log. Null for other channels or when the provider does not return one.
+   */
+  authorization?: CardAuthorization | null;
+}
+
+export interface CardAuthorization {
+  code: string;
+  reusable: boolean;
+  /** Same card, same customer: used to avoid saving a card twice. */
+  signature: string;
+  brand: string;
+  last4: string;
+  expMonth: string;
+  expYear: string;
+  bank: string | null;
+}
+
+export interface ChargeAuthorizationInput {
+  reference: string;
+  amountKobo: number;
+  email: string;
+  authorizationCode: string;
+  subaccountCode: string | null;
+  transactionChargeKobo?: number;
+  metadata: Record<string, string>;
 }
 
 export interface WebhookEvent {
@@ -62,6 +89,13 @@ export abstract class PaymentGateway {
     input: InitializeInput,
   ): Promise<{ authorizationUrl: string; reference: string }>;
   abstract verify(reference: string): Promise<VerifiedCharge>;
+  /**
+   * Charges a saved card authorization (ADR-0025). The outcome is confirmed with verify(reference) like any
+   * other charge; `pending` means the provider wants more from the payer or is still processing.
+   */
+  abstract chargeAuthorization(
+    input: ChargeAuthorizationInput,
+  ): Promise<{ status: 'success' | 'failed' | 'pending' }>;
   /** HMAC check of the raw request body against the provider's signature header. */
   abstract verifySignature(
     rawBody: Buffer,

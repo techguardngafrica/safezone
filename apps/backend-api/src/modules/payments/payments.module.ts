@@ -6,17 +6,34 @@ import { BillingModule } from '../billing/billing.module';
 import { IdentityModule } from '../identity/identity.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { OccupancyModule } from '../occupancy/occupancy.module';
+import { PropertyModule } from '../property/property.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { PaymentsController, PaymentsPublicController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { PlatformTransactionsController } from './platform-transactions.controller';
 
 /** Payments (payments.md). PaymentsConsumer runs in the worker process (worker.module.ts). */
+import { TransfersService } from './transfers.service';
+import { WalletController } from './wallet.controller';
+import { WalletStore } from './wallet-store.service';
+
 @Module({
-  imports: [TenancyModule, BillingModule, IdentityModule, NotificationsModule, OccupancyModule],
-  controllers: [PaymentsPublicController, PaymentsController, PlatformTransactionsController],
-  providers: [PaymentsService],
-  exports: [PaymentsService],
+  imports: [
+    TenancyModule,
+    BillingModule,
+    IdentityModule,
+    NotificationsModule,
+    OccupancyModule,
+    PropertyModule,
+  ],
+  controllers: [
+    PaymentsPublicController,
+    PaymentsController,
+    PlatformTransactionsController,
+    WalletController,
+  ],
+  providers: [PaymentsService, WalletStore, TransfersService],
+  exports: [PaymentsService, WalletStore, TransfersService],
 })
 export class PaymentsModule implements OnModuleInit {
   constructor(

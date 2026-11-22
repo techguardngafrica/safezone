@@ -159,6 +159,14 @@ const envSchema = z.object({
   VOICE_API_KEY: optionalString,
   KYC_PROVIDER: optionalString,
   KYC_API_KEY: optionalString,
+  /** Resident-to-resident transfers (ADR-0025): on in development and test; elsewhere only when 'true'. */
+  PAY_TRANSFERS_ENABLED: z.enum(['true', 'false']).optional(),
+  /** Airtime and data aggregator (ADR-0025): vtpass | fake. Unset outside development means unavailable. */
+  TOPUP_PROVIDER: z.enum(['vtpass', 'fake']).optional(),
+  VTPASS_BASE_URL: z.url().default('https://sandbox.vtpass.com/api'),
+  VTPASS_API_KEY: optionalString,
+  VTPASS_SECRET_KEY: optionalString,
+  VTPASS_PUBLIC_KEY: optionalString,
   BILLS_PROVIDER: optionalString,
   BILLS_API_KEY: optionalString,
   GOOGLE_MAPS_KEY: optionalString,

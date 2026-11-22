@@ -143,6 +143,8 @@ export class PurchasesService {
         amountKobo: Number(row.total),
         ...(input.callbackUrl ? { callbackUrl: input.callbackUrl } : {}),
         metadata: { purpose: 'utility_purchase', purchaseId: row.id },
+        ...(input.saveCard ? { saveCard: true } : {}),
+        ...(input.paymentMethodId ? { paymentMethodId: input.paymentMethodId } : {}),
       });
       await this.db.withTenant(access, (tx) =>
         tx.utilityPurchase.update({
@@ -150,6 +152,8 @@ export class PurchasesService {
           data: { authorizationUrl: checkout.authorizationUrl },
         }),
       );
+      // Saved card (ADR-0025): verify now, exactly as after checkout.
+      if (!checkout.authorizationUrl) return this.verify(access, row.id);
     } catch (error) {
       await this.db.withTenant(access, async (tx) => {
         await tx.utilityPurchase.update({

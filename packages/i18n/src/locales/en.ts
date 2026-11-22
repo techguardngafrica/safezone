@@ -162,6 +162,9 @@ export const en = {
   'notifications.facilities.booking_updated.body': 'Starts {startsAt}.',
   'notifications.facilities.booking_reminder.title': 'Reminder: {facility}',
   'notifications.facilities.booking_reminder.body': 'Your booking starts {startsAt}.',
+  'notifications.payments.transfer_received.title': 'You received ₦{amount}',
+  'notifications.payments.transfer_received.body':
+    'A neighbour sent you money. It settles to your bank account through the payment provider.',
   'notifications.marketplace.order_updated.title': 'Order update: {listing}',
   'notifications.marketplace.order_updated.body':
     'There is an update on the order with {vendor}. Open it for details.',

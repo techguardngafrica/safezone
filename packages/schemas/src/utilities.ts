@@ -124,6 +124,8 @@ export const createUtilityPurchaseSchema = z.object({
   amountKobo: z.number().int().positive(),
   /** Where the provider sends the payer back (deep link or web page). */
   callbackUrl: z.url().max(500).optional(),
+  paymentMethodId: z.uuid().optional(),
+  saveCard: z.boolean().optional(),
 });
 export const utilityPurchaseSchema = z.object({
   id: z.uuid(),

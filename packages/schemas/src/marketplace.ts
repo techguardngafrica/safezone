@@ -312,11 +312,17 @@ export const orderQuoteSchema = z.object({
 export const orderScheduleSchema = z.object({ scheduledAt: z.iso.datetime({ offset: true }) });
 export const orderReasonSchema = z.object({ reason: text(3, 500) });
 export const orderAssignSchema = z.object({ memberId: z.uuid() });
-export const orderPaySchema = z.object({ callbackUrl: z.url().max(500).optional() });
+export const orderPaySchema = z.object({
+  callbackUrl: z.url().max(500).optional(),
+  /** Pay with one of my saved cards instead of checkout (ADR-0025). */
+  paymentMethodId: z.uuid().optional(),
+  saveCard: z.boolean().optional(),
+});
 export const orderCheckoutSchema = z.object({
   orderId: z.uuid(),
   amountKobo: z.number().int(),
-  authorizationUrl: z.string(),
+  /** Null when a saved card was charged; the order then shows whether it is paid. */
+  authorizationUrl: z.string().nullable(),
 });
 
 export const orderMessageSchema = z.object({

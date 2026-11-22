@@ -5,6 +5,8 @@ import {
   PaymentProviderError,
   type VerifiedCharge,
   type WebhookEvent,
+  type CardAuthorization,
+  type ChargeAuthorizationInput,
 } from './payment-gateway';
 
 interface FakeCharge {
@@ -13,6 +15,7 @@ interface FakeCharge {
   paidKobo: number;
   channel: string;
   customerCode: string | null;
+  authorizationCode?: string;
 }
 
 /**
@@ -25,6 +28,13 @@ export class FakePaymentGateway extends PaymentGateway {
   readonly charges = new Map<string, FakeCharge>();
   readonly accounts = new Map<string, { accountNumber: string; subaccountCode: string }>();
   readonly refunds: { transactionReference: string; amountKobo: number }[] = [];
+  /** Card authorizations by code; card charges get one, with last4 4081 (Paystack's test card). */
+  readonly authorizations = new Map<
+    string,
+    CardAuthorization & { email: string; revoked: boolean }
+  >();
+  /** Test helper: authorizations whose next charge the provider leaves pending (e.g. asks for an OTP). */
+  readonly pendingAuthorizations = new Set<string>();
   private sequence = 0;
 
   /**
@@ -86,6 +96,40 @@ export class FakePaymentGateway extends PaymentGateway {
     if (!charge) throw new Error(`no fake charge ${reference}`);
     charge.status = options.status ?? 'success';
     charge.paidKobo = options.amountKobo ?? charge.input.amountKobo;
+    if (charge.status === 'success' && charge.channel === 'card' && !charge.authorizationCode) {
+      const code = `AUTH_fake_${++this.sequence}`;
+      charge.authorizationCode = code;
+      this.authorizations.set(code, {
+        code,
+        reusable: true,
+        signature: `SIG_fake_${charge.input.email}`,
+        brand: 'visa',
+        last4: '4081',
+        expMonth: '12',
+        expYear: '2030',
+        bank: 'TEST BANK',
+        email: charge.input.email,
+        revoked: false,
+      });
+    }
+  }
+
+  async chargeAuthorization(input: ChargeAuthorizationInput) {
+    const auth = this.authorizations.get(input.authorizationCode);
+    if (!auth || auth.revoked || auth.email !== input.email)
+      throw new PaymentProviderError('fake', false, 'Invalid authorization');
+    if (input.subaccountCode !== null && !input.subaccountCode.startsWith('ACCT_fake_'))
+      throw new PaymentProviderError('fake', false, 'Unknown subaccount');
+    const pending = this.pendingAuthorizations.has(input.authorizationCode);
+    this.charges.set(input.reference, {
+      input: { ...input, callbackUrl: '' },
+      status: pending ? 'pending' : 'success',
+      paidKobo: pending ? 0 : input.amountKobo,
+      channel: 'card',
+      customerCode: null,
+      authorizationCode: input.authorizationCode,
+    });
+    return { status: pending ? ('pending' as const) : ('success' as const) };
   }
 
   /** Test helper: a bank transfer into a dedicated account. Returns the charge reference. */
@@ -122,6 +166,23 @@ export class FakePaymentGateway extends PaymentGateway {
       paidAt: charge.status === 'success' ? new Date() : null,
       metadata: charge.input.metadata,
       customerCode: charge.customerCode,
+      authorization:
+        charge.status === 'success' && charge.authorizationCode
+          ? (({ email: _e, revoked: _r, ...auth }) => auth)(
+              this.authorizations.get(charge.authorizationCode) ?? {
+                code: charge.authorizationCode,
+                reusable: false,
+                signature: '',
+                brand: '',
+                last4: '',
+                expMonth: '',
+                expYear: '',
+                bank: null,
+                email: '',
+                revoked: false,
+              },
+            )
+          : null,
     };
   }
 
