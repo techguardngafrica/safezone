@@ -36,7 +36,7 @@ export const PERMISSIONS = {
   'community.moderate': 'Moderate channels and messages',
   'community.channel.create': 'Create resident channels',
 
-  // Money (estate billing residents)
+  // Money (estate billing residents & Phase 5 full accounting)
   'charge.manage': 'Define estate charges',
   'billing.run.create': 'Prepare billing runs',
   'billing.run.approve': 'Approve billing runs (second approver)',
@@ -44,6 +44,11 @@ export const PERMISSIONS = {
   'payment.make': 'Pay invoices',
   'payment.refund': 'Request refunds',
   'payment.reconcile': 'Reconcile transactions',
+  'accounting.read': 'View chart of accounts, journals, budgets and financial statements',
+  'accounting.manage':
+    'Manage chart of accounts, journals, periods, budgets and bank reconciliation',
+  'accounting.payable.manage': 'Create and record estate expenses and supplier payables',
+  'accounting.payable.approve': 'Approve estate expenses and supplier payables',
 
   // Operations
   'maintenance.request': 'Submit maintenance requests',
@@ -53,6 +58,31 @@ export const PERMISSIONS = {
   'document.manage': 'Manage estate documents',
   'report.read': 'View estate reports',
   'audit.read': 'View the estate audit log',
+  'analytics.schedule.manage': 'Manage scheduled estate email reports',
+
+  // Procurement & inventory (Phase 5)
+  'procurement.request': 'Create and submit purchase requests',
+  'procurement.approve': 'Approve or reject purchase requests',
+  'procurement.manage': 'Manage suppliers, quotations, purchase orders and goods receipts',
+  'inventory.manage': 'Manage inventory items, stores, stock movements and counts',
+  'asset.manage': 'Manage estate asset register and disposals',
+
+  // Workforce & HR (Phase 5)
+  'workforce.manage': 'Manage departments, staff profiles, duties and shift rosters',
+  'workforce.attendance.log': 'Clock in/out and view own attendance',
+  'workforce.leave.request': 'Submit leave requests',
+  'workforce.leave.approve': 'Approve or reject staff leave requests',
+  'payroll.view': 'View staff salary records and generate payroll exports',
+
+  // Governance (Phase 5)
+  'governance.manage': 'Manage policies, committee, meetings, minutes and motions',
+  'governance.vote': 'Cast votes on eligible estate motions',
+  'governance.policy.ack': 'Acknowledge published estate policies',
+  'governance.dispute.manage': 'Handle and resolve estate governance disputes',
+
+  // Patrols (Phase 5)
+  'patrol.manage': 'Manage patrol routes, checkpoints and security company contracts',
+  'patrol.scan': 'Run patrols and scan patrol checkpoints',
 
   // Marketplace inside an estate (marketplace.md, ADR-0023)
   'marketplace.use': 'Browse the marketplace, order from vendors and review orders',
@@ -68,6 +98,8 @@ export const PERMISSIONS = {
   'platform.config': 'Change feature flags, app versions and providers',
   'platform.compliance': 'Handle data subject requests, breaches and retention',
   'platform.finance': 'View platform transactions and revenue',
+  'platform.security_company.manage': 'Manage cross-estate security companies and estate contracts',
+  'platform.analytics.read': 'View platform KPIs and cross-estate analytics reports',
   'ad.enquiry.manage': 'Manage advertising enquiries and advertisers',
   'ad.campaign.manage': 'Create and schedule campaigns',
   'ad.campaign.review': 'Review and approve campaigns and creatives',
@@ -112,6 +144,8 @@ const residentBase: Permission[] = [
   'community.channel.create',
   'marketplace.use',
   'marketplace.sell',
+  'governance.vote',
+  'governance.policy.ack',
 ];
 
 const managerBase: Permission[] = [
@@ -128,11 +162,23 @@ const managerBase: Permission[] = [
   'community.moderate',
   'billing.run.approve',
   'invoice.read',
+  'accounting.read',
+  'accounting.payable.approve',
   'maintenance.assign',
   'facility.manage',
   'document.manage',
   'report.read',
+  'analytics.schedule.manage',
   'marketplace.moderate',
+  'procurement.request',
+  'procurement.approve',
+  'workforce.manage',
+  'workforce.attendance.log',
+  'workforce.leave.request',
+  'workforce.leave.approve',
+  'governance.manage',
+  'governance.dispute.manage',
+  'governance.policy.ack',
 ];
 
 /** Vendor-level permissions: checked against vendor_members, never against estate or platform roles. */
@@ -173,8 +219,15 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
       'role.assign',
       'audit.read',
       'charge.manage',
+      'accounting.manage',
+      'accounting.payable.manage',
+      'procurement.manage',
+      'inventory.manage',
+      'asset.manage',
+      'payroll.view',
       'gate.device.manage',
       'security.staff.manage',
+      'patrol.manage',
     ],
   },
   {
@@ -187,8 +240,14 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
       'role.assign',
       'audit.read',
       'charge.manage',
+      'accounting.manage',
+      'accounting.payable.manage',
+      'procurement.manage',
+      'inventory.manage',
+      'asset.manage',
       'gate.device.manage',
       'security.staff.manage',
+      'patrol.manage',
     ],
   },
   { key: 'estate_manager', name: 'Estate Manager', level: 'estate', permissions: managerBase },
@@ -204,7 +263,16 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
       'invoice.read',
       'payment.refund',
       'payment.reconcile',
+      'accounting.read',
+      'accounting.manage',
+      'accounting.payable.manage',
+      'accounting.payable.approve',
+      'payroll.view',
+      'workforce.attendance.log',
+      'workforce.leave.request',
+      'governance.policy.ack',
       'report.read',
+      'analytics.schedule.manage',
     ],
   },
   {
@@ -216,6 +284,13 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
       'maintenance.assign',
       'facility.manage',
       'document.manage',
+      'procurement.request',
+      'procurement.approve',
+      'inventory.manage',
+      'asset.manage',
+      'workforce.attendance.log',
+      'workforce.leave.request',
+      'governance.policy.ack',
       'report.read',
     ],
   },
@@ -233,25 +308,55 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
       'broadcast.emergency',
       'security.staff.manage',
       'gate.device.manage',
+      'patrol.manage',
+      'patrol.scan',
+      'workforce.attendance.log',
+      'workforce.leave.request',
+      'governance.policy.ack',
     ],
   },
   {
     key: 'security_officer',
     name: 'Security Officer',
     level: 'estate',
-    permissions: ['gate.verify', 'incident.report', 'sos.trigger', 'sos.respond'],
+    permissions: [
+      'gate.verify',
+      'incident.report',
+      'sos.trigger',
+      'sos.respond',
+      'patrol.scan',
+      'workforce.attendance.log',
+      'workforce.leave.request',
+      'governance.policy.ack',
+    ],
   },
   {
     key: 'maintenance_officer',
     name: 'Maintenance Officer',
     level: 'estate',
-    permissions: ['maintenance.request'],
+    permissions: [
+      'maintenance.request',
+      'procurement.request',
+      'workforce.attendance.log',
+      'workforce.leave.request',
+      'governance.policy.ack',
+    ],
   },
   {
     key: 'procurement_officer',
     name: 'Procurement Officer',
     level: 'estate',
-    permissions: ['report.read'],
+    permissions: [
+      'report.read',
+      'procurement.request',
+      'procurement.manage',
+      'inventory.manage',
+      'asset.manage',
+      'accounting.payable.manage',
+      'workforce.attendance.log',
+      'workforce.leave.request',
+      'governance.policy.ack',
+    ],
   },
   { key: 'resident', name: 'Resident', level: 'estate', permissions: residentBase },
   {
@@ -266,7 +371,13 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
     key: 'property_owner',
     name: 'Property Owner (non-resident)',
     level: 'estate',
-    permissions: ['resident.approve', 'invoice.read', 'payment.make'],
+    permissions: [
+      'resident.approve',
+      'invoice.read',
+      'payment.make',
+      'governance.vote',
+      'governance.policy.ack',
+    ],
   },
 
   // Platform level (Techguard)
@@ -287,6 +398,8 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
       'platform.estate.create',
       'platform.user.manage',
       'platform.config',
+      'platform.security_company.manage',
+      'platform.analytics.read',
       'vendor.approve',
     ],
   },
@@ -300,13 +413,18 @@ export const BUILT_IN_ROLES: readonly RoleDefinition[] = [
     key: 'platform_finance_officer',
     name: 'Platform Finance Officer',
     level: 'platform',
-    permissions: ['platform.finance'],
+    permissions: ['platform.finance', 'platform.analytics.read'],
   },
   {
     key: 'platform_operations_officer',
     name: 'Platform Operations Officer',
     level: 'platform',
-    permissions: ['platform.estate.create', 'platform.config'],
+    permissions: [
+      'platform.estate.create',
+      'platform.config',
+      'platform.security_company.manage',
+      'platform.analytics.read',
+    ],
   },
   {
     key: 'platform_compliance_officer',
@@ -423,6 +541,7 @@ export const GATE_SESSION_PERMISSIONS: readonly Permission[] = [
   'incident.report',
   'sos.trigger',
   'sos.respond',
+  'patrol.scan',
 ];
 
 /**
@@ -430,6 +549,7 @@ export const GATE_SESSION_PERMISSIONS: readonly Permission[] = [
  * read-only and never `pii.view`, so phone numbers stay masked. Only GET requests are allowed.
  */
 export const SUPPORT_SESSION_PERMISSIONS: readonly Permission[] = [
+  'accounting.read',
   'audit.read',
   'invoice.read',
   'report.read',

@@ -15,12 +15,26 @@ import {
 } from './domain/billing';
 
 export interface JournalInput {
-  type: 'invoice' | 'payment' | 'credit_note' | 'waiver' | 'refund' | 'adjustment';
+  type:
+    | 'invoice'
+    | 'payment'
+    | 'credit_note'
+    | 'waiver'
+    | 'refund'
+    | 'adjustment'
+    | 'manual'
+    | 'expense'
+    | 'payable'
+    | 'payable_payment'
+    | 'closing'
+    | 'reversal';
   description: string;
   sourceType: string;
   sourceId: string;
   reference?: string | null;
   postedBy: string | null;
+  reversesJournalId?: string | null;
+  occurredAt?: Date;
   lines: readonly JournalLine[];
 }
 
@@ -67,7 +81,8 @@ export class LedgerService {
         sourceId: journal.sourceId,
         reference: journal.reference ?? null,
         postedBy: journal.postedBy,
-        postedAt: now,
+        reversesJournalId: journal.reversesJournalId ?? null,
+        postedAt: journal.occurredAt ?? now,
       })),
     });
     await tx.ledgerEntry.createMany({
@@ -78,7 +93,7 @@ export class LedgerService {
           accountId: accountIds.get(line.account.code) as string,
           debit: BigInt(line.debit),
           credit: BigInt(line.credit),
-          occurredAt: now,
+          occurredAt: journal.occurredAt ?? now,
         })),
       ),
     });
@@ -287,5 +302,120 @@ export class LedgerService {
         lines,
       };
     });
+  }
+
+  /** Account sums inside a caller's tenant transaction (used by AccountingModule for statements/budgets). */
+  async balancesInTx(
+    tx: Tx,
+    estateId: string,
+    range?: { from?: string; to?: string; upTo?: string },
+  ) {
+    const occurredAt: Prisma.DateTimeFilter | undefined = range
+      ? {
+          ...(range.from ? { gte: watStart(range.from) } : {}),
+          ...(range.to ? { lt: watEndExclusive(range.to) } : {}),
+          ...(range.upTo ? { lt: watEndExclusive(range.upTo) } : {}),
+        }
+      : undefined;
+    const sums = await tx.ledgerEntry.groupBy({
+      by: ['accountId'],
+      where: { estateId, ...(occurredAt ? { occurredAt } : {}) },
+      _sum: { debit: true, credit: true },
+    });
+    if (sums.length === 0) return [];
+    const accounts = await tx.ledgerAccount.findMany({
+      where: { estateId, id: { in: sums.map((row) => row.accountId) } },
+      select: { id: true, code: true, name: true, type: true },
+      orderBy: { code: 'asc' },
+    });
+    const byId = new Map(sums.map((row) => [row.accountId, row._sum]));
+    return accounts.map((account) => {
+      const total = byId.get(account.id);
+      const debit = toKobo(total?.debit ?? 0n);
+      const credit = toKobo(total?.credit ?? 0n);
+      return {
+        code: account.code,
+        name: account.name,
+        type: account.type as LedgerAccountType,
+        debit,
+        credit,
+        balance: debit - credit,
+      };
+    });
+  }
+
+  /** Fetch one journal with its lines inside a caller's transaction (for reversals and reconciliation). */
+  async findJournalInTx(tx: Tx, estateId: string, journalId: string) {
+    const row = await tx.journal.findFirst({
+      where: { estateId, id: journalId },
+      include: {
+        entries: {
+          include: { account: { select: { code: true, name: true, type: true } } },
+          orderBy: { id: 'asc' },
+        },
+      },
+    });
+    if (!row) return null;
+    return {
+      id: row.id,
+      type: row.type,
+      description: row.description,
+      sourceType: row.sourceType,
+      sourceId: row.sourceId,
+      reference: row.reference,
+      postedBy: row.postedBy,
+      reversesJournalId: row.reversesJournalId,
+      postedAt: row.postedAt.toISOString(),
+      lines: row.entries.map((entry) => ({
+        accountCode: entry.account.code,
+        accountName: entry.account.name,
+        accountType: entry.account.type as LedgerAccountType,
+        debit: toKobo(entry.debit),
+        credit: toKobo(entry.credit),
+      })),
+    };
+  }
+
+  /** List journals with lines in a date range (for journal viewer, reconciliation matching and CSV export). */
+  async journalsInRangeInTx(tx: Tx, estateId: string, from?: string, to?: string, limit = 500) {
+    const rows = await tx.journal.findMany({
+      where: {
+        estateId,
+        ...(from || to
+          ? {
+              postedAt: {
+                ...(from ? { gte: watStart(from) } : {}),
+                ...(to ? { lt: watEndExclusive(to) } : {}),
+              },
+            }
+          : {}),
+      },
+      include: {
+        entries: {
+          include: { account: { select: { code: true, name: true, type: true } } },
+          orderBy: { id: 'asc' },
+        },
+      },
+      orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      type: row.type,
+      description: row.description,
+      sourceType: row.sourceType,
+      sourceId: row.sourceId,
+      reference: row.reference,
+      postedBy: row.postedBy,
+      reversesJournalId: row.reversesJournalId,
+      postedAt: row.postedAt.toISOString(),
+      lines: row.entries.map((entry) => ({
+        accountCode: entry.account.code,
+        accountName: entry.account.name,
+        accountType: entry.account.type as LedgerAccountType,
+        debit: toKobo(entry.debit),
+        credit: toKobo(entry.credit),
+      })),
+    }));
   }
 }

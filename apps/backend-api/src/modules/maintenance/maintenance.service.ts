@@ -804,27 +804,39 @@ export class MaintenanceService {
 
   async addMaterial(access: EstateAccess, id: string, input: z.infer<typeof addMaterialSchema>) {
     await this.db.withTenant(access, async (tx) => {
-      const row = await this.loadWorkOrder(tx, access, id);
-      if (row.status === 'verified' || row.status === 'closed' || row.status === 'cancelled')
-        throw new ConflictError('WORK_ORDER_CLOSED', 'This work order is finished');
-      const amount = Math.round(input.quantity * input.unitCost);
-      await tx.workOrderMaterial.create({
-        data: {
-          estateId: access.estateId,
-          workOrderId: id,
-          item: input.item,
-          quantity: input.quantity,
-          unitCost: BigInt(input.unitCost),
-          amount: BigInt(amount),
-          createdBy: access.userId,
-        },
-      });
-      await tx.workOrder.update({
-        where: { id },
-        data: { materialsCost: { increment: BigInt(amount) }, version: { increment: 1 } },
-      });
+      await this.addMaterialInTx(tx, access.estateId, access.userId, id, input);
     });
     return this.workOrder(access, id);
+  }
+
+  /** Exported for ProcurementModule when inventory stock is issued to a work order. */
+  async addMaterialInTx(
+    tx: Tx,
+    estateId: string,
+    userId: string,
+    workOrderId: string,
+    input: { item: string; quantity: number; unitCost: number },
+  ) {
+    const row = await tx.workOrder.findFirst({ where: { estateId, id: workOrderId } });
+    if (!row) throw new NotFoundError('Work order not found', 'WORK_ORDER_NOT_FOUND');
+    if (row.status === 'verified' || row.status === 'closed' || row.status === 'cancelled')
+      throw new ConflictError('WORK_ORDER_CLOSED', 'This work order is finished');
+    const amount = Math.round(input.quantity * input.unitCost);
+    await tx.workOrderMaterial.create({
+      data: {
+        estateId,
+        workOrderId,
+        item: input.item,
+        quantity: input.quantity,
+        unitCost: BigInt(input.unitCost),
+        amount: BigInt(amount),
+        createdBy: userId,
+      },
+    });
+    await tx.workOrder.update({
+      where: { id: workOrderId },
+      data: { materialsCost: { increment: BigInt(amount) }, version: { increment: 1 } },
+    });
   }
 
   /**

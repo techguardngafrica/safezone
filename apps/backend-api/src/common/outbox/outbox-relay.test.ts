@@ -33,6 +33,14 @@ describe('routeEvent', () => {
     ]);
   });
 
+  it('routes Phase 5 domain events to their respective queues and analytics', () => {
+    expect(routeEvent({ type: 'procurement.stock.low', audit: null })).toEqual(['procurement']);
+    expect(routeEvent({ type: 'security.shift.started', audit: null })).toEqual(['workforce']);
+    expect(routeEvent({ type: 'governance.motion.opened', audit: null })).toEqual(['governance']);
+    expect(routeEvent({ type: 'security.patrol.scanned', audit: null })).toEqual(['patrols']);
+    expect(routeEvent({ type: 'visitor.gate.recorded', audit: null })).toEqual(['analytics']);
+  });
+
   it('drops events nobody consumes', () => {
     expect(routeEvent({ type: 'tenancy.estate.viewed', audit: null })).toEqual([]);
   });

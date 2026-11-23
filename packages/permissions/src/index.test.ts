@@ -97,6 +97,20 @@ describe('role checks', () => {
     expect(granted.has('announcement.publish')).toBe(true);
     expect(granted.has('payment.make')).toBe(true);
   });
+
+  it('restricts payroll.view to estate_owner and estate_accountant (not estate_manager)', () => {
+    expect(hasPermission(['estate_owner'], 'payroll.view')).toBe(true);
+    expect(hasPermission(['estate_accountant'], 'payroll.view')).toBe(true);
+    expect(hasPermission(['estate_manager'], 'payroll.view')).toBe(false);
+    expect(hasPermission(['facility_manager'], 'payroll.view')).toBe(false);
+  });
+
+  it('grants residents governance voting and policy ack but not governance management', () => {
+    expect(hasPermission(['tenant'], 'governance.vote')).toBe(true);
+    expect(hasPermission(['property_owner'], 'governance.vote')).toBe(true);
+    expect(hasPermission(['tenant'], 'governance.manage')).toBe(false);
+    expect(hasPermission(['estate_manager'], 'governance.manage')).toBe(true);
+  });
 });
 
 describe('requiresMfa', () => {

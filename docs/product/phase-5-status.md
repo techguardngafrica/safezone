@@ -1,0 +1,14 @@
+# Phase 5 status: Operations Depth
+
+> Delivered 23 Nov 2026. Scope: [implementation plan, Phase 5](implementation-plan.md) and [ADR-0026](../architecture/adr/0026-phase-5-operations-depth.md).
+
+## Delivered
+
+| Area                             | Backend                          | Web UI                                                                       | Notes                                                                                                                                                                                           |
+| -------------------------------- | -------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Full Accounting & General Ledger | Done (`src/modules/accounting`)  | Done (`management-web /accounting`)                                          | CoA, manual/reversing journals, periods & closing, budgets with variance, expenses, payables, bank statement reconciliation, P&L, Balance Sheet, Cash Flow, CSV export                          |
+| Procurement & Inventory          | Done (`src/modules/procurement`) | Done (`management-web /procurement`)                                         | Suppliers, PRs with ordered amount-band approvals, quotations with ≥3-quote threshold, POs, GRNs, 3-way match → accounting payables, stock movements + work-order material cost, asset register |
+| Workforce & HR                   | Done (`src/modules/workforce`)   | Done (`management-web /workforce`)                                           | Departments, staff profiles, duties, rosters, attendance, leave requests, AES-256-GCM encrypted salaries strictly gated by `payroll.view`, payroll CSV export, automated offboarding            |
+| Governance                       | Done (`src/modules/governance`)  | Done (`management-web /governance`)                                          | Versioned policies + acknowledgements, committee, meetings/minutes/action items, motions with per-unit/per-owner/per-resident & secret/open ballots, resolutions, privacy-restricted disputes   |
+| Security Operations Depth        | Done (`src/modules/security`)    | Done (`management-web /security/patrols`, `super-admin /security-companies`) | Platform security companies, estate contracts, QR/NFC patrol routes, runs and offline checkpoint scan sync                                                                                      |
+| Deeper Analytics & Reporting     | Done (`src/modules/analytics`)   | Done (`super-admin /kpis`)                                                   | `analytics` Postgres schema, `rm_*` read models, PII-stripped product events, scheduled estate email reports, platform KPIs with small-number suppression (≥ 200)                               |

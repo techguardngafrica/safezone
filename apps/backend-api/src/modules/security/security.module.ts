@@ -19,6 +19,11 @@ import {
   ShiftsController,
 } from './security.controller';
 import { ShiftsService } from './shifts.service';
+import {
+  PatrolsController,
+  PlatformSecurityCompaniesController,
+} from './security-depth.controller';
+import { SecurityDepthService } from './security-depth.service';
 
 @Module({
   imports: [
@@ -36,15 +41,18 @@ import { ShiftsService } from './shifts.service';
     ShiftsController,
     GateDevicesController,
     GateAuthController,
+    PatrolsController,
+    PlatformSecurityCompaniesController,
   ],
   providers: [
     GatesService,
     IncidentsService,
     ShiftsService,
     GateAccessService,
+    SecurityDepthService,
     { provide: RateLimiter, useClass: RedisRateLimiter },
   ],
-  exports: [GatesService, GateAccessService, IncidentsService, ShiftsService],
+  exports: [GatesService, GateAccessService, IncidentsService, ShiftsService, SecurityDepthService],
 })
 export class SecurityModule implements OnModuleInit {
   constructor(

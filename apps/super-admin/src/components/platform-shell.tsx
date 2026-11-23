@@ -107,6 +107,18 @@ const NAV: { label?: MessageKey; items: NavSpec[] }[] = [
         icon: 'wallet',
         permission: 'platform.finance',
       },
+      {
+        href: '/security-companies',
+        label: 'admin.nav.securityCompanies',
+        icon: 'shield',
+        permission: 'platform.security_company.manage',
+      },
+      {
+        href: '/kpis',
+        label: 'admin.nav.kpis',
+        icon: 'barChart',
+        permission: 'platform.analytics.read',
+      },
     ],
   },
   {

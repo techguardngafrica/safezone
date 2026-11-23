@@ -16,7 +16,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["platform", "tenant", "audit"]
+  schemas  = ["platform", "tenant", "audit", "analytics"]
 }
 
 /// Transactional outbox (backend-api.md §10). Written in the same transaction as the state change;
@@ -3473,5 +3473,1133 @@ model TopupPurchase {
   @@index([estateId, userId, createdAt])
   @@index([status, paidAt])
   @@map("topup_purchases")
+  @@schema("tenant")
+}
+
+
+// ---------------------------------------------------------------------------
+// accounting (billing.md Phase 5, ADR-0026). Full general ledger, periods,
+// budgets, expenses, payables and bank reconciliation. Posts journals via LedgerService.
+// ---------------------------------------------------------------------------
+
+model CoaAccount {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  code        String
+  name        String
+  /// asset | liability | income | expense | equity
+  type        String
+  parentCode  String?   @map("parent_code")
+  description String?
+  isSystem    Boolean   @default(false) @map("is_system")
+  archivedAt  DateTime? @map("archived_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, code])
+  @@index([estateId, type])
+  @@map("coa_accounts")
+  @@schema("tenant")
+}
+
+model FinancialPeriod {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  name             String
+  startsOn         DateTime  @map("starts_on") @db.Date
+  endsOn           DateTime  @map("ends_on") @db.Date
+  /// open | closed
+  status           String    @default("open")
+  closedBy         String?   @map("closed_by") @db.Uuid
+  closedAt         DateTime? @map("closed_at") @db.Timestamptz(3)
+  closingJournalId String?   @map("closing_journal_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  budgets Budget[]
+
+  @@index([estateId, startsOn, endsOn])
+  @@map("financial_periods")
+  @@schema("tenant")
+}
+
+model Budget {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  name       String
+  periodId   String    @map("period_id") @db.Uuid
+  /// draft | approved | archived
+  status     String    @default("draft")
+  createdBy  String    @map("created_by") @db.Uuid
+  approvedBy String?   @map("approved_by") @db.Uuid
+  approvedAt DateTime? @map("approved_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  period FinancialPeriod @relation(fields: [periodId], references: [id])
+  lines  BudgetLine[]
+
+  @@index([estateId, periodId])
+  @@map("budgets")
+  @@schema("tenant")
+}
+
+model BudgetLine {
+  id            String  @id @default(uuid(7)) @db.Uuid
+  estateId      String  @map("estate_id") @db.Uuid
+  budgetId      String  @map("budget_id") @db.Uuid
+  accountCode   String  @map("account_code")
+  allocatedKobo BigInt  @map("allocated_kobo")
+  notes         String?
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetId, accountCode])
+  @@map("budget_lines")
+  @@schema("tenant")
+}
+
+model Expense {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  estateId            String    @map("estate_id") @db.Uuid
+  number              String
+  categoryAccountCode String    @map("category_account_code")
+  cashAccountCode     String    @default("cash:bank") @map("cash_account_code")
+  vendorName          String    @map("vendor_name")
+  description         String
+  amountKobo          BigInt    @map("amount_kobo")
+  incurredOn          DateTime  @map("incurred_on") @db.Date
+  receiptFileId       String?   @map("receipt_file_id") @db.Uuid
+  /// draft | submitted | approved | posted | rejected
+  status              String    @default("submitted")
+  requestedBy         String    @map("requested_by") @db.Uuid
+  approvedBy          String?   @map("approved_by") @db.Uuid
+  approvedAt          DateTime? @map("approved_at") @db.Timestamptz(3)
+  rejectionReason     String?   @map("rejection_reason")
+  journalId           String?   @map("journal_id") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, number])
+  @@index([estateId, status, createdAt])
+  @@map("expenses")
+  @@schema("tenant")
+}
+
+model Payable {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  estateId           String    @map("estate_id") @db.Uuid
+  number             String
+  supplierId         String?   @map("supplier_id") @db.Uuid
+  supplierName       String    @map("supplier_name")
+  poId               String?   @map("po_id") @db.Uuid
+  grnId              String?   @map("grn_id") @db.Uuid
+  invoiceRef         String    @map("invoice_ref")
+  expenseAccountCode String    @map("expense_account_code")
+  amountKobo         BigInt    @map("amount_kobo")
+  amountPaidKobo     BigInt    @default(0) @map("amount_paid_kobo")
+  dueOn              DateTime  @map("due_on") @db.Date
+  /// draft | matched | approved | partially_paid | paid | void
+  status             String    @default("draft")
+  requestedBy        String?   @map("requested_by") @db.Uuid
+  approvedBy         String?   @map("approved_by") @db.Uuid
+  approvedAt         DateTime? @map("approved_at") @db.Timestamptz(3)
+  journalId          String?   @map("journal_id") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  payments PayablePayment[]
+
+  @@unique([estateId, number])
+  @@index([estateId, status, dueOn])
+  @@map("payables")
+  @@schema("tenant")
+}
+
+model PayablePayment {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  payableId       String   @map("payable_id") @db.Uuid
+  amountKobo      BigInt   @map("amount_kobo")
+  paidOn          DateTime @map("paid_on") @db.Date
+  cashAccountCode String   @map("cash_account_code")
+  reference       String?
+  recordedBy      String   @map("recorded_by") @db.Uuid
+  journalId       String   @map("journal_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  payable Payable @relation(fields: [payableId], references: [id])
+
+  @@index([payableId, createdAt])
+  @@map("payable_payments")
+  @@schema("tenant")
+}
+
+model BankStatement {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  estateId           String   @map("estate_id") @db.Uuid
+  cashAccountCode    String   @map("cash_account_code")
+  name               String
+  statementFrom      DateTime @map("statement_from") @db.Date
+  statementTo        DateTime @map("statement_to") @db.Date
+  openingBalanceKobo BigInt   @map("opening_balance_kobo")
+  closingBalanceKobo BigInt   @map("closing_balance_kobo")
+  importedBy         String   @map("imported_by") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  lines BankStatementLine[]
+
+  @@index([estateId, createdAt])
+  @@map("bank_statements")
+  @@schema("tenant")
+}
+
+model BankStatementLine {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  estateId         String   @map("estate_id") @db.Uuid
+  statementId      String   @map("statement_id") @db.Uuid
+  txnDate          DateTime @map("txn_date") @db.Date
+  description      String
+  reference        String?
+  amountKobo       BigInt   @map("amount_kobo")
+  /// credit | debit
+  direction        String
+  matchedJournalId String?  @map("matched_journal_id") @db.Uuid
+  /// unmatched | matched | ignored
+  status           String   @default("unmatched")
+
+  statement BankStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@index([statementId, txnDate])
+  @@map("bank_statement_lines")
+  @@schema("tenant")
+}
+
+
+// ---------------------------------------------------------------------------
+// procurement (procurement.md, Phase 5; ADR-0026). Suppliers, PRs, multi-band
+// approvals, RFQs/quotations, POs, GRNs, inventory, stock movements and assets.
+// ---------------------------------------------------------------------------
+
+model Supplier {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  name        String
+  contactName String?  @map("contact_name")
+  phone       String?
+  email       String?
+  categories  String[] @default([])
+  vendorId    String?  @map("vendor_id") @db.Uuid
+  bankRef     String?  @map("bank_ref")
+  /// active | suspended | archived
+  status      String   @default("active")
+  rating      Int?     @db.SmallInt
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  quotations     Quotation[]
+  purchaseOrders PurchaseOrder[]
+
+  @@index([estateId, status])
+  @@map("suppliers")
+  @@schema("tenant")
+}
+
+model PurchaseRequest {
+  id                      String    @id @default(uuid(7)) @db.Uuid
+  estateId                String    @map("estate_id") @db.Uuid
+  number                  String
+  requestedBy             String    @map("requested_by") @db.Uuid
+  department              String
+  reason                  String
+  requiredBy              DateTime? @map("required_by") @db.Date
+  estimatedTotalKobo      BigInt    @map("estimated_total_kobo")
+  workOrderId             String?   @map("work_order_id") @db.Uuid
+  budgetLineId            String?   @map("budget_line_id") @db.Uuid
+  soleSourceJustification String?   @map("sole_source_justification")
+  /// draft | submitted | approved | rejected | rfq | quoted | po_created | closed
+  status                  String    @default("draft")
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  items          PurchaseRequestItem[]
+  quotations     Quotation[]
+  purchaseOrders PurchaseOrder[]
+
+  @@unique([estateId, number])
+  @@index([estateId, status, createdAt])
+  @@map("purchase_requests")
+  @@schema("tenant")
+}
+
+model PurchaseRequestItem {
+  id              String  @id @default(uuid(7)) @db.Uuid
+  estateId        String  @map("estate_id") @db.Uuid
+  prId            String  @map("pr_id") @db.Uuid
+  description     String
+  inventoryItemId String? @map("inventory_item_id") @db.Uuid
+  qty             Float
+  estUnitCostKobo BigInt  @map("est_unit_cost_kobo")
+
+  pr PurchaseRequest @relation(fields: [prId], references: [id], onDelete: Cascade)
+
+  @@map("purchase_request_items")
+  @@schema("tenant")
+}
+
+model ApprovalStep {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  subjectType  String    @map("subject_type")
+  subjectId    String    @map("subject_id") @db.Uuid
+  step         Int       @db.SmallInt
+  approverRole String    @map("approver_role")
+  approverId   String?   @map("approver_id") @db.Uuid
+  /// pending | approved | rejected
+  decision     String    @default("pending")
+  decidedAt    DateTime? @map("decided_at") @db.Timestamptz(3)
+  comment      String?
+
+  @@index([estateId, subjectType, subjectId, step])
+  @@map("approval_steps")
+  @@schema("tenant")
+}
+
+model Quotation {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  prId       String    @map("pr_id") @db.Uuid
+  supplierId String    @map("supplier_id") @db.Uuid
+  totalKobo  BigInt    @map("total_kobo")
+  validUntil DateTime? @map("valid_until") @db.Date
+  fileId     String?   @map("file_id") @db.Uuid
+  notes      String?
+  selected   Boolean   @default(false)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  pr       PurchaseRequest @relation(fields: [prId], references: [id], onDelete: Cascade)
+  supplier Supplier        @relation(fields: [supplierId], references: [id])
+
+  @@index([prId])
+  @@map("quotations")
+  @@schema("tenant")
+}
+
+model PurchaseOrder {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  number     String
+  prId       String    @map("pr_id") @db.Uuid
+  supplierId String    @map("supplier_id") @db.Uuid
+  totalKobo  BigInt    @map("total_kobo")
+  /// draft | issued | partially_received | received | invoiced | closed | cancelled
+  status     String    @default("draft")
+  issuedAt   DateTime? @map("issued_at") @db.Timestamptz(3)
+  notes      String?
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  pr            PurchaseRequest     @relation(fields: [prId], references: [id])
+  supplier      Supplier            @relation(fields: [supplierId], references: [id])
+  items         PurchaseOrderItem[]
+  goodsReceipts GoodsReceipt[]
+
+  @@unique([estateId, number])
+  @@index([estateId, status, createdAt])
+  @@map("purchase_orders")
+  @@schema("tenant")
+}
+
+model PurchaseOrderItem {
+  id              String  @id @default(uuid(7)) @db.Uuid
+  estateId        String  @map("estate_id") @db.Uuid
+  poId            String  @map("po_id") @db.Uuid
+  description     String
+  inventoryItemId String? @map("inventory_item_id") @db.Uuid
+  qtyOrdered      Float   @map("qty_ordered")
+  qtyReceived     Float   @default(0) @map("qty_received")
+  unitCostKobo    BigInt  @map("unit_cost_kobo")
+
+  po PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+
+  @@map("purchase_order_items")
+  @@schema("tenant")
+}
+
+model GoodsReceipt {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  estateId     String   @map("estate_id") @db.Uuid
+  poId         String   @map("po_id") @db.Uuid
+  receivedBy   String   @map("received_by") @db.Uuid
+  receivedAt   DateTime @default(now()) @map("received_at") @db.Timestamptz(3)
+  notes        String?
+  photoFileIds String[] @default([]) @map("photo_file_ids") @db.Uuid
+
+  po    PurchaseOrder      @relation(fields: [poId], references: [id])
+  items GoodsReceiptItem[]
+
+  @@index([poId])
+  @@map("goods_receipts")
+  @@schema("tenant")
+}
+
+model GoodsReceiptItem {
+  id          String @id @default(uuid(7)) @db.Uuid
+  estateId    String @map("estate_id") @db.Uuid
+  grId        String @map("gr_id") @db.Uuid
+  poItemId    String @map("po_item_id") @db.Uuid
+  qtyReceived Float  @map("qty_received")
+  qtyRejected Float  @default(0) @map("qty_rejected")
+
+  receipt GoodsReceipt @relation(fields: [grId], references: [id], onDelete: Cascade)
+
+  @@map("goods_receipt_items")
+  @@schema("tenant")
+}
+
+model StockLocation {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  name      String
+  spaceId   String?  @map("space_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  movements StockMovement[]
+
+  @@map("stock_locations")
+  @@schema("tenant")
+}
+
+model InventoryItem {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  estateId     String   @map("estate_id") @db.Uuid
+  sku          String
+  name         String
+  category     String
+  unit         String   @default("unit")
+  reorderLevel Float    @default(0) @map("reorder_level")
+  avgCostKobo  BigInt   @default(0) @map("avg_cost_kobo")
+  isConsumable Boolean  @default(false) @map("is_consumable")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  movements StockMovement[]
+
+  @@unique([estateId, sku])
+  @@map("inventory_items")
+  @@schema("tenant")
+}
+
+model StockMovement {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  estateId      String   @map("estate_id") @db.Uuid
+  itemId        String   @map("item_id") @db.Uuid
+  locationId    String   @map("location_id") @db.Uuid
+  /// receipt | issue | transfer | return | adjustment
+  type          String
+  qtyDelta      Float    @map("qty_delta")
+  unitCostKobo  BigInt   @default(0) @map("unit_cost_kobo")
+  referenceType String?  @map("reference_type")
+  referenceId   String?  @map("reference_id")
+  reason        String?
+  recordedBy    String   @map("recorded_by") @db.Uuid
+  occurredAt    DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  item     InventoryItem @relation(fields: [itemId], references: [id])
+  location StockLocation @relation(fields: [locationId], references: [id])
+
+  @@index([estateId, itemId, occurredAt])
+  @@map("stock_movements")
+  @@schema("tenant")
+}
+
+model Asset {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  estateId         String    @map("estate_id") @db.Uuid
+  tag              String
+  name             String
+  category         String
+  spaceId          String?   @map("space_id") @db.Uuid
+  custodianId      String?   @map("custodian_id") @db.Uuid
+  purchaseCostKobo BigInt    @default(0) @map("purchase_cost_kobo")
+  purchasedOn      DateTime? @map("purchased_on") @db.Date
+  warrantyUntil    DateTime? @map("warranty_until") @db.Date
+  /// in_use | in_repair | disposed
+  status           String    @default("in_use")
+  disposalReason   String?   @map("disposal_reason")
+  disposedAt       DateTime? @map("disposed_at") @db.Timestamptz(3)
+  notes            String?
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, tag])
+  @@map("assets")
+  @@schema("tenant")
+}
+
+
+// ---------------------------------------------------------------------------
+// workforce (workforce.md, Phase 5; ADR-0026). Departments, staff profiles,
+// duty assignments, rosters, attendance, leave, encrypted salary & payroll exports.
+// ---------------------------------------------------------------------------
+
+model Department {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  name        String
+  headStaffId String?  @map("head_staff_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff StaffProfile[]
+
+  @@unique([estateId, name])
+  @@map("departments")
+  @@schema("tenant")
+}
+
+model StaffProfile {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  estateId              String    @map("estate_id") @db.Uuid
+  userId                String    @map("user_id") @db.Uuid
+  staffNumber           String    @map("staff_number")
+  departmentId          String?   @map("department_id") @db.Uuid
+  jobTitle              String    @map("job_title")
+  /// full_time | part_time | contract
+  employmentType        String    @default("full_time") @map("employment_type")
+  startDate             DateTime  @map("start_date") @db.Date
+  endDate               DateTime? @map("end_date") @db.Date
+  /// active | on_leave | suspended | offboarded
+  status                String    @default("active")
+  emergencyContactName  String?   @map("emergency_contact_name")
+  emergencyContactPhone String?   @map("emergency_contact_phone")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  department    Department?        @relation(fields: [departmentId], references: [id])
+  duties        DutyAssignment[]
+  rosters       StaffRoster[]
+  attendance    AttendanceRecord[]
+  leaveRequests LeaveRequest[]
+  salaries      SalaryRecord[]
+
+  @@unique([estateId, userId])
+  @@unique([estateId, staffNumber])
+  @@map("staff_profiles")
+  @@schema("tenant")
+}
+
+model DutyAssignment {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  staffId     String    @map("staff_id") @db.Uuid
+  description String
+  spaceIds    String[]  @default([]) @map("space_ids") @db.Uuid
+  validFrom   DateTime  @map("valid_from") @db.Date
+  validTo     DateTime? @map("valid_to") @db.Date
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@map("duty_assignments")
+  @@schema("tenant")
+}
+
+model StaffRoster {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  staffId   String   @map("staff_id") @db.Uuid
+  date      DateTime @db.Date
+  startTime String   @map("start_time")
+  endTime   String   @map("end_time")
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([estateId, date])
+  @@map("staff_rosters")
+  @@schema("tenant")
+}
+
+model AttendanceRecord {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  staffId      String    @map("staff_id") @db.Uuid
+  clockIn      DateTime  @map("clock_in") @db.Timestamptz(3)
+  clockOut     DateTime? @map("clock_out") @db.Timestamptz(3)
+  /// app | security_shift | manual
+  source       String    @default("app")
+  geoOk        Boolean   @default(true) @map("geo_ok")
+  approvedBy   String?   @map("approved_by") @db.Uuid
+  editedReason String?   @map("edited_reason")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([estateId, staffId, clockIn])
+  @@map("attendance_records")
+  @@schema("tenant")
+}
+
+model LeaveType {
+  id                  String  @id @default(uuid(7)) @db.Uuid
+  estateId            String  @map("estate_id") @db.Uuid
+  name                String
+  annualAllowanceDays Int     @map("annual_allowance_days") @db.SmallInt
+  paid                Boolean @default(true)
+
+  requests LeaveRequest[]
+
+  @@unique([estateId, name])
+  @@map("leave_types")
+  @@schema("tenant")
+}
+
+model LeaveRequest {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  staffId     String    @map("staff_id") @db.Uuid
+  leaveTypeId String    @map("leave_type_id") @db.Uuid
+  startsOn    DateTime  @map("starts_on") @db.Date
+  endsOn      DateTime  @map("ends_on") @db.Date
+  days        Int       @db.SmallInt
+  reason      String
+  /// pending | approved | rejected | cancelled
+  status      String    @default("pending")
+  decidedBy   String?   @map("decided_by") @db.Uuid
+  decidedAt   DateTime? @map("decided_at") @db.Timestamptz(3)
+  comment     String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff     StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  leaveType LeaveType    @relation(fields: [leaveTypeId], references: [id])
+
+  @@index([estateId, status, createdAt])
+  @@map("leave_requests")
+  @@schema("tenant")
+}
+
+model SalaryRecord {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  estateId         String   @map("estate_id") @db.Uuid
+  staffId          String   @map("staff_id") @db.Uuid
+  /// AES-256-GCM wrapped JSON via KeyVault (workforce.md §3, ADR-0026).
+  payloadEncrypted String   @map("payload_encrypted")
+  effectiveFrom    DateTime @map("effective_from") @db.Date
+  createdBy        String   @map("created_by") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([estateId, staffId, effectiveFrom])
+  @@map("salary_records")
+  @@schema("tenant")
+}
+
+model PayrollExport {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  estateId     String   @map("estate_id") @db.Uuid
+  period       String
+  staffCount   Int      @map("staff_count")
+  totalNetKobo BigInt   @map("total_net_kobo")
+  csvContent   String   @map("csv_content")
+  createdBy    String   @map("created_by") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, period])
+  @@map("payroll_exports")
+  @@schema("tenant")
+}
+
+
+// ---------------------------------------------------------------------------
+// governance (governance.md, Phase 5; ADR-0026). Policies, committee,
+// meetings, minutes, motions, secret/open ballots, resolutions and disputes.
+// ---------------------------------------------------------------------------
+
+model Policy {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  estateId         String   @map("estate_id") @db.Uuid
+  title            String
+  category         String
+  currentVersionId String?  @map("current_version_id") @db.Uuid
+  requiresAck      Boolean  @default(false) @map("requires_ack")
+  /// all | residents | owners | staff
+  audience         String   @default("all")
+  /// draft | published | archived
+  status           String   @default("draft")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  versions PolicyVersion[]
+
+  @@map("policies")
+  @@schema("tenant")
+}
+
+model PolicyVersion {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  policyId    String   @map("policy_id") @db.Uuid
+  version     Int      @db.SmallInt
+  documentId  String?  @map("document_id") @db.Uuid
+  summary     String
+  effectiveOn DateTime @map("effective_on") @db.Date
+  publishedBy String   @map("published_by") @db.Uuid
+  publishedAt DateTime @default(now()) @map("published_at") @db.Timestamptz(3)
+
+  policy           Policy                 @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  acknowledgements PolicyAcknowledgement[]
+
+  @@unique([policyId, version])
+  @@map("policy_versions")
+  @@schema("tenant")
+}
+
+model PolicyAcknowledgement {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  policyVersionId String   @map("policy_version_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  acknowledgedAt  DateTime @default(now()) @map("acknowledged_at") @db.Timestamptz(3)
+
+  policyVersion PolicyVersion @relation(fields: [policyVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([policyVersionId, userId])
+  @@map("policy_acknowledgements")
+  @@schema("tenant")
+}
+
+model CommitteeMember {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  estateId  String    @map("estate_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  position  String
+  termStart DateTime  @map("term_start") @db.Date
+  termEnd   DateTime? @map("term_end") @db.Date
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("committee_members")
+  @@schema("tenant")
+}
+
+model Meeting {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  estateId     String    @map("estate_id") @db.Uuid
+  /// agm | egm | committee | town_hall
+  type         String
+  title        String
+  startsAt     DateTime  @map("starts_at") @db.Timestamptz(3)
+  location     String?
+  onlineLink   String?   @map("online_link")
+  agenda       Json      @default("[]") @db.JsonB
+  quorumRule   Int       @default(25) @map("quorum_rule") @db.SmallInt
+  /// scheduled | held | cancelled
+  status       String    @default("scheduled")
+  noticeSentAt DateTime? @map("notice_sent_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  attendance  MeetingAttendance[]
+  minutes     MeetingMinutes?
+  actionItems MeetingActionItem[]
+
+  @@map("meetings")
+  @@schema("tenant")
+}
+
+model MeetingAttendance {
+  id             String  @id @default(uuid(7)) @db.Uuid
+  estateId       String  @map("estate_id") @db.Uuid
+  meetingId      String  @map("meeting_id") @db.Uuid
+  userId         String  @map("user_id") @db.Uuid
+  unitId         String? @map("unit_id") @db.Uuid
+  present        Boolean @default(true)
+  proxyForUserId String? @map("proxy_for_user_id") @db.Uuid
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, userId])
+  @@map("meeting_attendance")
+  @@schema("tenant")
+}
+
+model MeetingMinutes {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  estateId   String   @map("estate_id") @db.Uuid
+  meetingId  String   @unique @map("meeting_id") @db.Uuid
+  content    String
+  documentId String?  @map("document_id") @db.Uuid
+  /// draft | approved | published
+  status     String   @default("draft")
+  approvedBy String?  @map("approved_by") @db.Uuid
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("meeting_minutes")
+  @@schema("tenant")
+}
+
+model MeetingActionItem {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  estateId  String    @map("estate_id") @db.Uuid
+  meetingId String    @map("meeting_id") @db.Uuid
+  title     String
+  ownerId   String?   @map("owner_id") @db.Uuid
+  dueOn     DateTime? @map("due_on") @db.Date
+  /// open | done
+  status    String    @default("open")
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("meeting_action_items")
+  @@schema("tenant")
+}
+
+model Motion {
+  id                     String   @id @default(uuid(7)) @db.Uuid
+  estateId               String   @map("estate_id") @db.Uuid
+  meetingId              String?  @map("meeting_id") @db.Uuid
+  title                  String
+  description            String
+  options                Json     @db.JsonB
+  /// per_unit | per_owner | per_resident
+  eligibility            String   @default("per_unit")
+  /// secret | open
+  ballot                 String   @default("secret")
+  opensAt                DateTime @map("opens_at") @db.Timestamptz(3)
+  closesAt               DateTime @map("closes_at") @db.Timestamptz(3)
+  quorumCount            Int      @default(1) @map("quorum_count")
+  /// simple | two_thirds | custom
+  threshold              String   @default("simple")
+  customThresholdPercent Int?     @map("custom_threshold_percent") @db.SmallInt
+  /// draft | open | closed | passed | failed | void
+  status                 String   @default("draft")
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  receipts   MotionBallotReceipt[]
+  votes      MotionVote[]
+  resolution Resolution?
+
+  @@map("motions")
+  @@schema("tenant")
+}
+
+model MotionBallotReceipt {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  estateId       String   @map("estate_id") @db.Uuid
+  motionId       String   @map("motion_id") @db.Uuid
+  /// unit:<unitId> for per_unit motions; user:<userId> for per_owner / per_resident.
+  voterKey       String   @map("voter_key")
+  castByUserId   String   @map("cast_by_user_id") @db.Uuid
+  proxyForUserId String?  @map("proxy_for_user_id") @db.Uuid
+  castAt         DateTime @default(now()) @map("cast_at") @db.Timestamptz(3)
+
+  motion Motion @relation(fields: [motionId], references: [id], onDelete: Cascade)
+
+  @@unique([motionId, voterKey])
+  @@map("motion_ballot_receipts")
+  @@schema("tenant")
+}
+
+model MotionVote {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  estateId    String   @map("estate_id") @db.Uuid
+  motionId    String   @map("motion_id") @db.Uuid
+  option      String
+  /// Always NULL on secret ballots (governance.md §4 rule 2, ADR-0026).
+  voterUserId String?  @map("voter_user_id") @db.Uuid
+  /// Always NULL on secret ballots.
+  unitId      String?  @map("unit_id") @db.Uuid
+  castAt      DateTime @default(now()) @map("cast_at") @db.Timestamptz(3)
+
+  motion Motion @relation(fields: [motionId], references: [id], onDelete: Cascade)
+
+  @@index([motionId])
+  @@map("motion_votes")
+  @@schema("tenant")
+}
+
+model Resolution {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  motionId  String   @unique @map("motion_id") @db.Uuid
+  text      String
+  adoptedOn DateTime @map("adopted_on") @db.Date
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  motion Motion @relation(fields: [motionId], references: [id])
+
+  @@map("resolutions")
+  @@schema("tenant")
+}
+
+model GovernanceDispute {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  estateId       String   @map("estate_id") @db.Uuid
+  partyUserIds   String[] @map("party_user_ids") @db.Uuid
+  summary        String
+  /// open | in_mediation | resolved | closed
+  status         String   @default("open")
+  handlerId      String?  @map("handler_id") @db.Uuid
+  mediationNotes String?  @map("mediation_notes")
+  outcome        String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("governance_disputes")
+  @@schema("tenant")
+}
+
+
+// ---------------------------------------------------------------------------
+// security depth (security.md Phase 5, ADR-0026). Cross-estate security
+// companies (platform) and QR/NFC patrol routes, checkpoints and logs (tenant).
+// ---------------------------------------------------------------------------
+
+model SecurityCompany {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  name               String
+  registrationNumber String?  @map("registration_number")
+  contactName        String   @map("contact_name")
+  contactPhone       String   @map("contact_phone")
+  contactEmail       String?  @map("contact_email")
+  /// active | suspended
+  status             String   @default("active")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  guards    SecurityCompanyGuard[]
+  contracts EstateSecurityContract[]
+
+  @@map("security_companies")
+  @@schema("platform")
+}
+
+model SecurityCompanyGuard {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  badgeNumber String   @map("badge_number")
+  /// active | inactive
+  status      String   @default("active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company SecurityCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@map("security_company_guards")
+  @@schema("platform")
+}
+
+model EstateSecurityContract {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  companyId  String    @map("company_id") @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  startsOn   DateTime  @map("starts_on") @db.Date
+  endsOn     DateTime? @map("ends_on") @db.Date
+  /// pending | active | terminated
+  status     String    @default("pending")
+  approvedBy String?   @map("approved_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company SecurityCompany @relation(fields: [companyId], references: [id])
+
+  @@index([estateId, status])
+  @@map("estate_security_contracts")
+  @@schema("platform")
+}
+
+model PatrolRoute {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  name            String
+  description     String?
+  intervalMinutes Int      @default(60) @map("interval_minutes")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  checkpoints PatrolCheckpoint[]
+  runs        PatrolRun[]
+
+  @@map("patrol_routes")
+  @@schema("tenant")
+}
+
+model PatrolCheckpoint {
+  id       String  @id @default(uuid(7)) @db.Uuid
+  estateId String  @map("estate_id") @db.Uuid
+  routeId  String  @map("route_id") @db.Uuid
+  sequence Int     @db.SmallInt
+  name     String
+  spaceId  String? @map("space_id") @db.Uuid
+  /// qr | nfc
+  tagType  String  @default("qr") @map("tag_type")
+  tagCode  String  @map("tag_code")
+  active   Boolean @default(true)
+
+  route PatrolRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  logs  PatrolLog[]
+
+  @@unique([estateId, tagCode])
+  @@map("patrol_checkpoints")
+  @@schema("tenant")
+}
+
+model PatrolRun {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  estateId    String    @map("estate_id") @db.Uuid
+  routeId     String    @map("route_id") @db.Uuid
+  guardUserId String    @map("guard_user_id") @db.Uuid
+  deviceId    String?   @map("device_id") @db.Uuid
+  startedAt   DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
+  /// in_progress | completed | incomplete
+  status      String    @default("in_progress")
+
+  route PatrolRoute @relation(fields: [routeId], references: [id])
+  logs  PatrolLog[]
+
+  @@index([estateId, startedAt])
+  @@map("patrol_runs")
+  @@schema("tenant")
+}
+
+model PatrolLog {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  estateId        String   @map("estate_id") @db.Uuid
+  runId           String   @map("run_id") @db.Uuid
+  checkpointId    String   @map("checkpoint_id") @db.Uuid
+  guardUserId     String   @map("guard_user_id") @db.Uuid
+  scannedAt       DateTime @default(now()) @map("scanned_at") @db.Timestamptz(3)
+  offlineRecorded Boolean  @default(false) @map("offline_recorded")
+  notes           String?
+  photoFileId     String?  @map("photo_file_id") @db.Uuid
+
+  run        PatrolRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
+  checkpoint PatrolCheckpoint @relation(fields: [checkpointId], references: [id])
+
+  @@unique([runId, checkpointId])
+  @@map("patrol_logs")
+  @@schema("tenant")
+}
+
+
+// ---------------------------------------------------------------------------
+// analytics (analytics.md, Phase 5; ADR-0026). Read-model projections,
+// platform daily KPIs, privacy-safe product events and scheduled email reports.
+// ---------------------------------------------------------------------------
+
+model RmGateDaily {
+  estateId       String   @map("estate_id") @db.Uuid
+  day            DateTime @db.Date
+  entries        Int      @default(0)
+  exits          Int      @default(0)
+  digitalEntries Int      @default(0) @map("digital_entries")
+  manualEntries  Int      @default(0) @map("manual_entries")
+  denies         Int      @default(0)
+  overrides      Int      @default(0)
+
+  @@id([estateId, day])
+  @@map("rm_gate_daily")
+  @@schema("analytics")
+}
+
+model RmSosMetrics {
+  estateId          String   @map("estate_id") @db.Uuid
+  day               DateTime @db.Date
+  realAlerts        Int      @default(0) @map("real_alerts")
+  drillAlerts       Int      @default(0) @map("drill_alerts")
+  ackSecondsSum     Int      @default(0) @map("ack_seconds_sum")
+  ackCount          Int      @default(0) @map("ack_count")
+  resolveSecondsSum Int      @default(0) @map("resolve_seconds_sum")
+  resolveCount      Int      @default(0) @map("resolve_count")
+
+  @@id([estateId, day])
+  @@map("rm_sos_metrics")
+  @@schema("analytics")
+}
+
+model RmCollectionsMonthly {
+  estateId             String @map("estate_id") @db.Uuid
+  month                String
+  billedKobo           BigInt @default(0) @map("billed_kobo")
+  collectedKobo        BigInt @default(0) @map("collected_kobo")
+  digitalCollectedKobo BigInt @default(0) @map("digital_collected_kobo")
+
+  @@id([estateId, month])
+  @@map("rm_collections_monthly")
+  @@schema("analytics")
+}
+
+model RmMaintenanceSla {
+  estateId          String   @map("estate_id") @db.Uuid
+  day               DateTime @db.Date
+  opened            Int      @default(0)
+  resolved          Int      @default(0)
+  breached          Int      @default(0)
+  resolveMinutesSum Int      @default(0) @map("resolve_minutes_sum")
+
+  @@id([estateId, day])
+  @@map("rm_maintenance_sla")
+  @@schema("analytics")
+}
+
+model RmCommunityDaily {
+  estateId    String   @map("estate_id") @db.Uuid
+  day         DateTime @db.Date
+  posts       Int      @default(0)
+  reactions   Int      @default(0)
+  activeUsers Int      @default(0) @map("active_users")
+
+  @@id([estateId, day])
+  @@map("rm_community_daily")
+  @@schema("analytics")
+}
+
+model RmPlatformDaily {
+  day                       DateTime @id @db.Date
+  activeEstates             Int      @default(0) @map("active_estates")
+  totalUsers                Int      @default(0) @map("total_users")
+  mau                       Int      @default(0)
+  txVolumeKobo              BigInt   @default(0) @map("tx_volume_kobo")
+  adRevenueKobo             BigInt   @default(0) @map("ad_revenue_kobo")
+  marketplaceCommissionKobo BigInt   @default(0) @map("marketplace_commission_kobo")
+  adImpressions             Int      @default(0) @map("ad_impressions")
+  adClicks                  Int      @default(0) @map("ad_clicks")
+
+  @@map("rm_platform_daily")
+  @@schema("analytics")
+}
+
+model ProductEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
+  estateId   String?  @map("estate_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  app        String
+  version    String
+  event      String
+  properties Json     @default("{}") @db.JsonB
+
+  @@index([occurredAt])
+  @@index([estateId, occurredAt])
+  @@map("product_events")
+  @@schema("analytics")
+}
+
+model ReportSchedule {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  estateId   String    @map("estate_id") @db.Uuid
+  reportKey  String    @map("report_key")
+  /// weekly | monthly
+  frequency  String
+  recipients String[]
+  format     String    @default("csv")
+  active     Boolean   @default(true)
+  lastSentAt DateTime? @map("last_sent_at") @db.Timestamptz(3)
+  createdBy  String    @map("created_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([estateId, active])
+  @@map("report_schedules")
   @@schema("tenant")
 }

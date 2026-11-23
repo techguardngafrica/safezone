@@ -5025,6 +5025,38 @@ export const en = {
   'mw.integrations.emptyTitle': 'No integrations available',
   'mw.integrations.emptyBody':
     'Enable the Payments feature on this estate to connect a settlement account.',
+
+  // Phase 5: Operations Depth navigation & screens
+  'nav.accounting': 'Accounting',
+  'nav.procurement': 'Procurement',
+  'nav.workforce': 'Workforce',
+  'nav.governance': 'Governance',
+  'nav.patrols': 'Patrols',
+  'nav.securityCompanies': 'Security companies',
+  'admin.nav.securityCompanies': 'Security companies',
+  'admin.nav.kpis': 'Platform KPIs',
+
+  'p5.accounting.title': 'Full accounting',
+  'p5.accounting.description':
+    'Chart of accounts, balanced journals, financial periods, budgets, expenses, payables, bank reconciliation and statements.',
+  'p5.procurement.title': 'Procurement and inventory',
+  'p5.procurement.description':
+    'Suppliers, purchase requests with band approvals, purchase orders, stock movements and asset register.',
+  'p5.workforce.title': 'Workforce and HR',
+  'p5.workforce.description':
+    'Departments, employee profiles, attendance, leave requests, encrypted salary records and payroll exports.',
+  'p5.governance.title': 'Estate governance',
+  'p5.governance.description':
+    'Versioned policies and acknowledgements, management committee, meetings, motions, secret/open voting and disputes.',
+  'p5.patrols.title': 'Security patrols',
+  'p5.patrols.description':
+    'Patrol routes, QR/NFC checkpoints, active patrol runs and security company contracts.',
+  'p5.admin.companies.title': 'Security companies',
+  'p5.admin.companies.description':
+    'Platform-level security organisations serving multiple estates and their active estate contracts.',
+  'p5.admin.kpis.title': 'Platform KPIs',
+  'p5.admin.kpis.description':
+    'Cross-estate success indicators with small-number cohort suppression.',
 } as const;
 
 export type MessageKey = keyof typeof en;

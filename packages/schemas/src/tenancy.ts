@@ -52,6 +52,12 @@ export const FEATURE_KEYS = [
   'facilities',
   'documents',
   'marketplace',
+  'accounting',
+  'procurement',
+  'workforce',
+  'governance',
+  'patrols',
+  'analytics',
 ] as const;
 export const featureKeySchema = z.enum(FEATURE_KEYS);
 export type FeatureKey = z.infer<typeof featureKeySchema>;

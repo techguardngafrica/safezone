@@ -72,6 +72,10 @@ export const DB_CONTEXTS = [
   'marketplace_admin',
   /** Advertising: enquiries, advertisers, campaigns, decisions and tracking (ADR-0024). */
   'advertising',
+  /** Cross-estate security companies and estate security contracts (ADR-0026). */
+  'security_companies',
+  /** Platform KPIs and cross-estate analytics aggregates (ADR-0026). */
+  'analytics',
 ] as const;
 export type DbContext = (typeof DB_CONTEXTS)[number];
 

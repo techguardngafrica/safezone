@@ -9,6 +9,11 @@ import { ConfigModule } from './config/config.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { QueuesModule } from './common/queues/queues.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { AccountingModule } from './modules/accounting/accounting.module';
+import { ProcurementModule } from './modules/procurement/procurement.module';
+import { WorkforceModule } from './modules/workforce/workforce.module';
+import { GovernanceModule } from './modules/governance/governance.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import { MovesModule } from './modules/occupancy/moves/moves.module';
@@ -71,6 +76,11 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     EmergencyModule,
     CommunityModule,
     BillingModule,
+    AccountingModule,
+    ProcurementModule,
+    WorkforceModule,
+    GovernanceModule,
+    AnalyticsModule,
     PaymentsModule,
     MaintenanceModule,
     UtilitiesModule,

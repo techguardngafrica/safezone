@@ -328,6 +328,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/analytics/events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ingest privacy-safe batched product analytics events (max 50)
+     * @description Any signed-in user.
+     */
+    post: operations['analytics_ingestEvents'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/gate/guards': {
     parameters: {
       query?: never;
@@ -492,6 +512,434 @@ export interface paths {
     patch: operations['estate_updateProfile'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/accounting/accounts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate chart of accounts
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listAccounts'];
+    put?: never;
+    /**
+     * Create a chart of accounts entry
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_createAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/accounts/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update or archive a chart of accounts entry
+     * @description Requires `accounting.manage`.
+     */
+    patch: operations['accounting_updateAccount'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/bank-statement-lines/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Match, unmatch or ignore a bank statement line
+     * @description Requires `accounting.manage`.
+     */
+    patch: operations['accounting_matchBankLine'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/bank-statements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List imported bank statements and reconciliation status
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listBankStatements'];
+    put?: never;
+    /**
+     * Import a bank statement and auto-match against cash journals
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_importBankStatement'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/budgets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List budgets with actuals and variance
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listBudgets'];
+    put?: never;
+    /**
+     * Create a draft budget for a financial period
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_createBudget'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/budgets/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a draft budget (must not be the creator)
+     * @description Requires `accounting.payable.approve`.
+     */
+    post: operations['accounting_approveBudget'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/expenses': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate expenses
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listExpenses'];
+    put?: never;
+    /**
+     * Submit an estate expense for approval
+     * @description Requires `accounting.payable.manage`.
+     */
+    post: operations['accounting_createExpense'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/expenses/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve and post an expense to the general ledger
+     * @description Requires `accounting.payable.approve`.
+     */
+    post: operations['accounting_approveExpense'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/expenses/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a submitted expense
+     * @description Requires `accounting.payable.approve`.
+     */
+    post: operations['accounting_rejectExpense'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Export journals or trial balance as CSV for external accounting tools
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_exportCsv'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/journals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List general ledger journals with balanced lines
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listJournals'];
+    put?: never;
+    /**
+     * Post a balanced manual journal entry
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_createManualJournal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/journals/{id}/reverse': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Post a reversing journal for an existing journal
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_reverseJournal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/payables': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List supplier payables
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listPayables'];
+    put?: never;
+    /**
+     * Record a supplier payable
+     * @description Requires `accounting.payable.manage`.
+     */
+    post: operations['accounting_createPayable'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/payables/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a payable and post it to Accounts Payable
+     * @description Requires `accounting.payable.approve`.
+     */
+    post: operations['accounting_approvePayable'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/payables/{id}/payments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record a payment against an approved payable
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_payPayable'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/periods': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List financial periods
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_listPeriods'];
+    put?: never;
+    /**
+     * Create a financial period
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_createPeriod'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/periods/{id}/close': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Close a financial period and post net income to retained earnings
+     * @description Requires `accounting.manage`.
+     */
+    post: operations['accounting_closePeriod'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/statements/balance-sheet': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Balance sheet as of a date
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_balanceSheet'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/statements/cash-flow': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Cash flow statement for a date range
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_cashFlow'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/accounting/statements/income': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Income statement (profit and loss) for a date range
+     * @description Requires `accounting.read`.
+     */
+    get: operations['accounting_incomeStatement'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/ad-settings': {
     parameters: {
       query?: never;
@@ -554,6 +1002,70 @@ export interface paths {
      * @description Any active member of the estate. Needs the `announcements` feature.
      */
     post: operations['community_read'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/assets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate asset register
+     * @description Requires `asset.manage` or `inventory.manage` or `report.read`.
+     */
+    get: operations['procurement_listAssets'];
+    put?: never;
+    /**
+     * Register a tagged estate asset
+     * @description Requires `asset.manage`.
+     */
+    post: operations['procurement_createAsset'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/assets/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update an estate asset
+     * @description Requires `asset.manage`.
+     */
+    patch: operations['procurement_updateAsset'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/assets/{id}/dispose': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Dispose of an estate asset with a recorded reason
+     * @description Requires `asset.manage`.
+     */
+    post: operations['procurement_disposeAsset'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1296,6 +1808,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/committee': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate management committee members
+     * @description Requires `governance.policy.ack` or `governance.manage`.
+     */
+    get: operations['governance_listCommittee'];
+    put?: never;
+    /**
+     * Add a management committee member
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_addCommitteeMember'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/community/guidelines': {
     parameters: {
       query?: never;
@@ -1330,6 +1866,26 @@ export interface paths {
      * @description Any active member of the estate. Needs the `community` feature.
      */
     post: operations['channels_accept'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/dashboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estate analytics dashboard widgets from event-driven read models
+     * @description Requires `report.read`.
+     */
+    get: operations['analytics_dashboard'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1380,6 +1936,50 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/departments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate departments
+     * @description Requires `workforce.manage` or `role.assign`.
+     */
+    get: operations['workforce_listDepartments'];
+    put?: never;
+    /**
+     * Create a department
+     * @description Requires `workforce.manage`.
+     */
+    post: operations['workforce_createDepartment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/departments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update a department
+     * @description Requires `workforce.manage`.
+     */
+    patch: operations['workforce_updateDepartment'];
+    trace?: never;
+  };
   '/v1/estates/{estateId}/direct-channels': {
     parameters: {
       query?: never;
@@ -1398,6 +1998,50 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/disputes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List governance disputes (visible only to involved parties and handlers)
+     * @description Requires `governance.policy.ack` or `governance.dispute.manage`.
+     */
+    get: operations['governance_listDisputes'];
+    put?: never;
+    /**
+     * Log a governance dispute
+     * @description Requires `governance.policy.ack` or `governance.dispute.manage`.
+     */
+    post: operations['governance_createDispute'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/disputes/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update dispute status, handler, mediation notes or outcome
+     * @description Requires `governance.dispute.manage`.
+     */
+    patch: operations['governance_updateDispute'];
     trace?: never;
   };
   '/v1/estates/{estateId}/document-folders': {
@@ -1590,6 +2234,30 @@ export interface paths {
      * @description Any active member of the estate. Needs the `occupancy` feature.
      */
     post: operations['estateOccupancy_staffStatus'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/duty-assignments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List staff duty assignments
+     * @description Requires `workforce.manage`.
+     */
+    get: operations['workforce_listDutyAssignments'];
+    put?: never;
+    /**
+     * Create a staff duty assignment
+     * @description Requires `workforce.manage`.
+     */
+    post: operations['workforce_createDutyAssignment'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2100,6 +2768,26 @@ export interface paths {
     patch: operations['security_update'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/goods-receipts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record a goods receipt note (GRN) against an issued PO
+     * @description Requires `procurement.manage` or `inventory.manage`.
+     */
+    post: operations['procurement_recordGoodsReceipt'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/guards': {
     parameters: {
       query?: never;
@@ -2468,6 +3156,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/inventory-items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List inventory items with on-hand quantity and low-stock flags
+     * @description Requires `inventory.manage` or `procurement.manage` or `procurement.request`.
+     */
+    get: operations['procurement_listInventoryItems'];
+    put?: never;
+    /**
+     * Register an inventory item
+     * @description Requires `inventory.manage`.
+     */
+    post: operations['procurement_createInventoryItem'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/invoices': {
     parameters: {
       query?: never;
@@ -2646,6 +3358,94 @@ export interface paths {
      * @description Any active member of the estate. Needs the `occupancy` feature.
      */
     post: operations['estateOccupancy_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/leave-requests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List leave requests
+     * @description Requires `workforce.leave.request` or `workforce.leave.approve` or `workforce.manage`.
+     */
+    get: operations['workforce_listLeaveRequests'];
+    put?: never;
+    /**
+     * Submit a leave request
+     * @description Requires `workforce.leave.request`.
+     */
+    post: operations['workforce_createLeaveRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/leave-requests/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a staff leave request (cannot approve own request)
+     * @description Requires `workforce.leave.approve`.
+     */
+    post: operations['workforce_approveLeaveRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/leave-requests/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a staff leave request
+     * @description Requires `workforce.leave.approve`.
+     */
+    post: operations['workforce_rejectLeaveRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/leave-types': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate leave types
+     * @description Requires `workforce.leave.request` or `workforce.manage`.
+     */
+    get: operations['workforce_listLeaveTypes'];
+    put?: never;
+    /**
+     * Create a leave type
+     * @description Requires `workforce.manage`.
+     */
+    post: operations['workforce_createLeaveType'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3440,6 +4240,110 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/meetings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate governance meetings (draft minutes hidden from residents)
+     * @description Requires `governance.policy.ack` or `governance.manage`.
+     */
+    get: operations['governance_listMeetings'];
+    put?: never;
+    /**
+     * Schedule an AGM, EGM, committee or town hall meeting
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_createMeeting'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meetings/{id}/action-items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add an action item to a meeting
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_addActionItem'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meetings/{id}/attendance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record meeting attendance or proxy
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_recordMeetingAttendance'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meetings/{id}/minutes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Save, approve or publish meeting minutes
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_upsertMinutes'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/meetings/{id}/notice': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send official notice for a meeting
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_sendMeetingNotice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/messages/{id}': {
     parameters: {
       query?: never;
@@ -3666,6 +4570,90 @@ export interface paths {
     get: operations['moderation_queue'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/motions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List governance motions
+     * @description Requires `governance.vote` or `governance.manage`.
+     */
+    get: operations['governance_listMotions'];
+    put?: never;
+    /**
+     * Create and open a governance motion for voting
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_createMotion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/motions/{id}/close': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Close a motion, evaluate quorum/threshold and adopt resolution if passed
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_closeMotion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/motions/{id}/results': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View motion results (secret ballots hidden until closed)
+     * @description Requires `governance.vote` or `governance.manage`.
+     */
+    get: operations['governance_motionResults'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/motions/{id}/votes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cast a vote on an open motion (secret ballots store no voter link)
+     * @description Requires `governance.vote`.
+     */
+    post: operations['governance_castVote'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4024,6 +5012,94 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/patrol-routes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List patrol routes and their QR/NFC checkpoints
+     * @description Requires `patrol.scan` or `patrol.manage`.
+     */
+    get: operations['patrols_listRoutes'];
+    put?: never;
+    /**
+     * Create a patrol route with ordered QR/NFC checkpoints
+     * @description Requires `patrol.manage`.
+     */
+    post: operations['patrols_createRoute'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/patrol-runs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List patrol runs and checkpoint scan logs
+     * @description Requires `patrol.scan` or `patrol.manage`.
+     */
+    get: operations['patrols_listRuns'];
+    put?: never;
+    /**
+     * Start a patrol run on a route
+     * @description Requires `patrol.scan`.
+     */
+    post: operations['patrols_startRun'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/patrol-runs/{id}/scan': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record a QR/NFC checkpoint scan on an active patrol run
+     * @description Requires `patrol.scan`.
+     */
+    post: operations['patrols_scanCheckpoint'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/patrols/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sync offline-recorded patrol checkpoint scans
+     * @description Requires `patrol.scan`.
+     */
+    post: operations['patrols_syncScans'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/payment-intents': {
     parameters: {
       query?: never;
@@ -4108,6 +5184,114 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/payroll-exports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List generated payroll CSV exports (requires payroll.view)
+     * @description Requires `payroll.view`.
+     */
+    get: operations['workforce_listPayrollExports'];
+    put?: never;
+    /**
+     * Generate a payroll CSV export for a period (requires payroll.view)
+     * @description Requires `payroll.view`.
+     */
+    post: operations['workforce_generatePayrollExport'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/policies': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate policies
+     * @description Requires `governance.policy.ack` or `governance.manage`.
+     */
+    get: operations['governance_listPolicies'];
+    put?: never;
+    /**
+     * Create a draft estate policy
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_createPolicy'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/policies/{id}/versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish a new version of an estate policy
+     * @description Requires `governance.manage`.
+     */
+    post: operations['governance_publishPolicyVersion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/policies/pending-ack': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List published mandatory policies not yet acknowledged by the caller
+     * @description Requires `governance.policy.ack`.
+     */
+    get: operations['governance_pendingPolicyAcknowledgements'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/policy-versions/{id}/acknowledge': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Acknowledge a published policy version
+     * @description Requires `governance.policy.ack`.
+     */
+    post: operations['governance_acknowledgePolicyVersion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/polls': {
     parameters: {
       query?: never;
@@ -4186,6 +5370,218 @@ export interface paths {
      * @description Any active member of the estate. Needs the `community` feature.
      */
     post: operations['polls_vote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/procurement/three-way-match': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Three-way match supplier invoice against PO and GRN to create an accounting payable
+     * @description Requires `procurement.manage` or `accounting.payable.manage`.
+     */
+    post: operations['procurement_matchSupplierInvoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List purchase orders
+     * @description Requires `procurement.manage` or `procurement.approve` or `inventory.manage`.
+     */
+    get: operations['procurement_listPurchaseOrders'];
+    put?: never;
+    /**
+     * Create a purchase order from an approved PR
+     * @description Requires `procurement.manage`.
+     */
+    post: operations['procurement_createPurchaseOrder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-orders/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a draft or issued purchase order
+     * @description Requires `procurement.manage`.
+     */
+    post: operations['procurement_cancelPurchaseOrder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-orders/{id}/issue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Issue a draft purchase order to the supplier
+     * @description Requires `procurement.manage`.
+     */
+    post: operations['procurement_issuePurchaseOrder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-requests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List purchase requests
+     * @description Requires `procurement.request` or `procurement.approve` or `procurement.manage`.
+     */
+    get: operations['procurement_listPurchaseRequests'];
+    put?: never;
+    /**
+     * Create a draft purchase request
+     * @description Requires `procurement.request`.
+     */
+    post: operations['procurement_createPurchaseRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-requests/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve the next pending step on a purchase request
+     * @description Requires `procurement.approve`.
+     */
+    post: operations['procurement_approvePurchaseRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-requests/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a purchase request
+     * @description Requires `procurement.approve`.
+     */
+    post: operations['procurement_rejectPurchaseRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/purchase-requests/{id}/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Submit a draft purchase request for band-based approval
+     * @description Requires `procurement.request`.
+     */
+    post: operations['procurement_submitPurchaseRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/quotations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List quotations for a purchase request
+     * @description Requires `procurement.manage` or `procurement.approve`.
+     */
+    get: operations['procurement_listQuotations'];
+    put?: never;
+    /**
+     * Capture a supplier quotation for an approved PR
+     * @description Requires `procurement.manage`.
+     */
+    post: operations['procurement_addQuotation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/quotations/{id}/select': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Select winning quotation (enforces quote threshold or sole-source justification)
+     * @description Requires `procurement.manage` or `procurement.approve`.
+     */
+    post: operations['procurement_selectQuotation'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4280,6 +5676,50 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/report-schedules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List scheduled estate email reports
+     * @description Requires `analytics.schedule.manage` or `report.read`.
+     */
+    get: operations['analytics_listSchedules'];
+    put?: never;
+    /**
+     * Create a scheduled estate email report
+     * @description Requires `analytics.schedule.manage`.
+     */
+    post: operations['analytics_createSchedule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/report-schedules/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete a scheduled estate email report
+     * @description Requires `analytics.schedule.manage`.
+     */
+    delete: operations['analytics_deleteSchedule'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/reports': {
     parameters: {
       query?: never;
@@ -4332,6 +5772,26 @@ export interface paths {
      * @description Requires `report.read`. Needs the `maintenance` feature.
      */
     get: operations['maintenance_report'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/reports/procurement': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Procurement, inventory valuation and asset summary report
+     * @description Requires `report.read` or `procurement.manage`.
+     */
+    get: operations['procurement_report'];
     put?: never;
     post?: never;
     delete?: never;
@@ -4476,6 +5936,30 @@ export interface paths {
     patch: operations['staffRoles_updateRole'];
     trace?: never;
   };
+  '/v1/estates/{estateId}/salary-records': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List decrypted staff salary records (requires payroll.view)
+     * @description Requires `payroll.view`.
+     */
+    get: operations['workforce_listSalaryRecords'];
+    put?: never;
+    /**
+     * Record an encrypted staff salary entry (requires payroll.view)
+     * @description Requires `payroll.view`.
+     */
+    post: operations['workforce_createSalaryRecord'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/search': {
     parameters: {
       query?: never;
@@ -4490,6 +5974,66 @@ export interface paths {
     get: operations['search_query'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/security-contracts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List security company contracts for this estate
+     * @description Requires `patrol.manage` or `security.staff.manage`.
+     */
+    get: operations['patrols_listEstateContracts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/security-contracts/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a pending security company contract for this estate
+     * @description Requires `patrol.manage`.
+     */
+    post: operations['patrols_approveContract'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/security-contracts/{id}/terminate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Terminate an estate security company contract
+     * @description Requires `patrol.manage`.
+     */
+    post: operations['patrols_terminateContract'];
     delete?: never;
     options?: never;
     head?: never;
@@ -5016,6 +6560,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/staff-rosters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List non-security staff shift rosters
+     * @description Requires `workforce.manage` or `workforce.attendance.log`.
+     */
+    get: operations['workforce_listRosters'];
+    put?: never;
+    /**
+     * Schedule a staff roster shift
+     * @description Requires `workforce.manage`.
+     */
+    post: operations['workforce_createRoster'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/staff/{userId}/roles': {
     parameters: {
       query?: never;
@@ -5114,6 +6682,98 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/stock-locations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List stock locations (stores)
+     * @description Requires `inventory.manage` or `procurement.manage`.
+     */
+    get: operations['procurement_listStockLocations'];
+    put?: never;
+    /**
+     * Create a stock location
+     * @description Requires `inventory.manage`.
+     */
+    post: operations['procurement_createStockLocation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/stock-movements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List recent stock movements
+     * @description Requires `inventory.manage`.
+     */
+    get: operations['procurement_listStockMovements'];
+    put?: never;
+    /**
+     * Record a stock movement (receipt, issue to work order, return, adjustment)
+     * @description Requires `inventory.manage`.
+     */
+    post: operations['procurement_createStockMovement'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/suppliers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate suppliers
+     * @description Requires `procurement.request` or `procurement.manage` or `procurement.approve`.
+     */
+    get: operations['procurement_listSuppliers'];
+    put?: never;
+    /**
+     * Register a supplier
+     * @description Requires `procurement.manage`.
+     */
+    post: operations['procurement_createSupplier'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/suppliers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update a supplier
+     * @description Requires `procurement.manage`.
+     */
+    patch: operations['procurement_updateSupplier'];
     trace?: never;
   };
   '/v1/estates/{estateId}/support-sessions': {
@@ -6006,6 +7666,150 @@ export interface paths {
      * @description Requires `maintenance.assign`. Needs the `maintenance` feature.
      */
     post: operations['maintenance_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/attendance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List attendance records (managers see all; staff see own)
+     * @description Requires `workforce.attendance.log` or `workforce.manage`.
+     */
+    get: operations['workforce_listAttendance'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/attendance/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit an attendance record with an audited reason
+     * @description Requires `workforce.manage`.
+     */
+    patch: operations['workforce_editAttendance'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/attendance/clock-in': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Clock in for the current staff member
+     * @description Requires `workforce.attendance.log`.
+     */
+    post: operations['workforce_clockIn'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/attendance/clock-out': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Clock out for the current staff member
+     * @description Requires `workforce.attendance.log`.
+     */
+    post: operations['workforce_clockOut'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/profiles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estate employee profiles
+     * @description Requires `workforce.manage` or `role.assign`.
+     */
+    get: operations['workforce_listStaffProfiles'];
+    put?: never;
+    /**
+     * Create an employee profile
+     * @description Requires `workforce.manage`.
+     */
+    post: operations['workforce_createStaffProfile'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/profiles/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update an employee profile
+     * @description Requires `workforce.manage`.
+     */
+    patch: operations['workforce_updateStaffProfile'];
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/workforce/profiles/{id}/offboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Offboard a staff member, revoking all estate roles and signing out all devices
+     * @description Requires `workforce.manage`.
+     */
+    post: operations['workforce_offboardStaff'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7832,6 +9636,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/kpis': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Platform-wide KPIs and success indicators with small-number suppression
+     * @description Requires `platform.analytics.read`.
+     */
+    get: operations['analytics_platformKpis'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/notification-templates': {
     parameters: {
       query?: never;
@@ -8030,6 +9854,94 @@ export interface paths {
      */
     put: operations['compliance_upsertRetentionRule'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/security-companies': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List platform-level security companies
+     * @description Requires `platform.security_company.manage`.
+     */
+    get: operations['platformSecurityCompanies_listCompanies'];
+    put?: never;
+    /**
+     * Register a cross-estate security company
+     * @description Requires `platform.security_company.manage`.
+     */
+    post: operations['platformSecurityCompanies_createCompany'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/security-companies/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update or suspend a security company
+     * @description Requires `platform.security_company.manage`.
+     */
+    patch: operations['platformSecurityCompanies_updateCompany'];
+    trace?: never;
+  };
+  '/v1/platform/security-companies/{id}/guards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List guards registered under a security company
+     * @description Requires `platform.security_company.manage`.
+     */
+    get: operations['platformSecurityCompanies_listGuards'];
+    put?: never;
+    /**
+     * Register a guard under a security company
+     * @description Requires `platform.security_company.manage`.
+     */
+    post: operations['platformSecurityCompanies_addGuard'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/security-companies/contracts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Link a security company to an estate via a pending contract
+     * @description Requires `platform.security_company.manage`.
+     */
+    post: operations['platformSecurityCompanies_createContract'];
     delete?: never;
     options?: never;
     head?: never;
@@ -10089,6 +12001,60 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  analytics_ingestEvents: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          events: {
+            estateId?: string | null;
+            /** @enum {string} */
+            app:
+              | 'resident-mobile'
+              | 'management-web'
+              | 'management-mobile'
+              | 'security-mobile'
+              | 'super-admin'
+              | 'public-web';
+            version: string;
+            event: string;
+            /** Format: date-time */
+            occurredAt?: string;
+            /** @default {} */
+            properties?: {
+              [key: string]: unknown;
+            };
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              accepted: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   gateAuth_guards: {
     parameters: {
       query?: never;
@@ -10553,6 +12519,1612 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  accounting_listAccounts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              code: string;
+              name: string;
+              /** @enum {string} */
+              type: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+              parentCode: string | null;
+              description: string | null;
+              isSystem: boolean;
+              archivedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_createAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          code: string;
+          name: string;
+          /** @enum {string} */
+          type: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+          parentCode?: string | null;
+          description?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              code: string;
+              name: string;
+              /** @enum {string} */
+              type: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+              parentCode: string | null;
+              description: string | null;
+              isSystem: boolean;
+              archivedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_updateAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          parentCode?: string | null;
+          description?: string | null;
+          archived?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              code: string;
+              name: string;
+              /** @enum {string} */
+              type: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+              parentCode: string | null;
+              description: string | null;
+              isSystem: boolean;
+              archivedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_matchBankLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status: 'unmatched' | 'matched' | 'ignored';
+          journalId?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              txnDate: string;
+              description: string;
+              reference: string | null;
+              amountKobo: number;
+              /** @enum {string} */
+              direction: 'credit' | 'debit';
+              matchedJournalId: string | null;
+              /** @enum {string} */
+              status: 'unmatched' | 'matched' | 'ignored';
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_listBankStatements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              cashAccountCode: string;
+              name: string;
+              statementFrom: string;
+              statementTo: string;
+              openingBalanceKobo: number;
+              closingBalanceKobo: number;
+              matchedCount: number;
+              unmatchedCount: number;
+              /** Format: date-time */
+              createdAt: string;
+              lines?: {
+                /** Format: uuid */
+                id: string;
+                txnDate: string;
+                description: string;
+                reference: string | null;
+                amountKobo: number;
+                /** @enum {string} */
+                direction: 'credit' | 'debit';
+                matchedJournalId: string | null;
+                /** @enum {string} */
+                status: 'unmatched' | 'matched' | 'ignored';
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_importBankStatement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default cash:bank */
+          cashAccountCode?: string;
+          name: string;
+          statementFrom: string;
+          statementTo: string;
+          openingBalanceKobo: number;
+          closingBalanceKobo: number;
+          lines: {
+            txnDate: string;
+            description: string;
+            reference?: string;
+            amountKobo: number;
+            /** @enum {string} */
+            direction: 'credit' | 'debit';
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              cashAccountCode: string;
+              name: string;
+              statementFrom: string;
+              statementTo: string;
+              openingBalanceKobo: number;
+              closingBalanceKobo: number;
+              matchedCount: number;
+              unmatchedCount: number;
+              /** Format: date-time */
+              createdAt: string;
+              lines?: {
+                /** Format: uuid */
+                id: string;
+                txnDate: string;
+                description: string;
+                reference: string | null;
+                amountKobo: number;
+                /** @enum {string} */
+                direction: 'credit' | 'debit';
+                matchedJournalId: string | null;
+                /** @enum {string} */
+                status: 'unmatched' | 'matched' | 'ignored';
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_listBudgets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** Format: uuid */
+              periodId: string;
+              periodName: string;
+              /** @enum {string} */
+              status: 'draft' | 'approved' | 'archived';
+              totalAllocatedKobo: number;
+              totalActualKobo: number;
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              lines: {
+                /** Format: uuid */
+                id: string;
+                accountCode: string;
+                accountName: string;
+                /** @enum {string} */
+                accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+                allocatedKobo: number;
+                actualKobo: number;
+                varianceKobo: number;
+                notes: string | null;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_createBudget: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** Format: uuid */
+          periodId: string;
+          lines: {
+            accountCode: string;
+            allocatedKobo: number;
+            notes?: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** Format: uuid */
+              periodId: string;
+              periodName: string;
+              /** @enum {string} */
+              status: 'draft' | 'approved' | 'archived';
+              totalAllocatedKobo: number;
+              totalActualKobo: number;
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              lines: {
+                /** Format: uuid */
+                id: string;
+                accountCode: string;
+                accountName: string;
+                /** @enum {string} */
+                accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+                allocatedKobo: number;
+                actualKobo: number;
+                varianceKobo: number;
+                notes: string | null;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_approveBudget: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              /** Format: uuid */
+              periodId: string;
+              periodName: string;
+              /** @enum {string} */
+              status: 'draft' | 'approved' | 'archived';
+              totalAllocatedKobo: number;
+              totalActualKobo: number;
+              /** Format: uuid */
+              createdBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              lines: {
+                /** Format: uuid */
+                id: string;
+                accountCode: string;
+                accountName: string;
+                /** @enum {string} */
+                accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+                allocatedKobo: number;
+                actualKobo: number;
+                varianceKobo: number;
+                notes: string | null;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_listExpenses: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        status?: 'draft' | 'submitted' | 'approved' | 'posted' | 'rejected';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              categoryAccountCode: string;
+              cashAccountCode: string;
+              vendorName: string;
+              description: string;
+              amountKobo: number;
+              incurredOn: string;
+              receiptFileId: string | null;
+              /** @enum {string} */
+              status: 'draft' | 'submitted' | 'approved' | 'posted' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              rejectionReason: string | null;
+              journalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_createExpense: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          categoryAccountCode: string;
+          /** @default cash:bank */
+          cashAccountCode?: string;
+          vendorName: string;
+          description: string;
+          amountKobo: number;
+          incurredOn: string;
+          /** Format: uuid */
+          receiptFileId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              categoryAccountCode: string;
+              cashAccountCode: string;
+              vendorName: string;
+              description: string;
+              amountKobo: number;
+              incurredOn: string;
+              receiptFileId: string | null;
+              /** @enum {string} */
+              status: 'draft' | 'submitted' | 'approved' | 'posted' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              rejectionReason: string | null;
+              journalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_approveExpense: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              categoryAccountCode: string;
+              cashAccountCode: string;
+              vendorName: string;
+              description: string;
+              amountKobo: number;
+              incurredOn: string;
+              receiptFileId: string | null;
+              /** @enum {string} */
+              status: 'draft' | 'submitted' | 'approved' | 'posted' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              rejectionReason: string | null;
+              journalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_rejectExpense: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              categoryAccountCode: string;
+              cashAccountCode: string;
+              vendorName: string;
+              description: string;
+              amountKobo: number;
+              incurredOn: string;
+              receiptFileId: string | null;
+              /** @enum {string} */
+              status: 'draft' | 'submitted' | 'approved' | 'posted' | 'rejected';
+              /** Format: uuid */
+              requestedBy: string;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              rejectionReason: string | null;
+              journalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_exportCsv: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+        kind?: 'journals' | 'trial_balance';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              filename: string;
+              /** @constant */
+              contentType: 'text/csv';
+              csv: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_listJournals: {
+    parameters: {
+      query?: {
+        from?: string;
+        to?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              type: string;
+              description: string;
+              sourceType: string;
+              sourceId: string;
+              reference: string | null;
+              postedBy: string | null;
+              reversesJournalId: string | null;
+              /** Format: date-time */
+              postedAt: string;
+              lines: {
+                accountCode: string;
+                accountName: string;
+                /** @enum {string} */
+                accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+                debit: number;
+                credit: number;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_createManualJournal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          description: string;
+          occurredOn?: string;
+          reference?: string;
+          lines: {
+            accountCode: string;
+            /** @default 0 */
+            debit?: number;
+            /** @default 0 */
+            credit?: number;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              type: string;
+              description: string;
+              sourceType: string;
+              sourceId: string;
+              reference: string | null;
+              postedBy: string | null;
+              reversesJournalId: string | null;
+              /** Format: date-time */
+              postedAt: string;
+              lines: {
+                accountCode: string;
+                accountName: string;
+                /** @enum {string} */
+                accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+                debit: number;
+                credit: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_reverseJournal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+          occurredOn?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              type: string;
+              description: string;
+              sourceType: string;
+              sourceId: string;
+              reference: string | null;
+              postedBy: string | null;
+              reversesJournalId: string | null;
+              /** Format: date-time */
+              postedAt: string;
+              lines: {
+                accountCode: string;
+                accountName: string;
+                /** @enum {string} */
+                accountType: 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+                debit: number;
+                credit: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_listPayables: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        status?: 'draft' | 'matched' | 'approved' | 'partially_paid' | 'paid' | 'void';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              supplierId: string | null;
+              supplierName: string;
+              poId: string | null;
+              grnId: string | null;
+              invoiceRef: string;
+              expenseAccountCode: string;
+              amountKobo: number;
+              amountPaidKobo: number;
+              balanceKobo: number;
+              dueOn: string;
+              /** @enum {string} */
+              status: 'draft' | 'matched' | 'approved' | 'partially_paid' | 'paid' | 'void';
+              requestedBy: string | null;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              journalId: string | null;
+              payments?: {
+                /** Format: uuid */
+                id: string;
+                amountKobo: number;
+                paidOn: string;
+                cashAccountCode: string;
+                reference: string | null;
+                /** Format: uuid */
+                recordedBy: string;
+                /** Format: uuid */
+                journalId: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_createPayable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          supplierId?: string;
+          supplierName: string;
+          /** Format: uuid */
+          poId?: string;
+          /** Format: uuid */
+          grnId?: string;
+          invoiceRef: string;
+          expenseAccountCode: string;
+          amountKobo: number;
+          dueOn: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              supplierId: string | null;
+              supplierName: string;
+              poId: string | null;
+              grnId: string | null;
+              invoiceRef: string;
+              expenseAccountCode: string;
+              amountKobo: number;
+              amountPaidKobo: number;
+              balanceKobo: number;
+              dueOn: string;
+              /** @enum {string} */
+              status: 'draft' | 'matched' | 'approved' | 'partially_paid' | 'paid' | 'void';
+              requestedBy: string | null;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              journalId: string | null;
+              payments?: {
+                /** Format: uuid */
+                id: string;
+                amountKobo: number;
+                paidOn: string;
+                cashAccountCode: string;
+                reference: string | null;
+                /** Format: uuid */
+                recordedBy: string;
+                /** Format: uuid */
+                journalId: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_approvePayable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              supplierId: string | null;
+              supplierName: string;
+              poId: string | null;
+              grnId: string | null;
+              invoiceRef: string;
+              expenseAccountCode: string;
+              amountKobo: number;
+              amountPaidKobo: number;
+              balanceKobo: number;
+              dueOn: string;
+              /** @enum {string} */
+              status: 'draft' | 'matched' | 'approved' | 'partially_paid' | 'paid' | 'void';
+              requestedBy: string | null;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              journalId: string | null;
+              payments?: {
+                /** Format: uuid */
+                id: string;
+                amountKobo: number;
+                paidOn: string;
+                cashAccountCode: string;
+                reference: string | null;
+                /** Format: uuid */
+                recordedBy: string;
+                /** Format: uuid */
+                journalId: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_payPayable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          amountKobo: number;
+          paidOn: string;
+          /** @default cash:bank */
+          cashAccountCode?: string;
+          reference?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              supplierId: string | null;
+              supplierName: string;
+              poId: string | null;
+              grnId: string | null;
+              invoiceRef: string;
+              expenseAccountCode: string;
+              amountKobo: number;
+              amountPaidKobo: number;
+              balanceKobo: number;
+              dueOn: string;
+              /** @enum {string} */
+              status: 'draft' | 'matched' | 'approved' | 'partially_paid' | 'paid' | 'void';
+              requestedBy: string | null;
+              approvedBy: string | null;
+              approvedAt: string | null;
+              journalId: string | null;
+              payments?: {
+                /** Format: uuid */
+                id: string;
+                amountKobo: number;
+                paidOn: string;
+                cashAccountCode: string;
+                reference: string | null;
+                /** Format: uuid */
+                recordedBy: string;
+                /** Format: uuid */
+                journalId: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_listPeriods: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              startsOn: string;
+              endsOn: string;
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              closedBy: string | null;
+              closedAt: string | null;
+              closingJournalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_createPeriod: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          startsOn: string;
+          endsOn: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              startsOn: string;
+              endsOn: string;
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              closedBy: string | null;
+              closedAt: string | null;
+              closingJournalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_closePeriod: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              startsOn: string;
+              endsOn: string;
+              /** @enum {string} */
+              status: 'open' | 'closed';
+              closedBy: string | null;
+              closedAt: string | null;
+              closingJournalId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_balanceSheet: {
+    parameters: {
+      query: {
+        asOf: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              asOf: string;
+              /** @constant */
+              currency: 'NGN';
+              assets: {
+                code: string;
+                name: string;
+                amountKobo: number;
+              }[];
+              liabilities: {
+                code: string;
+                name: string;
+                amountKobo: number;
+              }[];
+              equity: {
+                code: string;
+                name: string;
+                amountKobo: number;
+              }[];
+              retainedEarningsKobo: number;
+              totalAssetsKobo: number;
+              totalLiabilitiesKobo: number;
+              totalEquityKobo: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_cashFlow: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              from: string;
+              to: string;
+              /** @constant */
+              currency: 'NGN';
+              openingCashKobo: number;
+              inflowsKobo: number;
+              outflowsKobo: number;
+              netCashChangeKobo: number;
+              closingCashKobo: number;
+              byAccount: {
+                code: string;
+                name: string;
+                inflowsKobo: number;
+                outflowsKobo: number;
+                netKobo: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  accounting_incomeStatement: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              from: string;
+              to: string;
+              /** @constant */
+              currency: 'NGN';
+              income: {
+                code: string;
+                name: string;
+                amountKobo: number;
+              }[];
+              expenses: {
+                code: string;
+                name: string;
+                amountKobo: number;
+              }[];
+              totalIncomeKobo: number;
+              totalExpensesKobo: number;
+              netIncomeKobo: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   advertising_adSettings: {
     parameters: {
       query?: never;
@@ -10853,6 +14425,247 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listAssets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              tag: string;
+              name: string;
+              category: string;
+              spaceId: string | null;
+              custodianId: string | null;
+              purchaseCostKobo: number;
+              purchasedOn: string | null;
+              warrantyUntil: string | null;
+              /** @enum {string} */
+              status: 'in_use' | 'in_repair' | 'disposed';
+              disposalReason: string | null;
+              disposedAt: string | null;
+              notes: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createAsset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          tag: string;
+          name: string;
+          category: string;
+          /** Format: uuid */
+          spaceId?: string;
+          /** Format: uuid */
+          custodianId?: string;
+          purchaseCostKobo: number;
+          purchasedOn?: string;
+          warrantyUntil?: string;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              tag: string;
+              name: string;
+              category: string;
+              spaceId: string | null;
+              custodianId: string | null;
+              purchaseCostKobo: number;
+              purchasedOn: string | null;
+              warrantyUntil: string | null;
+              /** @enum {string} */
+              status: 'in_use' | 'in_repair' | 'disposed';
+              disposalReason: string | null;
+              disposedAt: string | null;
+              notes: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_updateAsset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          tag?: string;
+          name?: string;
+          category?: string;
+          /** Format: uuid */
+          spaceId?: string;
+          /** Format: uuid */
+          custodianId?: string;
+          purchaseCostKobo?: number;
+          purchasedOn?: string;
+          warrantyUntil?: string;
+          notes?: string;
+          /** @enum {string} */
+          status?: 'in_use' | 'in_repair';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              tag: string;
+              name: string;
+              category: string;
+              spaceId: string | null;
+              custodianId: string | null;
+              purchaseCostKobo: number;
+              purchasedOn: string | null;
+              warrantyUntil: string | null;
+              /** @enum {string} */
+              status: 'in_use' | 'in_repair' | 'disposed';
+              disposalReason: string | null;
+              disposedAt: string | null;
+              notes: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_disposeAsset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              tag: string;
+              name: string;
+              category: string;
+              spaceId: string | null;
+              custodianId: string | null;
+              purchaseCostKobo: number;
+              purchasedOn: string | null;
+              warrantyUntil: string | null;
+              /** @enum {string} */
+              status: 'in_use' | 'in_repair' | 'disposed';
+              disposalReason: string | null;
+              disposedAt: string | null;
+              notes: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
       500: components['responses']['Error500'];
     };
   };
@@ -13842,6 +17655,100 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  governance_listCommittee: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              position: string;
+              termStart: string;
+              termEnd: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_addCommitteeMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+          position: string;
+          termStart: string;
+          termEnd?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              position: string;
+              termStart: string;
+              termEnd: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   channels_guidelines: {
     parameters: {
       query?: never;
@@ -13899,6 +17806,74 @@ export interface operations {
             data: {
               text: string;
               acceptedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  analytics_dashboard: {
+    parameters: {
+      query?: {
+        from?: string;
+        to?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              estateId: string;
+              from: string;
+              to: string;
+              gate: {
+                entries: number;
+                exits: number;
+                digitalEntriesPercent: number;
+                denies: number;
+                overrides: number;
+              };
+              sos: {
+                realAlerts: number;
+                drillAlerts: number;
+                avgAckSeconds: number | null;
+                avgResolveSeconds: number | null;
+              };
+              collections: {
+                billedKobo: number;
+                collectedKobo: number;
+                digitalPercent: number;
+              };
+              maintenance: {
+                opened: number;
+                resolved: number;
+                breached: number;
+                avgResolveMinutes: number | null;
+              };
+              community: {
+                posts: number;
+                reactions: number;
+                activeUsers: number;
+              };
             };
           };
         };
@@ -14089,6 +18064,138 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  workforce_listDepartments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              headStaffId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createDepartment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** Format: uuid */
+          headStaffId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              headStaffId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_updateDepartment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          /** Format: uuid */
+          headStaffId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              headStaffId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   channels_direct: {
     parameters: {
       query?: never;
@@ -14145,6 +18252,153 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_listDisputes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              partyUserIds: string[];
+              summary: string;
+              /** @enum {string} */
+              status: 'open' | 'in_mediation' | 'resolved' | 'closed';
+              handlerId: string | null;
+              mediationNotes: string | null;
+              outcome: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_createDispute: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          partyUserIds: string[];
+          summary: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              partyUserIds: string[];
+              summary: string;
+              /** @enum {string} */
+              status: 'open' | 'in_mediation' | 'resolved' | 'closed';
+              handlerId: string | null;
+              mediationNotes: string | null;
+              outcome: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_updateDispute: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          status?: 'open' | 'in_mediation' | 'resolved' | 'closed';
+          handlerId?: string | null;
+          mediationNotes?: string;
+          outcome?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              partyUserIds: string[];
+              summary: string;
+              /** @enum {string} */
+              status: 'open' | 'in_mediation' | 'resolved' | 'closed';
+              handlerId: string | null;
+              mediationNotes: string | null;
+              outcome: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -15181,6 +19435,102 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_listDutyAssignments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              description: string;
+              spaceIds: string[];
+              validFrom: string;
+              validTo: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createDutyAssignment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          staffId: string;
+          description: string;
+          /** @default [] */
+          spaceIds?: string[];
+          validFrom: string;
+          validTo?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              description: string;
+              spaceIds: string[];
+              validFrom: string;
+              validTo: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -17117,6 +21467,77 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  procurement_recordGoodsReceipt: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          poId: string;
+          /** Format: uuid */
+          locationId?: string;
+          notes?: string;
+          /** @default [] */
+          photoFileIds?: string[];
+          items: {
+            /** Format: uuid */
+            poItemId: string;
+            qtyReceived: number;
+            /** @default 0 */
+            qtyRejected?: number;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              poId: string;
+              /** Format: uuid */
+              receivedBy: string;
+              /** Format: date-time */
+              receivedAt: string;
+              notes: string | null;
+              photoFileIds: string[];
+              items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                poItemId: string;
+                qtyReceived: number;
+                qtyRejected: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
   gateDevices_guards: {
     parameters: {
       query?: never;
@@ -18714,6 +23135,111 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  procurement_listInventoryItems: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              sku: string;
+              name: string;
+              category: string;
+              unit: string;
+              reorderLevel: number;
+              avgCostKobo: number;
+              onHand: number;
+              isLowStock: boolean;
+              isConsumable: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createInventoryItem: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          sku: string;
+          name: string;
+          category: string;
+          /** @default unit */
+          unit?: string;
+          /** @default 0 */
+          reorderLevel?: number;
+          /** @default false */
+          isConsumable?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              sku: string;
+              name: string;
+              category: string;
+              unit: string;
+              reorderLevel: number;
+              avgCostKobo: number;
+              onHand: number;
+              isLowStock: boolean;
+              isConsumable: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
   billing_listInvoices: {
     parameters: {
       query?: {
@@ -19423,6 +23949,316 @@ export interface operations {
               decidedAt: string | null;
               /** Format: date-time */
               expiresAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_listLeaveRequests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: uuid */
+              leaveTypeId: string;
+              leaveTypeName: string;
+              startsOn: string;
+              endsOn: string;
+              days: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+              decidedBy: string | null;
+              decidedAt: string | null;
+              comment: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createLeaveRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          leaveTypeId: string;
+          startsOn: string;
+          endsOn: string;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: uuid */
+              leaveTypeId: string;
+              leaveTypeName: string;
+              startsOn: string;
+              endsOn: string;
+              days: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+              decidedBy: string | null;
+              decidedAt: string | null;
+              comment: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_approveLeaveRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          comment?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: uuid */
+              leaveTypeId: string;
+              leaveTypeName: string;
+              startsOn: string;
+              endsOn: string;
+              days: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+              decidedBy: string | null;
+              decidedAt: string | null;
+              comment: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_rejectLeaveRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          comment?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: uuid */
+              leaveTypeId: string;
+              leaveTypeName: string;
+              startsOn: string;
+              endsOn: string;
+              days: number;
+              reason: string;
+              /** @enum {string} */
+              status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+              decidedBy: string | null;
+              decidedAt: string | null;
+              comment: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_listLeaveTypes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              annualAllowanceDays: number;
+              paid: boolean;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createLeaveType: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          annualAllowanceDays: number;
+          /** @default true */
+          paid?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              annualAllowanceDays: number;
+              paid: boolean;
             };
           };
         };
@@ -22991,6 +27827,473 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  governance_listMeetings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'agm' | 'egm' | 'committee' | 'town_hall';
+              title: string;
+              /** Format: date-time */
+              startsAt: string;
+              location: string | null;
+              onlineLink: string | null;
+              agenda: string[];
+              quorumRule: number;
+              /** @enum {string} */
+              status: 'scheduled' | 'held' | 'cancelled';
+              noticeSentAt: string | null;
+              attendeeCount: number;
+              minutes: {
+                /** Format: uuid */
+                id: string;
+                content: string;
+                documentId: string | null;
+                /** @enum {string} */
+                status: 'draft' | 'approved' | 'published';
+                approvedBy: string | null;
+                /** Format: date-time */
+                updatedAt: string;
+              } | null;
+              actionItems: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                ownerId: string | null;
+                dueOn: string | null;
+                /** @enum {string} */
+                status: 'open' | 'done';
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_createMeeting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          type: 'agm' | 'egm' | 'committee' | 'town_hall';
+          title: string;
+          /** Format: date-time */
+          startsAt: string;
+          location?: string;
+          /** Format: uri */
+          onlineLink?: string;
+          /** @default [] */
+          agenda?: string[];
+          /** @default 25 */
+          quorumRule?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'agm' | 'egm' | 'committee' | 'town_hall';
+              title: string;
+              /** Format: date-time */
+              startsAt: string;
+              location: string | null;
+              onlineLink: string | null;
+              agenda: string[];
+              quorumRule: number;
+              /** @enum {string} */
+              status: 'scheduled' | 'held' | 'cancelled';
+              noticeSentAt: string | null;
+              attendeeCount: number;
+              minutes: {
+                /** Format: uuid */
+                id: string;
+                content: string;
+                documentId: string | null;
+                /** @enum {string} */
+                status: 'draft' | 'approved' | 'published';
+                approvedBy: string | null;
+                /** Format: date-time */
+                updatedAt: string;
+              } | null;
+              actionItems: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                ownerId: string | null;
+                dueOn: string | null;
+                /** @enum {string} */
+                status: 'open' | 'done';
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_addActionItem: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title: string;
+          /** Format: uuid */
+          ownerId?: string;
+          dueOn?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'agm' | 'egm' | 'committee' | 'town_hall';
+              title: string;
+              /** Format: date-time */
+              startsAt: string;
+              location: string | null;
+              onlineLink: string | null;
+              agenda: string[];
+              quorumRule: number;
+              /** @enum {string} */
+              status: 'scheduled' | 'held' | 'cancelled';
+              noticeSentAt: string | null;
+              attendeeCount: number;
+              minutes: {
+                /** Format: uuid */
+                id: string;
+                content: string;
+                documentId: string | null;
+                /** @enum {string} */
+                status: 'draft' | 'approved' | 'published';
+                approvedBy: string | null;
+                /** Format: date-time */
+                updatedAt: string;
+              } | null;
+              actionItems: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                ownerId: string | null;
+                dueOn: string | null;
+                /** @enum {string} */
+                status: 'open' | 'done';
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_recordMeetingAttendance: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+          /** Format: uuid */
+          unitId?: string;
+          /** @default true */
+          present?: boolean;
+          /** Format: uuid */
+          proxyForUserId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'agm' | 'egm' | 'committee' | 'town_hall';
+              title: string;
+              /** Format: date-time */
+              startsAt: string;
+              location: string | null;
+              onlineLink: string | null;
+              agenda: string[];
+              quorumRule: number;
+              /** @enum {string} */
+              status: 'scheduled' | 'held' | 'cancelled';
+              noticeSentAt: string | null;
+              attendeeCount: number;
+              minutes: {
+                /** Format: uuid */
+                id: string;
+                content: string;
+                documentId: string | null;
+                /** @enum {string} */
+                status: 'draft' | 'approved' | 'published';
+                approvedBy: string | null;
+                /** Format: date-time */
+                updatedAt: string;
+              } | null;
+              actionItems: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                ownerId: string | null;
+                dueOn: string | null;
+                /** @enum {string} */
+                status: 'open' | 'done';
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_upsertMinutes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          content: string;
+          /** Format: uuid */
+          documentId?: string;
+          /** @enum {string} */
+          status?: 'draft' | 'approved' | 'published';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'agm' | 'egm' | 'committee' | 'town_hall';
+              title: string;
+              /** Format: date-time */
+              startsAt: string;
+              location: string | null;
+              onlineLink: string | null;
+              agenda: string[];
+              quorumRule: number;
+              /** @enum {string} */
+              status: 'scheduled' | 'held' | 'cancelled';
+              noticeSentAt: string | null;
+              attendeeCount: number;
+              minutes: {
+                /** Format: uuid */
+                id: string;
+                content: string;
+                documentId: string | null;
+                /** @enum {string} */
+                status: 'draft' | 'approved' | 'published';
+                approvedBy: string | null;
+                /** Format: date-time */
+                updatedAt: string;
+              } | null;
+              actionItems: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                ownerId: string | null;
+                dueOn: string | null;
+                /** @enum {string} */
+                status: 'open' | 'done';
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_sendMeetingNotice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              type: 'agm' | 'egm' | 'committee' | 'town_hall';
+              title: string;
+              /** Format: date-time */
+              startsAt: string;
+              location: string | null;
+              onlineLink: string | null;
+              agenda: string[];
+              quorumRule: number;
+              /** @enum {string} */
+              status: 'scheduled' | 'held' | 'cancelled';
+              noticeSentAt: string | null;
+              attendeeCount: number;
+              minutes: {
+                /** Format: uuid */
+                id: string;
+                content: string;
+                documentId: string | null;
+                /** @enum {string} */
+                status: 'draft' | 'approved' | 'published';
+                approvedBy: string | null;
+                /** Format: date-time */
+                updatedAt: string;
+              } | null;
+              actionItems: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                ownerId: string | null;
+                dueOn: string | null;
+                /** @enum {string} */
+                status: 'open' | 'done';
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   channels_remove: {
     parameters: {
       query?: never;
@@ -23750,6 +29053,298 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_listMotions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              meetingId: string | null;
+              title: string;
+              description: string;
+              options: string[];
+              /** @enum {string} */
+              eligibility: 'per_unit' | 'per_owner' | 'per_resident';
+              /** @enum {string} */
+              ballot: 'secret' | 'open';
+              /** Format: date-time */
+              opensAt: string;
+              /** Format: date-time */
+              closesAt: string;
+              quorumCount: number;
+              /** @enum {string} */
+              threshold: 'simple' | 'two_thirds' | 'custom';
+              customThresholdPercent: number | null;
+              /** @enum {string} */
+              status: 'draft' | 'open' | 'closed' | 'passed' | 'failed' | 'void';
+              totalVotes: number;
+              hasVoted: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_createMotion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          meetingId?: string;
+          title: string;
+          description: string;
+          options: string[];
+          /**
+           * @default per_unit
+           * @enum {string}
+           */
+          eligibility?: 'per_unit' | 'per_owner' | 'per_resident';
+          /**
+           * @default secret
+           * @enum {string}
+           */
+          ballot?: 'secret' | 'open';
+          /** Format: date-time */
+          opensAt: string;
+          /** Format: date-time */
+          closesAt: string;
+          /** @default 1 */
+          quorumCount?: number;
+          /**
+           * @default simple
+           * @enum {string}
+           */
+          threshold?: 'simple' | 'two_thirds' | 'custom';
+          customThresholdPercent?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              meetingId: string | null;
+              title: string;
+              description: string;
+              options: string[];
+              /** @enum {string} */
+              eligibility: 'per_unit' | 'per_owner' | 'per_resident';
+              /** @enum {string} */
+              ballot: 'secret' | 'open';
+              /** Format: date-time */
+              opensAt: string;
+              /** Format: date-time */
+              closesAt: string;
+              quorumCount: number;
+              /** @enum {string} */
+              threshold: 'simple' | 'two_thirds' | 'custom';
+              customThresholdPercent: number | null;
+              /** @enum {string} */
+              status: 'draft' | 'open' | 'closed' | 'passed' | 'failed' | 'void';
+              totalVotes: number;
+              hasVoted: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_closeMotion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              motionId: string;
+              /** @enum {string} */
+              status: 'draft' | 'open' | 'closed' | 'passed' | 'failed' | 'void';
+              /** @enum {string} */
+              ballot: 'secret' | 'open';
+              quorumCount: number;
+              totalVotes: number;
+              quorumMet: boolean;
+              winningOption: string | null;
+              tallies: {
+                option: string;
+                votes: number;
+                percent: number;
+              }[];
+              resolutionText: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_motionResults: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              motionId: string;
+              /** @enum {string} */
+              status: 'draft' | 'open' | 'closed' | 'passed' | 'failed' | 'void';
+              /** @enum {string} */
+              ballot: 'secret' | 'open';
+              quorumCount: number;
+              totalVotes: number;
+              quorumMet: boolean;
+              winningOption: string | null;
+              tallies: {
+                option: string;
+                votes: number;
+                percent: number;
+              }[];
+              resolutionText: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_castVote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          option: string;
+          /** Format: uuid */
+          unitId?: string;
+          /** Format: uuid */
+          proxyForUserId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @constant */
+              recorded: true;
+              /** Format: uuid */
+              motionId: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
   };
@@ -24976,6 +30571,381 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  patrols_listRoutes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              description: string | null;
+              intervalMinutes: number;
+              active: boolean;
+              checkpoints: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                routeId: string;
+                sequence: number;
+                name: string;
+                spaceId: string | null;
+                /** @enum {string} */
+                tagType: 'qr' | 'nfc';
+                tagCode: string;
+                active: boolean;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_createRoute: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          description?: string;
+          /** @default 60 */
+          intervalMinutes?: number;
+          checkpoints: {
+            sequence: number;
+            name: string;
+            /** Format: uuid */
+            spaceId?: string;
+            /**
+             * @default qr
+             * @enum {string}
+             */
+            tagType?: 'qr' | 'nfc';
+            tagCode: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              description: string | null;
+              intervalMinutes: number;
+              active: boolean;
+              checkpoints: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                routeId: string;
+                sequence: number;
+                name: string;
+                spaceId: string | null;
+                /** @enum {string} */
+                tagType: 'qr' | 'nfc';
+                tagCode: string;
+                active: boolean;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_listRuns: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              routeId: string;
+              routeName: string;
+              /** Format: uuid */
+              guardUserId: string;
+              deviceId: string | null;
+              /** Format: date-time */
+              startedAt: string;
+              completedAt: string | null;
+              /** @enum {string} */
+              status: 'in_progress' | 'completed' | 'incomplete';
+              scannedCount: number;
+              totalCheckpoints: number;
+              logs?: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                runId: string;
+                /** Format: uuid */
+                checkpointId: string;
+                checkpointName: string;
+                /** Format: uuid */
+                guardUserId: string;
+                /** Format: date-time */
+                scannedAt: string;
+                offlineRecorded: boolean;
+                notes: string | null;
+                photoFileId: string | null;
+              }[];
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_startRun: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          routeId: string;
+          /** Format: uuid */
+          deviceId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              routeId: string;
+              routeName: string;
+              /** Format: uuid */
+              guardUserId: string;
+              deviceId: string | null;
+              /** Format: date-time */
+              startedAt: string;
+              completedAt: string | null;
+              /** @enum {string} */
+              status: 'in_progress' | 'completed' | 'incomplete';
+              scannedCount: number;
+              totalCheckpoints: number;
+              logs?: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                runId: string;
+                /** Format: uuid */
+                checkpointId: string;
+                checkpointName: string;
+                /** Format: uuid */
+                guardUserId: string;
+                /** Format: date-time */
+                scannedAt: string;
+                offlineRecorded: boolean;
+                notes: string | null;
+                photoFileId: string | null;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_scanCheckpoint: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          checkpointId?: string;
+          tagCode?: string;
+          /** Format: date-time */
+          scannedAt?: string;
+          /** @default false */
+          offlineRecorded?: boolean;
+          notes?: string;
+          /** Format: uuid */
+          photoFileId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              runId: string;
+              /** Format: uuid */
+              checkpointId: string;
+              checkpointName: string;
+              /** Format: uuid */
+              guardUserId: string;
+              /** Format: date-time */
+              scannedAt: string;
+              offlineRecorded: boolean;
+              notes: string | null;
+              photoFileId: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_syncScans: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          scans: {
+            /** Format: uuid */
+            runId: string;
+            /** Format: uuid */
+            checkpointId?: string;
+            tagCode?: string;
+            /** Format: date-time */
+            scannedAt: string;
+            notes?: string;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              accepted: number;
+              total: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   payments_createIntent: {
     parameters: {
       query?: never;
@@ -25238,6 +31208,380 @@ export interface operations {
       422: components['responses']['Error422'];
       500: components['responses']['Error500'];
       502: components['responses']['Error502'];
+    };
+  };
+  workforce_listPayrollExports: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              period: string;
+              staffCount: number;
+              totalNetKobo: number;
+              /** Format: uuid */
+              createdBy: string;
+              /** Format: date-time */
+              createdAt: string;
+              csv?: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_generatePayrollExport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          period: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              period: string;
+              staffCount: number;
+              totalNetKobo: number;
+              /** Format: uuid */
+              createdBy: string;
+              /** Format: date-time */
+              createdAt: string;
+              csv?: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_listPolicies: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              category: string;
+              requiresAck: boolean;
+              /** @enum {string} */
+              audience: 'all' | 'residents' | 'owners' | 'staff';
+              /** @enum {string} */
+              status: 'draft' | 'published' | 'archived';
+              currentVersion: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                policyId: string;
+                version: number;
+                documentId: string | null;
+                summary: string;
+                effectiveOn: string;
+                /** Format: uuid */
+                publishedBy: string;
+                /** Format: date-time */
+                publishedAt: string;
+                ackCount: number;
+                acknowledgedByMe: boolean;
+              } | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_createPolicy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title: string;
+          category: string;
+          /** @default false */
+          requiresAck?: boolean;
+          /**
+           * @default all
+           * @enum {string}
+           */
+          audience?: 'all' | 'residents' | 'owners' | 'staff';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              category: string;
+              requiresAck: boolean;
+              /** @enum {string} */
+              audience: 'all' | 'residents' | 'owners' | 'staff';
+              /** @enum {string} */
+              status: 'draft' | 'published' | 'archived';
+              currentVersion: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                policyId: string;
+                version: number;
+                documentId: string | null;
+                summary: string;
+                effectiveOn: string;
+                /** Format: uuid */
+                publishedBy: string;
+                /** Format: date-time */
+                publishedAt: string;
+                ackCount: number;
+                acknowledgedByMe: boolean;
+              } | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_publishPolicyVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          documentId?: string;
+          summary: string;
+          effectiveOn: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              policyId: string;
+              version: number;
+              documentId: string | null;
+              summary: string;
+              effectiveOn: string;
+              /** Format: uuid */
+              publishedBy: string;
+              /** Format: date-time */
+              publishedAt: string;
+              ackCount: number;
+              acknowledgedByMe: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_pendingPolicyAcknowledgements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              category: string;
+              requiresAck: boolean;
+              /** @enum {string} */
+              audience: 'all' | 'residents' | 'owners' | 'staff';
+              /** @enum {string} */
+              status: 'draft' | 'published' | 'archived';
+              currentVersion: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                policyId: string;
+                version: number;
+                documentId: string | null;
+                summary: string;
+                effectiveOn: string;
+                /** Format: uuid */
+                publishedBy: string;
+                /** Format: date-time */
+                publishedAt: string;
+                ackCount: number;
+                acknowledgedByMe: boolean;
+              } | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  governance_acknowledgePolicyVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @constant */
+              acknowledged: true;
+              /** Format: uuid */
+              policyVersionId: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
     };
   };
   polls_list: {
@@ -25522,6 +31866,948 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_matchSupplierInvoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          poId: string;
+          /** Format: uuid */
+          grnId: string;
+          invoiceRef: string;
+          amountKobo: number;
+          dueOn: string;
+          /** @default expense:procurement */
+          expenseAccountCode?: string;
+          /** @default 2 */
+          tolerancePercent?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              payableId: string;
+              payableNumber: string;
+              /** Format: uuid */
+              poId: string;
+              /** Format: uuid */
+              grnId: string;
+              diffPercent: number;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listPurchaseOrders: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        status?:
+          | 'draft'
+          | 'issued'
+          | 'partially_received'
+          | 'received'
+          | 'invoiced'
+          | 'closed'
+          | 'cancelled';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'issued'
+                | 'partially_received'
+                | 'received'
+                | 'invoiced'
+                | 'closed'
+                | 'cancelled';
+              issuedAt: string | null;
+              notes: string | null;
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qtyOrdered: number;
+                qtyReceived: number;
+                unitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createPurchaseOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          prId: string;
+          /** Format: uuid */
+          quotationId?: string;
+          /** Format: uuid */
+          supplierId: string;
+          notes?: string;
+          items: {
+            description: string;
+            /** Format: uuid */
+            inventoryItemId?: string;
+            qty: number;
+            unitCostKobo: number;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'issued'
+                | 'partially_received'
+                | 'received'
+                | 'invoiced'
+                | 'closed'
+                | 'cancelled';
+              issuedAt: string | null;
+              notes: string | null;
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qtyOrdered: number;
+                qtyReceived: number;
+                unitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_cancelPurchaseOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'issued'
+                | 'partially_received'
+                | 'received'
+                | 'invoiced'
+                | 'closed'
+                | 'cancelled';
+              issuedAt: string | null;
+              notes: string | null;
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qtyOrdered: number;
+                qtyReceived: number;
+                unitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_issuePurchaseOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'issued'
+                | 'partially_received'
+                | 'received'
+                | 'invoiced'
+                | 'closed'
+                | 'cancelled';
+              issuedAt: string | null;
+              notes: string | null;
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qtyOrdered: number;
+                qtyReceived: number;
+                unitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listPurchaseRequests: {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        status?:
+          | 'draft'
+          | 'submitted'
+          | 'approved'
+          | 'rejected'
+          | 'rfq'
+          | 'quoted'
+          | 'po_created'
+          | 'closed';
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              requestedBy: string;
+              department: string;
+              reason: string;
+              requiredBy: string | null;
+              estimatedTotalKobo: number;
+              workOrderId: string | null;
+              budgetLineId: string | null;
+              soleSourceJustification: string | null;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'approved'
+                | 'rejected'
+                | 'rfq'
+                | 'quoted'
+                | 'po_created'
+                | 'closed';
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qty: number;
+                estUnitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              approvalSteps: {
+                /** Format: uuid */
+                id: string;
+                step: number;
+                approverRole: string;
+                approverId: string | null;
+                /** @enum {string} */
+                decision: 'pending' | 'approved' | 'rejected';
+                decidedAt: string | null;
+                comment: string | null;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createPurchaseRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          department: string;
+          reason: string;
+          requiredBy?: string;
+          /** Format: uuid */
+          workOrderId?: string;
+          /** Format: uuid */
+          budgetLineId?: string;
+          items: {
+            description: string;
+            /** Format: uuid */
+            inventoryItemId?: string;
+            qty: number;
+            estUnitCostKobo: number;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              requestedBy: string;
+              department: string;
+              reason: string;
+              requiredBy: string | null;
+              estimatedTotalKobo: number;
+              workOrderId: string | null;
+              budgetLineId: string | null;
+              soleSourceJustification: string | null;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'approved'
+                | 'rejected'
+                | 'rfq'
+                | 'quoted'
+                | 'po_created'
+                | 'closed';
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qty: number;
+                estUnitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              approvalSteps: {
+                /** Format: uuid */
+                id: string;
+                step: number;
+                approverRole: string;
+                approverId: string | null;
+                /** @enum {string} */
+                decision: 'pending' | 'approved' | 'rejected';
+                decidedAt: string | null;
+                comment: string | null;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_approvePurchaseRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          comment?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              requestedBy: string;
+              department: string;
+              reason: string;
+              requiredBy: string | null;
+              estimatedTotalKobo: number;
+              workOrderId: string | null;
+              budgetLineId: string | null;
+              soleSourceJustification: string | null;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'approved'
+                | 'rejected'
+                | 'rfq'
+                | 'quoted'
+                | 'po_created'
+                | 'closed';
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qty: number;
+                estUnitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              approvalSteps: {
+                /** Format: uuid */
+                id: string;
+                step: number;
+                approverRole: string;
+                approverId: string | null;
+                /** @enum {string} */
+                decision: 'pending' | 'approved' | 'rejected';
+                decidedAt: string | null;
+                comment: string | null;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_rejectPurchaseRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          comment?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              requestedBy: string;
+              department: string;
+              reason: string;
+              requiredBy: string | null;
+              estimatedTotalKobo: number;
+              workOrderId: string | null;
+              budgetLineId: string | null;
+              soleSourceJustification: string | null;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'approved'
+                | 'rejected'
+                | 'rfq'
+                | 'quoted'
+                | 'po_created'
+                | 'closed';
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qty: number;
+                estUnitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              approvalSteps: {
+                /** Format: uuid */
+                id: string;
+                step: number;
+                approverRole: string;
+                approverId: string | null;
+                /** @enum {string} */
+                decision: 'pending' | 'approved' | 'rejected';
+                decidedAt: string | null;
+                comment: string | null;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_submitPurchaseRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              number: string;
+              /** Format: uuid */
+              requestedBy: string;
+              department: string;
+              reason: string;
+              requiredBy: string | null;
+              estimatedTotalKobo: number;
+              workOrderId: string | null;
+              budgetLineId: string | null;
+              soleSourceJustification: string | null;
+              /** @enum {string} */
+              status:
+                | 'draft'
+                | 'submitted'
+                | 'approved'
+                | 'rejected'
+                | 'rfq'
+                | 'quoted'
+                | 'po_created'
+                | 'closed';
+              items: {
+                /** Format: uuid */
+                id: string;
+                description: string;
+                inventoryItemId: string | null;
+                qty: number;
+                estUnitCostKobo: number;
+                lineTotalKobo: number;
+              }[];
+              approvalSteps: {
+                /** Format: uuid */
+                id: string;
+                step: number;
+                approverRole: string;
+                approverId: string | null;
+                /** @enum {string} */
+                decision: 'pending' | 'approved' | 'rejected';
+                decidedAt: string | null;
+                comment: string | null;
+              }[];
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listQuotations: {
+    parameters: {
+      query: {
+        prId: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              validUntil: string | null;
+              fileId: string | null;
+              notes: string | null;
+              selected: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_addQuotation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          prId: string;
+          /** Format: uuid */
+          supplierId: string;
+          totalKobo: number;
+          validUntil?: string;
+          /** Format: uuid */
+          fileId?: string;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              validUntil: string | null;
+              fileId: string | null;
+              notes: string | null;
+              selected: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_selectQuotation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          soleSourceJustification?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              prId: string;
+              /** Format: uuid */
+              supplierId: string;
+              supplierName: string;
+              totalKobo: number;
+              validUntil: string | null;
+              fileId: string | null;
+              notes: string | null;
+              selected: boolean;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       422: components['responses']['Error422'];
       500: components['responses']['Error500'];
     };
@@ -25853,6 +33139,166 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  analytics_listSchedules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              reportKey:
+                | 'operations_summary'
+                | 'collections'
+                | 'security_patrols'
+                | 'maintenance_sla'
+                | 'procurement_spend'
+                | 'workforce_attendance';
+              /** @enum {string} */
+              frequency: 'weekly' | 'monthly';
+              recipients: string[];
+              /** @constant */
+              format: 'csv';
+              active: boolean;
+              lastSentAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  analytics_createSchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          reportKey:
+            | 'operations_summary'
+            | 'collections'
+            | 'security_patrols'
+            | 'maintenance_sla'
+            | 'procurement_spend'
+            | 'workforce_attendance';
+          /** @enum {string} */
+          frequency: 'weekly' | 'monthly';
+          recipients: string[];
+          /**
+           * @default csv
+           * @enum {string}
+           */
+          format?: 'csv';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              reportKey:
+                | 'operations_summary'
+                | 'collections'
+                | 'security_patrols'
+                | 'maintenance_sla'
+                | 'procurement_spend'
+                | 'workforce_attendance';
+              /** @enum {string} */
+              frequency: 'weekly' | 'monthly';
+              recipients: string[];
+              /** @constant */
+              format: 'csv';
+              active: boolean;
+              lastSentAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  analytics_deleteSchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @constant */
+              deleted: true;
+              /** Format: uuid */
+              id: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   moderation_report: {
     parameters: {
       query?: never;
@@ -26016,6 +33462,45 @@ export interface operations {
                 materials: number;
                 recharged: number;
               };
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              totalSpendKobo: number;
+              openPoCount: number;
+              openPoTotalKobo: number;
+              stockValuationKobo: number;
+              lowStockCount: number;
+              assetCount: number;
+              assetBookValueKobo: number;
             };
           };
         };
@@ -26496,6 +33981,127 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  workforce_listSalaryRecords: {
+    parameters: {
+      query?: {
+        staffId?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              basicKobo: number;
+              allowances: {
+                label: string;
+                amountKobo: number;
+              }[];
+              deductions: {
+                label: string;
+                amountKobo: number;
+              }[];
+              grossKobo: number;
+              netKobo: number;
+              effectiveFrom: string;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createSalaryRecord: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          staffId: string;
+          basicKobo: number;
+          /** @default [] */
+          allowances?: {
+            label: string;
+            amountKobo: number;
+          }[];
+          /** @default [] */
+          deductions?: {
+            label: string;
+            amountKobo: number;
+          }[];
+          effectiveFrom: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              basicKobo: number;
+              allowances: {
+                label: string;
+                amountKobo: number;
+              }[];
+              deductions: {
+                label: string;
+                amountKobo: number;
+              }[];
+              grossKobo: number;
+              netKobo: number;
+              effectiveFrom: string;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   search_query: {
     parameters: {
       query: {
@@ -26529,6 +34135,146 @@ export interface operations {
                 subtitle: string | null;
                 href: string;
               }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_listEstateContracts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              companyId: string;
+              companyName: string;
+              /** Format: uuid */
+              estateId: string;
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'active' | 'terminated';
+              approvedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_approveContract: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              companyId: string;
+              companyName: string;
+              /** Format: uuid */
+              estateId: string;
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'active' | 'terminated';
+              approvedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  patrols_terminateContract: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              companyId: string;
+              companyName: string;
+              /** Format: uuid */
+              estateId: string;
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'active' | 'terminated';
+              approvedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
             };
           };
         };
@@ -28742,6 +36488,101 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  workforce_listRosters: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              date: string;
+              startTime: string;
+              endTime: string;
+              notes: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createRoster: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          staffId: string;
+          date: string;
+          startTime: string;
+          endTime: string;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              date: string;
+              startTime: string;
+              endTime: string;
+              notes: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   staffRoles_assignRole: {
     parameters: {
       query?: never;
@@ -28984,6 +36825,383 @@ export interface operations {
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listStockLocations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              spaceId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createStockLocation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          /** Format: uuid */
+          spaceId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              spaceId: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listStockMovements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              itemId: string;
+              itemName: string;
+              /** Format: uuid */
+              locationId: string;
+              /** @enum {string} */
+              type: 'receipt' | 'issue' | 'transfer' | 'return' | 'adjustment';
+              qtyDelta: number;
+              unitCostKobo: number;
+              referenceType: string | null;
+              referenceId: string | null;
+              reason: string | null;
+              /** Format: uuid */
+              recordedBy: string;
+              /** Format: date-time */
+              occurredAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createStockMovement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          itemId: string;
+          /** Format: uuid */
+          locationId: string;
+          /** @enum {string} */
+          type: 'receipt' | 'issue' | 'transfer' | 'return' | 'adjustment';
+          qty: number;
+          unitCostKobo?: number;
+          /** Format: uuid */
+          workOrderId?: string;
+          department?: string;
+          reason?: string;
+          /** @enum {string} */
+          direction?: 'in' | 'out';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              itemId: string;
+              itemName: string;
+              /** Format: uuid */
+              locationId: string;
+              /** @enum {string} */
+              type: 'receipt' | 'issue' | 'transfer' | 'return' | 'adjustment';
+              qtyDelta: number;
+              unitCostKobo: number;
+              referenceType: string | null;
+              referenceId: string | null;
+              reason: string | null;
+              /** Format: uuid */
+              recordedBy: string;
+              /** Format: date-time */
+              occurredAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_listSuppliers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              contactName: string | null;
+              phone: string | null;
+              email: string | null;
+              categories: string[];
+              vendorId: string | null;
+              bankRef: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended' | 'archived';
+              rating: number | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_createSupplier: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          contactName?: string;
+          phone?: string;
+          /** Format: email */
+          email?: string;
+          /** @default [] */
+          categories?: string[];
+          /** Format: uuid */
+          vendorId?: string;
+          bankRef?: string;
+          rating?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              contactName: string | null;
+              phone: string | null;
+              email: string | null;
+              categories: string[];
+              vendorId: string | null;
+              bankRef: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended' | 'archived';
+              rating: number | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  procurement_updateSupplier: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          contactName?: string;
+          phone?: string;
+          /** Format: email */
+          email?: string;
+          /** @default [] */
+          categories?: string[];
+          /** Format: uuid */
+          vendorId?: string;
+          bankRef?: string;
+          rating?: number;
+          /** @enum {string} */
+          status?: 'active' | 'suspended' | 'archived';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              contactName: string | null;
+              phone: string | null;
+              email: string | null;
+              categories: string[];
+              vendorId: string | null;
+              bankRef: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended' | 'archived';
+              rating: number | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -32028,6 +40246,462 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_listAttendance: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: date-time */
+              clockIn: string;
+              clockOut: string | null;
+              /** @enum {string} */
+              source: 'app' | 'security_shift' | 'manual';
+              geoOk: boolean;
+              approvedBy: string | null;
+              editedReason: string | null;
+              durationMinutes: number | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_editAttendance: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          clockIn?: string;
+          /** Format: date-time */
+          clockOut?: string;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: date-time */
+              clockIn: string;
+              clockOut: string | null;
+              /** @enum {string} */
+              source: 'app' | 'security_shift' | 'manual';
+              geoOk: boolean;
+              approvedBy: string | null;
+              editedReason: string | null;
+              durationMinutes: number | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_clockIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default true */
+          geoOk?: boolean;
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: date-time */
+              clockIn: string;
+              clockOut: string | null;
+              /** @enum {string} */
+              source: 'app' | 'security_shift' | 'manual';
+              geoOk: boolean;
+              approvedBy: string | null;
+              editedReason: string | null;
+              durationMinutes: number | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_clockOut: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          notes?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              staffId: string;
+              /** Format: date-time */
+              clockIn: string;
+              clockOut: string | null;
+              /** @enum {string} */
+              source: 'app' | 'security_shift' | 'manual';
+              geoOk: boolean;
+              approvedBy: string | null;
+              editedReason: string | null;
+              durationMinutes: number | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_listStaffProfiles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              staffNumber: string;
+              departmentId: string | null;
+              departmentName: string | null;
+              jobTitle: string;
+              /** @enum {string} */
+              employmentType: 'full_time' | 'part_time' | 'contract';
+              startDate: string;
+              endDate: string | null;
+              /** @enum {string} */
+              status: 'active' | 'on_leave' | 'suspended' | 'offboarded';
+              emergencyContactName: string | null;
+              emergencyContactPhone: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_createStaffProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+          staffNumber: string;
+          /** Format: uuid */
+          departmentId?: string;
+          jobTitle: string;
+          /**
+           * @default full_time
+           * @enum {string}
+           */
+          employmentType?: 'full_time' | 'part_time' | 'contract';
+          startDate: string;
+          emergencyContactName?: string;
+          emergencyContactPhone?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              staffNumber: string;
+              departmentId: string | null;
+              departmentName: string | null;
+              jobTitle: string;
+              /** @enum {string} */
+              employmentType: 'full_time' | 'part_time' | 'contract';
+              startDate: string;
+              endDate: string | null;
+              /** @enum {string} */
+              status: 'active' | 'on_leave' | 'suspended' | 'offboarded';
+              emergencyContactName: string | null;
+              emergencyContactPhone: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_updateStaffProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          staffNumber?: string;
+          /** Format: uuid */
+          departmentId?: string;
+          jobTitle?: string;
+          /**
+           * @default full_time
+           * @enum {string}
+           */
+          employmentType?: 'full_time' | 'part_time' | 'contract';
+          startDate?: string;
+          emergencyContactName?: string;
+          emergencyContactPhone?: string;
+          /** @enum {string} */
+          status?: 'active' | 'on_leave' | 'suspended';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              staffNumber: string;
+              departmentId: string | null;
+              departmentName: string | null;
+              jobTitle: string;
+              /** @enum {string} */
+              employmentType: 'full_time' | 'part_time' | 'contract';
+              startDate: string;
+              endDate: string | null;
+              /** @enum {string} */
+              status: 'active' | 'on_leave' | 'suspended' | 'offboarded';
+              emergencyContactName: string | null;
+              emergencyContactPhone: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  workforce_offboardStaff: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          endDate: string;
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              userId: string;
+              staffNumber: string;
+              departmentId: string | null;
+              departmentName: string | null;
+              jobTitle: string;
+              /** @enum {string} */
+              employmentType: 'full_time' | 'part_time' | 'contract';
+              startDate: string;
+              endDate: string | null;
+              /** @enum {string} */
+              status: 'active' | 'on_leave' | 'suspended' | 'offboarded';
+              emergencyContactName: string | null;
+              emergencyContactPhone: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
@@ -37873,7 +46547,13 @@ export interface operations {
           | 'community'
           | 'facilities'
           | 'documents'
-          | 'marketplace';
+          | 'marketplace'
+          | 'accounting'
+          | 'procurement'
+          | 'workforce'
+          | 'governance'
+          | 'patrols'
+          | 'analytics';
       };
       cookie?: never;
     };
@@ -38340,6 +47020,47 @@ export interface operations {
                 delayed: number;
                 failed: number;
               }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  analytics_platformKpis: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              asOf: string;
+              suppressionThreshold: number;
+              activeEstates: number;
+              totalUsers: number;
+              monthlyActiveUsers: number | null;
+              suppressed: boolean;
+              txVolumeKobo: number;
+              adRevenueKobo: number;
+              marketplaceCommissionKobo: number;
+              adImpressions: number;
+              adClicks: number;
+              adCtrPercent: number;
             };
           };
         };
@@ -38852,6 +47573,307 @@ export interface operations {
       400: components['responses']['Error400'];
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSecurityCompanies_listCompanies: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              registrationNumber: string | null;
+              contactName: string;
+              contactPhone: string;
+              contactEmail: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              guardCount: number;
+              activeContractCount: number;
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSecurityCompanies_createCompany: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          registrationNumber?: string;
+          contactName: string;
+          contactPhone: string;
+          /** Format: email */
+          contactEmail?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              registrationNumber: string | null;
+              contactName: string;
+              contactPhone: string;
+              contactEmail: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              guardCount: number;
+              activeContractCount: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSecurityCompanies_updateCompany: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name?: string;
+          registrationNumber?: string;
+          contactName?: string;
+          contactPhone?: string;
+          /** Format: email */
+          contactEmail?: string;
+          /** @enum {string} */
+          status?: 'active' | 'suspended';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              name: string;
+              registrationNumber: string | null;
+              contactName: string;
+              contactPhone: string;
+              contactEmail: string | null;
+              /** @enum {string} */
+              status: 'active' | 'suspended';
+              guardCount: number;
+              activeContractCount: number;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSecurityCompanies_listGuards: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              companyId: string;
+              /** Format: uuid */
+              userId: string;
+              badgeNumber: string;
+              /** @enum {string} */
+              status: 'active' | 'inactive';
+              /** Format: date-time */
+              createdAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSecurityCompanies_addGuard: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          userId: string;
+          badgeNumber: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              companyId: string;
+              /** Format: uuid */
+              userId: string;
+              badgeNumber: string;
+              /** @enum {string} */
+              status: 'active' | 'inactive';
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformSecurityCompanies_createContract: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          companyId: string;
+          /** Format: uuid */
+          estateId: string;
+          startsOn: string;
+          endsOn?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              companyId: string;
+              companyName: string;
+              /** Format: uuid */
+              estateId: string;
+              startsOn: string;
+              endsOn: string | null;
+              /** @enum {string} */
+              status: 'pending' | 'active' | 'terminated';
+              approvedBy: string | null;
+              /** Format: date-time */
+              createdAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };

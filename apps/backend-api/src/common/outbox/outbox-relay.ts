@@ -70,6 +70,27 @@ export function routeEvent(event: Pick<RelayedEvent, 'type' | 'audit'>): QueueNa
   if (event.type === 'visitor.pass.shared' || event.type === 'occupancy.occupancy.ended') {
     queues.push(QUEUES.gate);
   }
+  if (event.type.startsWith('procurement.')) queues.push(QUEUES.procurement);
+  if (
+    event.type.startsWith('workforce.') ||
+    event.type === 'security.shift.started' ||
+    event.type === 'security.shift.ended'
+  ) {
+    queues.push(QUEUES.workforce);
+  }
+  if (event.type.startsWith('governance.')) queues.push(QUEUES.governance);
+  if (event.type.startsWith('security.patrol.')) queues.push(QUEUES.patrols);
+  if (
+    event.type.startsWith('visitor.gate.') ||
+    event.type.startsWith('emergency.alert.') ||
+    event.type.startsWith('billing.invoice.') ||
+    event.type.startsWith('payments.payment.') ||
+    event.type.startsWith('maintenance.') ||
+    event.type.startsWith('community.message.') ||
+    event.type.startsWith('community.reaction.')
+  ) {
+    queues.push(QUEUES.analytics);
+  }
   return queues;
 }
 

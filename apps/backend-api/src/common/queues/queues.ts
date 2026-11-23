@@ -29,6 +29,16 @@ export const QUEUES = {
   utilities: 'utilities',
   /** Marketplace order payments confirmed and refunds (ADR-0023). */
   marketplace: 'marketplace',
+  /** Procurement low-stock alerts and notifications (ADR-0026). */
+  procurement: 'procurement',
+  /** Workforce shift attendance sync and scheduled offboarding (ADR-0026). */
+  workforce: 'workforce',
+  /** Governance motion auto-open/close and policy reminders (ADR-0026). */
+  governance: 'governance',
+  /** Patrol schedule checks and missed-checkpoint alerts (ADR-0026). */
+  patrols: 'patrols',
+  /** Analytics read-model projections, nightly platform KPIs and scheduled reports (ADR-0026). */
+  analytics: 'analytics',
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
