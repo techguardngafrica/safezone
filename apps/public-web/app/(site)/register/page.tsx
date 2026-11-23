@@ -1,21 +1,22 @@
 import type { Metadata } from 'next';
-import { Card } from '@safezone/web-ui';
+import { t } from '@safezone/i18n';
 import { PageTitle } from '../../../src/components/site-shell';
+import { RegisterFlow } from '../../../src/register/register-flow';
 
-export const metadata: Metadata = { title: 'Register your estate' };
+export const metadata: Metadata = {
+  title: t('public.register.metaTitle'),
+  description: t('public.register.metaDescription'),
+};
 
 /**
  * Self-service estate registration (docs/architecture/apps/public-web.md §5).
- * Phase 1: phone + OTP → representative details → estate details → documents → consent → submit.
- * Validate with estateApplicationSchema from @safezone/schemas. Onboarding is free: no plan or payment step.
+ * Onboarding is free: no plan or payment step.
  */
 export default function RegisterPage() {
   return (
     <>
-      <PageTitle title={'Register your estate'} />
-      <Card>
-        <p>Estate registration opens in Phase 1.</p>
-      </Card>
+      <PageTitle title={t('public.register.title')} lead={t('public.register.lead')} />
+      <RegisterFlow />
     </>
   );
 }

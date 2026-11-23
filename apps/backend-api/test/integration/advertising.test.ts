@@ -81,6 +81,23 @@ describe('advertising', () => {
       })
       .expect(201);
     expect(enquiry.body.data.status).toBe('submitted');
+    const trackingToken = enquiry.body.data.trackingToken as string;
+    expect(trackingToken).toMatch(/^[A-Za-z0-9_-]{40,64}$/);
+
+    // Link-based status lookup is public, privacy-minimized (no phone/email/notes) and returns 404 for unknown tokens.
+    const tracked = await stack.http.get(`/v1/public/ad-enquiries/${trackingToken}`).expect(200);
+    expect(tracked.body.data).toMatchObject({
+      id: enquiry.body.data.id,
+      status: 'submitted',
+      orgName: 'Fresh Mart',
+      category: 'retail',
+      hasAdvertiserAccount: false,
+    });
+    expect(tracked.body.data.phone).toBeUndefined();
+    expect(tracked.body.data.email).toBeUndefined();
+    expect(tracked.body.data.notes).toBeUndefined();
+    await stack.http.get(`/v1/public/ad-enquiries/${'a'.repeat(43)}`).expect(404);
+
     await stack.http.get('/v1/platform/ad-enquiries').set(as(owner)).expect(403);
     const listed = await stack.http.get('/v1/platform/ad-enquiries').set(as(manager)).expect(200);
     expect(listed.body.data[0]).toMatchObject({ orgName: 'Fresh Mart', phone: '+2348060000020' });
@@ -97,6 +114,10 @@ describe('advertising', () => {
       })
       .expect(201);
     advertiserId = advertiser.body.data.id;
+    const trackedAfter = await stack.http
+      .get(`/v1/public/ad-enquiries/${trackingToken}`)
+      .expect(200);
+    expect(trackedAfter.body.data.hasAdvertiserAccount).toBe(true);
     const mine = await stack.http.get('/v1/me/advertisers').set(as(owner)).expect(200);
     expect(mine.body.data).toEqual([
       expect.objectContaining({ id: advertiserId, role: 'advertiser_organisation_owner' }),

@@ -86,7 +86,7 @@ Short form: name, phone, email, estate name, location, size, preferred contact t
 - Signed-in advertiser area (`/advertiser/*`): campaigns, status, reports (own campaigns only), invoices and receipts.
 - Advertisers can do the same in Advertiser mode inside the Resident App.
 
-Built (Phase 4, ADR-0024): `/advertise` (where ads show and never show, how review and payment work, enquiry form to `POST /v1/public/ad-enquiries`, tobacco not offered) and `/advertiser` (campaign list; campaign page with plan, creatives to add or change for review, results with estates under 200 people grouped, invoices paid to Safezone through the provider and verified on return; team for owners). `noindex`, disallowed in robots. Not built yet: enquiry status tracking by link, PDF reports, creative image upload (a file ID is typed for now).
+Built (Phase 4, ADR-0024): `/advertise` (where ads show and never show, how review and payment work, enquiry form to `POST /v1/public/ad-enquiries`, tobacco not offered), `/advertise/status/[token]` (link-based enquiry status tracking via `GET /v1/public/ad-enquiries/:token`, `noindex`, disallowed in robots), and `/advertiser` (campaign list; campaign page with plan, creatives to add or change for review, results with estates under 200 people grouped, invoices paid to Safezone through the provider and verified on return; team for owners). `noindex`, disallowed in robots. Not built yet: PDF reports, creative image upload (a file ID is typed for now).
 
 ## 8. Vendor Portal (`/vendor/*`, Phase 4)
 
@@ -103,7 +103,7 @@ Mobile-responsive, signed in with phone + OTP, vendor roles from [authz.md](../m
 | Reviews  | Ratings and reviews, responses                                           |
 | Disputes | Open disputes and outcomes                                               |
 
-Built (Phase 4, ADR-0023): `/vendors` (information, indexed) and `/vendor` (Overview, Orders, Listings, Profile and payout, Team, Earnings and reviews; `noindex`, disallowed in robots). Navigation and pages follow the caller's vendor role; service personnel see only Overview and Orders assigned to them. A signed-in person without a vendor account sees the application form at `/vendor`. Not built yet: document and photo uploads, the Estates and Disputes areas, and availability calendars.
+Built (Phase 4, ADR-0023): `/vendors` (information, indexed) and `/vendor` (Overview, Orders, Listings, Estates, Disputes, Profile and payout, Team, Earnings and reviews; `noindex`, disallowed in robots). Navigation and pages follow the caller's vendor role; service personnel see only Overview and Orders assigned to them. A signed-in person without a vendor account sees the application form at `/vendor`. Not built yet: document and photo uploads, and availability calendars.
 
 Vendor application (`/vendors`): business details, owner identity, documents, categories, areas, bank details (captured by the payment provider for subaccount creation, never stored raw by Safezone).
 
@@ -154,5 +154,5 @@ apps/public-web/
 Built: a shared header and footer (`app/(site)/layout.tsx`) with legal links on every public page except the visitor pass page; `/estates`; `/help` (FAQ with structured data); `/download` (no store links until the apps are published, set in `src/site.ts`); `/status` (live checks of the API's public `/health/live` and `/health/ready`, refreshed every minute, `noindex`); `/legal/terms`, `/legal/privacy`, `/legal/cookies` and `/legal/ad-policy`; `sitemap.xml` and `robots.txt` (pass pages, account and status excluded).
 
 - Content lives as typed data in `content/` (no MDX dependency). The legal pages are **drafts written from how the product works today** and say so on the page. They need legal review, and `src/site.ts` still needs the registered company name, RC number, address and the data protection contact.
-- `/register` and `/contact` are still placeholders ("opens in Phase 1"): the self-service registration and assisted onboarding forms are not built.
-- No favicon or Apple touch icon yet (ship gate, needs a brand asset). No Playwright tests yet.
+- `/register` (multi-step self-service estate registration with phone + OTP, representative & estate details, signed-URL document uploads, consent, live status view, resubmit and withdraw) and `/contact` (assisted onboarding lead form) are now built with Playwright E2E coverage alongside `/advertise`, `/advertise/status/[token]`, `/vendor/estates`, and `/vendor/disputes`.
+- No favicon or Apple touch icon yet (ship gate, needs a brand asset).

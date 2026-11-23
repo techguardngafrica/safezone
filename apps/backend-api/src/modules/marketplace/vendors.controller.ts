@@ -2,6 +2,7 @@ import { Controller, Delete, Get, Patch, Post, Put } from '@nestjs/common';
 import {
   addVendorMemberSchema,
   createListingSchema,
+  disputeListQuerySchema,
   listingSchema,
   myVendorSchema,
   orderAssignSchema,
@@ -19,6 +20,8 @@ import {
   updateVendorMemberSchema,
   updateVendorSchema,
   vendorApplicationSchema,
+  vendorApprovedEstateSchema,
+  vendorDisputeSchema,
   vendorEarningsSchema,
   vendorItemParamsSchema,
   vendorListingQuerySchema,
@@ -502,5 +505,34 @@ export class VendorsController {
   })
   payouts(@CurrentVendor() vendor: VendorAccess) {
     return this.orders.earnings(vendor);
+  }
+
+  @Get('vendors/:vendorId/estates')
+  @Can('vendor.order.manage')
+  @Contract({
+    summary: 'Estates that have approved this vendor',
+    tags: TAGS,
+    params: vendorParamSchema,
+    response: z.array(vendorApprovedEstateSchema),
+  })
+  estates(@CurrentVendor() vendor: VendorAccess) {
+    return this.orders.vendorApprovedEstates(vendor);
+  }
+
+  @Get('vendors/:vendorId/disputes')
+  @Can('vendor.order.manage')
+  @Contract({
+    summary: 'Open disputes and outcomes for this vendor',
+    tags: TAGS,
+    params: vendorParamSchema,
+    query: disputeListQuerySchema,
+    response: vendorDisputeSchema,
+    paginated: true,
+  })
+  disputes(
+    @CurrentVendor() vendor: VendorAccess,
+    @ValidQuery() query: z.infer<typeof disputeListQuerySchema>,
+  ) {
+    return this.orders.vendorDisputes(vendor, query);
   }
 }

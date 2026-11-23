@@ -26,11 +26,30 @@ test('advertise: an organisation sends an enquiry', async ({ page, techguard }) 
   await page.getByRole('button', { name: t('public.advertise.form.submit') }).click();
   await expect(page.getByText(t('public.advertise.form.sent'))).toBeVisible();
 
+  // Follow the link-based enquiry status tracker (public-web.md §7).
+  await page.getByRole('link', { name: t('public.advertise.form.trackLink') }).click();
+  await expect(
+    page.getByRole('heading', { level: 1, name: t('public.advertise.status.title') }),
+  ).toBeVisible();
+  await expect(page.getByText('Fresh Mart Lekki')).toBeVisible();
+  await expect(
+    page.getByText(t('public.advertise.status.label.submitted'), { exact: true }).first(),
+  ).toBeVisible();
+
   const desk = await techguard('advertising_manager');
-  const enquiries = await desk.get<{ orgName: string | null; placements: string[] }[]>(
+  const enquiries = await desk.get<{ id: string; orgName: string | null; placements: string[] }[]>(
     '/v1/platform/ad-enquiries',
   );
-  expect(enquiries).toContainEqual(
-    expect.objectContaining({ orgName: 'Fresh Mart Lekki', placements: ['resident.home.banner'] }),
-  );
+  const created = enquiries.find((e) => e.orgName === 'Fresh Mart Lekki');
+  expect(created).toBeDefined();
+  expect(created?.placements).toEqual(['resident.home.banner']);
+
+  // Status update made by Techguard is reflected on the tracking link.
+  await desk.request('PATCH', `/v1/platform/ad-enquiries/${created?.id}`, {
+    status: 'proposal_sent',
+  });
+  await page.reload();
+  await expect(
+    page.getByText(t('public.advertise.status.label.proposal_sent'), { exact: true }),
+  ).toBeVisible();
 });

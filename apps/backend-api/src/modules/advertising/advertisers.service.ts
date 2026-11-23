@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   type AdCategory,
   type adEnquiryListQuerySchema,
@@ -23,16 +23,21 @@ import {
   NotFoundError,
   RateLimitedError,
 } from '../../common/errors/domain-error';
+import { uuidv7 } from '../../common/ids/uuidv7';
 import { type AuditInput, appendOutboxEvents } from '../../common/outbox/outbox-writer';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { RateLimiter } from '../../common/rate-limit/rate-limiter';
+import { ENV } from '../../config/config.module';
+import type { Env } from '../../config/env';
 import { IdentityService } from '../identity/identity.service';
 import { AdCache } from './ad-cache';
+import { deriveAdEnquiryToken, hashAdEnquiryToken } from './domain/enquiry-token';
 
 type EnquiryRow = Prisma.AdEnquiryGetPayload<object>;
 type AdvertiserRow = Prisma.AdvertiserGetPayload<object>;
 
 const ENQUIRIES_PER_IP_PER_HOUR = 5;
+const ENQUIRY_STATUS_LOOKUPS_PER_IP_PER_HOUR = 30;
 const cursorSchema = z.object({ createdAt: z.string(), id: z.uuid() });
 const isCursor = (value: unknown): value is z.infer<typeof cursorSchema> =>
   cursorSchema.safeParse(value).success;
@@ -68,6 +73,7 @@ export class AdvertisersService {
     private readonly identity: IdentityService,
     private readonly rateLimiter: RateLimiter,
     private readonly cache: AdCache,
+    @Inject(ENV) private readonly env: Env,
   ) {}
 
   // ---- Enquiries -----------------------------------------------------------------------------
@@ -88,9 +94,13 @@ export class AdvertisersService {
       const limit = await this.rateLimiter.hit(limitKey, ENQUIRIES_PER_IP_PER_HOUR, 3600);
       if (!limit.allowed) throw new RateLimitedError(limit.retryAfterSeconds);
     }
+    const id = uuidv7();
+    const trackingToken = deriveAdEnquiryToken(this.env.OTP_HMAC_SECRET, id);
+    const trackingTokenHash = hashAdEnquiryToken(trackingToken);
     return this.db.withContext('advertising', async (tx) => {
       const row = await tx.adEnquiry.create({
         data: {
+          id,
           source: source.kind,
           userId: source.kind === 'resident_app' ? source.userId : null,
           advertiserType: input.advertiserType,
@@ -105,6 +115,7 @@ export class AdvertisersService {
           durationWeeks: input.durationWeeks ?? null,
           audience: input.audience ?? null,
           placements: input.placements,
+          trackingTokenHash,
         },
       });
       await appendOutboxEvents(tx, [
@@ -116,7 +127,37 @@ export class AdvertisersService {
           payload: { enquiryId: row.id, source: row.source },
         },
       ]);
-      return { id: row.id, status: row.status as 'submitted' };
+      return { id: row.id, status: row.status as 'submitted', trackingToken };
+    });
+  }
+
+  /** Public link-based status lookup (public-web.md §7). Rate-limited; returns no PII or internal notes. */
+  async publicEnquiryStatus(token: string, ip: string | undefined) {
+    if (ip) {
+      const limit = await this.rateLimiter.hit(
+        `ad-enquiry:status:ip:${ip}`,
+        ENQUIRY_STATUS_LOOKUPS_PER_IP_PER_HOUR,
+        3600,
+      );
+      if (!limit.allowed) throw new RateLimitedError(limit.retryAfterSeconds);
+    }
+    const tokenHash = hashAdEnquiryToken(token);
+    return this.db.withContext('advertising', async (tx) => {
+      const row = await tx.adEnquiry.findUnique({ where: { trackingTokenHash: tokenHash } });
+      if (!row) throw new NotFoundError('Enquiry not found', 'AD_ENQUIRY_NOT_FOUND');
+      return {
+        id: row.id,
+        status: row.status as 'submitted',
+        advertiserType: row.advertiserType as 'individual' | 'organisation',
+        orgName: row.orgName,
+        category: row.category as AdCategory,
+        budgetRange: row.budgetRange as 'not_sure',
+        durationWeeks: row.durationWeeks,
+        placements: row.placements as AdPlacementKey[],
+        hasAdvertiserAccount: row.advertiserId !== null,
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+      };
     });
   }
 

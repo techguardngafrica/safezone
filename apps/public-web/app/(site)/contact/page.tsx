@@ -1,20 +1,22 @@
 import type { Metadata } from 'next';
-import { Card } from '@safezone/web-ui';
+import { t } from '@safezone/i18n';
 import { PageTitle } from '../../../src/components/site-shell';
+import { ContactForm } from '../../../src/contact/contact-form';
 
-export const metadata: Metadata = { title: 'Talk to us' };
+export const metadata: Metadata = {
+  title: t('public.contact.metaTitle'),
+  description: t('public.contact.metaDescription'),
+};
 
 /**
- * Techguard-assisted onboarding request (public-web.md §6). Validate with onboardingLeadSchema.
+ * Techguard-assisted onboarding request (public-web.md §6).
  * Creates a lead in the Super Admin onboarding pipeline.
  */
 export default function ContactPage() {
   return (
     <>
-      <PageTitle title={'Talk to us'} />
-      <Card>
-        <p>The assisted onboarding form opens in Phase 1.</p>
-      </Card>
+      <PageTitle title={t('public.contact.title')} lead={t('public.contact.lead')} />
+      <ContactForm />
     </>
   );
 }

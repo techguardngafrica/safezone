@@ -501,6 +501,32 @@ describe('marketplace', () => {
       .set(as(residentA))
       .expect(200);
     expect(order.body.data.status).toBe('completed');
+
+    // Vendor Portal: approved estates & disputes endpoints (with role scoping and cross-vendor isolation).
+    const approvedEstates = await stack.http.get(vendorUrl('/estates')).set(as(owner)).expect(200);
+    expect(approvedEstates.body.data).toEqual([
+      expect.objectContaining({ estateId: estateA, estateName: 'Market Estate A' }),
+    ]);
+    await stack.http.get(vendorUrl('/estates')).set(as(personnel)).expect(403);
+    await stack.http.get(vendorUrl('/estates')).set(as(residentA)).expect(404);
+
+    const vendorDisputes = await stack.http
+      .get(vendorUrl('/disputes?status=resolved'))
+      .set(as(owner))
+      .expect(200);
+    expect(vendorDisputes.body.data).toContainEqual(
+      expect.objectContaining({
+        id: dispute.id,
+        orderId: id,
+        estateId: estateA,
+        estateName: 'Market Estate A',
+        status: 'resolved',
+        resolution: 'partial_refund',
+        refundKobo: 500_000,
+      }),
+    );
+    await stack.http.get(vendorUrl('/disputes')).set(as(personnel)).expect(403);
+    await stack.http.get(vendorUrl('/disputes')).set(as(residentA)).expect(404);
   });
 
   it('refunds a verified charge that matches no order', async () => {

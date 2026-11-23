@@ -228,6 +228,14 @@ export const setVendorApprovalSchema = z.object({
   status: vendorApprovalStatusSchema,
   reason: z.string().trim().max(500).optional(),
 });
+/** An estate that has explicitly approved this vendor (Vendor Portal /vendor/estates). */
+export const vendorApprovedEstateSchema = z.object({
+  estateId: z.uuid(),
+  estateName: z.string(),
+  state: z.string().nullable(),
+  lga: z.string().nullable(),
+  decidedAt: z.iso.datetime(),
+});
 
 // ---- Orders -------------------------------------------------------------------------------------
 
@@ -380,6 +388,12 @@ export const disputeListQuerySchema = z.object({
   status: disputeStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   cursor: z.string().min(1).optional(),
+});
+/** Dispute view for the Vendor Portal: adds estate name, listing title and order amount. */
+export const vendorDisputeSchema = disputeSchema.extend({
+  estateName: z.string(),
+  listingTitle: z.string(),
+  orderAmountKobo: z.number().int().nullable(),
 });
 
 export const vendorEarningsSchema = z.object({

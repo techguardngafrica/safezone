@@ -43,6 +43,18 @@ const NAV: { path: string; label: MessageKey; icon: NavItem['icon']; permission:
     permission: 'vendor.listing.manage',
   },
   {
+    path: '/vendor/estates',
+    label: 'vendor.nav.estates',
+    icon: 'building',
+    permission: 'vendor.order.manage',
+  },
+  {
+    path: '/vendor/disputes',
+    label: 'vendor.nav.disputes',
+    icon: 'alert',
+    permission: 'vendor.order.manage',
+  },
+  {
     path: '/vendor/profile',
     label: 'vendor.nav.profile',
     icon: 'settings',

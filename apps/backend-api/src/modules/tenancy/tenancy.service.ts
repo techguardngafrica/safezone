@@ -244,6 +244,21 @@ export class TenancyService {
     return new Map(rows.map((row) => [row.id, row.name]));
   }
 
+  /** Name, state and LGA of estates by id, for cross-module vendor/admin views without querying tenancy tables directly. */
+  async estateSummariesByIds(
+    ids: readonly string[],
+  ): Promise<Map<string, { name: string; state: string | null; lga: string | null }>> {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) return new Map();
+    const rows = await this.db.withContext('tenancy', (tx) =>
+      tx.estate.findMany({
+        where: { id: { in: unique } },
+        select: { id: true, name: true, state: true, lga: true },
+      }),
+    );
+    return new Map(rows.map((row) => [row.id, { name: row.name, state: row.state, lga: row.lga }]));
+  }
+
   /** State and LGA of an estate, for area targeting (advertising) without a full profile read. */
   async estateLocation(estateId: string): Promise<{ state: string | null; lga: string | null }> {
     const row = await this.db.withContext('tenancy', (tx) =>

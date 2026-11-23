@@ -8384,6 +8384,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/public/ad-enquiries/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Track the status of a submitted advertising enquiry by link token
+     * @description Public.
+     */
+    get: operations['advertising_publicEnquiryStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/public/app-config': {
     parameters: {
       query?: never;
@@ -8506,6 +8526,46 @@ export interface paths {
      * @description Requires `vendor.profile.manage`.
      */
     patch: operations['vendors_update'];
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/disputes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Open disputes and outcomes for this vendor
+     * @description Requires `vendor.order.manage`.
+     */
+    get: operations['vendors_disputes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vendors/{vendorId}/estates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estates that have approved this vendor
+     * @description Requires `vendor.order.manage`.
+     */
+    get: operations['vendors_estates'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/vendors/{vendorId}/listings': {
@@ -32110,6 +32170,7 @@ export interface operations {
                 | 'approved'
                 | 'rejected'
                 | 'converted_to_campaign';
+              trackingToken: string;
             };
           };
         };
@@ -39958,12 +40019,93 @@ export interface operations {
                 | 'approved'
                 | 'rejected'
                 | 'converted_to_campaign';
+              trackingToken: string;
             };
           };
         };
       };
       400: components['responses']['Error400'];
       422: components['responses']['Error422'];
+      429: components['responses']['Error429'];
+      500: components['responses']['Error500'];
+    };
+  };
+  advertising_publicEnquiryStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_information'
+                | 'proposal_sent'
+                | 'negotiation'
+                | 'approved'
+                | 'rejected'
+                | 'converted_to_campaign';
+              /** @enum {string} */
+              advertiserType: 'individual' | 'organisation';
+              orgName: string | null;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              budgetRange:
+                'under_100k' | '100k_500k' | '500k_2m' | '2m_10m' | 'over_10m' | 'not_sure';
+              durationWeeks: number | null;
+              placements: (
+                | 'resident.home.banner'
+                | 'resident.feed.sponsored'
+                | 'resident.marketplace.banner'
+                | 'resident.discovery.sponsored'
+                | 'management.dashboard.info'
+              )[];
+              hasAdvertiserAccount: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      404: components['responses']['Error404'];
       429: components['responses']['Error429'];
       500: components['responses']['Error500'];
     };
@@ -40386,6 +40528,101 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_disputes: {
+    parameters: {
+      query?: {
+        status?: 'open' | 'resolved';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              orderId: string;
+              /** Format: uuid */
+              estateId: string;
+              /** Format: uuid */
+              vendorId: string;
+              reason: string;
+              evidenceFileIds: string[];
+              /** @enum {string} */
+              status: 'open' | 'resolved';
+              resolution: ('refund' | 'partial_refund' | 'no_action') | null;
+              refundKobo: number | null;
+              note: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+              estateName: string;
+              listingTitle: string;
+              orderAmountKobo: number | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  vendors_estates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        vendorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              estateId: string;
+              estateName: string;
+              state: string | null;
+              lga: string | null;
+              /** Format: date-time */
+              decidedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
       500: components['responses']['Error500'];
     };
   };

@@ -45,6 +45,7 @@ export function EnquiryForm() {
   const [placements, setPlacements] = useState<AdPlacementKey[]>([]);
   const [consent, setConsent] = useState(false);
   const [invalid, setInvalid] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const send = useMutation({
     mutationFn: () => {
@@ -73,12 +74,40 @@ export function EnquiryForm() {
     },
   });
 
-  if (send.isSuccess)
+  if (send.isSuccess) {
+    const statusPath = `/advertise/status/${send.data.trackingToken}`;
+    const fullUrl =
+      typeof window !== 'undefined' ? `${window.location.origin}${statusPath}` : statusPath;
     return (
       <Panel title={t('public.advertise.form.title')}>
-        <Banner tone="success">{t('public.advertise.form.sent')}</Banner>
+        <div style={{ display: 'grid', gap: 12 }}>
+          <Banner tone="success">{t('public.advertise.form.sent')}</Banner>
+          <p style={{ margin: 0 }}>{t('public.advertise.form.trackHelp')}</p>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Link
+              href={statusPath}
+              className="sz-btn sz-btn-primary"
+              style={{ textDecoration: 'none' }}
+            >
+              {t('public.advertise.form.trackLink')}
+            </Link>
+            <ActionButton
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                  void navigator.clipboard.writeText(fullUrl);
+                  setCopied(true);
+                }
+              }}
+            >
+              {copied ? t('public.advertise.form.copied') : t('public.advertise.form.copyLink')}
+            </ActionButton>
+          </div>
+        </div>
       </Panel>
     );
+  }
 
   const valid =
     contactName.trim().length >= 2 &&

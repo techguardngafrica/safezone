@@ -142,7 +142,29 @@ export const adEnquiryListQuerySchema = z.object({
   status: adEnquiryStatusSchema.optional(),
   ...cursorQuery,
 });
-export const adEnquiryReceiptSchema = z.object({ id: z.uuid(), status: adEnquiryStatusSchema });
+export const adEnquiryReceiptSchema = z.object({
+  id: z.uuid(),
+  status: adEnquiryStatusSchema,
+  trackingToken: z.string(),
+});
+/** Unguessable token from the enquiry tracking link (base64url, 32 bytes). */
+export const adEnquiryTokenParamSchema = z.object({
+  token: z.string().regex(/^[A-Za-z0-9_-]{40,64}$/),
+});
+/** Public link-based status view: privacy-minimized, no phone/email/internal notes. */
+export const publicAdEnquiryStatusSchema = z.object({
+  id: z.uuid(),
+  status: adEnquiryStatusSchema,
+  advertiserType: z.enum(['individual', 'organisation']),
+  orgName: z.string().nullable(),
+  category: adCategorySchema,
+  budgetRange: adBudgetRangeSchema,
+  durationWeeks: z.number().int().nullable(),
+  placements: z.array(adPlacementKeySchema),
+  hasAdvertiserAccount: z.boolean(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
 
 // ---- Advertisers --------------------------------------------------------------------------------
 

@@ -738,6 +738,85 @@ export class OrdersService {
     );
   }
 
+  /** Estates that have explicitly approved this vendor (public-web.md §8: Vendor Portal /vendor/estates). */
+  async vendorApprovedEstates(access: VendorAccess) {
+    const rows = await this.asVendor(access, null, (tx) =>
+      tx.estateVendorApproval.findMany({
+        where: { vendorId: access.vendorId, status: 'approved' },
+        orderBy: { decidedAt: 'desc' },
+        take: 200,
+      }),
+    );
+    const summaries = await this.tenancy.estateSummariesByIds(rows.map((r) => r.estateId));
+    return rows.map((row) => {
+      const summary = summaries.get(row.estateId);
+      return {
+        estateId: row.estateId,
+        estateName: summary?.name ?? 'Estate',
+        state: summary?.state ?? null,
+        lga: summary?.lga ?? null,
+        decidedAt: row.decidedAt.toISOString(),
+      };
+    });
+  }
+
+  /** Open disputes and outcomes for this vendor (public-web.md §8: Vendor Portal /vendor/disputes). */
+  async vendorDisputes(access: VendorAccess, query: z.infer<typeof disputeListQuerySchema>) {
+    const {
+      page,
+      nextCursor: cursor,
+      orders,
+      listings,
+    } = await this.asVendor(access, null, async (tx) => {
+      const rows = await tx.marketplaceDispute.findMany({
+        where: {
+          vendorId: access.vendorId,
+          ...(query.status ? { status: query.status } : {}),
+          ...after(query.cursor),
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: query.limit + 1,
+      });
+      const items = rows.slice(0, query.limit);
+      const orderIds = [...new Set(items.map((r) => r.orderId))];
+      const orderRows =
+        orderIds.length === 0
+          ? []
+          : await tx.marketplaceOrder.findMany({
+              where: { id: { in: orderIds }, vendorId: access.vendorId },
+              select: { id: true, listingId: true, amount: true },
+            });
+      const listingIds = [...new Set(orderRows.map((o) => o.listingId))];
+      const listingRows =
+        listingIds.length === 0
+          ? []
+          : await tx.listing.findMany({
+              where: { id: { in: listingIds } },
+              select: { id: true, title: true },
+            });
+      return {
+        page: items,
+        nextCursor: nextCursor(rows, query.limit),
+        orders: new Map(orderRows.map((o) => [o.id, o])),
+        listings: new Map(listingRows.map((l) => [l.id, l.title])),
+      };
+    });
+    const estateNames = await this.tenancy.estateNamesByIds(page.map((r) => r.estateId));
+    return {
+      items: page.map((row) => {
+        const order = orders.get(row.orderId);
+        return {
+          ...disputeView(row),
+          estateName: estateNames.get(row.estateId) ?? 'Estate',
+          listingTitle: (order ? listings.get(order.listingId) : undefined) ?? 'Order',
+          orderAmountKobo:
+            order?.amount === undefined || order.amount === null ? null : Number(order.amount),
+        };
+      }),
+      nextCursor: cursor,
+    };
+  }
+
   // ---- Messages ------------------------------------------------------------------------------
 
   async residentMessages(access: EstateAccess, orderId: string) {

@@ -11,6 +11,7 @@ export default function robots(): MetadataRoute.Robots {
           '/p/',
           '/account',
           '/status',
+          '/advertise/status/',
           '/vendor/',
           '/vendor$',
           '/advertiser/',

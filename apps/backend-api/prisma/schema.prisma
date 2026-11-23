@@ -2964,6 +2964,7 @@ model EstateVendorApproval {
   decidedAt DateTime @default(now()) @map("decided_at") @db.Timestamptz(3)
 
   @@id([estateId, vendorId])
+  @@index([vendorId, status])
   @@map("estate_vendor_approvals")
   @@schema("tenant")
 }
@@ -3139,12 +3140,13 @@ model AdEnquiry {
   durationWeeks  Int?     @map("duration_weeks")
   audience       String?
   placements     String[]
-  status         String   @default("submitted")
-  notes          String?
-  assigneeId     String?  @map("assignee_id") @db.Uuid
-  advertiserId   String?  @map("advertiser_id") @db.Uuid
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status            String   @default("submitted")
+  notes             String?
+  assigneeId        String?  @map("assignee_id") @db.Uuid
+  advertiserId      String?  @map("advertiser_id") @db.Uuid
+  trackingTokenHash String?  @unique @map("tracking_token_hash")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@index([status, createdAt])
   @@index([userId, createdAt])

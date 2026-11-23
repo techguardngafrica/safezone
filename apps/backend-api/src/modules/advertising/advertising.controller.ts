@@ -7,6 +7,7 @@ import {
   adDecisionSchema,
   adEnquiryReceiptSchema,
   adEnquirySchema,
+  adEnquiryTokenParamSchema,
   addAdvertiserMemberSchema,
   adInvoiceCheckoutSchema,
   adInvoicePaySchema,
@@ -20,6 +21,7 @@ import {
   estateAdSettingsSchema,
   estateParamSchema,
   myAdvertiserSchema,
+  publicAdEnquiryStatusSchema,
   updateEstateAdSettingsSchema,
 } from '@safezone/schemas';
 import type { Request, Response } from 'express';
@@ -86,6 +88,22 @@ export class AdvertisingController {
   })
   publicEnquiry(@ValidBody() body: z.infer<typeof createAdEnquirySchema>, @Req() request: Request) {
     return this.advertisers.submitEnquiry(body, { kind: 'web', ip: request.ip });
+  }
+
+  @Get('public/ad-enquiries/:token')
+  @Public()
+  @Contract({
+    summary: 'Track the status of a submitted advertising enquiry by link token',
+    tags: TAGS,
+    params: adEnquiryTokenParamSchema,
+    response: publicAdEnquiryStatusSchema,
+    errors: [404, 429],
+  })
+  publicEnquiryStatus(
+    @ValidParams() params: z.infer<typeof adEnquiryTokenParamSchema>,
+    @Req() request: Request,
+  ) {
+    return this.advertisers.publicEnquiryStatus(params.token, request.ip);
   }
 
   @Post('me/ad-enquiries')
