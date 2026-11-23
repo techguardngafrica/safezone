@@ -332,6 +332,168 @@ export class OrdersService {
     return this.estateVendors(access);
   }
 
+  /** Aggregate order volume and dispute counts for estate management (management-web.md §6.11; no financials). */
+  async estateOverview(access: EstateAccess) {
+    return this.asResident(access, async (tx) => {
+      const [orders, disputes] = await Promise.all([
+        tx.marketplaceOrder.findMany({
+          where: { estateId: access.estateId },
+          select: { vendorId: true, status: true },
+        }),
+        tx.marketplaceDispute.findMany({
+          where: { estateId: access.estateId },
+          select: { vendorId: true, status: true },
+        }),
+      ]);
+
+      const activeStatuses = new Set([
+        'requested',
+        'quoted',
+        'accepted',
+        'scheduled',
+        'in_progress',
+      ]);
+      const completedStatuses = new Set(['completed', 'reviewed']);
+      const cancelledStatuses = new Set([
+        'declined',
+        'cancelled_by_resident',
+        'cancelled_by_vendor',
+      ]);
+      const disputedStatuses = new Set(['disputed', 'refunded']);
+
+      let activeOrders = 0;
+      let completedOrders = 0;
+      let cancelledOrders = 0;
+      let disputedOrders = 0;
+      const perVendor = new Map<
+        string,
+        { orderCount: number; completedCount: number; openDisputeCount: number }
+      >();
+      const touch = (vendorId: string) => {
+        let entry = perVendor.get(vendorId);
+        if (!entry) {
+          entry = { orderCount: 0, completedCount: 0, openDisputeCount: 0 };
+          perVendor.set(vendorId, entry);
+        }
+        return entry;
+      };
+
+      for (const order of orders) {
+        const entry = touch(order.vendorId);
+        entry.orderCount += 1;
+        if (activeStatuses.has(order.status)) activeOrders += 1;
+        else if (completedStatuses.has(order.status)) {
+          completedOrders += 1;
+          entry.completedCount += 1;
+        } else if (cancelledStatuses.has(order.status)) cancelledOrders += 1;
+        else if (disputedStatuses.has(order.status)) disputedOrders += 1;
+      }
+
+      let openDisputes = 0;
+      let resolvedDisputes = 0;
+      for (const dispute of disputes) {
+        if (dispute.status === 'open') {
+          openDisputes += 1;
+          touch(dispute.vendorId).openDisputeCount += 1;
+        } else {
+          resolvedDisputes += 1;
+        }
+      }
+
+      const vendorIds = [...perVendor.keys()];
+      const vendorRows =
+        vendorIds.length === 0
+          ? []
+          : await tx.vendor.findMany({
+              where: { id: { in: vendorIds } },
+              select: { id: true, name: true },
+            });
+      const vendorNames = new Map(vendorRows.map((v) => [v.id, v.name]));
+
+      const byVendor = [...perVendor.entries()]
+        .map(([vendorId, counts]) => ({
+          vendorId,
+          vendorName: vendorNames.get(vendorId) ?? 'Vendor',
+          ...counts,
+        }))
+        .sort((a, b) => b.orderCount - a.orderCount || a.vendorName.localeCompare(b.vendorName));
+
+      return {
+        totalOrders: orders.length,
+        activeOrders,
+        completedOrders,
+        cancelledOrders,
+        disputedOrders,
+        openDisputes,
+        resolvedDisputes,
+        byVendor,
+      };
+    });
+  }
+
+  /** Estate-scoped disputes for management oversight (management-web.md §6.11; no financials, no resident PII). */
+  async estateDisputes(access: EstateAccess, query: z.infer<typeof disputeListQuerySchema>) {
+    return this.asResident(access, async (tx) => {
+      const rows = await tx.marketplaceDispute.findMany({
+        where: {
+          estateId: access.estateId,
+          ...(query.status ? { status: query.status } : {}),
+          ...after(query.cursor),
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: query.limit + 1,
+      });
+      const page = rows.slice(0, query.limit);
+      const orderIds = [...new Set(page.map((r) => r.orderId))];
+      const vendorIds = [...new Set(page.map((r) => r.vendorId))];
+      const [orderRows, vendorRows] = await Promise.all([
+        orderIds.length === 0
+          ? []
+          : tx.marketplaceOrder.findMany({
+              where: { id: { in: orderIds }, estateId: access.estateId },
+              select: { id: true, listingId: true },
+            }),
+        vendorIds.length === 0
+          ? []
+          : tx.vendor.findMany({
+              where: { id: { in: vendorIds } },
+              select: { id: true, name: true },
+            }),
+      ]);
+      const listingIds = [...new Set(orderRows.map((o) => o.listingId))];
+      const listingRows =
+        listingIds.length === 0
+          ? []
+          : await tx.listing.findMany({
+              where: { id: { in: listingIds } },
+              select: { id: true, title: true },
+            });
+      const orderById = new Map(orderRows.map((o) => [o.id, o]));
+      const vendorNames = new Map(vendorRows.map((v) => [v.id, v.name]));
+      const listingTitles = new Map(listingRows.map((l) => [l.id, l.title]));
+
+      return {
+        items: page.map((row) => {
+          const order = orderById.get(row.orderId);
+          return {
+            id: row.id,
+            orderId: row.orderId,
+            vendorId: row.vendorId,
+            vendorName: vendorNames.get(row.vendorId) ?? 'Vendor',
+            listingTitle: (order ? listingTitles.get(order.listingId) : undefined) ?? 'Order',
+            reason: row.reason,
+            status: row.status as 'open' | 'resolved',
+            resolution: row.resolution as 'refund' | 'partial_refund' | 'no_action' | null,
+            note: row.note,
+            createdAt: row.createdAt.toISOString(),
+            resolvedAt: row.resolvedAt?.toISOString() ?? null,
+          };
+        }),
+        nextCursor: nextCursor(rows, query.limit),
+      };
+    });
+  }
+
   // ---- Resident side -------------------------------------------------------------------------
 
   async place(access: EstateAccess, input: z.infer<typeof placeOrderSchema>) {

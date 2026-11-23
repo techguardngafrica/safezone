@@ -512,3 +512,39 @@ export const marketplaceVendorProfileSchema = z.object({
 });
 export const estateOrderItemParamsSchema = z.object({ estateId: z.uuid(), id: z.uuid() });
 export const estateVendorParamsSchema = z.object({ estateId: z.uuid(), vendorId: z.uuid() });
+
+/** Per-vendor order volume for estate management (management-web.md §6.11; no vendor financials). */
+export const estateMarketplaceVendorStatsSchema = z.object({
+  vendorId: z.uuid(),
+  vendorName: z.string(),
+  orderCount: z.number().int(),
+  completedCount: z.number().int(),
+  openDisputeCount: z.number().int(),
+});
+
+/** Aggregate estate order volume and dispute counts (no vendor financials). */
+export const estateMarketplaceOverviewSchema = z.object({
+  totalOrders: z.number().int(),
+  activeOrders: z.number().int(),
+  completedOrders: z.number().int(),
+  cancelledOrders: z.number().int(),
+  disputedOrders: z.number().int(),
+  openDisputes: z.number().int(),
+  resolvedDisputes: z.number().int(),
+  byVendor: z.array(estateMarketplaceVendorStatsSchema),
+});
+
+/** Estate-level dispute view for management oversight (no vendor financials, no resident PII). */
+export const estateDisputeSchema = z.object({
+  id: z.uuid(),
+  orderId: z.uuid(),
+  vendorId: z.uuid(),
+  vendorName: z.string(),
+  listingTitle: z.string(),
+  reason: z.string(),
+  status: disputeStatusSchema,
+  resolution: disputeResolutionSchema.nullable(),
+  note: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  resolvedAt: z.iso.datetime().nullable(),
+});

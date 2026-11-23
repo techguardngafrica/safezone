@@ -149,7 +149,7 @@ Progress is saved per step; the dashboard shows a setup checklist until complete
 
 ### 6.11 Marketplace (Phase 4)
 
-- Browse platform vendors serving the estate's area; approve or block per estate.
+- Browse platform vendors serving the estate's area; approve or block per estate (`/[estateId]/marketplace`, `marketplace.moderate`).
 - See orders volume and disputes involving the estate's residents (no vendor financials).
 
 ### 6.12 Reports and dashboard

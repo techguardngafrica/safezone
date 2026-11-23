@@ -441,6 +441,42 @@ describe('cross-tenant isolation', () => {
       .set(auth(adminB))
       .expect(200);
     expect(approvals.body.data).toEqual([]);
+    // Estate A's orders and disputes never appear in Estate B's marketplace overview or disputes.
+    const overview = await stack.http
+      .get(`/v1/estates/${estateB}/marketplace/overview`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(overview.body.data.totalOrders).toBe(0);
+    const disputes = await stack.http
+      .get(`/v1/estates/${estateB}/marketplace/disputes`)
+      .set(auth(adminB))
+      .expect(200);
+    expect(disputes.body.data).toEqual([]);
+  });
+
+  it("an estate's notification template override is invisible to another estate", async () => {
+    await stack.http
+      .put(`/v1/estates/${estateA}/notification-templates/visitor.arrived`)
+      .set('Authorization', `Bearer ${adminA}`)
+      .send({ title: 'Estate A arrival', body: '{visitor} has arrived at Estate A.' })
+      .expect(200);
+    await stack.http
+      .get(`/v1/estates/${estateA}/notification-templates`)
+      .set('Authorization', `Bearer ${adminB}`)
+      .expect(404);
+    await stack.http
+      .put(`/v1/estates/${estateA}/notification-templates/visitor.arrived`)
+      .set('Authorization', `Bearer ${adminB}`)
+      .send({ title: 'Tampered', body: 'Tampered' })
+      .expect(404);
+    const templatesB = await stack.http
+      .get(`/v1/estates/${estateB}/notification-templates`)
+      .set('Authorization', `Bearer ${adminB}`)
+      .expect(200);
+    const visitorArrived = (
+      templatesB.body.data as { intent: string; customTitle: string | null }[]
+    ).find((t) => t.intent === 'visitor.arrived');
+    expect(visitorArrived?.customTitle).toBeNull();
   });
 
   it('every advertiser route refuses a signed-in user who is not on that advertiser (404)', async () => {

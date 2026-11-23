@@ -517,6 +517,53 @@ export function isIntentKey(value: string): value is IntentKey {
   return Object.hasOwn(INTENTS, value);
 }
 
+/**
+ * Estate-facing operational intents whose wording an estate may customise (notifications.md §7).
+ * Safety-critical (SOS, emergency broadcast), security, onboarding and platform intents stay locked.
+ */
+export const CUSTOMISABLE_ESTATE_INTENTS: ReadonlySet<IntentKey> = new Set<IntentKey>([
+  'occupancy.join_request_approved',
+  'occupancy.join_request_rejected',
+  'occupancy.move_scheduled',
+  'occupancy.move_completed',
+  'occupancy.lease_expiring',
+  'visitor.walkin_request',
+  'visitor.delivery_at_gate',
+  'visitor.arrived',
+  'community.announcement',
+  'utilities.outage',
+  'maintenance.request_updated',
+  'facilities.booking_updated',
+  'facilities.booking_reminder',
+  'billing.invoice_issued',
+  'billing.invoice_reminder',
+  'billing.invoice_overdue',
+  'billing.payment_received',
+]);
+
+export function isCustomisableEstateIntent(key: string): key is IntentKey {
+  return isIntentKey(key) && CUSTOMISABLE_ESTATE_INTENTS.has(key);
+}
+
+/** Extract unique `{placeholder}` names from one or more template strings. */
+export function extractPlaceholders(...templates: (string | null | undefined)[]): string[] {
+  const names = new Set<string>();
+  for (const template of templates) {
+    if (!template) continue;
+    for (const match of template.matchAll(/\{(\w+)\}/g)) {
+      if (match[1]) names.add(match[1]);
+    }
+  }
+  return [...names];
+}
+
+/** Render a template string with `{placeholder}` substitution (same rules as @safezone/i18n). */
+export function renderTemplate(template: string, params: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in params ? String(params[name]) : match,
+  );
+}
+
 /** Channels to use for one user: defaults ∩ preferences, unless the intent is mandatory. */
 export function resolveChannels(
   intent: IntentDefinition,

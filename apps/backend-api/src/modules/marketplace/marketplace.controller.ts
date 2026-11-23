@@ -1,5 +1,8 @@
 import { Controller, Get, Post, Put } from '@nestjs/common';
 import {
+  disputeListQuerySchema,
+  estateDisputeSchema,
+  estateMarketplaceOverviewSchema,
   estateOrderItemParamsSchema,
   estateParamSchema,
   estateVendorParamsSchema,
@@ -297,5 +300,36 @@ export class MarketplaceController {
     @ValidBody() body: z.infer<typeof setVendorApprovalSchema>,
   ) {
     return this.orders.setApproval(estate, body);
+  }
+
+  @Get('overview')
+  @Can('marketplace.moderate')
+  @RequiresFeature('marketplace')
+  @Contract({
+    summary: 'Estate marketplace order volume and dispute counts (no vendor financials)',
+    tags: TAGS,
+    params: estateParamSchema,
+    response: estateMarketplaceOverviewSchema,
+  })
+  overview(@CurrentEstate() estate: EstateAccess) {
+    return this.orders.estateOverview(estate);
+  }
+
+  @Get('disputes')
+  @Can('marketplace.moderate')
+  @RequiresFeature('marketplace')
+  @Contract({
+    summary: 'Marketplace disputes involving residents of this estate (no vendor financials)',
+    tags: TAGS,
+    params: estateParamSchema,
+    query: disputeListQuerySchema,
+    response: estateDisputeSchema,
+    paginated: true,
+  })
+  disputes(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidQuery() query: z.infer<typeof disputeListQuerySchema>,
+  ) {
+    return this.orders.estateDisputes(estate, query);
   }
 }

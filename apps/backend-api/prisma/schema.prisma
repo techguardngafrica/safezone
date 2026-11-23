@@ -467,6 +467,24 @@ model NotificationPreference {
   @@schema("platform")
 }
 
+/// Estate wording overrides for allowed notification intents (notifications.md §7, management-web.md §6.13).
+model EstateNotificationTemplate {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  estateId  String   @map("estate_id") @db.Uuid
+  intentKey String   @map("intent_key")
+  title     String
+  body      String
+  smsBody   String?  @map("sms_body")
+  updatedBy String   @map("updated_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([estateId, intentKey])
+  @@index([estateId])
+  @@map("estate_notification_templates")
+  @@schema("tenant")
+}
+
 // ---------------------------------------------------------------------------
 // file service (modules/documents.md, Phase 0 part). Estate files are tenant-visible; personal files
 // (estate_id null) only to their uploader. The worker scans in the 'files' context.

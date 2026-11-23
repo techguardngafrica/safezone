@@ -309,6 +309,13 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         feature: 'documents',
       },
       {
+        path: 'marketplace',
+        label: 'nav.marketplace',
+        icon: 'store',
+        permission: 'marketplace.moderate',
+        feature: 'marketplace',
+      },
+      {
         path: 'reports',
         label: 'nav.reports',
         icon: 'barChart',
@@ -323,6 +330,18 @@ const NAV: { label?: Parameters<typeof t>[0]; items: NavSpec[] }[] = [
         path: 'settings/estate',
         label: 'nav.estateSettings',
         icon: 'settings',
+        permission: 'estate.configure',
+      },
+      {
+        path: 'settings/notifications',
+        label: 'nav.notificationTemplates',
+        icon: 'messageSquare',
+        permission: 'estate.configure',
+      },
+      {
+        path: 'settings/integrations',
+        label: 'nav.integrations',
+        icon: 'sliders',
         permission: 'estate.configure',
       },
       {

@@ -5,7 +5,13 @@ import { DatabaseService } from '../../common/database/database.service';
 import type { RelayedEvent } from '../../common/outbox/outbox-relay';
 import { PushSender } from '../../integrations/push/push-sender';
 import { SmsSender } from '../../integrations/sms/sms-sender';
-import { type IntentDefinition, INTENTS, isIntentKey, resolveChannels } from './domain/intents';
+import {
+  type IntentDefinition,
+  INTENTS,
+  isIntentKey,
+  renderTemplate,
+  resolveChannels,
+} from './domain/intents';
 import { type NotificationRequest, notificationRequestSchema } from './notifications.service';
 
 /** Domain events that become notifications without the emitting module calling us. */
@@ -72,6 +78,20 @@ export class DeliveryService {
       const params = Object.fromEntries(
         Object.entries(request.data).map(([key, value]) => [key, String(value)]),
       );
+      const override = request.estateId
+        ? await tx.estateNotificationTemplate.findUnique({
+            where: {
+              estateId_intentKey: { estateId: request.estateId, intentKey: request.intent },
+            },
+            select: { title: true, body: true, smsBody: true },
+          })
+        : null;
+      const renderedTitle = override
+        ? renderTemplate(override.title, params)
+        : t(intent.title, params, locale);
+      const renderedBody = override
+        ? renderTemplate(override.body, params)
+        : t(intent.body, params, locale);
 
       await tx.notification.createMany({
         data: [
@@ -80,8 +100,8 @@ export class DeliveryService {
             estateId: request.estateId,
             intentKey: request.intent,
             priority: intent.priority,
-            title: t(intent.title, params, locale),
-            body: t(intent.body, params, locale),
+            title: renderedTitle,
+            body: renderedBody,
             data: request.data,
             dedupeKey: request.dedupeKey,
           },
@@ -99,10 +119,15 @@ export class DeliveryService {
         where: { userId, invalidAt: null },
         select: { id: true, expoToken: true },
       });
+      const smsText = override?.smsBody
+        ? renderTemplate(override.smsBody, params)
+        : intent.sms
+          ? t(intent.sms, params, locale)
+          : notification.body;
       return {
         notification,
         phone: user.phoneE164,
-        smsText: intent.sms ? t(intent.sms, params, locale) : notification.body,
+        smsText,
         tokens,
         channels: resolveChannels(
           intent,

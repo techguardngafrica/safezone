@@ -123,5 +123,6 @@ Implementation (ADR-0023): `accepted` means the price is agreed and payment is d
 - Platform routes as built: `GET /v1/platform/vendors`, `POST /v1/platform/vendors/:id/approve|reject|suspend|reinstate`, `GET/POST /v1/platform/commission-rules` (append-only), `GET /v1/platform/order-disputes[/:id]`, `POST /v1/platform/order-disputes/:id/resolve`.
 - Classifieds: `GET/POST /v1/estates/:estateId/classifieds`, `GET/PATCH …/:id`, `POST …/:id/hide|restore` (moderators), `GET/POST …/:id/messages`.
 - Estate settings: `marketplace.allow_all_verified_vendors` (default off) and `marketplace.classifieds_enabled` (default on). Feature key `marketplace` is on the free core plan.
+- Estate management oversight: `GET /v1/estates/:estateId/marketplace/overview` (aggregate order counts and per-vendor order/dispute volume, no financials) and `GET /v1/estates/:estateId/marketplace/disputes` (estate-scoped disputes, no financials or resident PII), both gated by `marketplace.moderate`.
 - Commission is 0% until Techguard sets a rule; rules are append-only and the rule in force at checkout is fixed on the order.
 - Not built yet: contractor visitor pass for in-estate jobs (capability 13), document expiry reminders (rule 7), and notifying residents with open orders when a vendor is suspended (rule 8; they can already cancel).

@@ -2,6 +2,7 @@
 
 import { type ApiData, unwrap } from '@safezone/api-client';
 import { type MessageKey, t } from '@safezone/i18n';
+import { AD_CATEGORIES, type AdCategory } from '@safezone/schemas';
 import {
   ActionButton,
   Banner,
@@ -22,6 +23,7 @@ import { api } from '../../../lib/session';
 
 type Estate = ApiData<'/v1/estates/{estateId}', 'get'>;
 type Settings = ApiData<'/v1/estates/{estateId}/settings', 'get'>;
+type AdSettings = ApiData<'/v1/estates/{estateId}/ad-settings', 'get'>;
 type Escalation = Settings['sos.escalation'][number];
 type TenantApproval = Settings['tenant_approval'];
 
@@ -152,6 +154,12 @@ function PoliciesForm({ settings }: { settings: Settings }) {
   const [guardPhone, setGuardPhone] = useState(settings['guards.can_see_resident_phone']);
   const [countdown, setCountdown] = useState(String(settings['sos.cancel_countdown_seconds']));
   const [escalation, setEscalation] = useState<Escalation[]>(settings['sos.escalation']);
+  const [allowAllVendors, setAllowAllVendors] = useState(
+    settings['marketplace.allow_all_verified_vendors'],
+  );
+  const [classifiedsEnabled, setClassifiedsEnabled] = useState(
+    settings['marketplace.classifieds_enabled'],
+  );
 
   const save = useMutation({
     mutationFn: () =>
@@ -167,6 +175,8 @@ function PoliciesForm({ settings }: { settings: Settings }) {
             'guards.can_see_resident_phone': guardPhone,
             'sos.cancel_countdown_seconds': Number(countdown),
             'sos.escalation': escalation,
+            'marketplace.allow_all_verified_vendors': allowAllVendors,
+            'marketplace.classifieds_enabled': classifiedsEnabled,
           },
         }),
       ),
@@ -303,6 +313,103 @@ function PoliciesForm({ settings }: { settings: Settings }) {
             </ActionButton>
           </div>
         </fieldset>
+        <h3 style={{ margin: '8px 0 0', fontSize: 16 }}>{t('settings.policies.marketplace')}</h3>
+        <CheckboxField
+          label={t('settings.policies.allowAllVerifiedVendors')}
+          checked={allowAllVendors}
+          onChange={setAllowAllVendors}
+          helper={t('settings.policies.allowAllVerifiedVendorsHelp')}
+        />
+        <CheckboxField
+          label={t('settings.policies.classifiedsEnabled')}
+          checked={classifiedsEnabled}
+          onChange={setClassifiedsEnabled}
+        />
+        <FormError message={save.isError ? errorText(save.error) : null} />
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <ActionButton type="submit" busy={save.isPending}>
+            {t('common.save')}
+          </ActionButton>
+          <SavedNote show={save.isSuccess} />
+        </div>
+      </form>
+    </Panel>
+  );
+}
+
+function AdvertisingForm({ adSettings }: { adSettings: AdSettings }) {
+  const { estateId } = useEstate();
+  const queryClient = useQueryClient();
+  const [blocked, setBlocked] = useState<Set<AdCategory>>(
+    () => new Set(adSettings.blockedCategories),
+  );
+  const [dashboardInfoEnabled, setDashboardInfoEnabled] = useState(adSettings.dashboardInfoEnabled);
+
+  const toggleCategory = (category: AdCategory, checked: boolean) => {
+    setBlocked((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(category);
+      else next.delete(category);
+      return next;
+    });
+  };
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        api.PUT('/v1/estates/{estateId}/ad-settings', {
+          params: { path: { estateId } },
+          body: {
+            blockedCategories: [...blocked],
+            dashboardInfoEnabled,
+          },
+        }),
+      ),
+    onSuccess: (data) => queryClient.setQueryData(['estate', estateId, 'ad-settings'], data),
+  });
+
+  return (
+    <Panel title={t('settings.ads.title')}>
+      <form
+        className="sz-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          save.mutate();
+        }}
+      >
+        <p className="sz-muted" style={{ margin: 0, fontSize: 14 }}>
+          {t('settings.ads.description')}
+        </p>
+        <CheckboxField
+          label={t('settings.ads.dashboardInfo')}
+          checked={dashboardInfoEnabled}
+          onChange={setDashboardInfoEnabled}
+          helper={t('settings.ads.dashboardInfoHelp')}
+        />
+        <fieldset style={{ border: 0, padding: 0, margin: 0, display: 'grid', gap: 12 }}>
+          <legend style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+            {t('settings.ads.blockedCategories')}
+          </legend>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+              gap: 10,
+            }}
+          >
+            {AD_CATEGORIES.map((category) => (
+              <CheckboxField
+                key={category}
+                label={t(`settings.ads.category.${category}` as MessageKey)}
+                checked={blocked.has(category)}
+                onChange={(checked) => toggleCategory(category, checked)}
+              />
+            ))}
+          </div>
+        </fieldset>
+        <p className="sz-muted" style={{ margin: 0, fontSize: 13 }}>
+          {t('settings.ads.policyNote')}
+        </p>
         <FormError message={save.isError ? errorText(save.error) : null} />
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <ActionButton type="submit" busy={save.isPending}>
@@ -326,6 +433,11 @@ export function EstateSettingsScreen() {
     queryFn: () =>
       unwrap(api.GET('/v1/estates/{estateId}/settings', { params: { path: { estateId } } })),
   });
+  const adSettings = useQuery({
+    queryKey: ['estate', estateId, 'ad-settings'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/ad-settings', { params: { path: { estateId } } })),
+  });
   return (
     <>
       <PageHeader title={t('settings.title')} description={t('settings.description')} />
@@ -341,6 +453,14 @@ export function EstateSettingsScreen() {
           <ErrorState message={errorText(settings.error)} onRetry={() => void settings.refetch()} />
         ) : null}
         {settings.data ? <PoliciesForm settings={settings.data} /> : null}
+        {adSettings.isPending ? <Skeleton height={240} /> : null}
+        {adSettings.isError ? (
+          <ErrorState
+            message={errorText(adSettings.error)}
+            onRetry={() => void adSettings.refetch()}
+          />
+        ) : null}
+        {adSettings.data ? <AdvertisingForm adSettings={adSettings.data} /> : null}
       </div>
     </>
   );

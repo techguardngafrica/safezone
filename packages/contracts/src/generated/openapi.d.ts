@@ -3124,6 +3124,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/marketplace/disputes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Marketplace disputes involving residents of this estate (no vendor financials)
+     * @description Requires `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_disputes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/marketplace/listings': {
     parameters: {
       query?: never;
@@ -3326,6 +3346,26 @@ export interface paths {
      * @description Requires `marketplace.use`. Needs the `marketplace` feature.
      */
     post: operations['marketplace_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/marketplace/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estate marketplace order volume and dispute counts (no vendor financials)
+     * @description Requires `marketplace.moderate`. Needs the `marketplace` feature.
+     */
+    get: operations['marketplace_overview'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -3711,6 +3751,50 @@ export interface paths {
      */
     post: operations['moves_complete'];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/notification-templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Notification templates for this estate with any saved wording overrides
+     * @description Requires `estate.configure`.
+     */
+    get: operations['estateNotificationTemplates_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/estates/{estateId}/notification-templates/{intent}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Save a wording override for a customisable estate notification intent
+     * @description Requires `estate.configure`.
+     */
+    put: operations['estateNotificationTemplates_upsert'];
+    post?: never;
+    /**
+     * Reset an estate notification template back to the platform default
+     * @description Requires `estate.configure`.
+     */
+    delete: operations['estateNotificationTemplates_reset'];
     options?: never;
     head?: never;
     patch?: never;
@@ -21412,6 +21496,59 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  marketplace_disputes: {
+    parameters: {
+      query?: {
+        status?: 'open' | 'resolved';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              orderId: string;
+              /** Format: uuid */
+              vendorId: string;
+              vendorName: string;
+              listingTitle: string;
+              reason: string;
+              /** @enum {string} */
+              status: 'open' | 'resolved';
+              resolution: ('refund' | 'partial_refund' | 'no_action') | null;
+              note: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              resolvedAt: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
   marketplace_browse: {
     parameters: {
       query?: {
@@ -22534,6 +22671,53 @@ export interface operations {
                 comment: string | null;
                 vendorResponse: string | null;
               } | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  marketplace_overview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              totalOrders: number;
+              activeOrders: number;
+              completedOrders: number;
+              cancelledOrders: number;
+              disputedOrders: number;
+              openDisputes: number;
+              resolvedDisputes: number;
+              byVendor: {
+                /** Format: uuid */
+                vendorId: string;
+                vendorName: string;
+                orderCount: number;
+                completedCount: number;
+                openDisputeCount: number;
+              }[];
             };
           };
         };
@@ -23909,6 +24093,138 @@ export interface operations {
       404: components['responses']['Error404'];
       409: components['responses']['Error409'];
       422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateNotificationTemplates_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              intent: string;
+              category: string;
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'bulk';
+              mandatory: boolean;
+              customisable: boolean;
+              channels: ('push' | 'sms' | 'email' | 'whatsapp')[];
+              smsOnlyWithoutPush: boolean;
+              placeholders: string[];
+              defaultTitle: string;
+              defaultBody: string;
+              defaultSms: string | null;
+              customTitle: string | null;
+              customBody: string | null;
+              customSms: string | null;
+              updatedAt: string | null;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateNotificationTemplates_upsert: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        intent: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title: string;
+          body: string;
+          sms?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              intent: string;
+              category: string;
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'bulk';
+              mandatory: boolean;
+              customisable: boolean;
+              channels: ('push' | 'sms' | 'email' | 'whatsapp')[];
+              smsOnlyWithoutPush: boolean;
+              placeholders: string[];
+              defaultTitle: string;
+              defaultBody: string;
+              defaultSms: string | null;
+              customTitle: string | null;
+              customBody: string | null;
+              customSms: string | null;
+              updatedAt: string | null;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      422: components['responses']['Error422'];
+      500: components['responses']['Error500'];
+    };
+  };
+  estateNotificationTemplates_reset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        intent: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
       500: components['responses']['Error500'];
     };
   };
