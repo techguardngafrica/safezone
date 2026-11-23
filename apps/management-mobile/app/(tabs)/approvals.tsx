@@ -36,6 +36,7 @@ const APPROVE_NOTE: Record<ApprovalKind, boolean> = {
   waiver: true,
   manual_payment: true,
   refund: true,
+  vendor: true,
   billing_run: false,
   booking: false,
   staff_pass: false,
@@ -50,6 +51,7 @@ const CATEGORIES: readonly ApprovalCategory[] = [
   'finance',
   'facilities',
   'community',
+  'vendors',
 ];
 
 function ApprovalCard({

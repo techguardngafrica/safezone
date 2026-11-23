@@ -13,9 +13,11 @@ export type ApprovalKind =
   | 'staff_pass'
   | 'move'
   | 'channel'
-  | 'ownership_transfer';
+  | 'ownership_transfer'
+  | 'vendor';
 
-export type ApprovalCategory = 'all' | 'people' | 'finance' | 'facilities' | 'community';
+export type ApprovalCategory =
+  'all' | 'people' | 'finance' | 'facilities' | 'community' | 'vendors';
 
 export interface ApprovalItem {
   kind: ApprovalKind;
@@ -121,6 +123,17 @@ export interface OwnershipTransferLike {
   createdAt: string;
 }
 
+export interface EstateVendorLike {
+  vendor: {
+    id: string;
+    name: string;
+    type: string;
+    description: string;
+  };
+  status: 'approved' | 'blocked' | null;
+  decidedAt: string | null;
+}
+
 export interface ApprovalSources {
   joins?: JoinRequestLike[];
   runs?: BillingRunLike[];
@@ -132,6 +145,7 @@ export interface ApprovalSources {
   moves?: MoveLike[];
   channels?: ChannelLike[];
   ownershipTransfers?: OwnershipTransferLike[];
+  vendors?: EstateVendorLike[];
 }
 
 /** Formatting is injected so this file stays free of i18n and Intl. */
@@ -158,6 +172,7 @@ const KIND_CATEGORY: Record<ApprovalKind, Exclude<ApprovalCategory, 'all'>> = {
   refund: 'finance',
   booking: 'facilities',
   channel: 'community',
+  vendor: 'vendors',
 };
 
 export function categoryOfKind(kind: ApprovalKind): Exclude<ApprovalCategory, 'all'> {
@@ -289,6 +304,17 @@ export function toApprovalItems(sources: ApprovalSources, format: ApprovalFormat
       detail: format.transferDetail(transfer.unitCode ?? '-', transfer.type),
       note: transfer.reason,
       createdAt: transfer.createdAt,
+    });
+  }
+  for (const entry of sources.vendors ?? []) {
+    if (entry.status !== null) continue;
+    items.push({
+      kind: 'vendor',
+      id: entry.vendor.id,
+      title: entry.vendor.name,
+      detail: entry.vendor.type,
+      note: entry.vendor.description || null,
+      createdAt: '',
     });
   }
   return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

@@ -32,7 +32,7 @@ import { api } from '../../src/lib/session';
 import { useNow } from '../../src/lib/use-now';
 
 type Step = 'acknowledge' | 'responding';
-type Dialog = 'note' | 'resolve' | 'false' | 'close' | null;
+type Dialog = 'note' | 'escalate' | 'resolve' | 'false' | 'close' | null;
 
 function mapsUrl(lat: number, lng: number): string {
   return Platform.OS === 'ios'
@@ -199,6 +199,13 @@ export default function SosResponse() {
             body: { note: value },
           }),
         );
+      if (dialog === 'escalate')
+        return unwrap(
+          api.POST('/v1/estates/{estateId}/sos/{id}/escalate', {
+            params: { path },
+            body: value ? { note: value } : {},
+          }),
+        );
       if (dialog === 'close')
         return unwrap(
           api.POST('/v1/estates/{estateId}/sos/{id}/close', {
@@ -248,7 +255,7 @@ export default function SosResponse() {
   const active = ACTIVE_SOS.has(alert.status);
   const actions = sosActions(alert.status);
   const location = alert.lastLocation;
-  const dialogRequired = dialog !== 'close';
+  const dialogRequired = dialog !== 'close' && dialog !== 'escalate';
 
   return (
     <SafeAreaView style={[styles.screen, !active && { backgroundColor: colors.semantic.text }]}>
@@ -297,6 +304,28 @@ export default function SosResponse() {
               solid
               busy={busy === 'responding'}
               onPress={() => step('responding')}
+            />
+          ) : null}
+          {active && alert.residentPhone ? (
+            <AlarmButton
+              label={
+                alert.residentName
+                  ? t('mm.sos.callResident', { name: alert.residentName })
+                  : t('mm.sos.callResidentPlain')
+              }
+              icon="call-outline"
+              onPress={() => void Linking.openURL(`tel:${alert.residentPhone}`)}
+            />
+          ) : null}
+          {active ? (
+            <AlarmButton
+              label={t('mm.sos.escalate')}
+              icon="megaphone-outline"
+              busy={busy === 'escalate'}
+              onPress={() => {
+                setText('');
+                setDialog('escalate');
+              }}
             />
           ) : null}
           {active && can('security.staff.manage') ? (
@@ -418,23 +447,33 @@ export default function SosResponse() {
         title={
           dialog === 'false'
             ? t('mm.sos.falseTitle')
+            : dialog === 'escalate'
+              ? t('mm.sos.escalateTitle')
+              : dialog
+                ? t(`sos.dialog.${dialog === 'resolve' ? 'resolve' : dialog}.title`)
+                : ''
+        }
+        body={
+          dialog === 'escalate'
+            ? t('mm.sos.escalateBody')
             : dialog
-              ? t(`sos.dialog.${dialog === 'resolve' ? 'resolve' : dialog}.title`)
+              ? t(`mm.sos.dialogBody.${dialog}`)
               : ''
         }
-        body={dialog ? t(`mm.sos.dialogBody.${dialog}`) : ''}
         confirmLabel={
           dialog === 'false'
             ? t('mm.sos.falseAlarm')
-            : dialog
-              ? t(`sos.dialog.${dialog === 'resolve' ? 'resolve' : dialog}.submit`)
-              : ''
+            : dialog === 'escalate'
+              ? t('mm.sos.escalate')
+              : dialog
+                ? t(`sos.dialog.${dialog === 'resolve' ? 'resolve' : dialog}.submit`)
+                : ''
         }
         busy={busy === dialog}
         error={dialog ? error : null}
         reason={{
           label:
-            dialog === 'close'
+            dialog === 'close' || dialog === 'escalate'
               ? t('sos.dialog.close.label')
               : dialog === 'note'
                 ? t('sos.dialog.note.label')
@@ -445,6 +484,10 @@ export default function SosResponse() {
         }}
         onConfirm={() => {
           if (dialogRequired && text.trim().length < 3) {
+            setError(t('mm.sos.textTooShort'));
+            return;
+          }
+          if (!dialogRequired && text.trim().length > 0 && text.trim().length < 3) {
             setError(t('mm.sos.textTooShort'));
             return;
           }

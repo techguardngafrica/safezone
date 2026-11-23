@@ -4724,6 +4724,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/estates/{estateId}/sos/{id}/escalate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Manually escalate an active alert to supervisors and managers
+     * @description Requires `sos.respond`. Needs the `emergency` feature.
+     */
+    post: operations['emergency_escalate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/estates/{estateId}/sos/{id}/location': {
     parameters: {
       query?: never;
@@ -26964,6 +26984,8 @@ export interface operations {
                     relationship: string;
                   }[]
                 | null;
+              residentName?: string | null;
+              residentPhone?: string | null;
             };
           };
         };
@@ -27234,6 +27256,90 @@ export interface operations {
           /** @enum {string} */
           category?:
             'security_threat' | 'medical' | 'fire' | 'accident' | 'suspicious_activity' | 'general';
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** @enum {string} */
+              status:
+                | 'triggered'
+                | 'acknowledged'
+                | 'assigned'
+                | 'responding'
+                | 'resolved'
+                | 'closed'
+                | 'cancelled';
+              /** @enum {string} */
+              category:
+                | 'security_threat'
+                | 'medical'
+                | 'fire'
+                | 'accident'
+                | 'suspicious_activity'
+                | 'general';
+              isDrill: boolean;
+              source: string;
+              /** Format: uuid */
+              triggeredBy: string;
+              triggerRole: string;
+              householdId: string | null;
+              unitCode: string | null;
+              /** Format: date-time */
+              triggeredAt: string;
+              acknowledgedAt: string | null;
+              acknowledgedBy: string | null;
+              assignedTo: string | null;
+              respondingAt: string | null;
+              resolvedAt: string | null;
+              resolution: string | null;
+              falseAlarm: boolean;
+              closedAt: string | null;
+              lastLocation: {
+                lat: number;
+                lng: number;
+                accuracyM: number | null;
+                /** Format: date-time */
+                capturedAt: string;
+              } | null;
+              reused: boolean;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      409: components['responses']['Error409'];
+      500: components['responses']['Error500'];
+    };
+  };
+  emergency_escalate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        estateId: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note?: string;
         };
       };
     };

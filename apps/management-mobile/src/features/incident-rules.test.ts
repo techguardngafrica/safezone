@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { incidentActions, needsText } from './incident-rules';
+import { canAssignIncident, incidentActions, needsText } from './incident-rules';
 import { sosActions } from './sos-rules';
 
 describe('incidentActions', () => {
@@ -20,6 +20,14 @@ describe('incidentActions', () => {
   it('needs text only to resolve', () => {
     expect(needsText('resolve')).toBe(true);
     expect(needsText('close')).toBe(false);
+  });
+
+  it('allows assignment while open, and blocks it once resolved or closed', () => {
+    expect(canAssignIncident('reported')).toBe(true);
+    expect(canAssignIncident('under_review')).toBe(true);
+    expect(canAssignIncident('assigned')).toBe(true);
+    expect(canAssignIncident('resolved')).toBe(false);
+    expect(canAssignIncident('closed')).toBe(false);
   });
 });
 

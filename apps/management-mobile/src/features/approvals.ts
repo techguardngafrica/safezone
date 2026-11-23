@@ -44,6 +44,7 @@ export function useApprovals() {
       (can('billing.run.approve') || can('payment.reconcile')),
     booking: accessReady && hasFeature('facilities') && can('facility.manage'),
     community: accessReady && hasFeature('community') && can('community.moderate'),
+    vendor: accessReady && hasFeature('marketplace') && can('marketplace.moderate'),
   };
   const [
     joins,
@@ -56,6 +57,7 @@ export function useApprovals() {
     moves,
     channels,
     ownershipTransfers,
+    vendors,
   ] = useQueries({
     queries: [
       {
@@ -162,6 +164,17 @@ export function useApprovals() {
         enabled: allow.join,
         refetchInterval: POLL_MS,
       },
+      {
+        queryKey: ['estate', estateId, 'vendor-approvals', 'inbox'],
+        queryFn: () =>
+          unwrap(
+            api.GET('/v1/estates/{estateId}/marketplace/vendor-approvals', {
+              params: { path: { estateId } },
+            }),
+          ),
+        enabled: allow.vendor,
+        refetchInterval: POLL_MS,
+      },
     ],
   });
   const sources = [
@@ -175,6 +188,7 @@ export function useApprovals() {
     moves,
     channels,
     ownershipTransfers,
+    vendors,
   ];
   const items: ApprovalItem[] = toApprovalItems(
     {
@@ -188,6 +202,7 @@ export function useApprovals() {
       moves: moves.data,
       channels: channels.data,
       ownershipTransfers: ownershipTransfers.data,
+      vendors: vendors.data,
     },
     format,
   );
@@ -196,7 +211,12 @@ export function useApprovals() {
     items,
     /** True when the user may approve anything at all here. */
     anyAllowed:
-      allow.join || allow.billing || allow.manualPayment || allow.booking || allow.community,
+      allow.join ||
+      allow.billing ||
+      allow.manualPayment ||
+      allow.booking ||
+      allow.community ||
+      allow.vendor,
     isPending: enabledSources.some((query) => query.isPending),
     error: sources.find((query) => query.isError)?.error ?? null,
     refetch: () => Promise.all(sources.map((query) => query.refetch())),
@@ -341,6 +361,17 @@ export function useDecideApproval() {
                   body: { reason: text },
                 }),
               );
+        case 'vendor':
+          return unwrap(
+            api.PUT('/v1/estates/{estateId}/marketplace/vendor-approvals', {
+              params: { path: { estateId } },
+              body: {
+                vendorId: item.id,
+                status: action === 'approve' ? 'approved' : 'blocked',
+                ...(text ? { reason: text } : {}),
+              },
+            }),
+          );
       }
     },
     onSuccess: async () => {
@@ -356,6 +387,7 @@ export function useDecideApproval() {
           'moves',
           'channels',
           'ownership-transfers',
+          'vendor-approvals',
           'residents',
         ].map((key) => queryClient.invalidateQueries({ queryKey: ['estate', estateId, key] })),
       );

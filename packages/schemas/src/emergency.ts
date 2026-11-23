@@ -75,12 +75,18 @@ export const sosDetailSchema = sosAlertSchema.extend({
   emergencyContacts: z
     .array(z.object({ name: z.string(), phone: z.string(), relationship: z.string() }))
     .nullable(),
+  /** Triggering resident's name and phone; populated only for active alerts when the caller has `pii.view`. */
+  residentName: z.string().nullable().optional(),
+  residentPhone: z.string().nullable().optional(),
 });
 export const sosListQuerySchema = z.object({
   status: z.enum(['active', 'all']).default('active'),
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 export const assignSosSchema = z.object({ userId: z.uuid() });
+export const escalateSosSchema = z.object({
+  note: z.string().trim().min(3).max(500).optional(),
+});
 export const sosNoteSchema = z.object({ note: z.string().trim().min(1).max(1000) });
 export const resolveSosSchema = z.object({
   resolution: z.string().trim().min(3).max(1000),

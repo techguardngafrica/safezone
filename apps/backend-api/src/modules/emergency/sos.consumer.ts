@@ -61,6 +61,16 @@ export class SosConsumer implements OnApplicationBootstrap, OnApplicationShutdow
         const event = job.data as RelayedEvent;
         if (event.type === 'emergency.alert.triggered' && event.estateId) {
           await this.fanOut(event.estateId, (event.payload as { alertId: string }).alertId);
+        } else if (
+          event.type === 'emergency.alert.escalated' &&
+          event.estateId &&
+          (event.payload as { manual?: boolean }).manual
+        ) {
+          await this.manualEscalate(
+            event.estateId,
+            (event.payload as { alertId: string }).alertId,
+            event.id,
+          );
         }
       },
       {
@@ -178,6 +188,34 @@ export class SosConsumer implements OnApplicationBootstrap, OnApplicationShutdow
         },
       ]),
     );
+  }
+
+  /** Manual escalation by a responder: immediately alert supervisors and managers. */
+  async manualEscalate(estateId: string, alertId: string, eventId: string): Promise<void> {
+    const alert = await this.load(estateId, alertId);
+    if (!alert || alert.status === 'cancelled' || alert.status === 'closed') return;
+    const place = await this.place(alert);
+    const label = alert.isDrill ? 'DRILL ' : '';
+    const recipients = (
+      await this.authz.holdersOf(estateId, ['security_supervisor', ...MANAGER_ROLES])
+    ).filter((userId) => userId !== alert.triggeredBy);
+    if (recipients.length > 0) {
+      await this.delivery.deliver({
+        intent: 'emergency.sos_escalated',
+        userIds: recipients,
+        estateId,
+        data: {
+          label,
+          place,
+          seconds: Math.max(0, Math.round((Date.now() - alert.triggeredAt.getTime()) / 1000)),
+          alertId,
+        },
+        dedupeKey: `sos:${alertId}:manual:${eventId}`,
+      });
+    }
+    if (!alert.isDrill && alert.triggerRole === 'resident') {
+      await this.notifyContacts(alert);
+    }
   }
 
   private async notifyContacts(alert: AlertRow): Promise<number> {

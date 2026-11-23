@@ -4,6 +4,7 @@ import {
   closeSosSchema,
   emergencyBroadcastResultSchema,
   emergencyBroadcastSchema,
+  escalateSosSchema,
   estateItemParamsSchema,
   estateParamSchema,
   resolveSosSchema,
@@ -187,6 +188,26 @@ export class EmergencyController {
     @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
   ) {
     return this.sos.act(estate, params.id, 'responding');
+  }
+
+  @Post('sos/:id/escalate')
+  @Can('sos.respond')
+  @RequiresFeature('emergency')
+  @HttpCode(200)
+  @Contract({
+    summary: 'Manually escalate an active alert to supervisors and managers',
+    tags: ['emergency'],
+    params: estateItemParamsSchema,
+    body: escalateSosSchema,
+    response: sosAlertSchema,
+    errors: [403, 404, 409],
+  })
+  escalate(
+    @CurrentEstate() estate: EstateAccess,
+    @ValidParams() params: z.infer<typeof estateItemParamsSchema>,
+    @ValidBody() body: z.infer<typeof escalateSosSchema>,
+  ) {
+    return this.sos.escalate(estate, params.id, body.note);
   }
 
   @Post('sos/:id/notes')

@@ -4506,6 +4506,24 @@ export const en = {
   'mm.announcements.audience.spaces': 'Specific spaces',
   'mm.announcements.selectSpaces': 'Choose buildings or units',
   'mm.announcements.spacesRequired': 'Select at least one building or unit.',
+  'mm.incidents.assign': 'Assign',
+  'mm.incidents.assignTitle': 'Assign incident to',
+  'mm.incidents.assignedTo': 'Assigned to',
+  'mm.incidents.unassigned': 'Unassigned',
+  'mm.approvals.kind.vendor': 'Vendor',
+  'mm.approvals.filter.vendors': 'Vendors',
+  'mm.approvals.confirmBody.vendor.approve':
+    'Approve this verified vendor to appear in your estate marketplace.',
+  'mm.approvals.confirmBody.vendor.reject':
+    'Block this vendor from serving residents in your estate.',
+  'mm.approvals.vendorDetail': '{type}',
+  'mm.sos.escalate': 'Escalate alert',
+  'mm.sos.escalateTitle': 'Escalate this SOS?',
+  'mm.sos.escalateBody':
+    'Immediately alerts security supervisors, estate managers and emergency contacts.',
+  'mm.sos.callResident': 'Call resident ({name})',
+  'mm.sos.callResidentPlain': 'Call resident',
+  'mm.offline.persistedBanner': 'Offline. Showing saved data; actions need a connection.',
 } as const;
 
 export type MessageKey = keyof typeof en;

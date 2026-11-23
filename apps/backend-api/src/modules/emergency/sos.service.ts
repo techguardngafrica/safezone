@@ -13,6 +13,7 @@ import {
 } from '../../common/errors/domain-error';
 import { appendOutboxEvents } from '../../common/outbox/outbox-writer';
 import { AuthzService } from '../authz/authz.service';
+import { UserDirectory } from '../identity/user-directory.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { isStaffWith, OccupancyService } from '../occupancy/occupancy.service';
 import { PropertyService } from '../property/property.service';
@@ -47,6 +48,7 @@ export class SosService {
     private readonly authz: AuthzService,
     private readonly tenancy: TenancyService,
     private readonly notifications: NotificationsService,
+    private readonly users: UserDirectory,
   ) {}
 
   async trigger(access: EstateAccess, clientUuid: string, input: z.infer<typeof triggerSosSchema>) {
@@ -183,6 +185,11 @@ export class SosService {
             }),
           )
         : null;
+    const canSeeResidentPhone =
+      responder && access.permissions.has('pii.view') && isActiveSos(alert.status);
+    const resident = canSeeResidentPhone
+      ? ((await this.users.contactsOf([alert.triggeredBy])).get(alert.triggeredBy) ?? null)
+      : null;
     return this.db.withTenant(access, async (tx) => {
       const timeline = await tx.sosEvent.findMany({
         where: { estateId: access.estateId, alertId },
@@ -200,6 +207,8 @@ export class SosService {
           occurredAt: event.occurredAt.toISOString(),
         })),
         emergencyContacts: contacts,
+        residentName: resident?.fullName ?? null,
+        residentPhone: resident?.phone ?? null,
       };
     });
   }
@@ -343,6 +352,39 @@ export class SosService {
     return this.db.withTenant(access, async (tx) => {
       const alert = await this.visible(tx, access, alertId);
       await this.event(tx, alert, 'note', access.userId, { note });
+      return this.view(tx, alert, false);
+    });
+  }
+
+  /** Manually escalate an active alert to supervisors and managers (management-mobile.md §7.1). */
+  async escalate(access: EstateAccess, alertId: string, note?: string) {
+    if (!access.permissions.has('sos.respond')) throw new ForbiddenError();
+    return this.db.withTenant(access, async (tx) => {
+      const alert = await this.visible(tx, access, alertId);
+      if (!isActiveSos(alert.status)) {
+        throw new ConflictError('SOS_NOT_ACTIVE', 'This alert has ended and cannot be escalated');
+      }
+      await this.event(tx, alert, 'escalated', access.userId, {
+        manual: true,
+        ...(note ? { note } : {}),
+      });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'emergency.alert.escalated',
+          estateId: access.estateId,
+          aggregateType: 'sos_alert',
+          aggregateId: alert.id,
+          payload: { alertId: alert.id, manual: true, ...(note ? { note } : {}) },
+          audit: {
+            actorType: 'user',
+            actorId: access.userId,
+            action: 'emergency.alert.escalate',
+            resourceType: 'sos_alert',
+            resourceId: alert.id,
+            ...(note ? { reason: note } : {}),
+          },
+        },
+      ]);
       return this.view(tx, alert, false);
     });
   }

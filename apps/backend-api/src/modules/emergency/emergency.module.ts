@@ -3,6 +3,7 @@ import { EstateExportRegistry } from '../../common/export/export-registry';
 import { tenantDataset } from '../../common/export/tenant-dataset';
 import { DatabaseService } from '../../common/database/database.service';
 import { AuthzModule } from '../authz/authz.module';
+import { IdentityModule } from '../identity/identity.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { OccupancyModule } from '../occupancy/occupancy.module';
 import { PropertyModule } from '../property/property.module';
@@ -11,7 +12,14 @@ import { EmergencyController } from './emergency.controller';
 import { SosService } from './sos.service';
 
 @Module({
-  imports: [TenancyModule, AuthzModule, OccupancyModule, PropertyModule, NotificationsModule],
+  imports: [
+    TenancyModule,
+    AuthzModule,
+    IdentityModule,
+    OccupancyModule,
+    PropertyModule,
+    NotificationsModule,
+  ],
   controllers: [EmergencyController],
   providers: [SosService],
   exports: [SosService],

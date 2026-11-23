@@ -136,6 +136,18 @@ describe('toApprovalItems', () => {
             createdAt: '2026-11-21T10:30:00.000Z',
           },
         ],
+        vendors: [
+          {
+            vendor: { id: 'v1', name: 'CleanPro Ltd', type: 'company', description: 'Cleaning' },
+            status: null,
+            decidedAt: null,
+          },
+          {
+            vendor: { id: 'v2', name: 'Already Ok', type: 'individual', description: 'Plumber' },
+            status: 'approved',
+            decidedAt: '2026-11-20T00:00:00.000Z',
+          },
+        ],
       },
       format,
     );
@@ -150,13 +162,15 @@ describe('toApprovalItems', () => {
       'c1',
       'w1',
       'ds1',
+      'v1',
     ]);
     expect(items[0]).toMatchObject({ kind: 'manual_payment', title: 'N2500' });
     expect(filterApprovals(items, 'finance').map((i) => i.id)).toEqual(['mp1', 'r1', 'rf1', 'w1']);
     expect(filterApprovals(items, 'people').map((i) => i.id)).toEqual(['ot1', 'm1', 'j1', 'ds1']);
     expect(filterApprovals(items, 'facilities').map((i) => i.id)).toEqual(['b1']);
     expect(filterApprovals(items, 'community').map((i) => i.id)).toEqual(['c1']);
-    expect(filterApprovals(items, 'all')).toHaveLength(10);
+    expect(filterApprovals(items, 'vendors').map((i) => i.id)).toEqual(['v1']);
+    expect(filterApprovals(items, 'all')).toHaveLength(11);
   });
 
   it('names applicants without a profile name', () => {

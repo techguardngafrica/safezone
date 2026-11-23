@@ -19,6 +19,11 @@ export function incidentActions(status: IncidentStatus): IncidentAction[] {
   return (Object.keys(FROM) as IncidentAction[]).filter((action) => FROM[action].includes(status));
 }
 
+/** True when an incident can be assigned or reassigned to a staff member or guard. */
+export function canAssignIncident(status: IncidentStatus): boolean {
+  return status === 'reported' || status === 'under_review' || status === 'assigned';
+}
+
 /** Resolving needs a resolution of 3+ characters, as the API requires. */
 export function needsText(action: IncidentAction): boolean {
   return action === 'resolve';

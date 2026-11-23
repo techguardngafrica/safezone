@@ -19,6 +19,7 @@ import { AppLock } from '../src/features/app-lock';
 import { SosWatcher } from '../src/features/sos-watcher';
 import { errorText } from '../src/lib/errors';
 import { ManagerProvider, manageableMemberships, useMemberships } from '../src/lib/manager';
+import { attachOfflineCache, clearOfflineCache } from '../src/lib/offline-cache';
 import { session } from '../src/lib/session';
 
 function Splash() {
@@ -90,7 +91,10 @@ function AuthGate() {
     void session.restore().then(() => setRestored(session.getState().status === 'signed_in'));
   }, []);
   useEffect(() => {
-    if (state.status !== 'signed_in' && state.status !== 'restoring') setRestored(false);
+    if (state.status !== 'signed_in' && state.status !== 'restoring') {
+      setRestored(false);
+      void clearOfflineCache();
+    }
   }, [state.status]);
   if (state.status === 'restoring') return <Splash />;
   if (state.status !== 'signed_in')
@@ -113,6 +117,7 @@ export default function RootLayout() {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 15_000 } } }),
   );
+  useEffect(() => attachOfflineCache(queryClient), [queryClient]);
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>

@@ -1,11 +1,12 @@
 import { unwrap } from '@safezone/api-client';
-import { colors, spacing, typography } from '@safezone/design-tokens';
+import { colors, radii, spacing, typography } from '@safezone/design-tokens';
 import { type MessageKey, formatDateTime, t } from '@safezone/i18n';
 import {
   ActionButton,
   Card,
   ConfirmModal,
   ErrorState,
+  ListRow,
   ScreenHeader,
   ScrollScreen,
   SectionHeader,
@@ -16,12 +17,21 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Icon } from '../../src/components/icon';
 import {
   INCIDENT_STATUS_TONE,
   type IncidentAction,
   SEVERITY_TONE,
+  canAssignIncident,
   incidentActions,
   needsText,
 } from '../../src/features/incident-rules';
@@ -42,7 +52,53 @@ function Field({ label, value }: { label: string; value: string | null | undefin
   );
 }
 
-/** Incident detail: facts, timeline and notes; managers can review, resolve, reopen and close. */
+function AssignIncidentSheet({
+  visible,
+  busy,
+  onClose,
+  onPick,
+}: {
+  visible: boolean;
+  busy: boolean;
+  onClose: () => void;
+  onPick: (userId: string) => void;
+}) {
+  const { estateId } = useManager();
+  const staff = useQuery({
+    queryKey: ['estate', estateId, 'staff'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/staff', { params: { path: { estateId } } })),
+    enabled: visible,
+  });
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel={t('ui.close')}>
+        <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+          <Text accessibilityRole="header" style={styles.sheetTitle}>
+            {t('mm.incidents.assignTitle')}
+          </Text>
+          {staff.isPending || busy ? <ActivityIndicator color={colors.brand.primary} /> : null}
+          {staff.isError ? (
+            <ErrorState message={errorText(staff.error)} onRetry={() => void staff.refetch()} />
+          ) : null}
+          <ScrollView style={{ maxHeight: 360 }}>
+            {(staff.data ?? []).map((member) => (
+              <ListRow
+                key={member.userId}
+                title={member.fullName ?? t('mm.approvals.unknownName')}
+                subtitle={member.assignments.map((a) => a.roleName).join(', ')}
+                leading={<Icon name="person-outline" color={colors.brand.primary} size={20} />}
+                onPress={() => onPick(member.userId)}
+              />
+            ))}
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+/** Incident detail: facts, assignment, timeline and notes; managers can review, assign, resolve, reopen and close. */
 export default function IncidentDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -55,9 +111,17 @@ export default function IncidentDetailScreen() {
         api.GET('/v1/estates/{estateId}/incidents/{id}', { params: { path: { estateId, id } } }),
       ),
   });
+  const staff = useQuery({
+    queryKey: ['estate', estateId, 'staff'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/staff', { params: { path: { estateId } } })),
+    enabled: can('incident.manage'),
+    staleTime: 5 * 60_000,
+  });
   const pull = usePullRefresh(detail.refetch);
   const [note, setNote] = useState('');
   const [action, setAction] = useState<IncidentAction | null>(null);
+  const [assigning, setAssigning] = useState(false);
   const [text, setText] = useState('');
 
   const refresh = () =>
@@ -95,6 +159,19 @@ export default function IncidentDetailScreen() {
       void refresh();
     },
   });
+  const assign = useMutation({
+    mutationFn: ({ assigneeId, version }: { assigneeId: string; version: number }) =>
+      unwrap(
+        api.POST('/v1/estates/{estateId}/incidents/{id}/transition', {
+          params: { path: { estateId, id } },
+          body: { action: 'assign', version, assigneeId },
+        }),
+      ),
+    onSuccess: () => {
+      setAssigning(false);
+      void refresh();
+    },
+  });
 
   if (detail.isPending)
     return (
@@ -118,6 +195,10 @@ export default function IncidentDetailScreen() {
   const incident = detail.data;
   const actions = can('incident.manage') ? incidentActions(incident.status) : [];
   const textRequired = action ? needsText(action) : false;
+  const assigneeName = incident.assignedTo
+    ? (staff.data?.find((m) => m.userId === incident.assignedTo)?.fullName ??
+      t('mm.approvals.unknownName'))
+    : t('mm.incidents.unassigned');
 
   return (
     <ScrollScreen edges={['top', 'left', 'right', 'bottom']} {...pull}>
@@ -145,6 +226,7 @@ export default function IncidentDetailScreen() {
       <Card>
         <View style={{ gap: spacing[3] }}>
           <Field label={t('mm.incidents.description')} value={incident.description} />
+          <Field label={t('mm.incidents.assignedTo')} value={assigneeName} />
           <Field
             label={t('mm.incidents.place')}
             value={
@@ -165,6 +247,15 @@ export default function IncidentDetailScreen() {
           ) : null}
         </View>
       </Card>
+
+      {can('incident.manage') && canAssignIncident(incident.status) ? (
+        <ActionButton
+          label={t('mm.incidents.assign')}
+          variant="outline"
+          icon={<Icon name="person-add-outline" size={18} color={colors.brand.primary} />}
+          onPress={() => setAssigning(true)}
+        />
+      ) : null}
 
       {actions.length > 0 ? (
         <View style={{ gap: spacing[2] }}>
@@ -220,6 +311,13 @@ export default function IncidentDetailScreen() {
           </Card>
         ))}
 
+      <AssignIncidentSheet
+        visible={assigning}
+        busy={assign.isPending}
+        onClose={() => setAssigning(false)}
+        onPick={(assigneeId) => assign.mutate({ assigneeId, version: incident.version })}
+      />
+
       <ConfirmModal
         visible={action !== null}
         title={action ? t(`incident.action.${action}` as MessageKey) : ''}
@@ -245,3 +343,19 @@ export default function IncidentDetailScreen() {
     </ScrollScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  scrim: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: colors.semantic.surface,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    padding: spacing[5],
+    gap: spacing[3],
+  },
+  sheetTitle: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    color: colors.semantic.text,
+  },
+});
