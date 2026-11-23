@@ -10,7 +10,7 @@ import {
   toApprovalItems,
 } from './approval-items';
 
-export type { ApprovalItem, ApprovalKind } from './approval-items';
+export type { ApprovalCategory, ApprovalItem, ApprovalKind } from './approval-items';
 
 const POLL_MS = 60_000;
 
@@ -20,6 +20,13 @@ const format: ApprovalFormat = {
   money: formatKobo,
   dateTime: formatDateTime,
   runDetail: (invoices, amount) => t('mm.approvals.runDetail', { invoices, amount }),
+  moveType: (type) =>
+    type === 'move_in' || type === 'move_out'
+      ? t(`mm.approvals.moveType.${type}` as MessageKey)
+      : type,
+  moveDetail: (type, unit, date) => t('mm.approvals.moveDetail', { type, unit, date }),
+  transferDetail: (unit, type) => t('mm.approvals.transferDetail', { unit, type }),
+  paymentDetail: (method, ref) => t('mm.approvals.paymentDetail', { method, ref }),
 };
 
 /**
@@ -31,9 +38,25 @@ export function useApprovals() {
   const allow = {
     join: accessReady && hasFeature('occupancy') && can('resident.approve'),
     billing: accessReady && hasFeature('billing') && can('billing.run.approve'),
+    manualPayment:
+      accessReady &&
+      hasFeature('billing') &&
+      (can('billing.run.approve') || can('payment.reconcile')),
     booking: accessReady && hasFeature('facilities') && can('facility.manage'),
+    community: accessReady && hasFeature('community') && can('community.moderate'),
   };
-  const [joins, runs, waivers, bookings] = useQueries({
+  const [
+    joins,
+    runs,
+    waivers,
+    manualPayments,
+    refunds,
+    bookings,
+    domesticStaff,
+    moves,
+    channels,
+    ownershipTransfers,
+  ] = useQueries({
     queries: [
       {
         queryKey: ['estate', estateId, 'join-requests', 'awaiting_manager', 'inbox'],
@@ -67,6 +90,28 @@ export function useApprovals() {
         refetchInterval: POLL_MS,
       },
       {
+        queryKey: ['estate', estateId, 'manual-payments', 'pending', 'inbox'],
+        queryFn: () =>
+          unwrap(
+            api.GET('/v1/estates/{estateId}/manual-payments', {
+              params: { path: { estateId }, query: { status: 'pending' } },
+            }),
+          ),
+        enabled: allow.manualPayment,
+        refetchInterval: POLL_MS,
+      },
+      {
+        queryKey: ['estate', estateId, 'refunds', 'pending', 'inbox'],
+        queryFn: () =>
+          unwrap(
+            api.GET('/v1/estates/{estateId}/refunds', {
+              params: { path: { estateId }, query: { status: 'pending' } },
+            }),
+          ),
+        enabled: allow.billing,
+        refetchInterval: POLL_MS,
+      },
+      {
         queryKey: ['estate', estateId, 'bookings', 'pending_approval', 'inbox'],
         queryFn: () =>
           unwrap(
@@ -77,18 +122,81 @@ export function useApprovals() {
         enabled: allow.booking,
         refetchInterval: POLL_MS,
       },
+      {
+        queryKey: ['estate', estateId, 'domestic-staff', 'pending', 'inbox'],
+        queryFn: () =>
+          unwrap(
+            api.GET('/v1/estates/{estateId}/domestic-staff', {
+              params: { path: { estateId }, query: { status: 'pending' } },
+            }),
+          ),
+        enabled: allow.join,
+        refetchInterval: POLL_MS,
+      },
+      {
+        queryKey: ['estate', estateId, 'moves', 'scheduled', 'inbox'],
+        queryFn: () =>
+          unwrap(
+            api.GET('/v1/estates/{estateId}/moves', {
+              params: { path: { estateId }, query: { status: 'scheduled' } },
+            }),
+          ),
+        enabled: allow.join,
+        refetchInterval: POLL_MS,
+      },
+      {
+        queryKey: ['estate', estateId, 'channels', 'inbox'],
+        queryFn: () =>
+          unwrap(api.GET('/v1/estates/{estateId}/channels', { params: { path: { estateId } } })),
+        enabled: allow.community,
+        refetchInterval: POLL_MS,
+      },
+      {
+        queryKey: ['estate', estateId, 'ownership-transfers', 'inbox'],
+        queryFn: () =>
+          unwrap(
+            api.GET('/v1/estates/{estateId}/ownership-transfers', {
+              params: { path: { estateId } },
+            }),
+          ),
+        enabled: allow.join,
+        refetchInterval: POLL_MS,
+      },
     ],
   });
-  const sources = [joins, runs, waivers, bookings];
+  const sources = [
+    joins,
+    runs,
+    waivers,
+    manualPayments,
+    refunds,
+    bookings,
+    domesticStaff,
+    moves,
+    channels,
+    ownershipTransfers,
+  ];
   const items: ApprovalItem[] = toApprovalItems(
-    { joins: joins.data, runs: runs.data, waivers: waivers.data, bookings: bookings.data },
+    {
+      joins: joins.data,
+      runs: runs.data,
+      waivers: waivers.data,
+      manualPayments: manualPayments.data,
+      refunds: refunds.data,
+      bookings: bookings.data,
+      domesticStaff: domesticStaff.data,
+      moves: moves.data,
+      channels: channels.data,
+      ownershipTransfers: ownershipTransfers.data,
+    },
     format,
   );
   const enabledSources = sources.filter((query) => query.fetchStatus !== 'idle' || query.data);
   return {
     items,
     /** True when the user may approve anything at all here. */
-    anyAllowed: allow.join || allow.billing || allow.booking,
+    anyAllowed:
+      allow.join || allow.billing || allow.manualPayment || allow.booking || allow.community,
     isPending: enabledSources.some((query) => query.isPending),
     error: sources.find((query) => query.isError)?.error ?? null,
     refetch: () => Promise.all(sources.map((query) => query.refetch())),
@@ -157,6 +265,34 @@ export function useDecideApproval() {
                 }),
               );
         }
+        case 'manual_payment':
+          return action === 'approve'
+            ? unwrap(
+                api.POST('/v1/estates/{estateId}/manual-payments/{id}/approve', {
+                  params: { path },
+                  body: text ? { reason: text } : {},
+                }),
+              )
+            : unwrap(
+                api.POST('/v1/estates/{estateId}/manual-payments/{id}/reject', {
+                  params: { path },
+                  body: { reason: text },
+                }),
+              );
+        case 'refund':
+          return action === 'approve'
+            ? unwrap(
+                api.POST('/v1/estates/{estateId}/refunds/{id}/approve', {
+                  params: { path },
+                  body: text ? { reason: text } : {},
+                }),
+              )
+            : unwrap(
+                api.POST('/v1/estates/{estateId}/refunds/{id}/reject', {
+                  params: { path },
+                  body: { reason: text },
+                }),
+              );
         case 'booking':
           return action === 'approve'
             ? unwrap(api.POST('/v1/estates/{estateId}/bookings/{id}/approve', { params: { path } }))
@@ -166,13 +302,62 @@ export function useDecideApproval() {
                   body: { reason: text },
                 }),
               );
+        case 'staff_pass':
+          return unwrap(
+            api.POST('/v1/estates/{estateId}/domestic-staff/{id}/status', {
+              params: { path },
+              body: { status: action === 'approve' ? 'active' : 'ended' },
+            }),
+          );
+        case 'move':
+          return action === 'approve'
+            ? unwrap(api.POST('/v1/estates/{estateId}/moves/{id}/complete', { params: { path } }))
+            : unwrap(
+                api.POST('/v1/estates/{estateId}/moves/{id}/cancel', {
+                  params: { path },
+                  body: { reason: text },
+                }),
+              );
+        case 'channel':
+          return action === 'approve'
+            ? unwrap(api.POST('/v1/estates/{estateId}/channels/{id}/approve', { params: { path } }))
+            : unwrap(
+                api.POST('/v1/estates/{estateId}/channels/{id}/archive', {
+                  params: { path },
+                  body: { reason: text },
+                }),
+              );
+        case 'ownership_transfer':
+          return action === 'approve'
+            ? unwrap(
+                api.POST('/v1/estates/{estateId}/ownership-transfers/{id}/approve', {
+                  params: { path },
+                  body: {},
+                }),
+              )
+            : unwrap(
+                api.POST('/v1/estates/{estateId}/ownership-transfers/{id}/reject', {
+                  params: { path },
+                  body: { reason: text },
+                }),
+              );
       }
     },
     onSuccess: async () => {
       await Promise.all(
-        ['join-requests', 'billing-runs', 'waivers', 'bookings', 'residents'].map((key) =>
-          queryClient.invalidateQueries({ queryKey: ['estate', estateId, key] }),
-        ),
+        [
+          'join-requests',
+          'billing-runs',
+          'waivers',
+          'manual-payments',
+          'refunds',
+          'bookings',
+          'domestic-staff',
+          'moves',
+          'channels',
+          'ownership-transfers',
+          'residents',
+        ].map((key) => queryClient.invalidateQueries({ queryKey: ['estate', estateId, key] })),
       );
     },
   });

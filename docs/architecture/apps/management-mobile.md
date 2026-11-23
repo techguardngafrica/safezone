@@ -154,22 +154,25 @@ Maestro flows: MFA sign-in, approve join request, acknowledge and resolve SOS, r
 - The approvals inbox shows every pending item the user can act on, and nothing they cannot.
 - Every action is reflected on the web app within 2 seconds.
 
-## 14. Implementation status (21 Nov 2026)
+## 14. Implementation status (23 Nov 2026)
 
 Built:
 
 - **Sign-in and estate**: phone + OTP, then authenticator MFA (shared `SignInFlow`). The app opens only estates the user can manage, the same rule as management-web. The estate switcher lists the last-used estate first, and permissions and features are loaded per estate (`src/lib/manager.tsx`).
-- **Home**: active SOS cards, plus tiles for active SOS, waiting approvals, entries today and open incidents. "This month so far" (occupancy, collected against billed, outstanding) needs `report.read`. Also the latest announcements and a notification bell.
-- **Approvals**: one inbox for join requests, billing runs awaiting approval, pending waivers and facility bookings awaiting approval. Each source is fetched only with its permission and feature. Approve and reject use in-app confirms, and rejecting needs a reason. These use buttons, not swipes.
-- **Security**: live gate feed, expected visitors per gate (with pass revoke and a reason), pending walk-ins, and SOS (active and history). Name, plate or unit search on the gate lists. Incidents list and detail, with notes and review, resolve, reopen and close.
+- **Home**: active SOS cards, plus permission-aware tiles for active SOS, waiting approvals, entries today, open incidents, open maintenance and upcoming bookings. "This month so far" (occupancy, collected against billed, outstanding) needs `report.read` and links to full operational summaries. Also the latest announcements and a notification bell.
+- **Approvals**: unified inbox covering join requests, billing runs awaiting approval, pending waivers, pending office/manual payments, pending refunds, facility bookings awaiting approval, pending domestic staff passes, scheduled move-in/move-out requests, pending channel requests and ownership transfers. Category filter chips (`All`, `People & moves`, `Finance`, `Facilities`, `Community`). Each source is fetched only with its permission and feature. Approve and reject use in-app confirms (`ConfirmModal`), and rejecting needs a reason (except staff pass status toggle). Uses explicit buttons rather than swipes.
+- **Security**: live gate feed (with gate filter), expected visitors per gate (with pass revoke and a reason), inside/overstaying visitors (12h+ highlight and Flag Visitor to restricted list), pending walk-ins, guard shifts attendance (`/security-shifts`), and SOS (active and history). Name, plate or unit search on the gate lists. Incidents list and detail, with notes and review, resolve, reopen and close.
 - **SOS response** (§7.1): full-screen red alarm opened by a watcher that polls every 4 s while the app is open, plus Expo push (SOS Android channel at max importance) when an EAS project id is set. Vibration repeats until the alert is acknowledged. The screen offers acknowledge, responding, assign (guard list needs `security.staff.manage`), map, emergency contact calls, notes, resolve, false alarm and close.
-- **Estate**: resident lookup. Phone numbers are masked unless the role has `pii.view`, and only then can the resident be called.
+- **Estate & Finance**: permission-aware 4-section hub:
+  - **People**: resident lookup (phone masked unless `pii.view`, direct call when permitted, tappable to resident detail `/residents/[id]` showing household, vehicles and active passes) and unit directory lookup.
+  - **Maintenance**: queue with status filters, priority pills and SLA breach badges; detail screen (`/maintenance/[id]`) with triage/lifecycle transitions, work-order assignment to estate staff or external vendors, and public/internal comments.
+  - **Facilities**: bookings list with status filters (`Pending`, `Confirmed`, `All`) and approve, reject, check-in and no-show actions.
+  - **Finance**: read-only overview of collections this month vs billed/outstanding, collection rate, arrears by age band (`0-30`, `31-60`, `61-90`, `90+` days) and recent/failed transactions.
 - **App lock** (§10, `src/features/app-lock.tsx`, `expo-local-authentication`): asks for biometrics or the phone PIN when a saved session reopens the app, and after 5 minutes in the background. A fresh sign-in does not ask again. The SOS screen is never covered, so an alert can be acknowledged from a locked app. A phone with no screen lock cannot be locked; More shows a notice asking the user to set one. Adding this native module needs a new development build.
-- **More**: announcements (list; compose to the whole estate; emergency broadcast with `broadcast.emergency` after a confirmation), notifications centre, estate, account and sign-out.
+- **More**: announcements (list; compose to the whole estate or selected spaces/buildings; emergency broadcast with `broadcast.emergency` after a confirmation), community moderation queue (`/moderation`, with remove message, warn, mute, remove from channel, suspend channel and dismiss actions), operational summaries (`/reports`, this month vs last 30 days across occupancy, visitors, security/SOS/shifts, finance, maintenance and facilities), notifications centre, estate switcher, account and sign-out.
 
 Differences from this spec, until they are built:
 
-- No **Escalate** or **Call resident** on the SOS screen. Escalation runs on the server's timers, and the alert does not carry the resident's phone number.
-- No offline cache for the dashboard or last-viewed lists (§9). Lists show an offline banner. Approvals and SOS actions need a connection.
-- Not on mobile yet: the finance overview, maintenance queue, move approvals, moderation queue, overstaying-visitor flag and flag-visitor action, incident assignment, and announcement targeting by building or unit.
-- No Maestro flows yet (§12).
+- No **Escalate** or **Call resident** on the SOS screen (backend escalation runs on server timers, and the SOS detail payload does not carry the resident's phone number).
+- No persisted offline cache for the dashboard or last-viewed lists (§9). Lists show an offline banner and use TanStack Query's in-memory cache. Approvals and SOS actions need a connection.
+- No incident assignment or Maestro E2E flows yet (§12).

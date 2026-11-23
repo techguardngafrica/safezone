@@ -34,9 +34,10 @@ import { matchesVisitor } from '../../src/features/visitor-search';
 import { errorText, isNetworkError } from '../../src/lib/errors';
 import { useManager } from '../../src/lib/manager';
 import { api } from '../../src/lib/session';
+import { useNow } from '../../src/lib/use-now';
 import { usePullRefresh } from '../../src/lib/use-pull-refresh';
 
-type SecurityView = 'activity' | 'expected' | 'walkins' | 'sos';
+type SecurityView = 'activity' | 'expected' | 'inside' | 'walkins' | 'sos';
 type GateEvent = ApiRow<'/v1/estates/{estateId}/gate/events', 'get'>;
 type Walkin = ApiRow<'/v1/estates/{estateId}/walkins', 'get'>;
 
@@ -54,6 +55,7 @@ const WALKIN_TONE: Record<Walkin['status'], Tone> = {
   cancelled: 'neutral',
 };
 const LIVE_MS = 10_000;
+const OVERSTAY_MS = 12 * 60 * 60_000;
 
 function useGates() {
   const { estateId, hasFeature } = useManager();
@@ -101,14 +103,25 @@ function QueryStates({
   return null;
 }
 
-function Activity({ gateName, search }: { gateName: (id: string) => string; search: string }) {
+function Activity({
+  gateId,
+  gateName,
+  search,
+}: {
+  gateId: string;
+  gateName: (id: string) => string;
+  search: string;
+}) {
   const { estateId } = useManager();
   const events = useQuery({
-    queryKey: ['estate', estateId, 'gate-events', 'live'],
+    queryKey: ['estate', estateId, 'gate-events', 'live', gateId],
     queryFn: () =>
       unwrapPage(
         api.GET('/v1/estates/{estateId}/gate/events', {
-          params: { path: { estateId }, query: { limit: 50 } },
+          params: {
+            path: { estateId },
+            query: { gateId: gateId === 'all' ? undefined : gateId, limit: 50 },
+          },
         }),
       ),
     refetchInterval: LIVE_MS,
@@ -270,6 +283,120 @@ function Expected({ gateId, search }: { gateId: string | null; search: string })
   );
 }
 
+function Inside({ gateName, search }: { gateName: (id: string) => string; search: string }) {
+  const { estateId, can } = useManager();
+  const now = useNow(60_000);
+  const canFlag = can('security.staff.manage') || can('incident.manage');
+  const [flagging, setFlagging] = useState<{ name: string; plate: string | null } | null>(null);
+  const [reason, setReason] = useState('');
+  const inside = useQuery({
+    queryKey: ['estate', estateId, 'gate', 'inside'],
+    queryFn: () =>
+      unwrap(api.GET('/v1/estates/{estateId}/gate/inside', { params: { path: { estateId } } })),
+    refetchInterval: LIVE_MS,
+  });
+  const flag = useMutation({
+    mutationFn: (target: { name: string; plate: string | null }) =>
+      unwrap(
+        api.POST('/v1/estates/{estateId}/restricted-visitors', {
+          params: { path: { estateId } },
+          body: {
+            name: target.name,
+            plate: target.plate ?? undefined,
+            reason: reason.trim(),
+          },
+        }),
+      ),
+    onSuccess: () => {
+      setFlagging(null);
+      setReason('');
+    },
+  });
+  const items = (inside.data ?? []).filter((visitor) =>
+    matchesVisitor(search, [visitor.visitorName, visitor.vehiclePlate]),
+  );
+  return (
+    <>
+      <QueryStates
+        query={inside}
+        empty={items.length === 0}
+        emptyTitle={t('mm.security.insideEmpty')}
+        emptyBody={t('mm.security.insideEmptyBody')}
+      />
+      {items.map((visitor, index) => {
+        const enteredMs = Date.parse(visitor.enteredAt);
+        const isOverstay = Number.isFinite(enteredMs) && now - enteredMs > OVERSTAY_MS;
+        const displayName = visitor.visitorName ?? visitor.vehiclePlate ?? t('mm.security.unnamed');
+        return (
+          <Card key={`${visitor.passId ?? visitor.walkinId ?? index}-${visitor.enteredAt}`}>
+            <View style={{ gap: spacing[2] }}>
+              <View
+                style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[2] }}
+              >
+                <Text
+                  style={{
+                    flex: 1,
+                    fontSize: typography.size.md,
+                    fontWeight: typography.weight.semibold,
+                    color: colors.semantic.text,
+                  }}
+                >
+                  {displayName}
+                </Text>
+                {isOverstay ? (
+                  <StatusPill tone="warning" label={t('mm.security.overstay')} />
+                ) : null}
+              </View>
+              <Text style={{ fontSize: typography.size.sm, color: colors.semantic.textMuted }}>
+                {[
+                  t('mm.security.enteredAt', { time: formatTime(visitor.enteredAt) }),
+                  gateName(visitor.gateId),
+                  visitor.vehiclePlate,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+              {canFlag ? (
+                <ActionButton
+                  label={t('mm.security.flagVisitor')}
+                  variant="outline"
+                  icon={<Icon name="flag-outline" color={colors.brand.primary} size={18} />}
+                  onPress={() => {
+                    setReason('');
+                    setFlagging({ name: displayName, plate: visitor.vehiclePlate ?? null });
+                  }}
+                />
+              ) : null}
+            </View>
+          </Card>
+        );
+      })}
+      <ConfirmModal
+        visible={flagging !== null}
+        title={t('mm.security.flagTitle', { name: flagging?.name ?? '' })}
+        body={t('mm.security.flagBody')}
+        confirmLabel={t('mm.security.flagVisitor')}
+        destructive
+        busy={flag.isPending}
+        error={flag.isError ? errorText(flag.error) : null}
+        reason={{
+          label: t('mm.security.flagReason'),
+          value: reason,
+          onChange: setReason,
+          required: true,
+        }}
+        onConfirm={() => {
+          if (flagging && reason.trim().length >= 3) flag.mutate(flagging);
+        }}
+        onCancel={() => {
+          setFlagging(null);
+          flag.reset();
+        }}
+      />
+    </>
+  );
+}
+
 function Walkins({ gateName, search }: { gateName: (id: string) => string; search: string }) {
   const { estateId } = useManager();
   const walkins = useQuery({
@@ -370,7 +497,7 @@ function SosList() {
   );
 }
 
-/** Live gate feed, expected visitors, walk-ins and SOS (management-mobile.md §6 tab 3, §7.1-7.2). */
+/** Live gate feed, expected visitors, inside/overstaying, walk-ins and SOS (management-mobile.md §6 tab 3). */
 export default function SecurityScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -378,11 +505,13 @@ export default function SecurityScreen() {
   const canSos = useCanRespondToSos();
   const canGate = hasFeature('visitors') && can('visitor.log.read');
   const canIncidents = hasFeature('security') && (can('incident.manage') || can('incident.report'));
+  const canShifts = hasFeature('security') && can('security.staff.manage');
   const options = useMemo(
     () =>
       [
         canGate ? { key: 'activity' as const, label: t('mm.security.tab.activity') } : null,
         canGate ? { key: 'expected' as const, label: t('mm.security.tab.expected') } : null,
+        canGate ? { key: 'inside' as const, label: t('mm.security.tab.inside') } : null,
         canGate ? { key: 'walkins' as const, label: t('mm.security.tab.walkins') } : null,
         canSos ? { key: 'sos' as const, label: t('mm.security.tab.sos') } : null,
       ].filter((option): option is { key: SecurityView; label: string } => option !== null),
@@ -393,6 +522,7 @@ export default function SecurityScreen() {
   const [search, setSearch] = useState('');
   const gates = useGates();
   const [gateId, setGateId] = useState<string | null>(null);
+  const [activityGate, setActivityGate] = useState<string>('all');
   const activeGate = gateId ?? gates.data?.[0]?.id ?? null;
   const gateName = (id: string) => gates.data?.find((gate) => gate.id === id)?.name ?? '';
   const pull = usePullRefresh(() =>
@@ -414,6 +544,15 @@ export default function SecurityScreen() {
           leading={<Icon name="document-text-outline" color={colors.brand.primary} size={20} />}
           trailing={<Icon name="chevron-forward" color={colors.semantic.textMuted} size={20} />}
           onPress={() => router.push('/incidents')}
+        />
+      ) : null}
+      {canShifts ? (
+        <ListRow
+          title={t('mm.security.shiftsTitle')}
+          subtitle={t('mm.security.shiftsSubtitle')}
+          leading={<Icon name="time-outline" color={colors.brand.primary} size={20} />}
+          trailing={<Icon name="chevron-forward" color={colors.semantic.textMuted} size={20} />}
+          onPress={() => router.push('/security-shifts')}
         />
       ) : null}
       {!current ? (
@@ -439,6 +578,17 @@ export default function SecurityScreen() {
               autoCapitalize="none"
             />
           ) : null}
+          {current === 'activity' && (gates.data?.length ?? 0) > 1 ? (
+            <ChipGroup
+              label={t('visitorLog.filter.gate')}
+              options={[
+                { key: 'all', label: t('mm.security.allGates') },
+                ...(gates.data ?? []).map((gate) => ({ key: gate.id, label: gate.name })),
+              ]}
+              value={activityGate}
+              onChange={setActivityGate}
+            />
+          ) : null}
           {current === 'expected' && (gates.data?.length ?? 0) > 1 ? (
             <ChipGroup
               label={t('visitorLog.filter.gate')}
@@ -447,8 +597,11 @@ export default function SecurityScreen() {
               onChange={setGateId}
             />
           ) : null}
-          {current === 'activity' ? <Activity gateName={gateName} search={search} /> : null}
+          {current === 'activity' ? (
+            <Activity gateId={activityGate} gateName={gateName} search={search} />
+          ) : null}
           {current === 'expected' ? <Expected gateId={activeGate} search={search} /> : null}
+          {current === 'inside' ? <Inside gateName={gateName} search={search} /> : null}
           {current === 'walkins' ? <Walkins gateName={gateName} search={search} /> : null}
           {current === 'sos' ? <SosList /> : null}
         </>

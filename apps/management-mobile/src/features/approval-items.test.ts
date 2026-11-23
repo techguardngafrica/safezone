@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { badgeLabel, reasonIsValid, toApprovalItems, type ApprovalFormat } from './approval-items';
+import {
+  badgeLabel,
+  filterApprovals,
+  reasonIsValid,
+  toApprovalItems,
+  type ApprovalFormat,
+} from './approval-items';
 
 const format: ApprovalFormat = {
   unknownName: 'Unknown',
@@ -7,6 +13,10 @@ const format: ApprovalFormat = {
   money: (kobo) => `N${kobo / 100}`,
   dateTime: (iso) => `at ${iso}`,
   runDetail: (invoices, amount) => `${invoices} invoices, ${amount}`,
+  moveType: (type) => (type === 'move_in' ? 'Move-in' : 'Move-out'),
+  moveDetail: (type, unit, date) => `${type} · ${unit} · ${date}`,
+  transferDetail: (unit, type) => `${unit} · ${type}`,
+  paymentDetail: (method, ref) => `${method} · ${ref}`,
 };
 
 describe('toApprovalItems', () => {
@@ -53,6 +63,26 @@ describe('toApprovalItems', () => {
             createdAt: '2026-11-19T09:00:00.000Z',
           },
         ],
+        manualPayments: [
+          {
+            id: 'mp1',
+            amount: 250_000,
+            method: 'bank_transfer',
+            reference: 'REF-1',
+            note: 'Paid at office',
+            status: 'pending',
+            createdAt: '2026-11-21T12:00:00.000Z',
+          },
+        ],
+        refunds: [
+          {
+            id: 'rf1',
+            amount: 100_000,
+            reason: 'Double charge',
+            status: 'pending',
+            createdAt: '2026-11-21T08:00:00.000Z',
+          },
+        ],
         bookings: [
           {
             id: 'b1',
@@ -71,13 +101,62 @@ describe('toApprovalItems', () => {
             createdAt: '2026-11-21T12:00:00.000Z',
           },
         ],
+        domesticStaff: [
+          { id: 'ds1', name: 'Musa', role: 'Driver', status: 'pending' },
+          { id: 'ds2', name: 'Grace', role: 'Chef', status: 'active' },
+        ],
+        moves: [
+          {
+            id: 'm1',
+            type: 'move_in',
+            unitCode: 'B3',
+            scheduledOn: '2026-11-25',
+            gateNotice: 'Truck at 9am',
+            status: 'scheduled',
+            createdAt: '2026-11-20T12:00:00.000Z',
+          },
+        ],
+        channels: [
+          {
+            id: 'c1',
+            name: 'Tennis Club',
+            description: 'Weekly matches',
+            category: 'social',
+            status: 'pending_approval',
+            createdAt: '2026-11-20T08:00:00.000Z',
+          },
+        ],
+        ownershipTransfers: [
+          {
+            id: 'ot1',
+            unitCode: 'C2',
+            type: 'sale',
+            reason: 'Completed sale',
+            status: 'confirmed',
+            createdAt: '2026-11-21T10:30:00.000Z',
+          },
+        ],
       },
       format,
     );
-    expect(items.map((item) => item.id)).toEqual(['b1', 'r1', 'j1', 'w1']);
-    expect(items[1]).toMatchObject({ kind: 'billing_run', detail: '12 invoices, N12000' });
-    expect(items[2]).toMatchObject({ kind: 'join', title: 'Ada', detail: 'A1 · TENANT' });
-    expect(items[3]).toMatchObject({ kind: 'waiver', invoiceId: 'i1', title: 'N500' });
+    expect(items.map((item) => item.id)).toEqual([
+      'mp1',
+      'b1',
+      'ot1',
+      'r1',
+      'rf1',
+      'm1',
+      'j1',
+      'c1',
+      'w1',
+      'ds1',
+    ]);
+    expect(items[0]).toMatchObject({ kind: 'manual_payment', title: 'N2500' });
+    expect(filterApprovals(items, 'finance').map((i) => i.id)).toEqual(['mp1', 'r1', 'rf1', 'w1']);
+    expect(filterApprovals(items, 'people').map((i) => i.id)).toEqual(['ot1', 'm1', 'j1', 'ds1']);
+    expect(filterApprovals(items, 'facilities').map((i) => i.id)).toEqual(['b1']);
+    expect(filterApprovals(items, 'community').map((i) => i.id)).toEqual(['c1']);
+    expect(filterApprovals(items, 'all')).toHaveLength(10);
   });
 
   it('names applicants without a profile name', () => {

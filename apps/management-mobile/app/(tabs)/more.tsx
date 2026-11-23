@@ -31,7 +31,7 @@ function Leading({ name }: { name: IconName }) {
 export default function MoreScreen() {
   const router = useRouter();
   const state = useSession(session);
-  const { estateName, memberships, roles, hasFeature } = useManager();
+  const { estateName, memberships, roles, can, hasFeature } = useManager();
   const [switching, setSwitching] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const lockMissing = useDeviceLockMissing();
@@ -46,6 +46,24 @@ export default function MoreScreen() {
           leading={<Leading name="megaphone-outline" />}
           trailing={<Chevron />}
           onPress={() => router.push('/announcements')}
+        />
+      ) : null}
+      {hasFeature('community') && can('community.moderate') ? (
+        <ListRow
+          title={t('mm.more.moderation')}
+          subtitle={t('mm.more.moderationHint')}
+          leading={<Leading name="shield-half-outline" />}
+          trailing={<Chevron />}
+          onPress={() => router.push('/moderation')}
+        />
+      ) : null}
+      {can('report.read') ? (
+        <ListRow
+          title={t('mm.more.reports')}
+          subtitle={t('mm.more.reportsHint')}
+          leading={<Leading name="bar-chart-outline" />}
+          trailing={<Chevron />}
+          onPress={() => router.push('/reports')}
         />
       ) : null}
       <ListRow

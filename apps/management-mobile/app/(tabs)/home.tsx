@@ -151,8 +151,35 @@ function Stats() {
     enabled: showIncidents,
     refetchInterval: 60_000,
   });
+  const showMaintenance = hasFeature('maintenance') && can('maintenance.assign');
+  const maintenance = useQuery({
+    queryKey: ['estate', estateId, 'maintenance-requests', 'open', 'count'],
+    queryFn: () =>
+      unwrap(
+        api.GET('/v1/estates/{estateId}/maintenance-requests', {
+          params: { path: { estateId }, query: { limit: 50 } },
+        }),
+      ),
+    enabled: showMaintenance,
+    refetchInterval: 60_000,
+  });
+  const showBookings = hasFeature('facilities') && can('facility.manage');
+  const bookings = useQuery({
+    queryKey: ['estate', estateId, 'bookings', 'confirmed', 'count'],
+    queryFn: () =>
+      unwrap(
+        api.GET('/v1/estates/{estateId}/bookings', {
+          params: { path: { estateId }, query: { status: 'confirmed' } },
+        }),
+      ),
+    enabled: showBookings,
+    refetchInterval: 60_000,
+  });
   const entries = gate.data?.items.filter(
     (event) => event.direction === 'in' && event.decision !== 'deny',
+  );
+  const openMaintenance = maintenance.data?.filter(
+    (req) => !['resolved', 'closed', 'rejected', 'cancelled'].includes(req.status),
   );
   const activeCount = sos.data?.length;
 
@@ -191,11 +218,28 @@ function Stats() {
           onPress={() => router.push('/incidents')}
         />
       ) : null}
+      {showMaintenance ? (
+        <StatTile
+          icon="construct-outline"
+          label={t('mm.home.openMaintenance')}
+          value={countText(openMaintenance?.length)}
+          onPress={() => router.push('/estate?section=maintenance')}
+        />
+      ) : null}
+      {showBookings ? (
+        <StatTile
+          icon="calendar-outline"
+          label={t('mm.home.upcomingBookings')}
+          value={countText(bookings.data?.length)}
+          onPress={() => router.push('/estate?section=facilities')}
+        />
+      ) : null}
     </View>
   );
 }
 
 function MonthSummary() {
+  const router = useRouter();
   const { estateId, can, hasFeature } = useManager();
   const range = monthToDateWat();
   const allowed = can('report.read');
@@ -251,6 +295,11 @@ function MonthSummary() {
             </View>
           </>
         ) : null}
+        <ActionButton
+          label={t('mm.home.viewReports')}
+          variant="text"
+          onPress={() => router.push('/reports')}
+        />
       </View>
     </Card>
   );
