@@ -39,12 +39,15 @@ export function statusTone(status: string): Tone {
     case 'accepted':
     case 'ok':
     case 'live':
+    case 'allowed':
       return 'success';
     case 'submitted':
+    case 'applied':
     case 'pending':
     case 'new':
     case 'received':
     case 'under_review':
+    case 'in_review':
     case 'in_progress':
     case 'open':
     case 'contacted':
@@ -68,6 +71,8 @@ export function statusTone(status: string): Tone {
     case 'paused':
     case 'unverified':
     case 'revision_requested':
+    case 'requires_update':
+    case 'restricted':
       return 'warning';
     case 'rejected':
     case 'suspended':
@@ -80,6 +85,8 @@ export function statusTone(status: string): Tone {
     case 'fail':
     case 'critical':
     case 'investigating':
+    case 'prohibited':
+    case 'void':
       return 'danger';
     default:
       return 'neutral';

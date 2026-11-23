@@ -1,15 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type {
-  AdCampaignStatus,
-  AdCategory,
-  AdPlacementKey,
-  AdTargeting,
-  adCampaignListQuerySchema,
-  adLineItemInputSchema,
-  createAdCampaignSchema,
-  createAdCreativeSchema,
-  reviewAdCreativeSchema,
-  updateAdCampaignSchema,
+import {
+  AD_CATEGORIES,
+  type AdCampaignStatus,
+  type AdCategory,
+  type AdPlacementKey,
+  type AdTargeting,
+  type adCampaignListQuerySchema,
+  type adLineItemInputSchema,
+  type arconListQuerySchema,
+  type createAdCampaignSchema,
+  type createAdCreativeSchema,
+  type platformAdCreativeListQuerySchema,
+  type platformAdInvoiceListQuerySchema,
+  type platformAdReportQuerySchema,
+  type reviewAdCreativeSchema,
+  type updateAdCampaignSchema,
 } from '@safezone/schemas';
 import type { z } from 'zod';
 import type { Prisma } from '../../generated/prisma/client';
@@ -30,11 +35,13 @@ import { cursorPage, cursorWhere } from './advertisers.service';
 import {
   type ApprovalProblem,
   approvalProblems,
+  BANNED_CATEGORIES,
   type CampaignAction,
   campaignCan,
   ctr,
   groupByAudience,
   MINIMUM_AUDIENCE,
+  RESTRICTED_CATEGORIES,
   scheduleStep,
   statusAfterApproval,
   vatKobo,
@@ -663,6 +670,266 @@ export class CampaignsService {
       ),
       minimumAudience: MINIMUM_AUDIENCE,
     };
+  }
+
+  // ---- Platform cross-campaign desks (super-admin.md §6.6, §6.8, §6.9) -----------------------
+
+  async platformCreatives(query: z.infer<typeof platformAdCreativeListQuerySchema>) {
+    return this.ctx(async (tx) => {
+      const rows = await tx.adCreative.findMany({
+        where: {
+          active: true,
+          ...(query.reviewStatus ? { reviewStatus: query.reviewStatus } : {}),
+          ...cursorWhere(query.cursor),
+        },
+        orderBy: { id: 'desc' },
+        take: query.limit + 1,
+      });
+      const page = cursorPage(rows, query.limit);
+      const campaignIds = [...new Set(page.items.map((r) => r.campaignId))];
+      const campaigns = campaignIds.length
+        ? await tx.adCampaign.findMany({
+            where: { id: { in: campaignIds } },
+            select: { id: true, title: true, advertiserId: true, arconApprovalRef: true },
+          })
+        : [];
+      const advertiserIds = [...new Set(campaigns.map((c) => c.advertiserId))];
+      const advertisers = advertiserIds.length
+        ? await tx.advertiser.findMany({
+            where: { id: { in: advertiserIds } },
+            select: { id: true, name: true, category: true },
+          })
+        : [];
+      const campMap = new Map(campaigns.map((c) => [c.id, c]));
+      const advMap = new Map(advertisers.map((a) => [a.id, a]));
+      return {
+        items: page.items.map((row) => {
+          const camp = campMap.get(row.campaignId);
+          const adv = camp ? advMap.get(camp.advertiserId) : undefined;
+          return {
+            ...creativeView(row),
+            campaignTitle: camp?.title ?? '',
+            advertiserId: camp?.advertiserId ?? row.campaignId,
+            advertiserName: adv?.name ?? '',
+            category: (adv?.category ?? 'other') as AdCategory,
+            arconApprovalRef: camp?.arconApprovalRef ?? null,
+          };
+        }),
+        nextCursor: page.nextCursor,
+      };
+    });
+  }
+
+  async platformInvoices(query: z.infer<typeof platformAdInvoiceListQuerySchema>) {
+    return this.ctx(async (tx) => {
+      const rows = await tx.adInvoice.findMany({
+        where: {
+          ...(query.status ? { status: query.status } : {}),
+          ...cursorWhere(query.cursor),
+        },
+        orderBy: { id: 'desc' },
+        take: query.limit + 1,
+      });
+      const page = cursorPage(rows, query.limit);
+      const campaignIds = [...new Set(page.items.map((r) => r.campaignId))];
+      const campaigns = campaignIds.length
+        ? await tx.adCampaign.findMany({
+            where: { id: { in: campaignIds } },
+            select: { id: true, title: true, advertiserId: true },
+          })
+        : [];
+      const advertiserIds = [...new Set(campaigns.map((c) => c.advertiserId))];
+      const advertisers = advertiserIds.length
+        ? await tx.advertiser.findMany({
+            where: { id: { in: advertiserIds } },
+            select: { id: true, name: true },
+          })
+        : [];
+      const campMap = new Map(campaigns.map((c) => [c.id, c]));
+      const advMap = new Map(advertisers.map((a) => [a.id, a.name]));
+      return {
+        items: page.items.map((row) => {
+          const camp = campMap.get(row.campaignId);
+          return {
+            ...invoiceView(row),
+            campaignTitle: camp?.title ?? '',
+            advertiserId: camp?.advertiserId ?? row.campaignId,
+            advertiserName: camp ? (advMap.get(camp.advertiserId) ?? '') : '',
+          };
+        }),
+        nextCursor: page.nextCursor,
+      };
+    });
+  }
+
+  async platformReport(query: z.infer<typeof platformAdReportQuerySchema>) {
+    const to = query.to ? new Date(query.to) : new Date();
+    const from = query.from
+      ? new Date(query.from)
+      : new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return this.ctx(async (tx) => {
+      const [totals] = await tx.$queryRaw<{ impressions: bigint; clicks: bigint }[]>`
+        select (select count(*) from platform.ad_impressions where at >= ${from} and at <= ${to}) as impressions,
+               (select count(*) from platform.ad_clicks where at >= ${from} and at <= ${to}) as clicks`;
+      const [invTotals] = await tx.$queryRaw<{ invoiced: bigint; paid: bigint }[]>`
+        select coalesce(sum(total) filter (where status in ('issued', 'paid')), 0) as invoiced,
+               coalesce(sum(total) filter (where status = 'paid'), 0) as paid
+          from platform.ad_invoices
+         where created_at >= ${from} and created_at <= ${to}`;
+      const placementRows = await tx.$queryRaw<
+        { placement_key: string; impressions: bigint; clicks: bigint }[]
+      >`
+        select p.key as placement_key,
+               coalesce(i.n, 0) as impressions,
+               coalesce(c.n, 0) as clicks
+          from platform.ad_placements p
+          left join (select placement_key, count(*) as n from platform.ad_impressions
+                      where at >= ${from} and at <= ${to} group by 1) i on i.placement_key = p.key
+          left join (select placement_key, count(*) as n from platform.ad_clicks
+                      where at >= ${from} and at <= ${to} group by 1) c on c.placement_key = p.key
+         order by impressions desc, p.key asc`;
+      const campaignRows = await tx.$queryRaw<
+        {
+          campaign_id: string;
+          title: string;
+          advertiser_name: string;
+          status: string;
+          impressions: bigint;
+          clicks: bigint;
+          paid_kobo: bigint;
+        }[]
+      >`
+        select c.id as campaign_id, c.title, a.name as advertiser_name, c.status,
+               coalesce(i.n, 0) as impressions,
+               coalesce(k.n, 0) as clicks,
+               coalesce(v.paid, 0) as paid_kobo
+          from platform.ad_campaigns c
+          join platform.advertisers a on a.id = c.advertiser_id
+          left join (select campaign_id, count(*) as n from platform.ad_impressions
+                      where at >= ${from} and at <= ${to} group by 1) i on i.campaign_id = c.id
+          left join (select campaign_id, count(*) as n from platform.ad_clicks
+                      where at >= ${from} and at <= ${to} group by 1) k on k.campaign_id = c.id
+          left join (select campaign_id, sum(total) as paid from platform.ad_invoices
+                      where status = 'paid' and created_at >= ${from} and created_at <= ${to}
+                      group by 1) v on v.campaign_id = c.id
+         where coalesce(i.n, 0) > 0 or coalesce(k.n, 0) > 0 or coalesce(v.paid, 0) > 0
+         order by impressions desc, paid_kobo desc
+         limit 50`;
+      const impressions = Number(totals?.impressions ?? 0n);
+      const clicks = Number(totals?.clicks ?? 0n);
+      return {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        impressions,
+        clicks,
+        ctr: ctr(impressions, clicks),
+        invoicedKobo: Number(invTotals?.invoiced ?? 0n),
+        paidKobo: Number(invTotals?.paid ?? 0n),
+        byPlacement: placementRows.map((p) => {
+          const imp = Number(p.impressions);
+          const clk = Number(p.clicks);
+          return {
+            placementKey: p.placement_key as AdPlacementKey,
+            impressions: imp,
+            clicks: clk,
+            ctr: ctr(imp, clk),
+          };
+        }),
+        byCampaign: campaignRows.map((c) => {
+          const imp = Number(c.impressions);
+          const clk = Number(c.clicks);
+          return {
+            campaignId: c.campaign_id,
+            campaignTitle: c.title,
+            advertiserName: c.advertiser_name,
+            status: c.status as AdCampaignStatus,
+            impressions: imp,
+            clicks: clk,
+            ctr: ctr(imp, clk),
+            paidKobo: Number(c.paid_kobo),
+          };
+        }),
+      };
+    });
+  }
+
+  categoryPolicies() {
+    return AD_CATEGORIES.map((category) => {
+      if (BANNED_CATEGORIES.has(category)) {
+        return {
+          category,
+          policy: 'prohibited' as const,
+          locked: true,
+          notes: 'Permanently prohibited across all Safezone surfaces.',
+        };
+      }
+      if (RESTRICTED_CATEGORIES.has(category)) {
+        return {
+          category,
+          policy: 'restricted' as const,
+          locked: false,
+          notes: 'Requires ARCON vetting and a reviewer justification note on campaign approval.',
+        };
+      }
+      return {
+        category,
+        policy: 'allowed' as const,
+        locked: false,
+        notes: 'Eligible for managed campaigns subject to standard ARCON and creative review.',
+      };
+    });
+  }
+
+  async arconRegister(query: z.infer<typeof arconListQuerySchema>) {
+    return this.ctx(async (tx) => {
+      const q = query.q?.trim();
+      const rows = await tx.adCampaign.findMany({
+        where: {
+          ...(query.hasRef === 'yes' ? { arconApprovalRef: { not: null } } : {}),
+          ...(query.hasRef === 'no' ? { arconApprovalRef: null } : {}),
+          ...(q
+            ? {
+                OR: [
+                  { arconApprovalRef: { contains: q, mode: 'insensitive' } },
+                  { title: { contains: q, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+          ...cursorWhere(query.cursor),
+        },
+        orderBy: { id: 'desc' },
+        take: query.limit + 1,
+      });
+      const page = cursorPage(rows, query.limit);
+      const advertiserIds = [...new Set(page.items.map((r) => r.advertiserId))];
+      const advertisers = advertiserIds.length
+        ? await tx.advertiser.findMany({
+            where: { id: { in: advertiserIds } },
+            select: { id: true, name: true, category: true },
+          })
+        : [];
+      const advMap = new Map(advertisers.map((a) => [a.id, a]));
+      return {
+        items: page.items.map((row) => {
+          const adv = advMap.get(row.advertiserId);
+          return {
+            campaignId: row.id,
+            campaignTitle: row.title,
+            advertiserId: row.advertiserId,
+            advertiserName: adv?.name ?? '',
+            category: (adv?.category ?? 'other') as AdCategory,
+            arconApprovalRef: row.arconApprovalRef,
+            arconApprovalFileId: row.arconApprovalFileId,
+            campaignStatus: row.status as AdCampaignStatus,
+            startsAt: row.startsAt.toISOString(),
+            endsAt: row.endsAt.toISOString(),
+            approvedAt: row.approvedAt?.toISOString() ?? null,
+            restrictedNote: row.restrictedNote,
+          };
+        }),
+        nextCursor: page.nextCursor,
+      };
+    });
   }
 
   // ---- Helpers -------------------------------------------------------------------------------

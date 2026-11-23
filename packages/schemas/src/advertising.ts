@@ -430,3 +430,89 @@ export const updateEstateAdSettingsSchema = z.object({
   blockedCategories: z.array(adCategorySchema).max(AD_CATEGORIES.length).optional(),
   dashboardInfoEnabled: z.boolean().optional(),
 });
+
+// ---- Platform cross-campaign desks (super-admin.md §6.6, §6.8, §6.9) ----------------------------
+
+export const platformAdCreativeItemSchema = adCreativeSchema.extend({
+  campaignTitle: z.string(),
+  advertiserId: z.uuid(),
+  advertiserName: z.string(),
+  category: adCategorySchema,
+  arconApprovalRef: z.string().nullable(),
+});
+export const platformAdCreativeListQuerySchema = z.object({
+  reviewStatus: adCreativeReviewSchema.optional(),
+  ...cursorQuery,
+});
+
+export const platformAdInvoiceItemSchema = adInvoiceSchema.extend({
+  campaignTitle: z.string(),
+  advertiserId: z.uuid(),
+  advertiserName: z.string(),
+});
+export const platformAdInvoiceListQuerySchema = z.object({
+  status: z.enum(['issued', 'paid', 'void']).optional(),
+  ...cursorQuery,
+});
+
+export const platformAdReportQuerySchema = z.object({
+  from: z.iso.datetime({ offset: true }).optional(),
+  to: z.iso.datetime({ offset: true }).optional(),
+});
+export const platformAdReportSchema = z.object({
+  from: z.iso.datetime(),
+  to: z.iso.datetime(),
+  impressions: z.number().int(),
+  clicks: z.number().int(),
+  ctr: z.number(),
+  invoicedKobo: koboSchema,
+  paidKobo: koboSchema,
+  byPlacement: z.array(
+    z.object({
+      placementKey: adPlacementKeySchema,
+      impressions: z.number().int(),
+      clicks: z.number().int(),
+      ctr: z.number(),
+    }),
+  ),
+  byCampaign: z.array(
+    z.object({
+      campaignId: z.uuid(),
+      campaignTitle: z.string(),
+      advertiserName: z.string(),
+      status: adCampaignStatusSchema,
+      impressions: z.number().int(),
+      clicks: z.number().int(),
+      ctr: z.number(),
+      paidKobo: koboSchema,
+    }),
+  ),
+});
+
+export const adCategoryPolicyLevelSchema = z.enum(['allowed', 'restricted', 'prohibited']);
+export const adCategoryPolicySchema = z.object({
+  category: adCategorySchema,
+  policy: adCategoryPolicyLevelSchema,
+  locked: z.boolean(),
+  notes: z.string(),
+});
+
+export const arconRecordSchema = z.object({
+  campaignId: z.uuid(),
+  campaignTitle: z.string(),
+  advertiserId: z.uuid(),
+  advertiserName: z.string(),
+  category: adCategorySchema,
+  arconApprovalRef: z.string().nullable(),
+  arconApprovalFileId: z.uuid().nullable(),
+  campaignStatus: adCampaignStatusSchema,
+  startsAt: z.iso.datetime(),
+  endsAt: z.iso.datetime(),
+  approvedAt: z.iso.datetime().nullable(),
+  restrictedNote: z.string().nullable(),
+});
+export const arconListQuerySchema = z.object({
+  q: z.string().trim().min(1).max(120).optional(),
+  hasRef: z.enum(['yes', 'no']).optional(),
+  ...cursorQuery,
+});

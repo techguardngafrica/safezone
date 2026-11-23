@@ -374,6 +374,62 @@ export const retentionRuleSchema = z.object({
 });
 export const upsertRetentionRuleSchema = retentionRuleSchema.omit({ updatedAt: true });
 
+/** DPIA records register (super-admin.md §6.8). */
+export const dpiaRiskLevelSchema = z.enum(['low', 'medium', 'high']);
+export const dpiaStatusSchema = z.enum(['draft', 'in_review', 'approved', 'requires_update']);
+
+export const dpiaRecordSchema = z.object({
+  id: z.uuid(),
+  title: z.string(),
+  estateId: z.uuid().nullable(),
+  processingActivity: z.string(),
+  riskLevel: dpiaRiskLevelSchema,
+  status: dpiaStatusSchema,
+  mitigations: z.string(),
+  documentFileId: z.uuid().nullable(),
+  reviewedBy: z.uuid().nullable(),
+  reviewedAt: z.iso.datetime().nullable(),
+  nextReviewAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+
+export const createDpiaRecordSchema = z.object({
+  title: z.string().trim().min(3).max(200),
+  estateId: z.uuid().optional(),
+  processingActivity: z.string().trim().min(5).max(4000),
+  riskLevel: dpiaRiskLevelSchema,
+  mitigations: z.string().trim().min(5).max(4000),
+  documentFileId: z.uuid().optional(),
+  nextReviewAt: z.iso.datetime({ offset: true }).optional(),
+});
+
+export const updateDpiaRecordSchema = z.object({
+  title: z.string().trim().min(3).max(200).optional(),
+  processingActivity: z.string().trim().min(5).max(4000).optional(),
+  riskLevel: dpiaRiskLevelSchema.optional(),
+  status: dpiaStatusSchema.optional(),
+  mitigations: z.string().trim().min(5).max(4000).optional(),
+  documentFileId: z.uuid().nullable().optional(),
+  nextReviewAt: z.iso.datetime({ offset: true }).nullable().optional(),
+});
+
+/** Platform notification template catalogue (super-admin.md §6.9). */
+export const platformNotificationTemplateSchema = z.object({
+  intent: z.string(),
+  category: z.string(),
+  priority: z.enum(['critical', 'high', 'normal', 'bulk']),
+  mandatory: z.boolean(),
+  channels: z.array(z.enum(['push', 'sms', 'email', 'whatsapp'])),
+  smsOnlyWithoutPush: z.boolean(),
+  titleKey: z.string(),
+  bodyKey: z.string(),
+  smsKey: z.string().nullable(),
+  titleText: z.string(),
+  bodyText: z.string(),
+  smsText: z.string().nullable(),
+});
+
 /** Platform audit log query (super-admin.md §5). */
 export const platformAuditQuerySchema = z.object({
   estateId: z.uuid().optional(),

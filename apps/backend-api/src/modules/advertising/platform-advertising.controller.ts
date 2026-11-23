@@ -4,6 +4,7 @@ import {
   adCampaignDetailSchema,
   adCampaignListQuerySchema,
   adCampaignSchema,
+  adCategoryPolicySchema,
   adCreativeSchema,
   adCreditSchema,
   adEnquiryListQuerySchema,
@@ -14,11 +15,19 @@ import {
   advertiserListQuerySchema,
   advertiserSchema,
   approveAdCampaignSchema,
+  arconListQuerySchema,
+  arconRecordSchema,
   createAdCampaignSchema,
   createAdCreativeSchema,
   createAdInvoiceSchema,
   createAdvertiserSchema,
+  platformAdCreativeItemSchema,
+  platformAdCreativeListQuerySchema,
   platformAdEnquirySchema,
+  platformAdInvoiceItemSchema,
+  platformAdInvoiceListQuerySchema,
+  platformAdReportQuerySchema,
+  platformAdReportSchema,
   reviewAdCreativeSchema,
   updateAdCampaignSchema,
   updateAdEnquirySchema,
@@ -387,5 +396,69 @@ export class PlatformAdvertisingController {
   })
   invoices(@ValidParams() params: IdParams) {
     return this.campaigns.invoices(params.id);
+  }
+
+  // ---- Cross-campaign desks (super-admin.md §6.6, §6.8, §6.9) --------------------------------
+
+  @Get('ad-creatives')
+  @Can('ad.campaign.review', 'ad.campaign.manage')
+  @Contract({
+    summary: 'Creative review queue across campaigns',
+    tags: TAGS,
+    query: platformAdCreativeListQuerySchema,
+    response: platformAdCreativeItemSchema,
+    paginated: true,
+  })
+  creativeQueue(@ValidQuery() query: z.infer<typeof platformAdCreativeListQuerySchema>) {
+    return this.campaigns.platformCreatives(query);
+  }
+
+  @Get('ad-invoices')
+  @Can('ad.campaign.manage', 'ad.campaign.review', 'platform.finance')
+  @Contract({
+    summary: 'Ad invoices across all campaigns',
+    tags: TAGS,
+    query: platformAdInvoiceListQuerySchema,
+    response: platformAdInvoiceItemSchema,
+    paginated: true,
+  })
+  allInvoices(@ValidQuery() query: z.infer<typeof platformAdInvoiceListQuerySchema>) {
+    return this.campaigns.platformInvoices(query);
+  }
+
+  @Get('ad-reports')
+  @Can('ad.campaign.manage', 'ad.campaign.review', 'platform.finance')
+  @Contract({
+    summary: 'Aggregate platform advertising performance and revenue report',
+    tags: TAGS,
+    query: platformAdReportQuerySchema,
+    response: platformAdReportSchema,
+  })
+  platformReport(@ValidQuery() query: z.infer<typeof platformAdReportQuerySchema>) {
+    return this.campaigns.platformReport(query);
+  }
+
+  @Get('ad-categories')
+  @Can('platform.config', 'ad.campaign.manage', 'ad.campaign.review')
+  @Contract({
+    summary: 'Prohibited, restricted and allowed advertising categories',
+    tags: TAGS,
+    response: z.array(adCategoryPolicySchema),
+  })
+  adCategories() {
+    return this.campaigns.categoryPolicies();
+  }
+
+  @Get('compliance/arcon')
+  @Can('platform.compliance', 'ad.campaign.review')
+  @Contract({
+    summary: 'ARCON campaign approval register',
+    tags: ['platform', 'advertising'],
+    query: arconListQuerySchema,
+    response: arconRecordSchema,
+    paginated: true,
+  })
+  arconRegister(@ValidQuery() query: z.infer<typeof arconListQuerySchema>) {
+    return this.campaigns.arconRegister(query);
   }
 }

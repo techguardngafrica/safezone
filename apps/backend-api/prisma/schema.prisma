@@ -2787,6 +2787,30 @@ model RetentionRule {
   @@schema("platform")
 }
 
+/// Data Protection Impact Assessment (DPIA) register (super-admin.md §6.8).
+model DpiaRecord {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  title              String
+  estateId           String?   @map("estate_id") @db.Uuid
+  processingActivity String    @map("processing_activity")
+  /// low | medium | high
+  riskLevel          String    @map("risk_level")
+  /// draft | in_review | approved | requires_update
+  status             String    @default("draft")
+  mitigations        String
+  documentFileId     String?   @map("document_file_id") @db.Uuid
+  reviewedBy         String?   @map("reviewed_by") @db.Uuid
+  reviewedAt         DateTime? @map("reviewed_at") @db.Timestamptz(3)
+  nextReviewAt       DateTime? @map("next_review_at") @db.Timestamptz(3)
+  createdBy          String    @map("created_by") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, riskLevel, createdAt])
+  @@map("dpia_records")
+  @@schema("platform")
+}
+
 // ---------------------------------------------------------------------------
 // Marketplace (marketplace.md, Phase 4; ADR-0023). Vendors and listings are platform-level
 // (`marketplace` context); approvals, orders, reviews, disputes and classifieds are tenant tables.

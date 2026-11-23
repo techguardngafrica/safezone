@@ -1,4 +1,5 @@
 import { Controller, Get, Put } from '@nestjs/common';
+import { t } from '@safezone/i18n';
 import {
   appConfigQuerySchema,
   appConfigSchema,
@@ -8,6 +9,7 @@ import {
   featureFlagSchema,
   myFlagsQuerySchema,
   platformHealthSchema,
+  platformNotificationTemplateSchema,
   platformProviderStatusSchema,
   upsertAppVersionSchema,
   upsertFeatureFlagSchema,
@@ -20,6 +22,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { QueueService } from '../../common/queues/queue.service';
 import { QUEUES, type QueueName } from '../../common/queues/queues';
 import { RedisService } from '../../common/redis/redis.module';
+import { INTENTS, type IntentDefinition } from '../notifications/domain/intents';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { FeatureFlagsService } from './feature-flags.service';
 
@@ -127,6 +130,30 @@ export class PlatformController {
   })
   listProviders() {
     return this.flags.listProviders();
+  }
+
+  @Get('platform/notification-templates')
+  @Can('platform.config')
+  @Contract({
+    summary: 'Catalogue of platform notification intents and default English copy',
+    tags: ['platform'],
+    response: z.array(platformNotificationTemplateSchema),
+  })
+  listNotificationTemplates() {
+    return Object.entries(INTENTS).map(([intent, def]: [string, IntentDefinition]) => ({
+      intent,
+      category: def.category,
+      priority: def.priority,
+      mandatory: def.mandatory,
+      channels: [...def.channels],
+      smsOnlyWithoutPush: def.smsOnlyWithoutPush,
+      titleKey: def.title,
+      bodyKey: def.body,
+      smsKey: def.sms ?? null,
+      titleText: t(def.title),
+      bodyText: t(def.body),
+      smsText: def.sms ? t(def.sms) : null,
+    }));
   }
 
   @Get('platform/health')

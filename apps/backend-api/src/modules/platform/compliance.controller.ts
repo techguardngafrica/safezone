@@ -2,12 +2,15 @@ import { Controller, Get, Patch, Post, Put } from '@nestjs/common';
 import {
   breachSchema,
   createBreachSchema,
+  createDpiaRecordSchema,
   createDsrSchema,
+  dpiaRecordSchema,
   dsrListQuerySchema,
   dsrSchema,
   idParamSchema,
   retentionRuleSchema,
   updateBreachSchema,
+  updateDpiaRecordSchema,
   updateDsrSchema,
   upsertRetentionRuleSchema,
 } from '@safezone/schemas';
@@ -133,5 +136,50 @@ export class ComplianceController {
     @ValidBody() body: z.infer<typeof upsertRetentionRuleSchema>,
   ) {
     return this.compliance.upsertRetentionRule(auth.userId, body);
+  }
+
+  @Get('dpia')
+  @Can('platform.compliance')
+  @Contract({
+    summary: 'List DPIA records (newest first)',
+    tags: ['platform'],
+    response: z.array(dpiaRecordSchema),
+  })
+  listDpias() {
+    return this.compliance.listDpias();
+  }
+
+  @Post('dpia')
+  @Can('platform.compliance')
+  @Contract({
+    summary: 'Log a Data Protection Impact Assessment (DPIA) record',
+    tags: ['platform'],
+    body: createDpiaRecordSchema,
+    response: dpiaRecordSchema,
+    status: 201,
+  })
+  createDpia(
+    @CurrentAuth() auth: AuthContext,
+    @ValidBody() body: z.infer<typeof createDpiaRecordSchema>,
+  ) {
+    return this.compliance.createDpia(auth.userId, body);
+  }
+
+  @Patch('dpia/:id')
+  @Can('platform.compliance')
+  @Contract({
+    summary: 'Update a DPIA record or mark it approved',
+    tags: ['platform'],
+    params: idParamSchema,
+    body: updateDpiaRecordSchema,
+    response: dpiaRecordSchema,
+    errors: [404],
+  })
+  updateDpia(
+    @CurrentAuth() auth: AuthContext,
+    @ValidParams() params: z.infer<typeof idParamSchema>,
+    @ValidBody() body: z.infer<typeof updateDpiaRecordSchema>,
+  ) {
+    return this.compliance.updateDpia(auth.userId, params.id, body);
   }
 }

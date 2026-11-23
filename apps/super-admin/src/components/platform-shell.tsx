@@ -110,6 +110,29 @@ const NAV: { label?: MessageKey; items: NavSpec[] }[] = [
     ],
   },
   {
+    label: 'admin.nav.group.vendors',
+    items: [
+      {
+        href: '/vendors',
+        label: 'admin.nav.vendors',
+        icon: 'building',
+        permission: 'vendor.approve',
+      },
+      {
+        href: '/vendors/commissions',
+        label: 'admin.nav.commissions',
+        icon: 'sliders',
+        permission: ['platform.config', 'platform.finance'],
+      },
+      {
+        href: '/vendors/disputes',
+        label: 'admin.nav.disputes',
+        icon: 'alert',
+        permission: 'vendor.approve',
+      },
+    ],
+  },
+  {
     label: 'admin.nav.group.advertising',
     items: [
       {
@@ -131,10 +154,28 @@ const NAV: { label?: MessageKey; items: NavSpec[] }[] = [
         permission: ['ad.campaign.manage', 'ad.campaign.review'],
       },
       {
+        href: '/ads/review',
+        label: 'admin.nav.adReview',
+        icon: 'fileCheck',
+        permission: ['ad.campaign.review', 'ad.campaign.manage'],
+      },
+      {
         href: '/ads/placements',
         label: 'admin.nav.adPlacements',
         icon: 'sliders',
         permission: ['ad.campaign.manage', 'ad.campaign.review'],
+      },
+      {
+        href: '/ads/invoices',
+        label: 'admin.nav.adInvoices',
+        icon: 'wallet',
+        permission: ['ad.campaign.manage', 'ad.campaign.review', 'platform.finance'],
+      },
+      {
+        href: '/ads/reports',
+        label: 'admin.nav.adReports',
+        icon: 'activity',
+        permission: ['ad.campaign.manage', 'ad.campaign.review', 'platform.finance'],
       },
     ],
   },
@@ -158,6 +199,18 @@ const NAV: { label?: MessageKey; items: NavSpec[] }[] = [
         label: 'admin.nav.retention',
         icon: 'clock',
         permission: 'platform.compliance',
+      },
+      {
+        href: '/compliance/dpia',
+        label: 'admin.nav.dpia',
+        icon: 'shield',
+        permission: 'platform.compliance',
+      },
+      {
+        href: '/compliance/arcon',
+        label: 'admin.nav.arcon',
+        icon: 'clipboard',
+        permission: ['platform.compliance', 'ad.campaign.review'],
       },
     ],
   },
@@ -187,6 +240,18 @@ const NAV: { label?: MessageKey; items: NavSpec[] }[] = [
         label: 'admin.nav.providers',
         icon: 'sliders',
         permission: 'platform.config',
+      },
+      {
+        href: '/platform/templates',
+        label: 'admin.nav.templates',
+        icon: 'inbox',
+        permission: 'platform.config',
+      },
+      {
+        href: '/platform/ad-categories',
+        label: 'admin.nav.adCategories',
+        icon: 'shield',
+        permission: ['platform.config', 'ad.campaign.manage', 'ad.campaign.review'],
       },
       {
         href: '/audit',

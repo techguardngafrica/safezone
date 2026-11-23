@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
+  adCategoryPolicySchema,
   adTargetingSchema,
+  arconListQuerySchema,
   createAdCampaignSchema,
   createAdCreativeSchema,
   createAdEnquirySchema,
+  platformAdCreativeListQuerySchema,
+  platformAdInvoiceListQuerySchema,
   reviewAdCreativeSchema,
 } from './advertising';
+import { createDpiaRecordSchema, updateDpiaRecordSchema } from './platform-admin';
 
 const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
 
@@ -70,5 +75,41 @@ describe('advertising schemas', () => {
   it('needs notes when a creative is not approved', () => {
     expect(reviewAdCreativeSchema.safeParse({ decision: 'rejected' }).success).toBe(false);
     expect(reviewAdCreativeSchema.safeParse({ decision: 'approved' }).success).toBe(true);
+  });
+
+  it('validates platform advertising desk queries and category policies', () => {
+    expect(platformAdCreativeListQuerySchema.safeParse({ reviewStatus: 'pending' }).success).toBe(
+      true,
+    );
+    expect(platformAdInvoiceListQuerySchema.safeParse({ status: 'paid' }).success).toBe(true);
+    expect(arconListQuerySchema.safeParse({ hasRef: 'yes', q: 'ARCON' }).success).toBe(true);
+    expect(
+      adCategoryPolicySchema.safeParse({
+        category: 'tobacco',
+        policy: 'prohibited',
+        locked: true,
+        notes: 'Permanently prohibited.',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('validates DPIA create and update schemas', () => {
+    expect(
+      createDpiaRecordSchema.safeParse({
+        title: 'SOS location processing',
+        processingActivity: 'Capture GPS location during active SOS alerts only',
+        riskLevel: 'high',
+        mitigations: 'Stop collection immediately on resolution; strict RLS and audit trail',
+      }).success,
+    ).toBe(true);
+    expect(
+      createDpiaRecordSchema.safeParse({
+        title: 'No',
+        processingActivity: 'Short',
+        riskLevel: 'high',
+        mitigations: 'Short',
+      }).success,
+    ).toBe(false);
+    expect(updateDpiaRecordSchema.safeParse({ status: 'approved' }).success).toBe(true);
   });
 });

@@ -6888,6 +6888,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/ad-categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Prohibited, restricted and allowed advertising categories
+     * @description Requires `platform.config` or `ad.campaign.manage` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_adCategories'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/ad-creatives': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Creative review queue across campaigns
+     * @description Requires `ad.campaign.review` or `ad.campaign.manage`.
+     */
+    get: operations['platformAdvertising_creativeQueue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/platform/ad-creatives/{id}/review': {
     parameters: {
       query?: never;
@@ -6959,7 +6999,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Ad invoices across all campaigns
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review` or `platform.finance`.
+     */
+    get: operations['platformAdvertising_allInvoices'];
     put?: never;
     /**
      * Invoice a campaign (agreed price plus 7.5% VAT)
@@ -7010,6 +7054,26 @@ export interface paths {
      * @description Requires `ad.campaign.manage`.
      */
     patch: operations['platformAdvertising_updatePlacement'];
+    trace?: never;
+  };
+  '/v1/platform/ad-reports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Aggregate platform advertising performance and revenue report
+     * @description Requires `ad.campaign.manage` or `ad.campaign.review` or `platform.finance`.
+     */
+    get: operations['platformAdvertising_platformReport'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/platform/advertisers': {
@@ -7186,6 +7250,70 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/compliance/arcon': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * ARCON campaign approval register
+     * @description Requires `platform.compliance` or `ad.campaign.review`.
+     */
+    get: operations['platformAdvertising_arconRegister'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/dpia': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List DPIA records (newest first)
+     * @description Requires `platform.compliance`.
+     */
+    get: operations['compliance_listDpias'];
+    put?: never;
+    /**
+     * Log a Data Protection Impact Assessment (DPIA) record
+     * @description Requires `platform.compliance`.
+     */
+    post: operations['compliance_createDpia'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/dpia/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update a DPIA record or mark it approved
+     * @description Requires `platform.compliance`.
+     */
+    patch: operations['compliance_updateDpia'];
     trace?: never;
   };
   '/v1/platform/dsr': {
@@ -7612,6 +7740,26 @@ export interface paths {
      * @description Requires `platform.config`.
      */
     get: operations['platform_platformHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/notification-templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Catalogue of platform notification intents and default English copy
+     * @description Requires `platform.config`.
+     */
+    get: operations['platform_listNotificationTemplates'];
     put?: never;
     post?: never;
     delete?: never;
@@ -34590,6 +34738,132 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformAdvertising_adCategories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              /** @enum {string} */
+              policy: 'allowed' | 'restricted' | 'prohibited';
+              locked: boolean;
+              notes: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_creativeQueue: {
+    parameters: {
+      query?: {
+        reviewStatus?: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              /** @enum {string} */
+              type: 'image_banner' | 'sponsored_text' | 'sponsored_post' | 'promo_card';
+              imageFileId: string | null;
+              headline: string;
+              body: string | null;
+              cta: string;
+              destinationUrl: string;
+              version: number;
+              /** @enum {string} */
+              reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+              reviewNotes: string | null;
+              active: boolean;
+              /** Format: date-time */
+              createdAt: string;
+              campaignTitle: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              arconApprovalRef: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   platformAdvertising_review: {
     parameters: {
       query?: never;
@@ -34948,6 +35222,57 @@ export interface operations {
       500: components['responses']['Error500'];
     };
   };
+  platformAdvertising_allInvoices: {
+    parameters: {
+      query?: {
+        status?: 'issued' | 'paid' | 'void';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              campaignId: string;
+              number: string;
+              amountKobo: number;
+              vatKobo: number;
+              totalKobo: number;
+              /** @enum {string} */
+              status: 'issued' | 'paid' | 'void';
+              paidAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              campaignTitle: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
   platformAdvertising_invoice: {
     parameters: {
       query?: never;
@@ -35097,6 +35422,82 @@ export interface operations {
       401: components['responses']['Error401'];
       403: components['responses']['Error403'];
       404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_platformReport: {
+    parameters: {
+      query?: {
+        from?: string;
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: date-time */
+              from: string;
+              /** Format: date-time */
+              to: string;
+              impressions: number;
+              clicks: number;
+              ctr: number;
+              invoicedKobo: number;
+              paidKobo: number;
+              byPlacement: {
+                /** @enum {string} */
+                placementKey:
+                  | 'resident.home.banner'
+                  | 'resident.feed.sponsored'
+                  | 'resident.marketplace.banner'
+                  | 'resident.discovery.sponsored'
+                  | 'management.dashboard.info';
+                impressions: number;
+                clicks: number;
+                ctr: number;
+              }[];
+              byCampaign: {
+                /** Format: uuid */
+                campaignId: string;
+                campaignTitle: string;
+                advertiserName: string;
+                /** @enum {string} */
+                status:
+                  | 'draft'
+                  | 'submitted'
+                  | 'under_review'
+                  | 'awaiting_payment'
+                  | 'approved'
+                  | 'scheduled'
+                  | 'active'
+                  | 'paused'
+                  | 'completed'
+                  | 'rejected'
+                  | 'cancelled';
+                impressions: number;
+                clicks: number;
+                ctr: number;
+                paidKobo: number;
+              }[];
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
       500: components['responses']['Error500'];
     };
   };
@@ -35827,6 +36228,260 @@ export interface operations {
               bps: number;
               /** Format: date-time */
               validFrom: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      404: components['responses']['Error404'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platformAdvertising_arconRegister: {
+    parameters: {
+      query?: {
+        q?: string;
+        hasRef?: 'yes' | 'no';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              campaignId: string;
+              campaignTitle: string;
+              /** Format: uuid */
+              advertiserId: string;
+              advertiserName: string;
+              /** @enum {string} */
+              category:
+                | 'home_services'
+                | 'retail'
+                | 'food_and_drink'
+                | 'real_estate'
+                | 'finance'
+                | 'education'
+                | 'health'
+                | 'automotive'
+                | 'telecoms'
+                | 'events'
+                | 'public_service'
+                | 'alcohol'
+                | 'gambling'
+                | 'political'
+                | 'tobacco'
+                | 'other';
+              arconApprovalRef: string | null;
+              arconApprovalFileId: string | null;
+              /** @enum {string} */
+              campaignStatus:
+                | 'draft'
+                | 'submitted'
+                | 'under_review'
+                | 'awaiting_payment'
+                | 'approved'
+                | 'scheduled'
+                | 'active'
+                | 'paused'
+                | 'completed'
+                | 'rejected'
+                | 'cancelled';
+              /** Format: date-time */
+              startsAt: string;
+              /** Format: date-time */
+              endsAt: string;
+              approvedAt: string | null;
+              restrictedNote: string | null;
+            }[];
+            meta?: components['schemas']['PageMeta'];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_listDpias: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              estateId: string | null;
+              processingActivity: string;
+              /** @enum {string} */
+              riskLevel: 'low' | 'medium' | 'high';
+              /** @enum {string} */
+              status: 'draft' | 'in_review' | 'approved' | 'requires_update';
+              mitigations: string;
+              documentFileId: string | null;
+              reviewedBy: string | null;
+              reviewedAt: string | null;
+              nextReviewAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_createDpia: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title: string;
+          /** Format: uuid */
+          estateId?: string;
+          processingActivity: string;
+          /** @enum {string} */
+          riskLevel: 'low' | 'medium' | 'high';
+          mitigations: string;
+          /** Format: uuid */
+          documentFileId?: string;
+          /** Format: date-time */
+          nextReviewAt?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              estateId: string | null;
+              processingActivity: string;
+              /** @enum {string} */
+              riskLevel: 'low' | 'medium' | 'high';
+              /** @enum {string} */
+              status: 'draft' | 'in_review' | 'approved' | 'requires_update';
+              mitigations: string;
+              documentFileId: string | null;
+              reviewedBy: string | null;
+              reviewedAt: string | null;
+              nextReviewAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  compliance_updateDpia: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          title?: string;
+          processingActivity?: string;
+          /** @enum {string} */
+          riskLevel?: 'low' | 'medium' | 'high';
+          /** @enum {string} */
+          status?: 'draft' | 'in_review' | 'approved' | 'requires_update';
+          mitigations?: string;
+          documentFileId?: string | null;
+          nextReviewAt?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              /** Format: uuid */
+              id: string;
+              title: string;
+              estateId: string | null;
+              processingActivity: string;
+              /** @enum {string} */
+              riskLevel: 'low' | 'medium' | 'high';
+              /** @enum {string} */
+              status: 'draft' | 'in_review' | 'approved' | 'requires_update';
+              mitigations: string;
+              documentFileId: string | null;
+              reviewedBy: string | null;
+              reviewedAt: string | null;
+              nextReviewAt: string | null;
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              updatedAt: string;
             };
           };
         };
@@ -37309,6 +37964,48 @@ export interface operations {
                 failed: number;
               }[];
             };
+          };
+        };
+      };
+      400: components['responses']['Error400'];
+      401: components['responses']['Error401'];
+      403: components['responses']['Error403'];
+      500: components['responses']['Error500'];
+    };
+  };
+  platform_listNotificationTemplates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @constant */
+            success: true;
+            data: {
+              intent: string;
+              category: string;
+              /** @enum {string} */
+              priority: 'critical' | 'high' | 'normal' | 'bulk';
+              mandatory: boolean;
+              channels: ('push' | 'sms' | 'email' | 'whatsapp')[];
+              smsOnlyWithoutPush: boolean;
+              titleKey: string;
+              bodyKey: string;
+              smsKey: string | null;
+              titleText: string;
+              bodyText: string;
+              smsText: string | null;
+            }[];
           };
         };
       };

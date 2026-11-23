@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import type {
   createBreachSchema,
+  createDpiaRecordSchema,
   createDsrSchema,
   dsrListQuerySchema,
   updateBreachSchema,
+  updateDpiaRecordSchema,
   updateDsrSchema,
   upsertRetentionRuleSchema,
 } from '@safezone/schemas';
@@ -59,6 +61,24 @@ function toRetentionView(row: Prisma.RetentionRuleGetPayload<object>) {
     retentionDays: row.retentionDays,
     basis: row.basis,
     action: row.action as 'delete' | 'anonymise' | 'archive',
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+function toDpiaView(row: Prisma.DpiaRecordGetPayload<object>) {
+  return {
+    id: row.id,
+    title: row.title,
+    estateId: row.estateId,
+    processingActivity: row.processingActivity,
+    riskLevel: row.riskLevel as 'low' | 'medium' | 'high',
+    status: row.status as 'draft' | 'in_review' | 'approved' | 'requires_update',
+    mitigations: row.mitigations,
+    documentFileId: row.documentFileId,
+    reviewedBy: row.reviewedBy,
+    reviewedAt: row.reviewedAt?.toISOString() ?? null,
+    nextReviewAt: row.nextReviewAt?.toISOString() ?? null,
+    createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -306,6 +326,100 @@ export class ComplianceService {
       return saved;
     });
     return toRetentionView(row);
+  }
+
+  async listDpias() {
+    const rows = await this.db.withContext('platform_config', (tx) =>
+      tx.dpiaRecord.findMany({ orderBy: { createdAt: 'desc' }, take: 200 }),
+    );
+    return rows.map(toDpiaView);
+  }
+
+  async createDpia(actorId: string, input: z.infer<typeof createDpiaRecordSchema>) {
+    const row = await this.db.withContext('platform_config', async (tx) => {
+      const created = await tx.dpiaRecord.create({
+        data: {
+          title: input.title,
+          estateId: input.estateId ?? null,
+          processingActivity: input.processingActivity,
+          riskLevel: input.riskLevel,
+          mitigations: input.mitigations,
+          documentFileId: input.documentFileId ?? null,
+          nextReviewAt: input.nextReviewAt ? new Date(input.nextReviewAt) : null,
+          createdBy: actorId,
+        },
+      });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'platform.dpia.created',
+          estateId: null,
+          aggregateType: 'dpia_record',
+          aggregateId: created.id,
+          payload: { dpiaId: created.id, riskLevel: created.riskLevel },
+          audit: {
+            actorType: 'platform_staff',
+            actorId,
+            action: 'platform.dpia.create',
+            resourceType: 'dpia_record',
+            resourceId: created.id,
+            after: { title: created.title, riskLevel: created.riskLevel },
+          },
+        },
+      ]);
+      return created;
+    });
+    return toDpiaView(row);
+  }
+
+  async updateDpia(actorId: string, id: string, input: z.infer<typeof updateDpiaRecordSchema>) {
+    const row = await this.db.withContext('platform_config', async (tx) => {
+      const existing = await tx.dpiaRecord.findUnique({ where: { id } });
+      if (!existing) throw new NotFoundError('DPIA record not found');
+      const now = new Date();
+      const updated = await tx.dpiaRecord.update({
+        where: { id },
+        data: {
+          ...(input.title !== undefined ? { title: input.title } : {}),
+          ...(input.processingActivity !== undefined
+            ? { processingActivity: input.processingActivity }
+            : {}),
+          ...(input.riskLevel !== undefined ? { riskLevel: input.riskLevel } : {}),
+          ...(input.status !== undefined
+            ? {
+                status: input.status,
+                ...(input.status === 'approved'
+                  ? { reviewedBy: actorId, reviewedAt: existing.reviewedAt ?? now }
+                  : {}),
+              }
+            : {}),
+          ...(input.mitigations !== undefined ? { mitigations: input.mitigations } : {}),
+          ...(input.documentFileId !== undefined ? { documentFileId: input.documentFileId } : {}),
+          ...(input.nextReviewAt !== undefined
+            ? { nextReviewAt: input.nextReviewAt ? new Date(input.nextReviewAt) : null }
+            : {}),
+        },
+      });
+      await appendOutboxEvents(tx, [
+        {
+          type: 'platform.dpia.updated',
+          estateId: null,
+          aggregateType: 'dpia_record',
+          aggregateId: id,
+          payload: { dpiaId: id, status: updated.status },
+          audit: {
+            actorType: 'platform_staff',
+            actorId,
+            action: 'platform.dpia.update',
+            resourceType: 'dpia_record',
+            resourceId: id,
+            before: { status: existing.status, riskLevel: existing.riskLevel },
+            after: { status: updated.status, riskLevel: updated.riskLevel },
+          },
+        },
+      ]);
+      return updated;
+    });
+    return toDpiaView(row);
   }
 
   async countOpenSummary() {
