@@ -7,9 +7,9 @@ import {
   ActionButton,
   AppShell,
   Banner,
+  BrandLogo,
   EmptyState,
   ErrorState,
-  Icon,
   type NavGroup,
   type NavItem,
   SessionGate,
@@ -369,12 +369,7 @@ function AuthenticatedShell({ children }: { children: ReactNode }) {
 
   return (
     <AppShell
-      brand={
-        <>
-          <Icon name="shield" size={22} />
-          <span>Safezone Admin</span>
-        </>
-      }
+      brand={<BrandLogo name="Safezone" subtitle="Admin" />}
       nav={nav}
       pathname={pathname}
       renderLink={(item, props) => <Link href={item.href} {...props} />}

@@ -5,15 +5,30 @@
     "scheme": "safezone-management",
     "version": "0.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "primaryColor": "#254D42",
     "backgroundColor": "#FAF7F2",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF7F2"
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#254D42"
+    },
     "ios": {
       "bundleIdentifier": "ng.gsssecurity.safezone.management",
       "supportsTablet": true
     },
     "android": {
       "package": "ng.gsssecurity.safezone.management",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/monochrome-icon.png",
+        "backgroundColor": "#254D42"
+      },
       "permissions": ["POST_NOTIFICATIONS"]
     },
     "plugins": [

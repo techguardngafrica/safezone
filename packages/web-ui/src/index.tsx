@@ -106,6 +106,7 @@ export function PageShell({ title, children }: { title: string; children: ReactN
   );
 }
 
+export * from './brand';
 export * from './sign-in';
 export * from './styles';
 export * from './icons';

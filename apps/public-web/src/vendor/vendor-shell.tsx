@@ -7,6 +7,7 @@ import {
   AccountBar,
   ActionButton,
   AppShell,
+  BrandMark,
   ErrorState,
   type NavItem,
   SelectField,
@@ -171,8 +172,19 @@ function PortalShell({
   return (
     <AppShell
       brand={
-        <Link href="/vendor" style={{ color: 'inherit', textDecoration: 'none', fontWeight: 700 }}>
-          {t('vendor.portal.name')}
+        <Link
+          href="/vendor"
+          style={{
+            color: 'inherit',
+            textDecoration: 'none',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <BrandMark size={26} />
+          <span>{t('vendor.portal.name')}</span>
         </Link>
       }
       nav={[{ label: vendor.name, items }]}

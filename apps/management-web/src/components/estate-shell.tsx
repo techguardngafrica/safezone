@@ -6,9 +6,9 @@ import { t } from '@safezone/i18n';
 import {
   ActionButton,
   AppShell,
+  BrandLogo,
   EmptyState,
   ErrorState,
-  Icon,
   type NavGroup,
   type NavItem,
   SessionGate,
@@ -508,12 +508,7 @@ function Shell({ children }: { children: ReactNode }) {
 
   return (
     <AppShell
-      brand={
-        <>
-          <Icon name="shield" size={24} />
-          {t('app.name')}
-        </>
-      }
+      brand={<BrandLogo name={t('app.name')} />}
       nav={nav}
       pathname={pathname}
       renderLink={(item, props) => (

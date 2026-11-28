@@ -109,5 +109,6 @@ const styles = StyleSheet.create({
   offlineText: { color: colors.neutral[0], fontSize: typography.size.sm },
 });
 
+export * from './brand';
 export * from './sign-in';
 export * from './components';

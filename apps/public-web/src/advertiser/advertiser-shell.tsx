@@ -8,6 +8,7 @@ import {
   ActionButton,
   AppShell,
   Banner,
+  BrandMark,
   EmptyState,
   ErrorState,
   type NavItem,
@@ -105,9 +106,17 @@ function Area({ children }: { children: ReactNode }) {
         brand={
           <Link
             href="/advertiser"
-            style={{ color: 'inherit', textDecoration: 'none', fontWeight: 700 }}
+            style={{
+              color: 'inherit',
+              textDecoration: 'none',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
           >
-            {t('advertiser.portal.name')}
+            <BrandMark size={26} />
+            <span>{t('advertiser.portal.name')}</span>
           </Link>
         }
         nav={[

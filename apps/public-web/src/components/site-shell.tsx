@@ -1,5 +1,6 @@
 import { colors, radii, spacing, typography } from '@safezone/design-tokens';
 import { t } from '@safezone/i18n';
+import { BrandLogo } from '@safezone/web-ui';
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { site } from '../site';
@@ -64,7 +65,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               marginRight: 'auto',
             }}
           >
-            {site.name}
+            <BrandLogo name={site.name} />
           </Link>
           {NAV.map((item) => (
             <Link key={item.href} href={item.href} style={link}>

@@ -10,6 +10,7 @@ import type { SessionController, SessionState } from '@safezone/auth';
 import { colors, radii, spacing, typography } from '@safezone/design-tokens';
 import { type MessageKey, t } from '@safezone/i18n';
 import { normalizeNigerianPhone } from '@safezone/schemas';
+import { BrandMark } from './brand';
 import { Button } from './index';
 
 /** Reads a SessionController in React. */
@@ -219,11 +220,15 @@ export function SignInFlow({ controller, title, intro }: SignInFlowProps) {
       <p
         style={{
           margin: 0,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: spacing[2],
           color: colors.brand.primary,
           fontWeight: Number(typography.weight.semibold),
         }}
       >
-        {title}
+        <BrandMark size={24} />
+        <span>{title}</span>
       </p>
       <h1
         id="sign-in-heading"

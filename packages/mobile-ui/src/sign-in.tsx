@@ -14,6 +14,7 @@ import type { SessionController, SessionState } from '@safezone/auth';
 import { colors, radii, spacing, touchTarget, typography } from '@safezone/design-tokens';
 import { type MessageKey, t } from '@safezone/i18n';
 import { normalizeNigerianPhone } from '@safezone/schemas';
+import { BrandMark } from './brand';
 import { Button } from './index';
 
 export function useSession(controller: SessionController): SessionState {
@@ -135,7 +136,10 @@ export function SignInFlow({ controller, title, intro, large = false }: SignInFl
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Text style={styles.brand}>{title}</Text>
+        <View style={styles.brandRow}>
+          <BrandMark size={large ? 36 : 28} />
+          <Text style={styles.brand}>{title}</Text>
+        </View>
         <Text accessibilityRole="header" style={[styles.heading, large && styles.headingLarge]}>
           {heading}
         </Text>
@@ -343,6 +347,11 @@ const styles = StyleSheet.create({
     padding: spacing[5],
     gap: spacing[4],
     backgroundColor: colors.semantic.background,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
   },
   brand: {
     color: colors.brand.primary,
